@@ -1,0 +1,7 @@
+{
+  "name": "wiistock-mobile-v2",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
