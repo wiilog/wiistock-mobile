@@ -1,0 +1,4 @@
+export enum ServerImageKeyEnum {
+    LOGIN_IMAGE_KEY = 'MOBILE_LOGO_LOGIN',
+    HEADER_IMAGE_KEY = 'MOBILE_LOGO_HEADER'
+}

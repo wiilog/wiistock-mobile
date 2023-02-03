@@ -1,0 +1,49 @@
+<div *ngIf="!loading && isShown.header"
+     #content>
+    <div class="main-toolbar">
+        <ng-template #iconPlaceholderTemplate>
+            <div class="header-icon-placeholder">
+                <div class="header-icon"></div>
+            </div>
+        </ng-template>
+
+        <ion-button *ngIf="isShown.iconLeft; else iconPlaceholderTemplate"
+                    fill="clear"
+                    size="small"
+                    (click)="onLeftIconClick()">
+            <wii-icon [name]="isShown.iconLogout ? 'logout.svg' : 'arrow-left.svg'"
+                      color="white"
+                      class="header-icon">
+            </wii-icon>
+        </ion-button>
+        <div class="header-title">
+            <wii-server-image alt="Follow GT"
+                              class="logo"
+                              [key]="HEADER_IMAGE_KEY">
+            </wii-server-image>
+            <div class="user" *ngIf="isShown.user && loggedUser">{{ loggedUser }}</div>
+        </div>
+        <ion-button *ngIf="isShown.menu; else iconPlaceholderTemplate"
+                    fill="clear"
+                    size="small"
+                    (click)="goHome()">
+            <wii-icon name="home.svg" color="white" class="header-icon"></wii-icon>
+        </ion-button>
+    </div>
+    <nav class="title-toolbar" *ngIf="!router.url.startsWith('/main-menu') && currentTitles.length > 0">
+        <div class="main-titles">
+            <ng-container *ngFor="let config of currentTitles; let last = last">
+                <span (click)="onTitleClick(last, config)">{{titleLabelTranslations[config.label || -1] || config.label}}</span>
+                <ng-container *ngIf="!last">|</ng-container>
+            </ng-container>
+        </div>
+        <div class="sub-title" *ngIf="subTitle$|async as subtitle">
+            {{ subtitle }}
+        </div>
+    </nav>
+    <nav class="title-toolbar" *ngIf="router.url.startsWith('/main-menu')">
+        <div class="main-titles">
+            <span>Accueil</span>
+        </div>
+    </nav>
+</div>

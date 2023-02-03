@@ -1,10 +1,10 @@
-import { CapacitorConfig } from '@capacitor/cli';
+import {CapacitorConfig} from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'wiistock-mobile-v2',
-  webDir: 'www',
-  bundledWebRuntime: false
+    appId: 'com.wiilog.wiistock',
+    appName: 'Follow GT',
+    webDir: 'www',
+    bundledWebRuntime: false
 };
 
 export default config;

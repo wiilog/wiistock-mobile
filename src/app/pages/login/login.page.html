@@ -1,0 +1,59 @@
+<div class="page-content">
+    <wii-main-loader [loading]="loading"></wii-main-loader>
+
+    <div class="logo-container" *ngIf="!loading">
+        <wii-server-image #serverImageLogo
+                          alt="Follow GT"
+                          [key]="LOGIN_IMAGE_KEY">
+        </wii-server-image>
+    </div>
+    <div class="version-not-valid-container" *ngIf="!loading && appVersionInvalid else pendingDepositsTemplate">
+        <ion-button class="version-not-valid"
+                    [href]="apkUrl"
+                    size="large"
+                    color="primary"
+                    expand="full">
+            Veuillez mettre à jour<br/>
+            l'application
+        </ion-button>
+    </div>
+    <form (ngSubmit)="logForm()" *ngIf="!loading && !appVersionInvalid">
+        <div class="form-content">
+            <ion-item>
+                <ion-label color="medium">Clé de connexion</ion-label>
+                <ion-input type="password"
+                           [(ngModel)]="loginKey"
+                           name="loginKey"
+                           (keyup.enter)="logForm()"
+                ></ion-input>
+            </ion-item>
+        </div>
+        <ion-button type="submit"
+                    size="large"
+                    color="primary"
+                    expand="full">
+            Connexion
+        </ion-button>
+    </form>
+</div>
+<div class="page-footer">
+    <wii-icon class="parameters" name="cogs.svg" (action)="goToParams()"></wii-icon>
+    <div class="version-container" *ngIf="currentVersion">V {{ currentVersion }}</div>
+</div>
+
+<ng-template #pendingDepositsTemplate>
+    <ng-container *ngIf="pendingDeposits && loggedUser$">
+        <div class="logged-user" *ngIf="loggedUser$|async as loggedUser else userTemplate">
+            <div class="logged-user-info">
+                L'utilisateur {{ loggedUser }} doit se reconnecter car il reste des prises en cours
+            </div>
+        </div>
+    </ng-container>
+</ng-template>
+
+<ng-template #userTemplate>
+    <div class="logged-user" *ngIf="loggedUser$ && loggedUser$|async as loggedUser">
+        <div class="logged-user-info">Dernière session en cours</div>
+        {{ loggedUser }}
+    </div>
+</ng-template>

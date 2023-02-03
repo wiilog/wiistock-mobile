@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <defs>
+        <style>.svg-check-cls-1 {
+            fill: #ffffff;
+        }</style>
+    </defs>
+    <g>
+        <path class="svg-check-cls-1 svg-fill"
+              d="M43.73,92.93a8,8,0,0,1-6.13-2.86L14.49,62.51A8,8,0,1,1,26.74,52.23L42.1,70.53,72.26,11.44a8,8,0,1,1,14.25,7.27L50.86,88.56a8,8,0,0,1-6.22,4.31A7.07,7.07,0,0,1,43.73,92.93Z"/>
+    </g>
+</svg>

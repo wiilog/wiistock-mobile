@@ -1,0 +1,85 @@
+@import 'theme/variables';
+
+wii-icon.button-icon {
+    &:not(.big) {
+        margin-left: .7rem !important;
+        width: 1.8rem !important;
+        height: 1.8rem !important;
+    }
+
+    &.big {
+        margin-left: 1rem !important;
+        width: 3rem !important;
+        height: 3rem !important;
+    }
+}
+
+ion-button {
+    --border-radius: 0;
+
+    margin: 2px;
+    font-weight: bolder;
+
+    .button-text-wrapper {
+        .title {
+            font-weight: bold;
+        }
+    }
+
+    &[size="large"] {
+        wii-icon[name="check.svg"] {
+            max-height: 20px; /* text size */
+        }
+
+        &.larger {
+            height: 5rem;
+        }
+
+        .button-text-wrapper {
+            .title {
+                font-size: 16pt;
+            }
+
+            .subtitle {
+                font-size: 10pt;
+                font-weight: normal;
+            }
+        }
+    }
+
+    &:not([size="large"]) {
+        height: 3rem;
+        .button-text-wrapper {
+            display: flex;
+            align-items: baseline;
+
+            .title {
+                font-size: 13pt;
+            }
+
+            .subtitle {
+                margin-left: 7px;
+                font-size: 9pt;
+            }
+        }
+    }
+
+    &[disabled]:not(.outline), &.disabled:not(.outline) {
+        --ion-color-base: $darkGray !important;
+        opacity: 1;
+    }
+
+    &.outline {
+        --border-width: 2px;
+        --border-style: solid;
+        --border-color: $primary;
+        --ion-color-base: $white !important;
+        --ion-color-contrast: $primary !important;
+
+        &[disabled] {
+            --ion-color-base: $white !important;
+            --ion-color-contrast: $primary !important;
+            opacity: 0.5;
+        }
+    }
+}

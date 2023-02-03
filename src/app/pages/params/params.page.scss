@@ -1,0 +1,16 @@
+@import "theme/variables";
+
+.page-content {
+    padding: $spacer;
+
+    .page-title {
+        text-align: center;
+        margin-bottom: $spacer;
+    }
+
+    wii-icon {
+        width: 40px;
+        height: 40px;
+        display: inline-block;
+    }
+}

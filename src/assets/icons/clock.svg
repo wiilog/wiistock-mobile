@@ -1,0 +1,11 @@
+<svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <defs>
+        <style>.svg-clock-cls-1 {
+            fill: #fff;
+        }</style>
+    </defs>
+    <g>
+        <circle class="svg-fill" cx="50" cy="50" r="48"/>
+        <path class="svg-clock-cls-1" d="M79.05,69.49a4.68,4.68,0,0,1-2.11-.5L45.32,53.08V19.56a4.68,4.68,0,0,1,9.36,0V47.31L81.15,60.62a4.68,4.68,0,0,1-2.1,8.87Z"/>
+    </g>
+</svg>

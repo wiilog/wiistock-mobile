@@ -1,0 +1,20 @@
+// Ionic Variables and Theming. For more info, please see:
+// http://ionicframework.com/docs/theming/
+
+@import "functions";
+@import "colors";
+
+$dark-contrast-color: ("warning", "light");
+
+/** Ionic CSS Variables **/
+:root {
+    @each $name, $value in $base-colors {
+        $contrast-color: if(index($dark-contrast-color, $name), $black, $white);
+        --ion-color-#{$name}: #{$value};
+        --ion-color-#{$name}-rgb: #{toRGBParams($value)};
+        --ion-color-#{$name}-contrast: #{$contrast-color};
+        --ion-color-#{$name}-contrast-rgb: #{toRGBParams($contrast-color)};
+        --ion-color-#{$name}-shade: #{adjust-color($value, $lightness: -10%)};
+        --ion-color-#{$name}-tint: #{adjust-color($value, $lightness: 10%)};
+    }
+}

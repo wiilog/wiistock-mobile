@@ -1,0 +1,65 @@
+@import "theme/variables";
+
+:host {
+    display: block;
+    z-index: 15;
+
+    .main-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: $primary;
+        width: 100%;
+        padding: 4px 0;
+
+        .header-icon-placeholder {
+            width: 44px;
+            margin-right: 2px;
+            margin-left: 2px;
+        }
+
+        .header-icon {
+            height: 21px;
+            width: 21px;
+        }
+
+        .header-title {
+            text-align: center;
+            .logo {
+                display: inline-block;
+                max-width: 80px;
+                padding: 3px
+            }
+            .user {
+                font-size: 15px;
+                text-align: center;
+                font-weight: bold;
+                color: $white;
+            }
+        }
+    }
+
+    .title-toolbar {
+        padding: .75rem;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.04);
+        background-color: $white;
+
+        .main-titles {
+            text-align: center;
+            font-size: 13pt;
+
+            :last-child {
+                color: $primary;
+                font-weight: bold;
+            }
+        }
+
+        .sub-title {
+            text-align: center;
+            font-size: 11pt;
+            font-style: italic;
+            color: $primary;
+            padding-top: .25rem;
+        }
+    }
+}

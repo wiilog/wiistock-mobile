@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 58 86" style="enable-background:new 0 0 58 86;" xml:space="preserve">
+<style type="text/css">
+	.svg-gps-st0{fill:#1D1D1B;}
+	.svg-gps-st1{fill:#FFFFFF;}
+</style>
+<g>
+	<path class="svg-gps-st0 svg-fill" d="M29,0C13,0,0,13,0,29c0,18.8,27,55,28.2,56.6c0.3,0.5,0.9,0.6,1.4,0.3c0,0,0,0,0,0c0.1-0.1,0.2-0.2,0.3-0.3
+		C31,84.1,58,47.8,58,29C58,13,45,0,29,0z"/>
+	<circle class="svg-gps-st1" cx="29" cy="29" r="16.6"/>
+</g>
+</svg>

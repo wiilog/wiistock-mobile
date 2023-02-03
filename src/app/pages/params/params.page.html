@@ -1,0 +1,27 @@
+<div class="page-content">
+    <div class="page-title">
+        <wii-icon name="cogs.svg"></wii-icon>
+    </div>
+    <form (ngSubmit)="registerURL()">
+        <ion-item>
+            <ion-label color="medium">URL</ion-label>
+            <ion-input type="text"
+                       [(ngModel)]="URL"
+                       name="url"
+                       autocapitalize="off"></ion-input>
+        </ion-item>
+    </form>
+</div>
+<div class="page-footer persisted-page-footer">
+    <ion-button class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="registerURL()">
+        Valider
+        <wii-icon name="check.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

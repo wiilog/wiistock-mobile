@@ -1,0 +1,3 @@
+@function toRGBParams ($color) {
+    @return red($color) + ", " + green($color) + ", " + blue($color);
+}

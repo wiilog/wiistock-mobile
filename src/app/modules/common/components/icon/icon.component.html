@@ -1,0 +1,12 @@
+<ng-template #svgIcon>
+    <div [innerHTML]="svgObject$|async"
+         class="icon-wrapper"
+         [ngClass]="color"></div>
+</ng-template>
+
+<div class="icon-button ion-activatable ripple-parent"
+     *ngIf="(!buttonWithoutRipple && action.observers && action.observers.length > 0) else svgIcon"
+     (click)="onButtonClick($event)">
+    <ng-container [ngTemplateOutlet]="svgIcon"></ng-container>
+    <ion-ripple-effect></ion-ripple-effect>
+</div>

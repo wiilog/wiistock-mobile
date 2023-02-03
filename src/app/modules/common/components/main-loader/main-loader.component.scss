@@ -1,0 +1,27 @@
+@import "../../../../../theme/variables";
+
+:host {
+    .spinner-container {
+        position: fixed;
+        text-align: center;
+        background-color: $lightGrey;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+
+        .main-spinner {
+            height: 40px !important;
+            width: 40px !important;
+        }
+
+        .spinner-text {
+            font-weight: 300;
+            font-size: 13pt;
+        }
+    }
+}

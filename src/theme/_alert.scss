@@ -1,0 +1,106 @@
+@import "variables";
+
+.alert-wrapper {
+    min-width: 95% !important;
+
+    .alert-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        padding-top: 10px;
+
+        h2 {
+            font-size: 16px;
+
+            &.alert-title {
+                font-weight: bold;
+                margin-right: 6px;
+                display: flex;
+                align-items: center;
+            }
+        }
+    }
+
+    .alert-message {
+        color: $black;
+        text-align: center;
+    }
+
+    .alert-radio-group {
+        border: none;
+        margin-bottom: 10px;
+
+        .alert-radio-icon {
+            width: 15px;
+            height: 15px;
+            border-width: 1px;
+            border-color: $primary;
+
+            .alert-radio-inner {
+                left: 2px;
+                top: 2px;
+                width: 9px;
+                height: 9px;
+            }
+        }
+
+        .alert-button-inner .alert-radio-label {
+            padding-left: 36px !important;
+            color: $black;
+        }
+    }
+
+    .alert-button-group {
+        display: flex;
+        justify-content: space-evenly;
+        padding-right: 0;
+        padding-left: 0;
+        padding-top: 8px;
+
+        .alert-button {
+            display: flex;
+            justify-content: center;
+            margin-right: 0;
+            width: 45%;
+            border-radius: 0;
+            text-transform: none!important;
+
+            span {
+                width: fit-content;
+                font-size: 12px;
+                font-weight: bold;
+            }
+
+            &.alert-button-role-cancel {
+                border: 2px solid $primary !important;
+                color: $primary !important;
+                background-color: $white !important;
+            }
+
+            &.alert-button {
+                background-color: #030F4C;
+                color: $white;
+            }
+        }
+    }
+
+    li {
+        text-align: left;
+    }
+}
+
+.full-width {
+    width: 95% !important;
+    margin-bottom: 10px !important;
+}
+
+.warning {
+    .alert-title:before {
+        content: "";
+        background: url('../assets/icons/emergency.svg') no-repeat;
+        position: relative;
+        width: 15px;
+        height: 15px;
+        margin-right: 4px;
+    };
+}
