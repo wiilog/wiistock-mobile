@@ -20,9 +20,12 @@ export class UserDisconnectedGuard implements CanActivate {
             this.storageService.getString(StorageKeyEnum.OPERATOR),
             this.storageService.getString(StorageKeyEnum.API_KEY)
         ).pipe(
-            map(([operator, apiKey]) => (
-                Boolean(!operator || !apiKey) || this.router.createUrlTree([NavPathEnum.MAIN_MENU])
-            ))
+            map(([operator, apiKey]) => {
+                console.log("--> userdisconnected guard = ", Boolean(!operator || !apiKey))
+                return (
+                    Boolean(!operator || !apiKey) || this.router.createUrlTree([NavPathEnum.MAIN_MENU])
+                )
+            })
         );
     }
 

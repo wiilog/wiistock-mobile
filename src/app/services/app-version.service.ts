@@ -5,7 +5,9 @@ import {map} from 'rxjs/operators';
 import {App} from "@capacitor/app";
 
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class AppVersionService {
 
     public constructor(private apiService: ApiService) {}

@@ -1,6 +1,6 @@
 {
     "name": "wiistock-mobile",
-    "version": "6.20.2",
+    "version": "6.21.1",
     "author": "Wiilog Team",
     "description": "Follow your supply chain with GT Logistics.",
     "homepage": "https://www.wiilog.fr/",
@@ -12,7 +12,7 @@
         "build": "yarn ng build --configuration production",
         "build:dev": "yarn ng build --configuration development && yarn sync",
         "watch": "yarn build:dev && yarn ionic capacitor run android --livereload --external",
-        "version": "node scripts/change-app-version"
+        "wiis:version": "node scripts/set-app-version"
     },
     "private": true,
     "dependencies": {
@@ -35,6 +35,7 @@
         "@ionic/angular": "^6.1.9",
         "@ionic/cli": "^6.20.8",
         "@types/leaflet": "^1.9.0",
+        "com-darryncampbell-cordova-plugin-intent": "^2.2.0",
         "cordova-res": "^0.15.4",
         "ionicons": "^6.0.3",
         "leaflet": "^1.9.3",

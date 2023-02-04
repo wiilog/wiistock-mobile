@@ -7,6 +7,7 @@ import {IconComponent} from "@common/components/icon/icon.component";
 import {MainLoaderComponent} from "@common/components/main-loader/main-loader.component";
 import {ServerImageComponent} from "@common/components/server-image/server-image.component";
 import {MainHeaderComponent} from "@common/components/main-header/main-header.component";
+import {MenuComponent} from "@common/components/menu/menu.component";
 
 @NgModule({
     imports: [
@@ -20,12 +21,14 @@ import {MainHeaderComponent} from "@common/components/main-header/main-header.co
         MainLoaderComponent,
         MainHeaderComponent,
         ServerImageComponent,
+        MenuComponent,
     ],
     exports: [
         IconComponent,
         MainLoaderComponent,
         ServerImageComponent,
         MainHeaderComponent,
+        MenuComponent,
     ]
 })
 export class CommonModule {

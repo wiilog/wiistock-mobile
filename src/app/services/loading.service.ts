@@ -5,7 +5,9 @@ import {catchError, filter, map, mergeMap, tap} from 'rxjs/operators';
 import {NavigationEnd, Router} from '@angular/router';
 
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class LoadingService {
 
     private static readonly DEFAULT_MESSAGE: string = 'Chargement...';

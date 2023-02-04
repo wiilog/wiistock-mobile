@@ -1,99 +1,124 @@
 import {Injectable} from '@angular/core';
 import {StorageService} from '@app/services/storage/storage.service';
 import {Livraison} from '@entities/livraison';
-import {from, Observable, of, pipe, ReplaySubject, Subject, zip} from 'rxjs';
-import {mergeMap, map, take, tap} from 'rxjs/operators';
+import {from, Observable, of, zip} from 'rxjs';
+import {mergeMap, map, take, tap, catchError} from 'rxjs/operators';
 import {Handling} from '@entities/handling';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {Anomalie} from "@entities/anomalie";
 import {ArticlePrepaByRefArticle} from "@entities/article-prepa-by-ref-article";
 import {ArticleCollecte} from "@entities/article-collecte";
 import {ArticleLivraison} from "@entities/article-livraison";
-import {Platform} from '@ionic/angular';
 import * as moment from 'moment';
-import {TablesDefinitions} from '@app/services/sqlite/tables-definitions';
+import {keptTablesOnConnection, TablesDefinitions} from '@app/services/sqlite/tables-definitions';
 import {TableName} from '@app/services/sqlite/table-definition';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {DemandeLivraisonArticle} from '@entities/demande-livraison-article';
-import {CapacitorSQLite, SQLiteDBConnection, SQLiteConnection, CapacitorSQLitePlugin} from '@capacitor-community/sqlite';
+import {CapacitorSQLite, CapacitorSQLitePlugin} from '@capacitor-community/sqlite';
+import {Emplacement} from "@entities/emplacement";
+import {HandlingAttachment} from "@entities/handling-attachment";
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class SqliteService {
 
-    private sqlite: SQLiteConnection;
-    private sqlitePlugin: CapacitorSQLitePlugin;
+    private static readonly DB_NAME: string = 'wiistock_db';
 
-    private static readonly DB_NAME: string = 'follow_gt';
+    private readonly sqlite: CapacitorSQLitePlugin;
 
-    public constructor(private storageService: StorageService,
-                       private platform: Platform) {
-        this.createDB();
+    public constructor(private storageService: StorageService) {
+        this.sqlite = CapacitorSQLite;
     }
 
-    /**
-     * Plugin Initialization
-     */
-    private initializePlugin(): void {
-        this.sqlitePlugin = CapacitorSQLite;
-        this.sqlite = new SQLiteConnection(this.sqlitePlugin);
-    }
+    // private retrieveDBConnection(): Observable<void> {
+    //     if (this.db) {
+    //         return of(undefined);
+    //     }
+    //     else {
+    //         return from(this.sqlite.checkConnectionsConsistency())
+    //             .pipe(
+    //                 mergeMap(() => from(this.sqlite.isConnection(SqliteService.DB_NAME, false))),
+    //                 mergeMap(({result}) => (
+    //                     result
+    //                         ? from(this.sqlite.retrieveConnection(SqliteService.DB_NAME, false))
+    //                         : from(this.sqlite.createConnection(SqliteService.DB_NAME, false, 'no-encryption', 1, false))
+    //                 )),
+    //                 tap((db: SQLiteDBConnection) => {
+    //                     if (!db) {
+    //                         throw new Error(`Database returned is null`);
+    //                     }
+    //                     // save database connexion for next queries
+    //                     this.db = db;
+    //                 }),
+    //                 map(() => undefined)
+    //             );
+    //     }
+    // }
 
-    private retrieveDBConnection(): Observable<SQLiteDBConnection> {
-        return from(this.sqlite.checkConnectionsConsistency())
-            .pipe(
-                mergeMap(() => from(this.sqlite.isConnection(SqliteService.DB_NAME, false))),
-                mergeMap(({result}) => (
-                    result
-                        ? from(this.sqlite.retrieveConnection(SqliteService.DB_NAME, false))
-                        : from(this.sqlite.createConnection(SqliteService.DB_NAME, false, 'no-encryption', 1, false))
-                )),
-                tap((db: SQLiteDBConnection) => {
-                    if (!db) {
-                        throw new Error(`Database returned is null`);
+   /* private ensureDBIsOpened(): Observable<void> {
+        if (this.db) {
+            return from(this.db.isDBOpen()).pipe(
+                mergeMap(({result}) => {
+                    if (!this.db) {
+                        throw new Error('You had to retrieve connection before');
                     }
+                    return !result
+                            ? from(this.db.open())
+                            : of(undefined)
                 })
+            );
+        }
+        else {
+            throw new Error('You had to retrieve connection before');
+        }
+    }*/
+
+
+    public resetDataBase(force: boolean = false): Observable<void> {
+        return this.clearDatabase(force)
+            .pipe(
+                mergeMap(() => this.createDatabase()),
             );
     }
 
-    private createDB(): void {
-        // We wait sqlite plugin loading and we create the database
-        from(this.platform.ready())
-            .subscribe({
-                next: () => {
-                    this.initializePlugin();
-                    this.resetDataBase();
-                },
-                error: (e) => console.log(e)
-            });
-    }
-
-    public resetDataBase(force: boolean = false): Observable<void> {
-        const dropDatabaseRequests = TablesDefinitions
-            .filter(({keepOnConnection}) => force || !keepOnConnection)
-            .map(({name}) => `DROP TABLE IF EXISTS \`${name}\``);
-
-        const createDatabaseRequests = TablesDefinitions.map(({name, attributes}) => {
-            const attributesStr = Object
-                .keys(attributes)
-                .map((attr) => (`\`${attr}\` ${attributes[attr]}`))
+    private createDatabase(): Observable<void> {
+        const createDatabaseRequests = TablesDefinitions.map(({name, schema}) => {
+            const attributesStr = schema
+                .map(({column, value}) => (`\`${column}\` ${value}`))
                 .join(', ');
             return `CREATE TABLE IF NOT EXISTS \`${name}\` (${attributesStr})`;
         });
 
-        return this.executeQuery([
-            ...dropDatabaseRequests,
-            ...createDatabaseRequests
-        ], false);
+        return createDatabaseRequests.length > 0
+            ? zip(...createDatabaseRequests.map((statement) => this.execute(statement)))
+                .pipe(map(() => undefined))
+            : of(undefined);
     }
 
-    private static MultiSelectQueryMapper<T = any>(resQuery: any): Array<T> {
-        const list = [];
-        if (resQuery && resQuery.rows) {
-            for (let i = 0; i < resQuery.rows.length; i++) {
-                list.push(resQuery.rows.item(i));
-            }
-        }
-        return list;
+    private clearDatabase(force: boolean): Observable<void> {
+        const tableNamesToDrop: Array<string> = SqliteService.GetTableNames()
+            .filter((name) => (force || keptTablesOnConnection.indexOf(name) === -1))
+            .map((name) => `DROP TABLE IF EXISTS \`${name}\``);
+        return tableNamesToDrop.length > 0
+            ? zip(...tableNamesToDrop.map((dropStatement) => this.execute(dropStatement)))
+                .pipe(map(() => undefined))
+            : of(undefined);
+    }
+
+    /**
+     * @return TRUE if the connection was opened or has been opened. FALSE if database does not exist
+     */
+    private ensureDatabaseOpened(): Observable<boolean> {
+        return from(this.sqlite.isDBOpen({database: SqliteService.DB_NAME})).pipe(
+            catchError(() => of(this.sqlite.createConnection({database: SqliteService.DB_NAME})).pipe(
+                map(() => ({result: false}))
+            )),
+            mergeMap(({result}) => !result
+                ? from(this.sqlite.open({database: SqliteService.DB_NAME})).pipe(map(() => true))
+                : of(true)
+            ),
+        );
     }
 
     private static JoinWhereClauses(where: Array<string>): string {
@@ -101,6 +126,147 @@ export class SqliteService {
             .map((clause) => `(${clause})`)
             .join(' AND ');
         return `(${whereJoined})`;
+    }
+
+    private static GetTableNames(): Array<TableName> {
+        return TablesDefinitions.map(({name}) => name);
+    }
+
+    public execute(statement: string): Observable<{ changes?: number, lastId?: number}> {
+        return this.ensureDatabaseOpened()
+            .pipe(
+                // we use run instead of execute to retrieve last insert id
+                mergeMap(() => from(this.sqlite.run({
+                    database: SqliteService.DB_NAME,
+                    statement,
+                    values: [],
+                }))),
+                map((result) => result?.changes || {}),
+                // print queries on SQLite errors
+                tap({
+                    error: (error) => {
+                        console.error(`SqliteService::execute >> ${statement}`, error);
+                    }
+                }),
+            );
+    }
+
+
+    public query<T = any>(query: string): Observable<Array<T>> {
+        return this.ensureDatabaseOpened()
+            .pipe(
+                mergeMap(() => from(this.sqlite.query({
+                    database: SqliteService.DB_NAME,
+                    statement: query,
+                    values: []
+                }))),
+                map((result) => result?.values || []),
+                // print queries on SQLite errors
+                tap({
+                    error: (error) => {
+                        console.error(`SqliteService::query >> ${query}`, error);
+                    }
+                }),
+            );
+    }
+
+    public insert<T = any>(name: TableName, objects: T|Array<T>): Observable<number|undefined> {
+        if (objects
+            && (
+                !Array.isArray(objects)
+                || objects.length > 0
+            )) {
+            let query = this.createInsertQuery(name, objects);
+            return this.execute(query).pipe(map(({lastId}) => lastId));
+        }
+        else {
+            return of(undefined);
+        }
+    }
+
+    public update(name: TableName, config: Array<{values: any, where?: Array<string>}>): Observable<any> {
+        const queries = config
+            .map(({values, where}) => this.createUpdateQuery(name, values, where || []))
+            .filter((query) => query) as Array<string>;
+        return queries.length > 0
+            ? this.execute(queries.join(';'))
+            : of(false);
+    }
+
+
+    /**
+     * find all elements in the given table which correspond to the given where clauses.
+     * @param {string} table name of the table to do the search
+     * @param {string[]} where boolean clauses to apply with AND separator
+     * @param {Object.<string,'ASC'|'DESC'>} order
+     * @param {number|undefined} limit
+     * @param {number|undefined} offset
+     */
+    public findBy<T = any>(table: TableName,
+                           where: Array<string> = [],
+                           order: {[column: string]: 'ASC'|'DESC'} = {},
+                           {limit, offset}: { limit?: number, offset?: number } = {}): Observable<Array<T>> {
+        const sqlWhereClauses = (where && where.length > 0)
+            ? ` WHERE ${SqliteService.JoinWhereClauses(where)}`
+            : undefined;
+
+        const orderByArray = Object
+            .keys(order || {})
+            .map((column: string) => `${column} ${order[column]}`)
+
+        const sqlOrderByClauses = (orderByArray && orderByArray.length > 0)
+            ? ` ORDER BY ${orderByArray.join(',')}`
+            : undefined;
+
+        const offsetClause = offset ? ` OFFSET ${offset}` : '';
+        const limitClause = limit ? ` LIMIT ${limit}${offsetClause}` : undefined;
+
+        const sqlQuery = `SELECT * FROM ${table}${sqlWhereClauses || ''}${sqlOrderByClauses || ''}${limitClause || ''}`;
+
+        return this.query<T>(sqlQuery);
+    }
+
+    public findAll<T = any>(table: TableName): Observable<Array<T>> {
+        return this.findBy<T>(table);
+    }
+
+    public count(table: TableName, where: string[] = []): Observable<number> {
+        let whereClause = (where && where.length > 0)
+            ? ` WHERE ${where.map((condition) => `(${condition})`).join(' AND ')}`
+            : '';
+
+        let query = `SELECT COUNT(*) AS counter FROM ${table}${whereClause}`;
+
+        return this.query(query)
+            .pipe(
+                map((data) => {
+                    const {counter} = data[0] || {};
+                    return Number(counter || 0);
+                })
+            );
+    }
+
+    public findOneById<T = any>(table: TableName, id: number): Observable<T|null> {
+        return this.findOneBy<T>(table, {id});
+    }
+
+    public findOneBy<T = any>(table: TableName, conditions: {[name: string]: any}, glue: string = 'OR'): Observable<T|null> {
+        const condition = Object
+            .keys(conditions)
+            .map((name) => `${name} ${this.getComparatorForQuery(conditions[name])} ${this.getValueForQuery(conditions[name])}`)
+            .join(` ${glue} `);
+
+        return this.query<T>(`SELECT * FROM ${table} WHERE ${condition}`).pipe(
+            map((data) => data[0] || null)
+        );
+    }
+
+    public deleteBy(table: TableName,
+                    where: Array<string> = []): Observable<undefined> {
+        const sqlWhereClauses = (where && where.length > 0)
+            ? `WHERE ${SqliteService.JoinWhereClauses(where)}`
+            : '';
+        return this.execute(`DELETE FROM ${table} ${sqlWhereClauses};`).pipe(map(() => undefined));;
     }
 
     private importLocations(data: any): Observable<any> {
@@ -750,51 +916,9 @@ export class SqliteService {
         );
     }
 
-    public findOneById(table: TableName, id: number): Observable<any> {
-        return this.findOneBy(table, {id});
-    }
-
-    public findOneBy(table: TableName, conditions: {[name: string]: any}, glue: string = 'OR'): Observable<any> {
-        const condition = Object
-            .keys(conditions)
-            .map((name) => `${name} ${this.getComparatorForQuery(conditions[name])} ${this.getValueForQuery(conditions[name])}`)
-            .join(` ${glue} `);
-
-        return this.executeQuery(`SELECT * FROM ${table} WHERE ${condition}`).pipe(
-            map((data) => (
-                (data.rows.length > 0)
-                    ? data.rows.item(0)
-                    : null
-            ))
-        );
-    }
-
-    public count(table: TableName, where: string[] = []): Observable<number> {
-        let whereClause = (where && where.length > 0)
-            ? ` WHERE ${where.map((condition) => `(${condition})`).join(' AND ')}`
-            : '';
-
-        let query = `SELECT COUNT(*) AS nb FROM ${table}${whereClause}`;
-
-        return this.executeQuery(query)
-            .pipe(
-                map((data) => {
-                    let count = 0;
-                    if (data.rows.length > 0) {
-                        let item = data.rows.item(0);
-                        count = item.nb;
-                    }
-                    return Number(count);
-                })
-            );
-    }
-
     public findArticlesByCollecte(id_col: number): Observable<Array<ArticleCollecte>> {
-        // TODO adrien
-        return this.executeQuery(`SELECT * FROM article_collecte WHERE id_collecte = ${id_col}`)
-            .pipe(
-                map((articles) => SqliteService.MultiSelectQueryMapper<ArticleCollecte>(articles))
-            );
+        // TODO WIIS-7970
+        return this.query(`SELECT * FROM article_collecte WHERE id_collecte = ${id_col}`);
     }
 
     public findArticlesInDemandeLivraison(demandeId: number) {
@@ -804,10 +928,7 @@ export class SqliteService {
             `INNER JOIN article_in_demande_livraison ON article_in_demande_livraison.article_bar_code = demande_livraison_article.bar_code ` +
             `WHERE article_in_demande_livraison.demande_id = ${demandeId}`
         );
-        return this.executeQuery(query).pipe(
-            map((data) => SqliteService.MultiSelectQueryMapper<any>(data)),
-            take(1)
-        );
+        return this.query(query);
     }
 
     public findArticlesNotInDemandeLivraison(): Observable<Array<DemandeLivraisonArticle>> {
@@ -817,9 +938,7 @@ export class SqliteService {
             LEFT JOIN article_in_demande_livraison ON article_in_demande_livraison.article_bar_code = demande_livraison_article.bar_code
             WHERE article_in_demande_livraison.demande_id IS NULL`
         );
-        return this.executeQuery(query).pipe(
-            map((data) => SqliteService.MultiSelectQueryMapper<any>(data)),
-        );
+        return this.query(query);
     }
 
     public countArticlesByDemandeLivraison(demandeIds: Array<number>): Observable<{ [demande_id: number]: number }> {
@@ -830,8 +949,7 @@ export class SqliteService {
             `WHERE article_in_demande_livraison.demande_id IN (${demandeIdsJoined}) ` +
             `GROUP BY article_in_demande_livraison.demande_id`
         );
-        return this.executeQuery(query).pipe(
-            map((data) => SqliteService.MultiSelectQueryMapper<any>(data)),
+        return this.query(query).pipe(
             map((counters: Array<{demande_id: number, counter: number}>) => (
                 counters.reduce((acc, {demande_id, counter}) => ({
                     ...acc,
@@ -840,42 +958,6 @@ export class SqliteService {
             )),
             take(1)
         );
-    }
-
-    /**
-     * find all elements in the given table which correspond to the given where clauses.
-     * @param {string} table name of the table to do the search
-     * @param {string[]} where boolean clauses to apply with AND separator
-     * @param {Object.<string,'ASC'|'DESC'>} order
-     * @param {number|undefined} limit
-     * @param {number|undefined} offset
-     */
-    public findBy(table: TableName, where: Array<string> = [], order: {[column: string]: 'ASC'|'DESC'} = {}, {limit, offset}: { limit?: number, offset?: number } = {}): Observable<any> {
-        const sqlWhereClauses = (where && where.length > 0)
-            ? ` WHERE ${SqliteService.JoinWhereClauses(where)}`
-            : undefined;
-
-        const orderByArray = Object
-            .keys(order || {})
-            .map((column: string) => `${column} ${order[column]}`)
-
-        const sqlOrderByClauses = (orderByArray && orderByArray.length > 0)
-            ? ` ORDER BY ${orderByArray.join(',')}`
-            : undefined;
-
-        const offsetClause = offset ? ` OFFSET ${offset}` : '';
-        const limitClause = limit ? ` LIMIT ${limit}${offsetClause}` : undefined;
-
-        const sqlQuery = `SELECT * FROM ${table}${sqlWhereClauses || ''}${sqlOrderByClauses || ''}${limitClause || ''}`;
-
-        return this.executeQuery(sqlQuery).pipe(
-            map((data) => SqliteService.MultiSelectQueryMapper<any>(data)),
-            take(1)
-        );
-    }
-
-    public findAll(table: TableName): Observable<any> {
-        return this.findBy(table)
     }
 
     private createInsertQuery(name: TableName, objects: any|Array<any>): string {
@@ -909,184 +991,122 @@ export class SqliteService {
             `
             : undefined;
     }
-
-    public insert(name: TableName, objects: any|Array<any>): Observable<number|undefined> {
-        if (objects
-            && (
-                !Array.isArray(objects)
-                || objects.length > 0
-            )) {
-            let query = this.createInsertQuery(name, objects);
-            return this.executeQuery(query).pipe(map(({insertId}) => insertId));
-        }
-        else {
-            return of(undefined);
-        }
-    }
-
-    public update(name: TableName, config: Array<{values: any, where?: Array<string>}>): Observable<any> {
-        const queries = config
-            .map(({values, where}) => this.createUpdateQuery(name, values, where || []))
-            .filter((query) => query) as Array<string>;
-        return queries.length > 0
-            ? this.executeQuery(queries)
-            : of(false);
-    }
-
-    public executeQuery(queries: string|Array<string>, getRes: boolean = true): Observable<any> {
-        const queriesStr = typeof queries === 'string'
-            ? queries
-            : queries.join(';')
-
-        return from(this.retrieveDBConnection())
-            .pipe(
-                mergeMap((db: SQLiteDBConnection) => {
-                    return from(db.open())
-                        .pipe(
-                            mergeMap(() => db.execute(queriesStr)),
-
-                            // define executeQuery result
-                            map((res) => (getRes ? res : undefined)),
-
-                            // closes all connections
-                            mergeMap((result) => from(db.close()).pipe(
-                                map(() => this.sqlite.closeConnection(SqliteService.DB_NAME, false)),
-                                map(() => result)
-                            )),
-
-                            // print queries on sqlite errors
-                            tap({
-                                error: (error) => {
-                                    console.error(queries, error);
-                                }
-                            }),
-                        );
-                })
-            );
-    }
-
     public findMvtByArticlePrepa(id_art: number): Observable<any> {
-        return this.executeQuery('SELECT * FROM `mouvement` WHERE `id_article_prepa` = ' + id_art + ' LIMIT 1').pipe(
+        return this.query('SELECT * FROM `mouvement` WHERE `id_article_prepa` = ' + id_art + ' LIMIT 1').pipe(
             map((mvt) => (
-                (mvt && mvt.rows && mvt.rows.length > 0 && mvt.rows.item(0).url !== '')
-                    ? mvt.rows.item(0)
+                (mvt && mvt.length > 0 && mvt[0].url !== '')
+                    ? mvt[0]
                     : null
             ))
         );
     }
 
     public findMvtByArticleLivraison(id_art: number): Observable<any> {
-        return this.executeQuery('SELECT * FROM `mouvement` WHERE `id_article_livraison` = ' + id_art + ' LIMIT 1').pipe(
+        return this.query('SELECT * FROM `mouvement` WHERE `id_article_livraison` = ' + id_art + ' LIMIT 1').pipe(
             map((mvt) => (
-                (mvt && mvt.rows && mvt.rows.length > 0 && mvt.rows.item(0).url !== '')
-                    ? mvt.rows.item(0)
+                (mvt && mvt.length > 0 && mvt[0].url !== '')
+                    ? mvt[0]
                     : null
             ))
         );
     }
 
     public findMvtByArticleCollecte(id_art: number): Observable<any> {
-        return this.executeQuery('SELECT * FROM `mouvement` WHERE `id_article_collecte` = ' + id_art + ' LIMIT 1').pipe(
+        return this.query('SELECT * FROM `mouvement` WHERE `id_article_collecte` = ' + id_art + ' LIMIT 1').pipe(
             map((mvt) => (
-                (mvt && mvt.rows && mvt.rows.length > 0 && mvt.rows.item(0).url !== '')
-                    ? mvt.rows.item(0)
+                (mvt && mvt.length > 0 && mvt[0].url !== '')
+                    ? mvt[0]
                     : null
             ))
         );
     }
 
     public finishPrepa(id_prepa: number, emplacement: string): Observable<undefined> {
-        return this.executeQuery(
-            'UPDATE `preparation` SET date_end = \'' + moment().format() + '\', emplacement = \'' + emplacement + '\' WHERE id = ' + id_prepa,
-            false
-        );
+        return this.execute('UPDATE `preparation` SET date_end = \'' + moment().format() + '\', emplacement = \'' + emplacement + '\' WHERE id = ' + id_prepa)
+            .pipe(map(() => undefined));
     }
 
     public resetFinishedPrepas(id_prepas: Array<number>): Observable<undefined> {
         const idPrepasJoined = id_prepas.join(',');
-        return this.executeQuery(`UPDATE \`preparation\` SET date_end = NULL, emplacement = NULL WHERE id IN (${idPrepasJoined})`, false);
+        return this.execute(`UPDATE \`preparation\` SET date_end = NULL, emplacement = NULL WHERE id IN (${idPrepasJoined})`)
+            .pipe(map(() => undefined));
     }
 
     public resetFinishedCollectes(id_collectes: Array<number>): Observable<any> {
         const idCollectesJoined = id_collectes.join(',');
-        return this.executeQuery([
-            `UPDATE \`collecte\` SET date_end = NULL, location_to = NULL WHERE id IN (${idCollectesJoined})`,
-            `UPDATE \`article_collecte\` SET has_moved = 0 WHERE id_collecte IN (${idCollectesJoined})`
-        ], false);
+        return zip(
+            this.execute(`UPDATE \`collecte\` SET date_end = NULL, location_to = NULL WHERE id IN (${idCollectesJoined})`),
+            this.execute(`UPDATE \`article_collecte\` SET has_moved = 0 WHERE id_collecte IN (${idCollectesJoined})`)
+        ).pipe(map(() => undefined));
     }
 
     public startPrepa(id_prepa: number): Observable<undefined> {
-        return this.executeQuery('UPDATE `preparation` SET started = 1 WHERE id = ' + id_prepa, false);
+        return this.execute('UPDATE `preparation` SET started = 1 WHERE id = ' + id_prepa)
+            .pipe(map(() => undefined));;
     }
 
     public finishCollecte(id_collecte: number): Observable<undefined> {
-        return this.executeQuery("UPDATE `collecte` SET date_end = '" + moment().format() + '\' WHERE id = ' + id_collecte,  false);
+        return this.execute("UPDATE `collecte` SET date_end = '" + moment().format() + '\' WHERE id = ' + id_collecte)
+            .pipe(map(() => undefined));
     }
 
     public finishMvt(id_mvt: number, location_to?: string): Observable<undefined> {
         const setLocationQuery = location_to
             ? `, location = '${location_to}'`
             : '';
-        return this.executeQuery(`UPDATE \`mouvement\` SET date_drop = '${moment().format()}'${setLocationQuery} WHERE id = ${id_mvt}`, false);
+        return this.execute(`UPDATE \`mouvement\` SET date_drop = '${moment().format()}'${setLocationQuery} WHERE id = ${id_mvt}`)
+            .pipe(map(() => undefined));
     }
 
     public moveArticle(id_article: number): Observable<undefined> {
-        return this.executeQuery('UPDATE `article_prepa` SET has_moved = 1 WHERE id = ' + id_article, false);
+        return this.execute('UPDATE `article_prepa` SET has_moved = 1 WHERE id = ' + id_article)
+            .pipe(map(() => undefined));;
     }
 
     public moveArticleLivraison(id_article: number): Observable<undefined> {
-        return this.executeQuery('UPDATE `article_livraison` SET has_moved = 1 WHERE id = ' + id_article, false);
+        return this.execute('UPDATE `article_livraison` SET has_moved = 1 WHERE id = ' + id_article)
+            .pipe(map(() => undefined));;
     }
 
     public moveArticleCollecte(id_article_collecte: number): Observable<undefined> {
-        return this.executeQuery('UPDATE `article_collecte` SET has_moved = 1 WHERE id = ' + id_article_collecte, false);
+        return this.execute('UPDATE `article_collecte` SET has_moved = 1 WHERE id = ' + id_article_collecte)
+            .pipe(map(() => undefined));
     }
 
     public updateArticlePrepaQuantity(reference: string, idPrepa: number, is_ref: number, quantite: number): Observable<undefined> {
-        return this.executeQuery(
-            `UPDATE \`article_prepa\` SET quantite = ${quantite} WHERE reference LIKE '${reference}' AND id_prepa = ${idPrepa} AND is_ref LIKE '${is_ref}'`,
-            false
-        );
+        return this.execute(
+            `UPDATE \`article_prepa\` SET quantite = ${quantite} WHERE reference LIKE '${reference}' AND id_prepa = ${idPrepa} AND is_ref LIKE '${is_ref}'`
+        ).pipe(map(() => undefined));;
     }
 
     public updateArticleCollecteQuantity(id_article: number, quantite: number): Observable<undefined> {
-        return this.executeQuery('UPDATE `article_collecte` SET quantite = ' + quantite + ' WHERE id = ' + id_article, false);
+        return this.execute('UPDATE `article_collecte` SET quantite = ' + quantite + ' WHERE id = ' + id_article)
+            .pipe(map(() => undefined));;
     }
 
     public deletePreparationsById(preparations: Array<number>): Observable<any> {
         const joinedPreparations = preparations.join(',');
         return preparations.length > 0
-            ? this.executeQuery([
-                `DELETE FROM \`preparation\` WHERE id IN (${joinedPreparations})`,
-                `DELETE FROM \`article_prepa\` WHERE id_prepa IN (${joinedPreparations})`
-            ], false)
+            ? zip(
+                this.execute(`DELETE FROM \`preparation\` WHERE id IN (${joinedPreparations})`),
+                this.execute(`DELETE FROM \`article_prepa\` WHERE id_prepa IN (${joinedPreparations})`)
+            ).pipe(map(() => undefined))
             : of(undefined);
     }
-
-    /**
-     * Call sqlite delete command.
-     */
-    public deleteBy(table: TableName,
-                    where: Array<string> = []): Observable<undefined> {
-        const sqlWhereClauses = (where && where.length > 0)
-            ? `WHERE ${SqliteService.JoinWhereClauses(where)}`
-            : '';
-        return this.executeQuery(`DELETE FROM ${table} ${sqlWhereClauses};`, false);
-    }
-    /////////////////// TODO adrien suite
 
     public resetArticlePrepaByPrepa(ids: Array<number>): Observable<any> {
         const idsJoined = ids.join(',');
         return ids.length > 0
             ? zip(
-                this.executeQuery( `UPDATE \`article_prepa\` SET deleted = 0, has_moved = 0, quantite = original_quantity WHERE id_prepa IN (${idsJoined}) ;`, false),
-                this.executeQuery( `DELETE FROM \`article_prepa\` WHERE id_prepa IN (${idsJoined}) AND isSelectableByUser = 1;`, false)
-            )
+                this.execute( `UPDATE \`article_prepa\` SET deleted = 0, has_moved = 0, quantite = original_quantity WHERE id_prepa IN (${idsJoined}) ;`),
+                this.execute( `DELETE FROM \`article_prepa\` WHERE id_prepa IN (${idsJoined}) AND isSelectableByUser = 1;`)
+            ).pipe(map(() => undefined))
             : of(undefined);
     }
 
     public deleteArticlePrepa(reference: string, id_prepa: string, is_ref: number): Observable<void> {
-        return this.executeQuery(`UPDATE \`article_prepa\` SET deleted = 1 WHERE reference = '${reference}' AND id_prepa = ${id_prepa} AND is_ref = ${is_ref}`, false);
+        return this.execute(`UPDATE \`article_prepa\` SET deleted = 1 WHERE reference = '${reference}' AND id_prepa = ${id_prepa} AND is_ref = ${is_ref}`)
+            .pipe(map(() => undefined));
     }
 
     private getValueForQuery(value: any): string {
@@ -1107,16 +1127,16 @@ export class SqliteService {
         const joinedLivraisons = livraisons.join(',');
         return livraisons.length > 0
             ? zip(
-                this.executeQuery(`DELETE FROM \`livraison\` WHERE id IN (${joinedLivraisons});`, false),
-                this.executeQuery(`DELETE FROM \`article_livraison\` WHERE id_livraison IN (${joinedLivraisons})`, false)
-            )
+                this.execute(`DELETE FROM \`livraison\` WHERE id IN (${joinedLivraisons});`),
+                this.execute(`DELETE FROM \`article_livraison\` WHERE id_livraison IN (${joinedLivraisons})`)
+            ).pipe(map(() => undefined))
             : of(undefined);
     }
 
     public deleteMouvementsBy(columnName: 'id_prepa'|'id_livraison'|'id_collecte', ids: Array<number>): Observable<any> {
         const idsJoined = ids.join(',');
         return ids.length > 0
-            ? this.executeQuery(`DELETE FROM \`mouvement\` WHERE ${columnName} IN (${idsJoined})`, false)
+            ? this.execute(`DELETE FROM \`mouvement\` WHERE ${columnName} IN (${idsJoined})`).pipe(map(() => undefined))
             : of(undefined);
     }
 
@@ -1124,15 +1144,15 @@ export class SqliteService {
         const joinedCollecte = collecteIds.join(',');
         return collecteIds.length > 0
             ? zip(
-                this.executeQuery(`DELETE FROM \`collecte\` WHERE id IN (${joinedCollecte});`),
-                this.executeQuery(`DELETE FROM \`article_collecte\` WHERE id_collecte IN (${joinedCollecte})`)
+                this.execute(`DELETE FROM \`collecte\` WHERE id IN (${joinedCollecte});`),
+                this.execute(`DELETE FROM \`article_collecte\` WHERE id_collecte IN (${joinedCollecte})`)
             )
             : of(undefined);
     }
 
     public finishPrises(ids: Array<number>): Observable<any> {
         return ids.length > 0
-            ? this.executeQuery(`UPDATE \`mouvement_traca\` SET finished = 1 WHERE id IN (${ids.join(',')})`, false)
+            ? this.execute(`UPDATE \`mouvement_traca\` SET finished = 1 WHERE id IN (${ids.join(',')})`).pipe(map(() => undefined))
             : of(undefined);
     }
 
@@ -1144,7 +1164,7 @@ export class SqliteService {
 
     public resetMouvementsTraca(refArticles: Array<string>, type: string, fromStock: boolean): Observable<any> {
         return refArticles.length > 0
-            ? this.executeQuery(
+            ? this.execute(
                 'UPDATE mouvement_traca ' +
                 'SET finished = 0 ' +
                 `WHERE type LIKE '${type}' ` +
@@ -1156,7 +1176,7 @@ export class SqliteService {
 
     public getPrises(fromStock: boolean): Observable<Array<MouvementTraca>> {
         return this
-            .executeQuery(`
+            .query(`
                 SELECT *
                 FROM mouvement_traca mouvement_traca
                 WHERE id IN (
@@ -1168,7 +1188,6 @@ export class SqliteService {
                     LIMIT 1
                 )
                 AND mouvement_traca.type = 'prise'
-            `)
-            .pipe(map((articles) => SqliteService.MultiSelectQueryMapper<MouvementTraca>(articles)));
+            `);
     }
 }

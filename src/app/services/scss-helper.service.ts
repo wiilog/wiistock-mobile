@@ -1,6 +1,8 @@
 import {Injectable} from '@angular/core';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class ScssHelperService {
     private static readonly PREFIX: string = '--';
     private static readonly DEFAULT_VALUE: undefined = undefined;

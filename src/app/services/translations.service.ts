@@ -4,7 +4,9 @@ import {Injectable} from "@angular/core";
 import {map} from 'rxjs/operators';
 import {Observable, Subject} from 'rxjs';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class TranslationService {
 
     public readonly changedTranslations$: Subject<void>;

@@ -2,7 +2,9 @@ import {Injectable} from '@angular/core';
 import {AlertOptions} from '@ionic/core';
 import {AlertController} from '@ionic/angular';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class AlertService {
 
     public static readonly CSS_CLASS_MANAGED_ALERT = 'custom-managed-alert';

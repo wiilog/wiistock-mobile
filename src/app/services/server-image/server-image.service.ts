@@ -6,7 +6,9 @@ import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {map, tap} from 'rxjs/operators';
 
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class ServerImageService {
 
     private static CACHED_IMAGES: {[key: string]: string} = {};

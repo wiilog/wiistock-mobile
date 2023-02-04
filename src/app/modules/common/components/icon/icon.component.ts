@@ -3,7 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {Observable, ReplaySubject} from 'rxjs';
 import {map, tap} from 'rxjs/operators';
-import {IconColor} from '@app/modules/common/components/icon/icon-color';
+import {IconColor} from './icon-color';
 
 /**
  * Step to add svg icon into assets/icons :

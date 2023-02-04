@@ -1,508 +1,564 @@
-import {TableDefinition} from './table-definition';
+import {TableDefinition, TableName} from '@app/services/sqlite/table-definition';
+
+export const keptTablesOnConnection: Array<TableName> = [
+    'demande_livraison',
+    'article_in_demande_livraison',
+    'demande_livraison_type',
+    'demande_livraison_article',
+    'dispatch_type',
+    'type',
+]
 
 export const TablesDefinitions: Array<TableDefinition> = [
     {
         name: 'emplacement',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            label: 'VARCHAR(255)',
-            temperature_ranges: 'VARCHAR(255)'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'temperature_ranges', value: 'VARCHAR(255)'},
+        ]
     },
     {
         name: 'mouvement',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-            reference: 'INTEGER',
-            quantity: 'INTEGER',
-            barcode: 'VARCHAR(255)',
-            date_pickup: 'VARCHAR(255)',
-            location_from: 'TEXT',
-            date_drop: 'VARCHAR(255)',
-            location: 'TEXT',
-            type: 'VARCHAR(255)',
-            is_ref: 'INTEGER',
-            id_article_prepa: 'INTEGER',
-            id_prepa: 'INTEGER',
-            id_article_livraison: 'INTEGER',
-            id_livraison: 'INTEGER',
-            id_article_collecte: 'INTEGER',
-            id_collecte: 'INTEGER',
-            selected_by_article: 'INTEGER',
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'reference', value: 'INTEGER'},
+            {column: 'quantity', value: 'INTEGER'},
+            {column: 'barcode', value: 'VARCHAR(255)'},
+            {column: 'date_pickup', value: 'VARCHAR(255)'},
+            {column: 'location_from', value: 'TEXT'},
+            {column: 'date_drop', value: 'VARCHAR(255)'},
+            {column: 'location', value: 'TEXT'},
+            {column: 'type', value: 'VARCHAR(255)'},
+            {column: 'is_ref', value: 'INTEGER'},
+            {column: 'id_article_prepa', value: 'INTEGER'},
+            {column: 'id_prepa', value: 'INTEGER'},
+            {column: 'id_article_livraison', value: 'INTEGER'},
+            {column: 'id_livraison', value: 'INTEGER'},
+            {column: 'id_article_collecte', value: 'INTEGER'},
+            {column: 'id_collecte', value: 'INTEGER'},
+            {column: 'selected_by_article', value: 'INTEGER'},
+        ]
     },
     {
         name: 'mouvement_traca',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-            ref_article: 'VARCHAR(255)',
-            date: 'VARCHAR(255)',
-            ref_emplacement: 'VARCHAR(255)',
-            type: 'VARCHAR(255)',
-            operateur: 'VARCHAR(255)',
-            comment: 'VARCHAR(255)',
-            signature: 'TEXT',
-            freeFields: 'TEXT',
-            photo: 'TEXT',
-            finished: 'INTEGER',
-            fromStock: 'INTEGER',
-            quantity: 'INTEGER',
-            nature_id: 'INTEGER',
-            isGroup: 'INTEGER',
-            subPacks: 'TEXT',
-            packParent: 'VARCHAR(255)',
-            articles: 'JSON',
-            containsArticle: 'INTEGER',
-            projectId: 'INTEGER'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'ref_article', value: 'VARCHAR(255)'},
+            {column: 'date', value: 'VARCHAR(255)'},
+            {column: 'ref_emplacement', value: 'VARCHAR(255)'},
+            {column: 'type', value: 'VARCHAR(255)'},
+            {column: 'operateur', value: 'VARCHAR(255)'},
+            {column: 'comment', value: 'VARCHAR(255)'},
+            {column: 'signature', value: 'TEXT'},
+            {column: 'freeFields', value: 'TEXT'},
+            {column: 'photo', value: 'TEXT'},
+            {column: 'finished', value: 'INTEGER'},
+            {column: 'fromStock', value: 'INTEGER'},
+            {column: 'quantity', value: 'INTEGER'},
+            {column: 'nature_id', value: 'INTEGER'},
+            {column: 'isGroup', value: 'INTEGER'},
+            {column: 'subPacks', value: 'TEXT'},
+            {column: 'packParent', value: 'VARCHAR(255)'},
+            {column: 'articles', value: 'JSON'},
+            {column: 'containsArticle', value: 'INTEGER'},
+            {column: 'projectId', value: 'INTEGER'},
+        ]
     },
     {
         name: 'preparation',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            numero: 'TEXT',
-            emplacement: 'TEXT',
-            date_end: 'TEXT',
-            destination: 'TEXT',
-            started: 'INTEGER',
-            requester: 'VARCHAR(255)',
-            type: 'VARCHAR(255)',
-            comment: 'TEXT',
-            expectedAt: 'TEXT',
-            color: 'VARCHAR(255)',
-            project: 'VARCHAR(255)'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'numero', value: 'TEXT'},
+            {column: 'emplacement', value: 'TEXT'},
+            {column: 'date_end', value: 'TEXT'},
+            {column: 'destination', value: 'TEXT'},
+            {column: 'started', value: 'INTEGER'},
+            {column: 'requester', value: 'VARCHAR(255)'},
+            {column: 'type', value: 'VARCHAR(255)'},
+            {column: 'comment', value: 'TEXT'},
+            {column: 'expectedAt', value: 'TEXT'},
+            {column: 'color', value: 'VARCHAR(255)'},
+            {column: 'project', value: 'VARCHAR(255)'}
+        ]
     },
     {
         name: 'article_prepa',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-            label: 'TEXT',
-            reference: 'TEXT',
-            emplacement: 'TEXT',
-            type_quantite: 'TEXT',
-            barcode: 'TEXT',
-            reference_article_reference: 'TEXT',
-            quantite: 'INTEGER',
-            is_ref: 'INTEGER',
-            id_prepa: 'INTEGER',
-            has_moved: 'INTEGER',
-            isSelectableByUser: 'INTEGER',
-            original_quantity: 'INTEGER',
-            deleted: 'INTEGER DEFAULT 0',
-            targetLocationPicking: 'TEXT',
-            lineLogisticUnitId: 'INTEGER',
-            lineLogisticUnitCode: 'TEXT',
-            lineLogisticUnitNatureId: 'INTEGER',
-            lineLogisticUnitLocation: 'TEXT',
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'label', value: 'TEXT'},
+            {column: 'reference', value: 'TEXT'},
+            {column: 'emplacement', value: 'TEXT'},
+            {column: 'type_quantite', value: 'TEXT'},
+            {column: 'barcode', value: 'TEXT'},
+            {column: 'reference_article_reference', value: 'TEXT'},
+            {column: 'quantite', value: 'INTEGER'},
+            {column: 'is_ref', value: 'INTEGER'},
+            {column: 'id_prepa', value: 'INTEGER'},
+            {column: 'has_moved', value: 'INTEGER'},
+            {column: 'isSelectableByUser', value: 'INTEGER'},
+            {column: 'original_quantity', value: 'INTEGER'},
+            {column: 'deleted', value: 'INTEGER DEFAULT 0'},
+            {column: 'targetLocationPicking', value: 'TEXT'},
+            {column: 'lineLogisticUnitId', value: 'INTEGER'},
+            {column: 'lineLogisticUnitCode', value: 'TEXT'},
+            {column: 'lineLogisticUnitNatureId', value: 'INTEGER'},
+            {column: 'lineLogisticUnitLocation', value: 'TEXT'},
+        ]
     },
     {
         name: 'article_prepa_by_ref_article',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-            reference: 'TEXT',
-            label: 'TEXT',
-            location: 'TEXT',
-            reference_article: 'TEXT',
-            reference_barCode: 'VARCHAR(255)',
-            barcode: 'TEXT',
-            quantity: 'INTEGER',
-            isSelectableByUser: 'INTEGER',
-            management: 'VARCHAR(255)',
-            management_date: 'VARCHAR(255)',
-            management_order: 'INTEGER',
-            pickingPriority: 'INTEGER',
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'reference', value: 'TEXT'},
+            {column: 'label', value: 'TEXT'},
+            {column: 'location', value: 'TEXT'},
+            {column: 'reference_article', value: 'TEXT'},
+            {column: 'reference_barCode', value: 'VARCHAR(255)'},
+            {column: 'barcode', value: 'TEXT'},
+            {column: 'quantity', value: 'INTEGER'},
+            {column: 'isSelectableByUser', value: 'INTEGER'},
+            {column: 'management', value: 'VARCHAR(255)'},
+            {column: 'management_date', value: 'VARCHAR(255)'},
+            {column: 'management_order', value: 'INTEGER'},
+            {column: 'pickingPriority', value: 'INTEGER'},
+        ]
     },
     {
         name: 'livraison',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            number: 'TEXT',
-            location: 'TEXT',
-            date_end: 'TEXT',
-            requester: 'VARCHAR(255)',
-            type: 'VARCHAR(255)',
-            preparationLocation: 'VARCHAR(255)',
-            comment: 'TEXT',
-            expectedAt: 'TEXT',
-            color: 'VARCHAR(255)',
-            project: 'VARCHAR(255)'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'number', value: 'TEXT'},
+            {column: 'location', value: 'TEXT'},
+            {column: 'date_end', value: 'TEXT'},
+            {column: 'requester', value: 'VARCHAR(255)'},
+            {column: 'type', value: 'VARCHAR(255)'},
+            {column: 'preparationLocation', value: 'VARCHAR(255)'},
+            {column: 'comment', value: 'TEXT'},
+            {column: 'expectedAt', value: 'TEXT'},
+            {column: 'color', value: 'VARCHAR(255)'},
+            {column: 'project', value: 'VARCHAR(255)'}
+        ]
     },
     {
         name: 'collecte',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            number: 'TEXT',
-            date_end: 'TEXT',
-            location_from: 'VARCHAR(255)',
-            location_to: 'VARCHAR(255)',
-            requester: 'VARCHAR(255)',
-            type: 'VARCHAR(255)',
-            forStock: 'INTEGER',
-            comment: 'VARCHAR(255)'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'number', value: 'TEXT'},
+            {column: 'date_end', value: 'TEXT'},
+            {column: 'location_from', value: 'VARCHAR(255)'},
+            {column: 'location_to', value: 'VARCHAR(255)'},
+            {column: 'requester', value: 'VARCHAR(255)'},
+            {column: 'type', value: 'VARCHAR(255)'},
+            {column: 'forStock', value: 'INTEGER'},
+            {column: 'comment', value: 'VARCHAR(255)'}
+        ]
     },
     {
         name: 'transfer_order',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            number: 'TEXT',
-            requester: 'VARCHAR(255)',
-            destination: 'VARCHAR(255)',
-            origin: 'VARCHAR(255)',
-            treated: 'INTEGER'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'number', value: 'TEXT'},
+            {column: 'requester', value: 'VARCHAR(255)'},
+            {column: 'destination', value: 'VARCHAR(255)'},
+            {column: 'origin', value: 'VARCHAR(255)'},
+            {column: 'treated', value: 'INTEGER'}
+        ]
     },
     {
         name: 'transfer_order_article',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-            barcode: 'VARCHAR(255)',
-            label: 'VARCHAR(255)',
-            reference: 'VARCHAR(255)',
-            location: 'VARCHAR(255)',
-            quantity: 'INTEGER',
-            transfer_order_id: 'INTEGER'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'barcode', value: 'VARCHAR(255)'},
+            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'reference', value: 'VARCHAR(255)'},
+            {column: 'location', value: 'VARCHAR(255)'},
+            {column: 'quantity', value: 'INTEGER'},
+            {column: 'transfer_order_id', value: 'INTEGER'}
+        ]
     },
     {
         name: 'article_livraison',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-            label: 'TEXT',
-            reference: 'TEXT',
-            location: 'TEXT',
-            barcode: 'TEXT',
-            quantity: 'INTEGER',
-            is_ref: 'INTEGER',
-            id_livraison: 'INTEGER',
-            has_moved: 'INTEGER',
-            targetLocationPicking: 'TEXT',
-            currentLogisticUnitId: 'INTEGER',
-            currentLogisticUnitCode: 'TEXT',
-            currentLogisticUnitNatureId: 'TEXT',
-            currentLogisticUnitLocation: 'TEXT',
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'label', value: 'TEXT'},
+            {column: 'reference', value: 'TEXT'},
+            {column: 'location', value: 'TEXT'},
+            {column: 'barcode', value: 'TEXT'},
+            {column: 'quantity', value: 'INTEGER'},
+            {column: 'is_ref', value: 'INTEGER'},
+            {column: 'id_livraison', value: 'INTEGER'},
+            {column: 'has_moved', value: 'INTEGER'},
+            {column: 'targetLocationPicking', value: 'TEXT'},
+            {column: 'currentLogisticUnitId', value: 'INTEGER'},
+            {column: 'currentLogisticUnitCode', value: 'TEXT'},
+            {column: 'currentLogisticUnitNatureId', value: 'TEXT'},
+            {column: 'currentLogisticUnitLocation', value: 'TEXT'},
+        ]
     },
     {
         name: 'article_inventaire',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            reference: 'TEXT',
-            location: 'TEXT',
-            barcode: 'TEXT',
-            mission_id: 'INTEGER',
-            mission_start: 'VARCHAR(255)',
-            mission_end: 'VARCHAR(255)',
-            mission_name: 'VARCHAR(255)',
-            is_ref: 'INTEGER',
-            type: 'VARCHAR(255)',
-            done: 'INTEGER',
-            logistic_unit_code: 'VARCHAR(255)',
-            logistic_unit_nature: 'VARCHAR(255)',
-            logistic_unit_id: 'INTEGER',
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'reference', value: 'TEXT'},
+            {column: 'location', value: 'TEXT'},
+            {column: 'barcode', value: 'TEXT'},
+            {column: 'mission_id', value: 'INTEGER'},
+            {column: 'mission_start', value: 'VARCHAR(255)'},
+            {column: 'mission_end', value: 'VARCHAR(255)'},
+            {column: 'mission_name', value: 'VARCHAR(255)'},
+            {column: 'is_ref', value: 'INTEGER'},
+            {column: 'type', value: 'VARCHAR(255)'},
+            {column: 'done', value: 'INTEGER'},
+            {column: 'logistic_unit_code', value: 'VARCHAR(255)'},
+            {column: 'logistic_unit_nature', value: 'VARCHAR(255)'},
+            {column: 'logistic_unit_id', value: 'INTEGER'},
+        ]
     },
     {
         name: 'article_collecte',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-            label: 'TEXT',
-            reference: 'TEXT',
-            emplacement: 'TEXT',
-            barcode: 'TEXT',
-            quantite: 'INTEGER',
-            is_ref: 'INTEGER',
-            id_collecte: 'INTEGER',
-            has_moved: 'INTEGER',
-            reference_label: 'VARCHAR(255)',
-            quantity_type: 'VARCHAR(255)'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'label', value: 'TEXT'},
+            {column: 'reference', value: 'TEXT'},
+            {column: 'emplacement', value: 'TEXT'},
+            {column: 'barcode', value: 'TEXT'},
+            {column: 'quantite', value: 'INTEGER'},
+            {column: 'is_ref', value: 'INTEGER'},
+            {column: 'id_collecte', value: 'INTEGER'},
+            {column: 'has_moved', value: 'INTEGER'},
+            {column: 'reference_label', value: 'VARCHAR(255)'},
+            {column: 'quantity_type', value: 'VARCHAR(255)'}
+        ]
     },
     {
         name: 'picking_article_collecte',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-            label: 'TEXT',
-            reference: 'TEXT',
-            reference_label: 'TEXT',
-            barcode: 'TEXT',
-            location: 'TEXT',
-            is_ref: 'INTEGER'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'label', value: 'TEXT'},
+            {column: 'reference', value: 'TEXT'},
+            {column: 'reference_label', value: 'TEXT'},
+            {column: 'barcode', value: 'TEXT'},
+            {column: 'location', value: 'TEXT'},
+            {column: 'is_ref', value: 'INTEGER'}
+        ]
     },
     {
         name: 'saisie_inventaire',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-            bar_code: 'VARCHAR(255)',
-            date: 'TEXT',
-            location: 'TEXT',
-            mission_id: 'INTEGER',
-            is_ref: 'INTEGER',
-            quantity: 'INTEGER'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'bar_code', value: 'VARCHAR(255)'},
+            {column: 'date', value: 'TEXT'},
+            {column: 'location', value: 'TEXT'},
+            {column: 'mission_id', value: 'INTEGER'},
+            {column: 'is_ref', value: 'INTEGER'},
+            {column: 'quantity', value: 'INTEGER'}
+        ]
     },
     {
         name: 'anomalie_inventaire',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-            reference: 'TEXT',
-            location: 'TEXT',
-            comment: 'TEXT',
-            barcode: 'TEXT',
-            treated: 'TEXT',
-            type: 'VARCHAR(255)',
-            done: 'INTEGER',
-            is_ref: 'INTEGER',
-            quantity: 'INTEGER',
-            is_treatable: 'INTEGER',
-            countedQuantity: 'INTEGER',
-            mission_id: 'INTEGER',
-            mission_start: 'VARCHAR(255)',
-            mission_end: 'VARCHAR(255)',
-            mission_name: 'VARCHAR(255)',
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'reference', value: 'TEXT'},
+            {column: 'location', value: 'TEXT'},
+            {column: 'comment', value: 'TEXT'},
+            {column: 'barcode', value: 'TEXT'},
+            {column: 'treated', value: 'TEXT'},
+            {column: 'type', value: 'VARCHAR(255)'},
+            {column: 'done', value: 'INTEGER'},
+            {column: 'is_ref', value: 'INTEGER'},
+            {column: 'quantity', value: 'INTEGER'},
+            {column: 'is_treatable', value: 'INTEGER'},
+            {column: 'countedQuantity', value: 'INTEGER'},
+            {column: 'mission_id', value: 'INTEGER'},
+            {column: 'mission_start', value: 'VARCHAR(255)'},
+            {column: 'mission_end', value: 'VARCHAR(255)'},
+            {column: 'mission_name', value: 'VARCHAR(255)'},
+        ]
     },
     {
         name: 'handling',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            number: 'VARCHAR(255)',
-            typeId: 'INTEGER',
-            statusId: 'INTEGER',
-            carriedOutOperationCount: 'INTEGER',
-            typeLabel: 'VARCHAR(255)',
-            requester: 'VARCHAR(255)',
-            desiredDate: 'VARCHAR(255)',
-            comment: 'TEXT',
-            destination: 'TEXT',
-            source: 'TEXT',
-            subject: 'VARCHAR(255)',
-            emergency: 'VARCHAR(255)',
-            freeFields: 'TEXT',
-            color: 'VARCHAR(255)'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'number', value: 'VARCHAR(255)'},
+            {column: 'typeId', value: 'INTEGER'},
+            {column: 'statusId', value: 'INTEGER'},
+            {column: 'carriedOutOperationCount', value: 'INTEGER'},
+            {column: 'typeLabel', value: 'VARCHAR(255)'},
+            {column: 'requester', value: 'VARCHAR(255)'},
+            {column: 'desiredDate', value: 'VARCHAR(255)'},
+            {column: 'comment', value: 'TEXT'},
+            {column: 'destination', value: 'TEXT'},
+            {column: 'source', value: 'TEXT'},
+            {column: 'subject', value: 'VARCHAR(255)'},
+            {column: 'emergency', value: 'VARCHAR(255)'},
+            {column: 'freeFields', value: 'TEXT'},
+            {column: 'color', value: 'VARCHAR(255)'}
+        ]
     },
     {
         name: 'handling_attachment',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-            fileName: 'VARCHAR(255)',
-            href: 'VARCHAR(255)',
-            handlingId: 'INTEGER'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'fileName', value: 'VARCHAR(255)'},
+            {column: 'href', value: 'VARCHAR(255)'},
+            {column: 'handlingId', value: 'INTEGER'}
+        ]
     },
     {
         name: 'demande_livraison',
-        keepOnConnection: true,
-        attributes: {
-            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-            location_id: 'integer',
-            comment: 'VARCHAR(255)',
-            type_id: 'integer',
-            user_id: 'integer',
-            last_error: 'VARCHAR(255)',
-            free_fields: 'TEXT',
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'location_id', value: 'integer'},
+            {column: 'comment', value: 'VARCHAR(255)'},
+            {column: 'type_id', value: 'integer'},
+            {column: 'user_id', value: 'integer'},
+            {column: 'last_error', value: 'VARCHAR(255)'},
+            {column: 'free_fields', value: 'TEXT'},
+        ]
     },
     {
         name: 'article_in_demande_livraison',
-        keepOnConnection: true,
-        attributes: {
-            demande_id: 'INTEGER',
-            article_bar_code: 'VARCHAR(255)',
-            quantity_to_pick: 'INTEGER'
-        }
+        schema: [
+            {column: 'demande_id', value: 'INTEGER'},
+            {column: 'article_bar_code', value: 'VARCHAR(255)'},
+            {column: 'quantity_to_pick', value: 'INTEGER'}
+        ]
     },
     {
         name: 'demande_livraison_type',
-        keepOnConnection: true,
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            label: 'VARCHAR(255)',
-            to_delete: 'INTEGER'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'to_delete', value: 'INTEGER'}
+        ]
     },
     {
         name: 'demande_livraison_article',
-        keepOnConnection: true,
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            label: 'VARCHAR(255)',
-            reference: 'VARCHAR(255)',
-            bar_code: 'VARCHAR(255)',
-            type_quantity: 'VARCHAR(255)',
-            location_label: 'VARCHAR(255)',
-            available_quantity: 'INTEGER',
-            to_delete: 'INTEGER'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'reference', value: 'VARCHAR(255)'},
+            {column: 'bar_code', value: 'VARCHAR(255)'},
+            {column: 'type_quantity', value: 'VARCHAR(255)'},
+            {column: 'location_label', value: 'VARCHAR(255)'},
+            {column: 'available_quantity', value: 'INTEGER'},
+            {column: 'to_delete', value: 'INTEGER'}
+        ]
     },
     {
         name: 'free_field',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            label: 'VARCHAR(255)',
-            typeId: 'INTEGER',
-            categoryType: 'VARCHAR(255)',
-            typing: 'VARCHAR(255)',
-            requiredCreate: 'INTEGER',
-            requiredEdit: 'INTEGER',
-            elements: 'TEXT',
-            defaultValue: 'TEXT'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'typeId', value: 'INTEGER'},
+            {column: 'categoryType', value: 'VARCHAR(255)'},
+            {column: 'typing', value: 'VARCHAR(255)'},
+            {column: 'requiredCreate', value: 'INTEGER'},
+            {column: 'requiredEdit', value: 'INTEGER'},
+            {column: 'elements', value: 'TEXT'},
+            {column: 'defaultValue', value: 'TEXT'}
+        ]
     },
     {
         name: 'nature',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            label: 'VARCHAR(255)',
-            color: 'VARCHAR(255)',
-            hide: 'INTEGER'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'color', value: 'VARCHAR(255)'},
+            {column: 'hide', value: 'INTEGER'}
+        ]
     },
     {
         name: 'allowed_nature_location',
-        attributes: {
-            location_id: 'INTEGER',
-            nature_id: 'INTEGER'
-        }
+        schema: [
+            {column: 'location_id', value: 'INTEGER'},
+            {column: 'nature_id', value: 'INTEGER'}
+        ]
     },
     {
         name: 'translations',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            topMenu: 'VARCHAR(255)',
-            subMenu: 'VARCHAR(255)',
-            menu: 'VARCHAR(255)',
-            label: 'VARCHAR(255)',
-            translation: 'VARCHAR(255)'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'topMenu', value: 'VARCHAR(255)'},
+            {column: 'subMenu', value: 'VARCHAR(255)'},
+            {column: 'menu', value: 'VARCHAR(255)'},
+            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'translation', value: 'VARCHAR(255)'}
+        ]
     },
     {
         name: 'dispatch',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            requester: 'VARCHAR(255)',
-            number: 'VARCHAR(255)',
-            statusId: 'INTEGER',
-            startDate: 'VARCHAR(255)',
-            endDate: 'VARCHAR(255)',
-            emergency: 'VARCHAR(255)',
-            locationFromLabel: 'VARCHAR(255)',
-            locationToLabel: 'VARCHAR(255)',
-            typeId: 'INTEGER',
-            typeLabel: 'VARCHAR(255)',
-            statusLabel: 'VARCHAR(255)',
-            treatedStatusId: 'INTEGER',
-            partial: 'INTEGER',
-            color: 'VARCHAR(255)',
-            destination: 'VARCHAR(255)',
-            draft: 'INTEGER'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'requester', value: 'VARCHAR(255)'},
+            {column: 'number', value: 'VARCHAR(255)'},
+            {column: 'statusId', value: 'INTEGER'},
+            {column: 'startDate', value: 'VARCHAR(255)'},
+            {column: 'endDate', value: 'VARCHAR(255)'},
+            {column: 'emergency', value: 'VARCHAR(255)'},
+            {column: 'locationFromLabel', value: 'VARCHAR(255)'},
+            {column: 'locationToLabel', value: 'VARCHAR(255)'},
+            {column: 'typeId', value: 'INTEGER'},
+            {column: 'typeLabel', value: 'VARCHAR(255)'},
+            {column: 'statusLabel', value: 'VARCHAR(255)'},
+            {column: 'treatedStatusId', value: 'INTEGER'},
+            {column: 'partial', value: 'INTEGER'},
+            {column: 'color', value: 'VARCHAR(255)'},
+            {column: 'destination', value: 'VARCHAR(255)'},
+            {column: 'draft', value: 'INTEGER'}
+        ]
     },
     {
         name: 'dispatch_pack',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            code: 'VARCHAR(255)',
-            natureId: 'INTEGER',
-            quantity: 'INTEGER',
-            dispatchId: 'INTEGER',
-            lastLocation: 'VARCHAR(255)',
-            treated: 'INTEGER',
-            already_treated: 'INTEGER',
-            comment: 'VARCHAR(255)',
-            photo1: 'TEXT',
-            photo2: 'TEXT',
-            reference: 'TEXT',
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'code', value: 'VARCHAR(255)'},
+            {column: 'natureId', value: 'INTEGER'},
+            {column: 'quantity', value: 'INTEGER'},
+            {column: 'dispatchId', value: 'INTEGER'},
+            {column: 'lastLocation', value: 'VARCHAR(255)'},
+            {column: 'treated', value: 'INTEGER'},
+            {column: 'already_treated', value: 'INTEGER'},
+            {column: 'comment', value: 'VARCHAR(255)'},
+            {column: 'photo1', value: 'TEXT'},
+            {column: 'photo2', value: 'TEXT'},
+            {column: 'reference', value: 'TEXT'},
+        ]
     },
     {
         name: 'status',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            label: 'VARCHAR(255)',
-            typeId: 'INTEGER',
-            state: 'VARCHAR(255)',
-            category: 'VARCHAR(255)',
-            displayOrder: 'INTEGER',
-            commentNeeded: 'INTEGER'
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'typeId', value: 'INTEGER'},
+            {column: 'state', value: 'VARCHAR(255)'},
+            {column: 'category', value: 'VARCHAR(255)'},
+            {column: 'displayOrder', value: 'INTEGER'},
+            {column: 'commentNeeded', value: 'INTEGER'}
+        ]
     },
     {
         name: 'empty_round',
-        attributes: {
-            location: 'VARCHAR(255)',
-            comment: 'TEXT',
-            date: 'VARCHAR(255)'
-        }
+        schema: [
+            {column: 'location', value: 'VARCHAR(255)'},
+            {column: 'comment', value: 'TEXT'},
+            {column: 'date', value: 'VARCHAR(255)'}
+        ]
     },
     {
         name: 'transport_round',
-        attributes: {
-            id: 'INTEGER',
-            number: 'VARCHAR(255)',
-            status: 'VARCHAR(255)',
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER'},
+            {column: 'number', value: 'VARCHAR(255)'},
+            {column: 'status', value: 'VARCHAR(255)'},
+        ]
     },
     {
         name: 'transport_round_line',
-        attributes: {
-            order_id: 'INTEGER',
-            contact_name: 'VARCHAR(255)',
-            contact_address: 'VARCHAR(255)',
-            request_type: 'VARCHAR(255)',
-            priority: 'INTEGER',
-            estimated_at: 'VARCHAR(255)',
-            expected_at: 'VARCHAR(255)',
-        }
+        schema: [
+            {column: 'order_id', value: 'INTEGER'},
+            {column: 'contact_name', value: 'VARCHAR(255)'},
+            {column: 'contact_address', value: 'VARCHAR(255)'},
+            {column: 'request_type', value: 'VARCHAR(255)'},
+            {column: 'priority', value: 'INTEGER'},
+            {column: 'estimated_at', value: 'VARCHAR(255)'},
+            {column: 'expected_at', value: 'VARCHAR(255)'},
+        ]
     },
     {
         name: 'dispatch_type',
-        keepOnConnection: true,
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            label: 'VARCHAR(255)',
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'label', value: 'VARCHAR(255)'},
+        ]
+    },
+    {
+        name: 'type',
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'category', value: 'VARCHAR(255)'}
+        ]
+    },
+    {
+        name: 'supplier',
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'code', value: 'VARCHAR(255)'}
+        ]
+    },
+    {
+        name: 'reference_article',
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'label', value: 'VARCHAR(255)'},
+        ]
+    },
+    {
+        name: 'supplier_reference',
+        schema: [
+            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+        ]
     },
     {
         name: 'user',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            username: 'VARCHAR(255)',
-        }
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'username', value: 'VARCHAR(255)'},
+        ]
     },
     {
         name: 'reference',
-        attributes: {
-            reference: "VARCHAR(255)",
-            quantity: "INTEGER",
-            outFormatEquipment: "VARCHAR(255)",
-            manufacturerCode: "VARCHAR(255)",
-            sealingNumber: "VARCHAR(255)",
-            serialNumber: "VARCHAR(255)",
-            batchNumber: "VARCHAR(255)",
-            width: "REAL",
-            height: "REAL",
-            length: "REAL",
-            volume: "REAL",
-            weight: "REAL",
-            adr: "INTEGER",
-            associatedDocumentTypes: "TEXT",
-            comment: "TEXT",
-            photos: "TEXT",
-            logisticUnit: "VARCHAR(255)",
-        }
+        schema: [
+            {column: 'reference', value: 'VARCHAR(255)'},
+            {column: 'quantity', value: 'INTEGER'},
+            {column: 'outFormatEquipment', value: 'VARCHAR(255)'},
+            {column: 'manufacturerCode', value: 'VARCHAR(255)'},
+            {column: 'sealingNumber', value: 'VARCHAR(255)'},
+            {column: 'serialNumber', value: 'VARCHAR(255)'},
+            {column: 'batchNumber', value: 'VARCHAR(255)'},
+            {column: 'width', value: 'REAL'},
+            {column: 'height', value: 'REAL'},
+            {column: 'length', value: 'REAL'},
+            {column: 'volume', value: 'REAL'},
+            {column: 'weight', value: 'REAL'},
+            {column: 'adr', value: 'INTEGER'},
+            {column: 'associatedDocumentTypes', value: 'TEXT'},
+            {column: 'comment', value: 'TEXT'},
+            {column: 'photos', value: 'TEXT'},
+            {column: 'logisticUnit', value: 'VARCHAR(255)'},
+        ]
     },
     {
         name: 'project',
-        attributes: {
-            id: 'INTEGER PRIMARY KEY',
-            code: 'VARCHAR(255)',
-        },
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'code', value: 'VARCHAR(255)'},
+        ]
     },
+    {
+        name: 'inventory_mission',
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'mission_start', value: 'VARCHAR(255)'},
+            {column: 'mission_end', value: 'VARCHAR(255)'},
+            {column: 'mission_name', value: 'VARCHAR(255)'},
+            {column: 'type', value: 'VARCHAR(255)'},
+        ]
+    },
+    {
+        name: 'inventory_location_zone',
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'location_id', value: 'INTEGER'},
+            {column: 'location_label', value: 'VARCHAR(255)'},
+            {column: 'mission_id', value: 'INTEGER'},
+            {column: 'zone_id', value: 'INTEGER'},
+            {column: 'zone_label', value: 'VARCHAR(255)'},
+            {column: 'done', value: 'INTEGER'},
+        ]
+    }
 ];

@@ -5,7 +5,9 @@ import {ToastController} from '@ionic/angular';
 import {ToastOptions} from '@ionic/core';
 
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class ToastService {
 
     public static readonly LONG_DURATION: number = 5000;

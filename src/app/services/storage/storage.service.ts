@@ -5,7 +5,9 @@ import {mergeMap, map} from 'rxjs/operators';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class StorageService {
 
     private static FIELD_TYPES_TO_KEEP = ['displayedCreate', 'requiredCreate'];
@@ -135,7 +137,7 @@ export class StorageService {
     }
 
     public incrementCounter(key: StorageKeyEnum): Observable<void> {
-        // TODO adrien check fonctionnel ?
+        // TODO WIIS-7970 check fonctionnel ?
         return this.getString(StorageKeyEnum.COUNTERS).pipe(
             map((countersStr) => countersStr || {}),
             mergeMap((counters: any) => {
@@ -147,7 +149,7 @@ export class StorageService {
 
     public getCounter(key: StorageKeyEnum): Observable<number> {
 
-        // TODO adrien check fonctionnel ? enlever le any
+        // TODO WIIS-7970 check fonctionnel ? enlever le any
         return this.getString(StorageKeyEnum.COUNTERS).pipe(
             map((counters: any) => counters[key]),
             map((counter) => Number(counter) || 0)

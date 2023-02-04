@@ -7,12 +7,11 @@ import {mergeMap} from 'rxjs/operators';
 import {StorageService} from '@app/services/storage/storage.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
-// import {PageComponent} from '@pages/page.component'; // TODO adrien
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
-// import {localAddress} from '../../dev-credentials.json'; // TODO adrien
+// import {localAddress} from '../../dev-credentials.json'; // TODO WIIS-7970
 import {environment} from "@environments/environment";
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
-// import {NotificationService} from '@app/services/notification.service'; // TODO adrien
+// import {NotificationService} from '@app/services/notification.service'; // TODO WIIS-7970
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {NetworkService} from '@app/services/network.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
@@ -35,16 +34,16 @@ export class ParamsPage implements ViewWillEnter, ViewWillLeave {
                        private loadingService: LoadingService,
                        private sqliteService: SqliteService,
                        private toastService: ToastService,
-                       // private notificationService: NotificationService, // TODO adrien
+                       // private notificationService: NotificationService, // TODO WIIS-7970
                        private networkService: NetworkService,
                        private navService: NavService) {
         this.URL = '';
     }
 
     public ionViewWillEnter(): void {
-        // this.notificationService.userIsLogged = false; // TODO adrien
+        // this.notificationService.userIsLogged = false; // TODO WIIS-7970
         this.serverUrlSubscription = this.storageService.getString(StorageKeyEnum.URL_SERVER).subscribe((baseUrl) => {
-            // TODO adrien
+            // TODO WIIS-7970
             // if(!environment.production && localAddress && !baseUrl) {
             //     this.URL = localAddress;
             //     this.registerURL();
@@ -78,7 +77,7 @@ export class ParamsPage implements ViewWillEnter, ViewWillLeave {
                                 : throwError(() => new Error('invalid-url'))
                         )),
                         mergeMap(() => this.storageService.setItem(StorageKeyEnum.URL_SERVER, this.URL)),
-                        // mergeMap(() => this.sqliteService.resetDataBase(true)), // TODO adrien
+                        mergeMap(() => this.sqliteService.resetDataBase(true)),
                         mergeMap(() => this.toastService.presentToast('URL enregistrée'))
                     )
             })

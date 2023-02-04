@@ -1,7 +1,9 @@
 import {Injectable} from '@angular/core';
 import {Network} from '@capacitor/network';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class NetworkService {
 
     public async hasNetwork(): Promise<boolean> {

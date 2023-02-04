@@ -5,7 +5,9 @@ import {Router, NavigationStart} from '@angular/router';
 import {LoadingController} from '@ionic/angular';
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class NavService {
     private stack: Array<{ path: string, params: any }> = [];
     private justNavigated: boolean;

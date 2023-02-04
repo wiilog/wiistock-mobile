@@ -2,7 +2,9 @@ import {Injectable} from '@angular/core';
 import {Observable, Subject} from 'rxjs';
 
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class MainHeaderService {
 
     private readonly _navigationChange$: Subject<any>;

@@ -11,7 +11,9 @@ const GET = 'get';
 const POST = 'post';
 const DELETE = 'delete';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class ApiService {
     public static readonly CHECK_NOMADE_VERSIONS = {method: GET, service: '/nomade-versions'};
     public static readonly GET_PING = {method: GET, service: '/ping'};

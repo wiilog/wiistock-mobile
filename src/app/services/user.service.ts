@@ -3,15 +3,17 @@ import {zip} from 'rxjs';
 import {StorageService} from '@app/services/storage/storage.service';
 import {NavService} from "@app/services/nav/nav.service";
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
-// import {MainHeaderService} from "@app/common/services/main-header.service"; // TODO adrien
+import {MainHeaderService} from '@app/services/main-header.service';
 import {mergeMap} from 'rxjs/operators';
 import {LoadingService} from '@app/services/loading.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
-// import {FCM} from 'cordova-plugin-fcm-with-dependecy-updated/ionic/ngx'; // TODO adrien
+// import {FCM} from 'cordova-plugin-fcm-with-dependecy-updated/ionic/ngx'; // TODO WIIS-7970
 
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class UserService {
 
     public static readonly MAX_PSEUDO_LENGTH: number = 35;
@@ -22,9 +24,8 @@ export class UserService {
                        private sqliteService: SqliteService,
                        private loadingService: LoadingService,
                        private navService: NavService,
-                       // private fcm: FCM,  // TODO adrien
-                       // private mainHeaderService: MainHeaderService  // TODO adrien
-    ) {
+                       // private fcm: FCM,  // TODO WIIS-7970
+                       private mainHeaderService: MainHeaderService) {
         this.logoutOnProgress = false;
     }
 
@@ -32,9 +33,9 @@ export class UserService {
         if (!this.logoutOnProgress) {
             this.logoutOnProgress = true;
             zip(
-                // this.sqliteService.resetDataBase(), // TODO adrien
+                this.sqliteService.resetDataBase(),
                 this.storageService.clearStorage([StorageKeyEnum.URL_SERVER]),
-                // this.fcm.deleteInstanceId()
+                // this.fcm.deleteInstanceId() // TODO WIIS-7970
             )
                 .pipe(
                     mergeMap(() => this.navService.setRoot(NavPathEnum.LOGIN, {autoConnect: false})),
@@ -42,7 +43,7 @@ export class UserService {
                 )
                 .subscribe(() => {
                     this.logoutOnProgress = false;
-                    // this.mainHeaderService.emitNavigationChange(); // TODO adrien
+                    this.mainHeaderService.emitNavigationChange();
                 });
         }
     }

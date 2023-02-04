@@ -3,7 +3,7 @@ import {Platform} from '@ionic/angular';
 import {ScssHelperService} from '@app/services/scss-helper.service';
 import {from} from 'rxjs';
 import {NavService} from '@app/services/nav/nav.service';
-import {mergeMap} from 'rxjs/operators';
+import {mergeMap, tap} from 'rxjs/operators';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {StorageService} from '@app/services/storage/storage.service';
 import {ServerImageService} from '@app/services/server-image/server-image.service';

@@ -3047,6 +3047,11 @@ colors@1.4.0:
   resolved "https://registry.yarnpkg.com/colors/-/colors-1.4.0.tgz#c50491479d4c1bdaed2c9ced32cf7c7dc2360f78"
   integrity sha512-a+UqTh4kgZg/SlGvfbzDHpgRu7AAQOmmqRHJnxhRZICKFUT91brVhNNt58CMWU9PsBbv3PDCZUHbVxuDiH2mtA==
 
+com-darryncampbell-cordova-plugin-intent@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/com-darryncampbell-cordova-plugin-intent/-/com-darryncampbell-cordova-plugin-intent-2.2.0.tgz#ee196bc1e02ac040fbf20cc5b98bd26dbd968785"
+  integrity sha512-4ESoeYghE9GGuxKi4pnG+6CUJyYjS2j1tOmvlXXEM/9d5aBU47EpWbKKU1gjcfZFM4KCUbyba1NX6xNcH/L/wA==
+
 combined-stream@^1.0.8:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/combined-stream/-/combined-stream-1.0.8.tgz#c3d45a8b34fd730631a110a8a2520682b31d5a7f"

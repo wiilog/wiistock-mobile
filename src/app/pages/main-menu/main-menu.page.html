@@ -1,0 +1,15 @@
+<div scroll-y="true"
+     class="page-content"
+     *ngIf="!loading">
+    <wii-menu *ngIf="menuConfig" [config]="menuConfig"></wii-menu>
+</div>
+
+<ion-fab *ngIf="!loading"
+         vertical="end"
+         horizontal="bottom"
+         slot="fixed">
+    <ion-fab-button color="primary"
+                    (click)="synchronise()">
+        <ion-icon class="big-icon" name="refresh"></ion-icon>
+    </ion-fab-button>
+</ion-fab>

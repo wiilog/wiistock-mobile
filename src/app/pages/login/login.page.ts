@@ -1,26 +1,26 @@
 import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {ApiService} from '@app/services/api.service';
 import {ToastService} from '@app/services/toast.service';
-import {Observable, of, Subscription} from 'rxjs';
+import {Observable, of, Subscription, zip} from 'rxjs';
 import {filter, mergeMap, map, take, tap} from 'rxjs/operators';
 import {StorageService} from '@app/services/storage/storage.service';
 import {AppVersionService} from '@app/services/app-version.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
-// import {BarcodeScannerManagerService} from '@app/common/services/barcode-scanner-manager.service'; TODO adrien
 import {NavService} from '@app/services/nav/nav.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {environment} from '@environments/environment';
-// import {autoConnect, loginKey} from '../../dev-credentials.json'; // TODO adrien
+// import {autoConnect, loginKey} from '../../dev-credentials.json'; // TODO WIIS-7970
 import {ServerImageKeyEnum} from '@app/services/server-image/server-image-key.enum';
-import {ServerImageComponent} from '@app/modules/common/components/server-image/server-image.component';
-// import {NotificationService} from '@app/common/services/notification.service'; // TODO adrien
+import {ServerImageComponent} from '@common/components/server-image/server-image.component';
+// import {NotificationService} from '@app/common/services/notification.service'; // TODO WIIS-7970
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
-// import {ILocalNotification} from '@ionic-native/local-notifications'; // TODO adrien
+// import {ILocalNotification} from '@ionic-native/local-notifications'; // TODO WIIS-7970
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {UserService} from '@app/services/user.service';
 import {NetworkService} from '@app/services/network.service';
 import {SplashScreen} from "@capacitor/splash-screen";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
 
 
 @Component({
@@ -44,7 +44,7 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
 
     public apkUrl: string;
 
-    // public tappedNotification: ILocalNotification; // TODO adrien
+    // public tappedNotification: ILocalNotification; // TODO WIIS-7970
 
     public loggedUser$: Observable<string|null>;
     public pendingDeposits: boolean = false;
@@ -64,12 +64,12 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
                        private router: Router,
 
                        private changeDetector: ChangeDetectorRef,
-                       // private barcodeScannerManager: BarcodeScannerManagerService, // TODO adrien
+                       private barcodeScannerManager: BarcodeScannerManagerService,
                        private sqliteService: SqliteService,
                        private activatedRoute: ActivatedRoute,
                        private appVersionService: AppVersionService,
                        private storageService: StorageService,
-                       // private notificationService: NotificationService, // TODO adrien
+                       // private notificationService: NotificationService, // TODO WIIS-7970
                        private navService: NavService) {
         this.loading = true;
         this.appVersionInvalid = false;
@@ -80,29 +80,29 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
         this.storageService.getString(StorageKeyEnum.OPERATOR_ID).pipe(
             take(1),
             filter(Boolean),
-            map(operator => ({params: {operator}})),
-            mergeMap(params => this.apiService.requestApi(ApiService.GET_PREVIOUS_OPERATOR_MOVEMENTS, params))
-        ).subscribe(data => {
-            this.pendingDeposits = data.movements.length > 0;
+            mergeMap((operator) => zip(
+                this.apiService.requestApi(ApiService.GET_PREVIOUS_OPERATOR_MOVEMENTS, {params: {operator}}),
+                this.sqliteService.findBy('mouvement_traca', [`type LIKE 'prise'`, `finished = 0`])
+            ))
+        ).subscribe(([apiData, localData]) => {
+            this.pendingDeposits = apiData.movements.length > 0 || localData.length > 0;
         });
 
         if(this.serverImageLogo) {
             this.serverImageLogo.reload();
         }
-        // const autoConnect = this.currentNavParams.get('autoConnect'); // TODO adrien
-        // this.wantToAutoConnect = (typeof autoConnect === 'boolean' ? autoConnect : true); // TODO adrien
+        // const autoConnect = this.currentNavParams.get('autoConnect'); // TODO WIIS-7970
+        // this.wantToAutoConnect = (typeof autoConnect === 'boolean' ? autoConnect : true); // TODO WIIS-7970
 
-        // this.barcodeScannerManager.registerZebraBroadcastReceiver(); // TODO adrien
-        // this.notificationService.userIsLogged = false; // TODO adrien
+        this.barcodeScannerManager.registerZebraBroadcastReceiver();
+        // this.notificationService.userIsLogged = false; // TODO WIIS-7970
 
         this.loggedUser$ = this.storageService.getString(StorageKeyEnum.OPERATOR, UserService.MAX_PSEUDO_LENGTH);
 
-        /** TODO adrien
         this.unsubscribeZebra();
-        this.zebraSubscription = this.barcodeScannerManager
-            .zebraScan$
+        this.zebraSubscription = this.barcodeScannerManager.zebraScan$
             .pipe(
-                filter((barCode: string) => (
+                filter((barCode: string) => Boolean(
                     barCode
                     && barCode.length > 1
                     && !this.loading
@@ -115,7 +115,7 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
             .subscribe((barCode: string) => {
                 this.fillForm(barCode);
             });
-*/
+
         this.urlServerSubscription = this.storageService.getString(StorageKeyEnum.URL_SERVER).subscribe((url) => {
             if(url) {
                 this.appVersionSubscription = this.appVersionService.isAvailableVersion()
@@ -147,23 +147,13 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
             }
         });
 
-        /* TODO adrien
+        /* TODO WIIS-7970
         this.notificationSubscription = this.notificationService
             .$localNotification
             .subscribe((notification) => {
                 this.tappedNotification = notification;
             });
 */
-        const where = [
-            `type LIKE 'prise'`,
-            `finished = 0`,
-        ];
-
-        /** TODO adrien
-        this.sqliteService.findBy('mouvement_traca', where).subscribe(result => {
-            this.pendingDeposits = result;
-        })
-         */
     }
 
     public ionViewWillLeave(): void {
@@ -199,14 +189,13 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
                             if(success) {
                                 const {apiKey, rights, userId, username, notificationChannels, parameters, fieldsParam} = data;
 
-                                // return this.sqliteService.resetDataBase() TODO adrien
-                                return of(undefined)
+                                return this.sqliteService.resetDataBase()
                                     .pipe(
                                         mergeMap(() => this.storageService.initStorage(apiKey, username, userId, rights, notificationChannels, parameters, fieldsParam)),
                                         tap(() => {
                                             this.loginKey = '';
                                         }),
-                                        /* TODO adrien
+                                        /* TODO WIIS-7970
                                         mergeMap(() => this.notificationService.initialize()),
                                         mergeMap((notificationOptions) => {
                                             this.notificationService.userIsLogged = true;
@@ -223,17 +212,18 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
                             }
                         })
                     )
-                    .subscribe(
-                        ({success}) => {
+                    .subscribe({
+                        next: ({success}) => {
                             this.finishLoading();
-                            if(!success) {
+                            if (!success) {
                                 this.toastService.presentToast('Identifiants incorrects.');
                             }
                         },
-                        () => {
+                        error: () => {
                             this.finishLoading();
                             this.toastService.presentToast('Un problème est survenu, veuillez vérifier la connexion, vos identifiants et l\'URL saisie dans les paramètres', {duration: ToastService.LONG_DURATION});
-                        });
+                        }
+                    });
             }
             else {
                 this.toastService.presentToast('Vous devez être connecté à internet pour vous authentifier');
@@ -271,7 +261,7 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
     }
 
     private autoLoginIfAllowed() {
-        /* TODO adrien
+        /* TODO WIIS-7970
         if(!environment.production
             && autoConnect
             && this.wantToAutoConnect) {
