@@ -1,0 +1,23 @@
+@import "theme/variables";
+
+:host {
+    .button-container {
+        display: flex;
+
+        ion-button {
+            margin: calc(#{$spacer}) / 2;
+            width: calc(50% - #{$spacer} / 2);
+        }
+    }
+
+    .only-button-container {
+        ion-button {
+            width: 100%;
+            --border-width: 2px;
+            --border-style: solid;
+            --border-color: $primary;
+            --background: #FFFFFF;
+            --color: $primary;
+        }
+    }
+}

@@ -180,7 +180,8 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
 
         const actions = [];
 
-        if (rights.tracking) {
+        // TODO WIIS-7970 remove false
+        if (false && rights.tracking) {
             const action = () => {
                 this.navService.push(NavPathEnum.TRACKING_MENU, {
                     fromStock: false
@@ -206,7 +207,8 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
             actions.push(action);
         }
 
-        if (rights.demande) {
+        // TODO WIIS-7970 remove false
+        if (false && rights.demande) {
             const action = () => {
                 this.navService.push(NavPathEnum.DEMANDE_MENU);
             };
@@ -219,7 +221,8 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
             actions.push(action);
         }
 
-        if (rights.track) {
+        // TODO WIIS-7970 remove false
+        if (false && rights.track) {
             const action = () => {
                 this.navService.push(NavPathEnum.TRANSPORT_ROUND_LIST);
             };

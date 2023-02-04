@@ -1,0 +1,13 @@
+<wii-form-field [label]="label" [inline]="inline">
+    <div class="files-wrapper" field>
+        <ng-container *ngIf="value.length === 0">Aucune pièce jointe</ng-container>
+        <ng-container *ngFor="let fileLink of value">
+            <button (click)="viewImage(fileLink.href, fileLink.label)">
+                <div class="link-wrapper">{{ fileLink.label }}</div>
+                <wii-icon name="paperclip.svg"
+                          color="medium">
+                </wii-icon>
+            </button>
+        </ng-container>
+    </div>
+</wii-form-field>

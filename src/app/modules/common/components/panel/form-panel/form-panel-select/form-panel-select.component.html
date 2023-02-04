@@ -1,0 +1,31 @@
+<wii-form-field [label]="label"
+                [required]="inputConfig.required"
+                [inline]="inline"
+                [disabled]="inputConfig.disabled">
+    <div class="wrapper" [class.field-blocked]="inline === false" field>
+        <wii-search-item #searchComponent
+                         [type]="inputConfig.searchType"
+                         (itemChange)="onItemSelect($event)"
+                         (itemsLoaded)="initText()"
+                         [requestParams]="inputConfig.requestParams"
+                         [elements]="inputConfig.elements"
+                         [filterItem]="inputConfig.filterItem"
+                         [isMultiple]="inputConfig.isMultiple || false"
+                         hidden>
+        </wii-search-item>
+        <div>{{ text }}</div>
+        <wii-icon name="search.svg"
+                  color="primary"
+                  class="search-icon"
+                  (action)="onSearchClick()">
+        </wii-icon>
+        <ng-container add-on>
+            <wii-barcode-scanner #barcodeScanner
+                                 *ngIf="inputConfig.barcodeScanner"
+                                 class="inline"
+                                 (add)="onBarcodeScanned($event[0])">
+            </wii-barcode-scanner>
+        </ng-container>
+    </div>
+</wii-form-field>
+

@@ -1,0 +1,44 @@
+<div class="tools"
+     *ngIf="mode === ONLY_SCAN_MODE || mode === WITH_MANUAL_MODE || mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE || mode === ONLY_SEARCH_MODE || mode === TOOL_SELECTED_LABEL">
+    <wii-icon *ngIf="mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE || mode === ONLY_SEARCH_MODE"
+              name="search.svg"
+              color="primary"
+              class="tools-icon"
+              (action)="onSearchClick()">
+    </wii-icon>
+    <wii-icon *ngIf="mode === TOOLS_FULL_MODE"
+              name="plus.svg"
+              color="primary"
+              class="tools-icon"
+              (action)="onPenClick()">
+    </wii-icon>
+
+    <wii-icon name="scan-photo.svg"
+              color="primary"
+              class="tools-icon"
+              *ngIf="mode === ONLY_SCAN_MODE || mode === WITH_MANUAL_MODE || mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE || mode === TOOL_SELECTED_LABEL"
+              (action)="scan()">
+    </wii-icon>
+
+    <ng-container *ngIf="mode === TOOL_SELECTED_LABEL && selectedLabel$">
+        <div class="tools-selected-label ion-activatable ripple-parent"
+             (click)="onSelectedLabelClick()"
+             *ngIf="selectedLabel$ | async as selectedLabelValue">
+            <span class="selected-label-content">{{ selectedLabelValue }}</span>
+            <span class="selected-label-remove">&times;</span>
+            <ion-ripple-effect></ion-ripple-effect>
+        </div>
+    </ng-container>
+</div>
+
+<div class="input-manual"
+           *ngIf="mode === WITH_MANUAL_MODE || mode === ONLY_MANUAL_MODE">
+    <ion-item>
+        <ion-input type="text" placeholder="Entrée manuelle..." [(ngModel)]="input"></ion-input>
+        <wii-icon name="plus.svg"
+                  color="success"
+                  class="plus-icon"
+                  (action)="addManually()">
+        </wii-icon>
+    </ion-item>
+</div>

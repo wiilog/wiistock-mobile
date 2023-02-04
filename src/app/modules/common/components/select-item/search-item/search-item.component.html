@@ -1,0 +1,92 @@
+<ion-card>
+    <ion-card-content>
+        <ion-item class="without-label">
+            <ionic-selectable
+                #itemComponent
+                closeButtonText="Fermer"
+                [(ngModel)]="_item"
+                [isMultiple]="isMultiple || false"
+                [items]="dbItemsForList"
+                [itemValueField]="config[smartType]['valueField']"
+                [itemTextField]="config[smartType]['label']"
+                [placeholder]="config[smartType]['placeholder']"
+                searchPlaceholder="Rechercher"
+                [canSearch]="true"
+                [hasInfiniteScroll]="true"
+                (onSearch)="onItemSearch($event)"
+                (onChange)="onItemChange($event)"
+                (onInfiniteScroll)="onInfiniteScroll()">
+                <ng-template ionicSelectableSearchFailTemplate>
+                </ng-template>
+                <ng-template ionicSelectableItemTemplate
+                             let-article="item"
+                             *ngIf="config[smartType]['templateIndex'] === 'article-prepa'">
+                    <div class="ionic-selectable-item-wrapper">
+                        <p>Article {{article.barcode}}</p>
+                        <p *ngIf="article.location !== 'null'">Emplacement : {{article.location}}</p>
+                        <p *ngIf="article.quantity">Quantité restante : {{article.quantity}}</p>
+                        <p *ngIf="article.management">
+                            <span *ngIf="article.management === 'FIFO'">Date d'entrée en stock : </span>
+                            <span *ngIf="article.management === 'FEFO'">Date d'expiration : </span>
+                            <span *ngIf="article.management !== 'FEFO' && article.management !== 'FIFO'">Date : </span>
+                            {{article.management_date}}
+                        </p>
+                    </div>
+                </ng-template>
+                <ng-template ionicSelectableItemTemplate
+                             let-article="item"
+                             *ngIf="config[smartType]['templateIndex'] === 'article-inventory'">
+                    <div class="ionic-selectable-item-wrapper">
+                        <p>{{
+                                !this.hasParam('logistic_unit_code') &&
+                                article.logistic_unit_code ? 'Unité Logistique' : 'Référence'
+                            }} :
+                            {{
+                                !this.hasParam('logistic_unit_code') &&
+                                article.logistic_unit_code ? article.logistic_unit_code : article.reference
+                            }}</p>
+                        <p>{{
+                                !this.hasParam('logistic_unit_code') &&
+                                article.logistic_unit_code ? 'Nature' : 'Code barre'
+                            }} :
+                            {{
+                                !this.hasParam('logistic_unit_code') &&
+                                article.logistic_unit_code ? article.logistic_unit_nature : article.barcode
+                            }}</p>
+                    </div>
+                </ng-template>
+                <ng-template ionicSelectableItemTemplate
+                             let-article="item"
+                             *ngIf="config[smartType]['templateIndex'] === 'article-demande'">
+                    <div class="ionic-selectable-item-wrapper">
+                        <p>Article : {{article.reference}}</p>
+                        <p>Libellé : {{article.label}}</p>
+                        <p>Code barre : {{article.bar_code}}</p>
+                        <p *ngIf="article.available_quantity">Quantité disponible : {{article.available_quantity}}</p>
+                        <p *ngIf="article.location_label">Emplacement : {{article.location_label}}</p>
+                        <p>
+                            Gestion : {{
+                                article.type_quantity === 'reference' ? 'Par référence' :
+                                article.type_quantity === 'article' ? 'Par article' :
+                                article.type_quantity
+                            }}
+                        </p>
+                    </div>
+                </ng-template>
+                <ng-template ionicSelectableItemTemplate
+                             let-item="item"
+                             *ngIf="config[smartType]['templateIndex'] === 'default'">
+                    {{ item[config[smartType]['label']] }}
+                </ng-template>
+                <ng-template ionicSelectableItemTemplate
+                             let-article="item"
+                             *ngIf="config[smartType]['templateIndex'] === 'collectable-articles'">
+                    <div class="ionic-selectable-item-wrapper">
+                        <p>Barcode : {{article.barcode}}</p>
+                        <p>Libellé : {{article.label}}</p>
+                    </div>
+                </ng-template>
+            </ionic-selectable>
+        </ion-item>
+    </ion-card-content>
+</ion-card>

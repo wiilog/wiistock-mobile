@@ -1,0 +1,12 @@
+<wii-form-field [label]="label"
+                [required]="inputConfig.required"
+                [inline]="inline">
+    <ng-container field>
+        <ion-toggle #inputComponent="ngModel"
+                    [name]="name"
+                    [(ngModel)]="value"
+                    (ngModelChange)="onValueChange($event)"
+                    [required]="inputConfig.required || false">
+        </ion-toggle>
+    </ng-container>
+</wii-form-field>

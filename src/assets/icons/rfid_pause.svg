@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #030f4b;
+      }
+    </style>
+  </defs>
+  <g id="croix">
+    <g id="Tracé_89" data-name="Tracé 89">
+      <path class="cls-1" d="m29.73,98.55c-4.42,0-8-3.58-8-8V9.45c0-4.42,3.58-8,8-8s8,3.58,8,8v81.1c0,4.42-3.58,8-8,8Z"/>
+    </g>
+  </g>
+  <path class="cls-1" d="m70.27,98.55c-4.42,0-8-3.58-8-8V9.45c0-4.42,3.58-8,8-8s8,3.58,8,8v81.1c0,4.42-3.58,8-8,8Z"/>
+</svg>

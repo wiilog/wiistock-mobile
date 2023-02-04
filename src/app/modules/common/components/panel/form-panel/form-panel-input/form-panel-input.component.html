@@ -1,0 +1,17 @@
+<wii-form-field [label]="label"
+                [required]="inputConfig.required"
+                [inline]="inline">
+    <ng-container field>
+        <ion-input #inputComponent="ngModel"
+                   [name]="name"
+                   [(ngModel)]="value"
+                   (ngModelChange)="onValueChange($event)"
+                   [type]="inputConfig.type"
+                   [required]="inputConfig.required || false"
+                   [disabled]="inputConfig.disabled || false"
+                   [maxlength]="inputConfig.maxLength || null"
+                   [min]="inputConfig.min"
+                   [max]="inputConfig.max">
+        </ion-input>
+    </ng-container>
+</wii-form-field>

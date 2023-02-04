@@ -1,0 +1,44 @@
+@import "theme/variables";
+
+:host {
+    display: block;
+
+    wii-panel-header {
+        margin: $spacerMin;
+    }
+
+    .actions-container {
+        display: flex;
+        flex-wrap: nowrap;
+
+        ion-button {
+            --padding-start: .8em;
+            --padding-end: .8em;
+
+            flex: 1;
+            text-transform: none;
+            font-size: 13px;
+            letter-spacing: normal;
+
+            wii-icon {
+                width: 18px;
+                margin-right: $spacer;
+            }
+        }
+    }
+
+    wii-list-panel-item {
+        &.sub-list {
+            margin-right: $spacer * 1.2;
+            margin-left: $spacer * 1.2;
+        }
+
+        &.selected {
+            border: 2px solid #D73353 !important;
+        }
+
+        &:not(:last-child) {
+            margin-bottom: .35rem;
+        }
+    }
+}

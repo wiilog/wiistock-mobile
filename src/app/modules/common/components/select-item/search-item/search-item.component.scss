@@ -1,0 +1,11 @@
+@import "theme/variables";
+
+.ionic-selectable-item-wrapper {
+    font-size: $normalFontSize;
+    margin-top: $spacer;
+    margin-bottom: $spacer;
+
+    p {
+        margin: 0
+    }
+}

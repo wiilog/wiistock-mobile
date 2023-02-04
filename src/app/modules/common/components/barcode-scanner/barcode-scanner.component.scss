@@ -1,0 +1,72 @@
+@import "theme/variables";
+
+:host {
+    padding: 0;
+    display: block;
+
+    &:not(.inline) {
+        margin-bottom: $spacer;
+    }
+
+    .tools + .input-manual {
+        margin-top: $spacer;
+    }
+
+    .input-manual {
+        padding: 0 $spacerMin;
+    }
+
+    ion-item {
+        margin-bottom: $spacerMin !important;
+        ion-input {
+            font-size: $normalFontSize;
+        }
+    }
+
+    .plus-icon {
+        margin-left: 5px;
+        width: 30px;
+        height: 30px;
+        z-index: 100;
+    }
+
+    .tools {
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+
+        .tools-icon {
+            height: 2.4rem;
+            display: inline-block;
+        }
+
+        .tools-selected-label {
+            max-width: 60%;
+            margin-left: calc(#{$spacer} / 2);
+        }
+    }
+
+    .tools,
+    .selected-label-container {
+        .tools-selected-label {
+            display: flex;
+            align-items: center;
+            background-color: $medium;
+            color: $lightGrey;
+            padding: calc(#{$spacer} / 2);
+            border-radius: 25px;
+
+            .selected-label-content {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .selected-label-remove {
+                padding: 0 $spacerMin;
+                font-size: 18px;
+                line-height: 1;
+            }
+        }
+    }
+}

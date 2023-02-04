@@ -1,0 +1,23 @@
+<wii-form-field *ngIf="label else buttonOnly"
+                [label]="label"
+                [required]="inputConfig.required"
+                [inline]="inline">
+    <div class="button-container" add-on>
+        <ng-container *ngFor="let element of inputConfig.elements">
+            <ion-button [color]="value === element.id ? 'success' : 'primary'"
+                        (click)="onItemSelect(element)">
+                {{element.label}}
+            </ion-button>
+        </ng-container>
+    </div>
+</wii-form-field>
+<ng-template #buttonOnly>
+    <div class="only-button-container">
+        <ng-container *ngFor="let element of inputConfig.elements">
+            <ion-button (click)="onItemSelect(element)">
+                {{element.label}}
+            </ion-button>
+        </ng-container>
+    </div>
+</ng-template>
+

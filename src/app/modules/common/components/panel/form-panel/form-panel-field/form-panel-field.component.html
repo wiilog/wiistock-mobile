@@ -1,0 +1,10 @@
+<ion-item lines="none" [disabled]="disabled">
+    <ion-label color="medium"
+               [position]="inline === false ? 'stacked' : undefined">
+        {{label}}
+        <ng-container *ngIf="required">*</ng-container>
+    </ion-label>
+    <ng-content select="[field]"></ng-content>
+</ion-item>
+<ng-content select="[add-on]"></ng-content>
+

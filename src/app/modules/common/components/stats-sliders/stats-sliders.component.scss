@@ -1,0 +1,80 @@
+@import "theme/variables";
+
+$borderGutter: 20px;
+
+ion-slides {
+    padding-bottom: 30px;
+    background-color: white;
+    margin: calc(#{$spacer} / 2);
+}
+
+.menu-stats {
+    .number,
+    .label {
+        font-weight: 100;
+        color: $black;
+    }
+
+    .number {
+        font-size: 24px;
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
+
+    .label {
+        font-size: 16px;
+        margin-top: 5px;
+        margin-bottom: 10px;
+    }
+}
+.menu-stats-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    .menu-stats {
+        flex: 50%;
+        position: relative;
+
+        &:first-child:before,
+        &:first-child:after,
+        &:last-child:before,
+        &:last-child:after {
+            position: absolute;
+            background-color: #b7b7b7;
+            content: "";
+        }
+        &:before {
+            width: 1px;
+        }
+        &:after{
+            height: 1px;
+        }
+
+        &:first-child {
+            &:before {
+                right: 0;
+                top: $borderGutter;
+                bottom: $borderGutter;
+            }
+            &:after {
+                bottom: 0;
+                right: $borderGutter;
+                left: $borderGutter;
+            }
+        }
+
+        &:last-child {
+            &:before {
+                left: 0;
+                top: $borderGutter;
+                bottom: $borderGutter;
+            }
+            &:after {
+                top: 0;
+                right: $borderGutter;
+                left: $borderGutter;
+            }
+        }
+    }
+}

@@ -1,0 +1,31 @@
+<ion-slides pager="true">
+    <ion-slide *ngFor="let datum of data">
+        <ng-container *ngIf="datum.isSingleData">
+            <ng-container [ngTemplateOutlet]="singleDataTemplate"
+                          [ngTemplateOutletContext]="{datum: datum}"></ng-container>
+        </ng-container>
+
+        <ng-container *ngIf="!datum.isSingleData">
+            <ng-container [ngTemplateOutlet]="multipleDataTemplate"
+                          [ngTemplateOutletContext]="{data: datum}"></ng-container>
+        </ng-container>
+    </ion-slide>
+</ion-slides>
+
+<ng-template #singleDataTemplate
+             let-datum="datum">
+    <div class="menu-stats">
+        <p class="number" [class.text-danger]="datum.danger">{{ datum.counter }}</p>
+        <p class="label">{{ datum.label }}</p>
+    </div>
+</ng-template>
+
+<ng-template #multipleDataTemplate
+             let-data="data">
+    <div class="menu-stats-container">
+        <ng-container *ngFor="let datum of data">
+            <ng-container [ngTemplateOutlet]="singleDataTemplate"
+                          [ngTemplateOutletContext]="{datum: datum}"></ng-container>
+        </ng-container>
+    </div>
+</ng-template>

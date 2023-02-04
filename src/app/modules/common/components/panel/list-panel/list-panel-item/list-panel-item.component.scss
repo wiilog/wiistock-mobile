@@ -1,0 +1,101 @@
+@import "theme/variables";
+
+:host {
+    display: block;
+    position: relative;
+    background-color: $white;
+    padding: .5rem 1rem;
+    font-size: $normalFontSize;
+    border: none;
+    border-radius: $card-border-radius;
+    box-shadow: $card-box-shadow;
+
+    .badges-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: $spacerMin;
+        margin-bottom: $spacerMin;
+
+        .wii-badge {
+            &:first-child {
+                margin-left: 0;
+            }
+
+            &:last-child {
+                margin-right: 0;
+            }
+        }
+    }
+
+    .list-element-color {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 7px;
+        border-top-left-radius: $card-border-radius;
+        border-bottom-left-radius: $card-border-radius;
+    }
+
+    .list-element-wrapper {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+
+        .list-element-body-wrapper {
+            flex: 1;
+            .element-value {
+                word-break: break-word;
+                &.element-value-bold {
+                    font-weight: bold;
+                }
+            }
+        }
+
+        .list-element-icon {
+            padding-left: .5rem;
+            display: flex;
+            wii-icon, img {
+                height: 1.7rem;
+                width: 1.7rem;
+            }
+            ion-spinner * {
+                width: 25px;
+            }
+        }
+
+        .list-element-text {
+            padding-left: .5rem;
+            display: flex;
+            .element-value {
+                word-break: break-word;
+                &.element-value-bold {
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+
+    .list-element-disabled {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: rgba($primary, 15%);
+    }
+}
+
+ion-item-options {
+    ::ng-deep button {
+        border-radius: 5px;
+        font-weight: 700;
+        font-size: 15px;
+    }
+}
+
+::ng-deep ion-item {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}

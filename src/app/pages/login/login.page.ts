@@ -205,69 +205,71 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
                                             });
                                         }),
                                         */
-                                        map(() => ({success: true}))
-                                    )
-                            } else {
-                                return of({success: false})
-                            }
-                        })
-                    )
-                    .subscribe({
-                        next: ({success}) => {
-                            this.finishLoading();
-                            if (!success) {
-                                this.toastService.presentToast('Identifiants incorrects.');
-                            }
-                        },
-                        error: () => {
-                            this.finishLoading();
-                            this.toastService.presentToast('Un problème est survenu, veuillez vérifier la connexion, vos identifiants et l\'URL saisie dans les paramètres', {duration: ToastService.LONG_DURATION});
-                        }
-                    });
-            }
-            else {
-                this.toastService.presentToast('Vous devez être connecté à internet pour vous authentifier');
-            }
-        }
+                                // TODO WIIS-7970 remove
+                                mergeMap(() => this.navService.setRoot(NavPathEnum.MAIN_MENU)),
+                                map(() => ({success: true}))
+                            )
+                    } else {
+                        return of({success: false})
+                    }
+                })
+            )
+            .subscribe({
+                next: ({success}) => {
+                    this.finishLoading();
+                    if (!success) {
+                        this.toastService.presentToast('Identifiants incorrects.');
+                    }
+                },
+                error: () => {
+                    this.finishLoading();
+                    this.toastService.presentToast('Un problème est survenu, veuillez vérifier la connexion, vos identifiants et l\'URL saisie dans les paramètres', {duration: ToastService.LONG_DURATION});
+                }
+            });
     }
-
-    public goToParams(): void {
-        if(!this.loading) {
-            this.navService.push(NavPathEnum.PARAMS);
-        }
+    else {
+        this.toastService.presentToast('Vous devez être connecté à internet pour vous authentifier');
     }
+}
+}
 
-    public set loading(loading: boolean) {
-        this._loading = loading;
-        if(this._loading) {
-            SplashScreen.show();
-        } else {
-            SplashScreen.hide();
-        }
-    }
+public goToParams(): void {
+if(!this.loading) {
+    this.navService.push(NavPathEnum.PARAMS);
+}
+}
 
-    public get loading(): boolean {
-        return this._loading;
-    }
+public set loading(loading: boolean) {
+this._loading = loading;
+if(this._loading) {
+    SplashScreen.show();
+} else {
+    SplashScreen.hide();
+}
+}
 
-    public fillForm(key: string): void {
-        this.loginKey = key;
-        this.logForm();
-    }
+public get loading(): boolean {
+return this._loading;
+}
 
-    private finishLoading() {
-        this.loading = false;
-        this.changeDetector.detectChanges();
-    }
+public fillForm(key: string): void {
+this.loginKey = key;
+this.logForm();
+}
 
-    private autoLoginIfAllowed() {
-        /* TODO WIIS-7970
-        if(!environment.production
-            && autoConnect
-            && this.wantToAutoConnect) {
-            this.fillForm(loginKey);
-        }
-     */
+private finishLoading() {
+this.loading = false;
+this.changeDetector.detectChanges();
+}
+
+private autoLoginIfAllowed() {
+/* TODO WIIS-7970
+if(!environment.production
+    && autoConnect
+    && this.wantToAutoConnect) {
+    this.fillForm(loginKey);
+}
+*/
     }
 
     private unsubscribeZebra(): void {

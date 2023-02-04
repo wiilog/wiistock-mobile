@@ -60,6 +60,10 @@ export class StorageService {
 
     public updateRights(rights: { [name: string]: boolean }): Observable<any> {
         const rightKeys = Object.keys(rights);
+        console.log(rightKeys.map((key) => ({
+            key,
+            value: `${Number(Boolean(rights[key]))}`
+        })))
         return rightKeys.length > 0
             ? zip(...(rightKeys.map((key) => from(Preferences.set({
                 key,
@@ -123,6 +127,7 @@ export class StorageService {
 
     public getRight(rightName: string): Observable<boolean> {
         return from(Preferences.get({key: rightName})).pipe(
+            map(({value}) => value),
             map(Number),
             map(Boolean)
         );

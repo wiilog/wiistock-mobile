@@ -1,0 +1,22 @@
+@import "theme/variables";
+
+:host {
+    .add-camera {
+        width: 30px;
+        height: 30px;
+        display: inline-block;
+    }
+
+    .camera-image-container {
+        flex: 1;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+
+        .camera-image {
+            width: 45%;
+            padding: calc(#{$spacerMin} / 2);
+            display: inline-block;
+        }
+    }
+}

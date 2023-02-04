@@ -1,0 +1,43 @@
+<div class="wrapper" scroll-y="true">
+    <wii-panel-header *ngIf="header"
+                      #formHeaderComponent
+                      class="form-header"
+                      (toggle)="header.onToggle && header.onToggle($event)"
+                      [leftIcon]="header.leftIcon"
+                      [title]="header.title"
+                      [subtitle]="header.subtitle"
+                      [collapsed]="header.collapsed"
+                      [info]="header.info"
+                      [rightIcons]="header.rightIcon"
+                      [rightBadge]="header.rightBadge"
+                      [leftBadge]="header.leftBadge">
+    </wii-panel-header>
+    <div class="list-wrapper {{ isForm ? 'is-form' : '' }}">
+        <ng-container *ngIf="detailPosition === 'top' && details">
+            <ng-template *ngFor="let detailsRow of details"
+                         wiiFormViewer
+                         [param]="detailsRow">
+            </ng-template>
+        </ng-container>
+
+        <ng-container *ngFor="let param of body">
+            <!--suppress JSUnusedGlobalSymbols -->
+            <ng-container *ngFor="let _ of getOccurrences(param); let last = last">
+                <ng-template #formElements
+                             wiiFormPanel
+                             [param]="param">
+                </ng-template>
+                <div class="add-multiple-occurrence"
+                     *ngIf="param.config?.multiple && last">
+                    <ion-button color="primary" (click)="addMultipleOccurrence(param)">+</ion-button>
+                </div>
+            </ng-container>
+        </ng-container>
+        <ng-container *ngIf="detailPosition === 'bottom' && details">
+            <ng-template *ngFor="let detailsRow of details"
+                         wiiFormViewer
+                         [param]="detailsRow">
+            </ng-template>
+        </ng-container>
+    </div>
+</div>

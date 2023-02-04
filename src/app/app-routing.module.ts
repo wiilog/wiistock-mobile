@@ -25,6 +25,11 @@ const routes: Routes = [
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('./pages/main-menu/main-menu.module').then(m => m.MainMenuPageModule)
     },
+    {
+        path: NavPathEnum.STOCK_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('./pages/stock/stock-menu/stock-menu.module').then(m => m.StockMenuPageModule)
+    },
 ];
 
 @NgModule({

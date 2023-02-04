@@ -1,0 +1,152 @@
+@import "theme/variables";
+
+:host {
+    display: block;
+    position: relative;
+
+    .list-element-color {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 5px;
+    }
+
+    &.light {
+        margin-bottom: 0 !important;
+        margin-top: 10px !important;
+    }
+
+    &.collapse {
+        transition: box-shadow 300ms ease-in-out;
+
+        .header-body {
+            overflow: hidden;
+            transition: max-height 300ms ease-in-out;
+        }
+    }
+
+    &:not(.transparent-panel-header) {
+        background-color: $white;
+        border: none;
+        border-radius: $card-border-radius;
+        box-shadow: $card-box-shadow;
+    }
+
+    .list-header-wrapper {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+
+        &.list-header-wrapper-gutter {
+            padding: 10px;
+        }
+
+        &.light {
+            background-color: $white;
+            margin-left: 5px;
+            margin-right: 5px;
+            box-shadow: 2px 2px 5px rgb(51 51 51 / 10%);
+        }
+
+        .header-body,
+        .list-header-icon {
+            margin-bottom: $spacerMin;
+            margin-top: $spacerMin;
+        }
+        .header-body {
+            flex: 1;
+            font-size: $normalFontSize;
+
+            & > .header-body-wrapper > *:not(:last-child) {
+                margin-bottom: .20rem;
+            }
+
+            .header-title, .header-subtitle, .header-info {
+                word-break: break-word;
+            }
+
+            .header-title {
+                font-weight: bold;
+            }
+
+            .header-info {
+                color: $primary;
+                font-size: 90%;
+                font-style: italic;
+            }
+        }
+
+        .list-header-icon {
+            padding-left: 1rem;
+            padding-right: 1rem;
+
+            wii-icon:not(.custom-size) {
+                width: 3rem;
+                height: 3rem;
+                display: inline-block;
+            }
+
+            &:not(.list-header-icon-horizontal) {
+                .list-header-icon-wrapper:not(:first-child):not(.custom-size) {
+                    text-align: center;
+
+                    wii-icon {
+                        margin-top: $spacer;
+                        width: 1.7rem;
+                        height: 1.7rem;
+                    }
+                }
+            }
+
+            &.list-header-icon-horizontal {
+                display: flex;
+            }
+
+            &:last-child {
+                margin-left: auto;
+            }
+        }
+    }
+}
+
+.inline-right-badge {
+    display: flex;
+    justify-content: space-between;
+
+    .badges-container {
+        margin-right: 14px;
+    }
+}
+
+.badges-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+
+    margin-top: $spacerMin;
+    margin-bottom: $spacerMin;
+}
+
+.header-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    width: 100%;
+
+    .header-button {
+        display: flex;
+        align-items: center;
+
+        background-color: $white;
+        border: none;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.04);
+        padding: 8px;
+
+        wii-icon {
+            width: 15px;
+            margin-right: 10px;
+        }
+    }
+}

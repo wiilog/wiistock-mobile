@@ -1,0 +1,99 @@
+<ion-ripple-effect *ngIf="hasRipple"></ion-ripple-effect>
+
+<div class="list-element-color"
+     *ngIf="color"
+     [ngStyle]="{'background-color': color}">
+</div>
+
+<div class="list-header-wrapper" [class.light]="light"
+     [class.list-header-wrapper-gutter]="!leftIcon && (!_rightIcons || _rightIcons.length === 0)"
+     [style.padding-left]="!leftIcon ? '15px' : '0'">
+    <!-- Left icon -->
+    <div class="list-header-icon" *ngIf="leftIcon">
+        <wii-icon [name]="leftIcon.name"
+                  [color]="leftIcon.color"
+                  [customColor]="leftIcon.customColor"
+                  [style.width]="leftIcon.width"
+                  [style.height]="leftIcon.height"
+                  [buttonWithoutRipple]="!leftIconHasAction"
+                  (action)="onLeftIconClick($event)"
+                  [class.custom-size]="leftIcon.width !== undefined || leftIcon.height !== undefined">
+        </wii-icon>
+    </div>
+
+    <div class="header-body"
+         [style.maxHeight.px]="bodyMaxHeight"
+         (click)="toggleTitle()">
+        <div #headerBodyWrapper
+             [class.inline-right-badge]="rightBadge && rightBadge.inline"
+             class="header-body-wrapper">
+            <div>
+                <div class="header-title" *ngIf="title" [innerHTML]="title"></div>
+
+                <wii-list-panel-item *ngIf="item"
+                                     [infos]="item.infos"
+                                     [color]="item.color"
+                                     [backgroundColor]="item.backgroundColor"
+                                     [loading]="item.loading"
+                                     [disabled]="item.disabled"
+                                     [pressAction]="item.pressAction"
+                                     [rightIcon]="item.rightIcon"
+                                     [rightIconBase64]="item.rightIconBase64"
+                                     [boldValues]="[]"
+                                     style="padding-left: 15px">
+                </wii-list-panel-item>
+
+                <div *ngFor="let partSubTitle of _subtitle"
+                     class="header-subtitle"
+                     [innerHTML]="partSubTitle">
+                </div>
+
+                <div *ngIf="info"
+                     class="header-info"
+                     [innerHTML]="info">
+                </div>
+            </div>
+            <div *ngIf="leftBadge || rightBadge" class="badges-container">
+                <wii-badge *ngIf="leftBadge"
+                           [config]="leftBadge">
+                </wii-badge>
+                <wii-badge *ngIf="rightBadge"
+                           [config]="rightBadge">
+                </wii-badge>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right icon -->
+    <div class="list-header-icon"
+         [class.list-header-icon-horizontal]="rightIconLayout === 'horizontal'"
+         *ngIf="_rightIcons && _rightIcons.length > 0">
+        <div class="list-header-icon-wrapper"
+             *ngFor="let rightIcon of _rightIcons; let index = index">
+            <wii-icon [name]="rightIcon.name"
+                      [color]="rightIcon.color"
+                      [style.width]="rightIcon.width"
+                      [style.height]="rightIcon.height"
+                      [customColor]="rightIcon.customColor"
+                      [buttonWithoutRipple]="!rightIconHasAction(index)"
+                      (action)="onRightIconClick($event, index)"
+                      [class.custom-size]="rightIcon.width !== undefined || rightIcon.height !== undefined">
+            </wii-icon>
+        </div>
+    </div>
+
+    <div class="header-button-container"
+         *ngIf="headerButtonConfig && open">
+        <button (click)="mainButtonActionClick()"
+                class="header-button">
+            <wii-icon *ngIf="headerButtonConfig.icon"
+                      [name]="headerButtonConfig.icon.name"
+                      [style.width]="headerButtonConfig.icon.width"
+                      [style.height]="headerButtonConfig.icon.height"
+                      [color]="headerButtonConfig.icon.color"
+                      [class.custom-size]="headerButtonConfig.icon.width !== undefined || headerButtonConfig.icon.height !== undefined">
+            </wii-icon>
+            {{ headerButtonConfig.label }}
+        </button>
+    </div>
+</div>

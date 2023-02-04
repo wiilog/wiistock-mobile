@@ -1,0 +1,30 @@
+@import "theme/variables";
+
+:host {
+    .wrapper {
+        flex: 1;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        display: flex;
+
+        .search-icon {
+            margin-left: $spacerMin;
+            width: 32px;
+            height: 32px;
+        }
+
+        &.field-blocked {
+            width: 100%;
+            .search-icon {
+                margin-left: auto;
+                position: relative;
+                top: -10px;
+            }
+        }
+    }
+
+    wii-barcode-scanner {
+        margin-left: 8px;
+    }
+}

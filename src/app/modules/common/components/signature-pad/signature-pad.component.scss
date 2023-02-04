@@ -1,0 +1,36 @@
+@import "theme/variables";
+
+.wrapper {
+    background-color: white;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+
+    .signature-wrapper {
+        flex: 1;
+        canvas {
+            display: block;
+            background-color: $white;
+        }
+    }
+
+    .page-header {
+        text-align: center;
+        height: 40px;
+        color: $primary;
+        padding: $spacerMin;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        wii-icon {
+            padding: 3px;
+            width: 35px;
+            height: 35px;
+        }
+
+        h5 {
+            margin: 0;
+        }
+    }
+}

@@ -1,0 +1,73 @@
+<div class="list-element-color"
+     *ngIf="color"
+     [ngStyle]="{'background-color': color}">
+</div>
+<ion-list lines="none" class="ion-no-padding" *ngIf="sliding else content">
+    <ion-item-sliding>
+        <ion-item>
+            <ng-container *ngTemplateOutlet="content"></ng-container>
+        </ion-item>
+        <ng-container *ngIf="slidingConfig && slidingConfig.left">
+            <ion-item-options side="start" *ngFor="let config of slidingConfig.left">
+                <button (click)="config.action()" [style.background-color]="config.color" [style.color]="'#FFF'">{{ config.label }}</button>
+            </ion-item-options>
+        </ng-container>
+
+        <ng-container *ngIf="slidingConfig && slidingConfig.right">
+            <ion-item-options side="end" *ngFor="let config of slidingConfig.right">
+                <button (click)="config.action()" [style.background-color]="config.color" [style.color]="'#FFF'">{{ config.label }}</button>
+            </ion-item-options>
+        </ng-container>
+    </ion-item-sliding>
+</ion-list>
+
+<ng-template #content>
+    <div class="list-element-wrapper"
+         [class.ion-activatable]="(!rightIcon || !rightIcon.action) && pressAction"
+         [class.ripple-parent]="(!rightIcon || !rightIcon.action) && pressAction"
+         (click)="onPress()">
+        <div class="list-element-body-wrapper">
+            <div class="list-element-item"
+                 *ngFor="let line of infosArray">
+                <ng-container *ngIf="line.label">{{line.label}} :</ng-container>
+                <span class="element-value"
+                      [class.element-value-bold]="!boldValues || boldValues.indexOf(line.key) > -1">
+                    {{ line.value }}
+                </span>
+            </div>
+        </div>
+        <div class="list-element-text"
+             *ngIf="textRight">
+            <span class="element-value"
+                  [class.element-value-bold]="!boldValues || boldValues.indexOf('textRight') > -1"
+                  [style.font-size]="textRight.size">
+                    {{ textRight.label }}
+            </span>
+        </div>
+        <div class="list-element-icon"
+             *ngIf="loading || rightIcon || rightIconBase64">
+            <wii-icon *ngIf="rightIcon && !loading"
+                      [name]="rightIcon.name"
+                      [color]="rightIcon.color"
+                      (action)="rightIcon.action && rightIcon.action()"
+                      [buttonWithoutRipple]="!rightIcon.action">
+            </wii-icon>
+            <img *ngIf="rightIconBase64 && !loading"
+                 alt=""
+                 [src]="rightIconBase64"/>
+            <ion-spinner *ngIf="loading"
+                         name="dots">
+            </ion-spinner>
+        </div>
+
+        <ion-ripple-effect *ngIf="(!rightIcon || !rightIcon.action) && pressAction"></ion-ripple-effect>
+    </div>
+    <p class="badges-container"
+       *ngIf="badge">
+        <wii-badge [config]="badge">
+        </wii-badge>
+    </p>
+    <div class="list-element-disabled"
+         *ngIf="disabled">
+    </div>
+</ng-template>

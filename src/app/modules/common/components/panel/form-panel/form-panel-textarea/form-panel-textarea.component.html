@@ -1,0 +1,14 @@
+<wii-form-field [label]="label"
+                [required]="inputConfig.required"
+                [inline]="inline">
+    <ng-container field>
+        <ion-textarea #inputComponent="ngModel"
+                      [name]="name"
+                      [disabled]="inputConfig.disabled || false"
+                      [required]="inputConfig.required || false"
+                      [maxlength]="inputConfig.maxLength || null"
+                      [(ngModel)]="value"
+                      auto-grow="true">
+        </ion-textarea>
+    </ng-container>
+</wii-form-field>

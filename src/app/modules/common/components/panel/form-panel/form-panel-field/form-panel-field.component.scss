@@ -1,0 +1,13 @@
+@import "theme/variables";
+
+:host {
+    display: block;
+    background-color: $white;
+    border: 1px solid $lightBlue;
+    font-size: $normalFontSize;
+
+    ion-label,
+    ion-item {
+        font-size: $normalFontSize;
+    }
+}

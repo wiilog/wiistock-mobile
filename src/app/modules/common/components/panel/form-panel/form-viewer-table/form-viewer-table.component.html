@@ -1,0 +1,11 @@
+<div class="form-table">
+    <div *ngFor="let item of value" class="table-row">
+        <div class="title">
+            <div class="color-strip" [style.background-color]="item.color"></div>
+            {{ item.title }}
+        </div>
+        <div class="content">
+            <b>{{ item.label }} :</b> {{ item.value }}
+        </div>
+    </div>
+</div>

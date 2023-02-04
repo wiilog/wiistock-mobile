@@ -1,0 +1,33 @@
+@import "theme/variables";
+
+:host {
+    .files-wrapper {
+        overflow: hidden;
+        flex: 1;
+
+        button {
+            flex: 1;
+            display: flex;
+            text-decoration: none;
+            color: $dark;
+            background: $lightBlue;
+            padding: $spacerMin;
+            margin: calc(#{$spacerMin} / 2);
+            border-radius: 8px;
+            border: none;
+
+            .link-wrapper {
+                flex: 1;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+
+            wii-icon {
+                width: 15px;
+                display: inline-block;
+                margin-left: $spacerMin;
+            }
+        }
+    }
+}

@@ -15,8 +15,6 @@ import {TableName} from '@app/services/sqlite/table-definition';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {DemandeLivraisonArticle} from '@entities/demande-livraison-article';
 import {CapacitorSQLite, CapacitorSQLitePlugin} from '@capacitor-community/sqlite';
-import {Emplacement} from "@entities/emplacement";
-import {HandlingAttachment} from "@entities/handling-attachment";
 
 @Injectable({
     providedIn: 'root'
@@ -885,6 +883,7 @@ export class SqliteService {
     }
 
     public importData(data: any): Observable<any> {
+        console.error('WWWWWWWWWWWWWWWWWWWWWW'  , "import dataxx !!!")
         return of(undefined).pipe(
             mergeMap(() => this.importLocations(data).pipe(tap(() => {console.log('--- > importLocations')}))),
             mergeMap(() => this.importArticlesPrepaByRefArticle(data).pipe(tap(() => {console.log('--- > importArticlesPrepaByRefArticle')}))),

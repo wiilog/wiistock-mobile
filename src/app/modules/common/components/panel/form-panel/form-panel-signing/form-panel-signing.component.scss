@@ -1,0 +1,12 @@
+@import "theme/variables";
+
+:host {
+    .add-signature {
+        width: 30px;
+        height: 30px;
+    }
+
+    .signature-image {
+        width: 30%;
+    }
+}

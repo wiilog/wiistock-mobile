@@ -1,0 +1,35 @@
+@import "theme/variables";
+
+.form-table {
+    border: 1px solid $lightBlue;
+
+    .table-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.25rem 0.5rem;
+        background: white;
+
+        &:not(:last-of-type) {
+            border-bottom: 1px solid $lightGrey;
+        }
+
+        .title {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            font-weight: bold;
+            flex: 1 1 auto;
+
+            .color-strip {
+                width: 4px;
+                height: 100%;
+                margin-right: 5px;
+            }
+        }
+
+        .content {
+            white-space: nowrap;
+            padding: 4px;
+        }
+    }
+}

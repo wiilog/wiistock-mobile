@@ -1,0 +1,9 @@
+<wii-form-field [label]="label"
+                [required]="inputConfig.required"
+                [inline]="inline">
+    <ng-container field>
+        <div>{{ formattedValue }}</div>
+        <wii-icon class="calendar-icon" color="success" name="calendar.svg" (action)="onItemClicked()"></wii-icon>
+        <wii-icon class="calendar-icon" color="danger" name="trash.svg" (action)="emptyValue()"></wii-icon>
+    </ng-container>
+</wii-form-field>

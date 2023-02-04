@@ -1,0 +1,33 @@
+<div class="wrapper">
+    <div class="page-header">
+        <div class="icon-wrapper">
+            <wii-icon color="black" name="arrow-left.svg" (action)="onPop()"></wii-icon>
+        </div>
+        <h5>Signature</h5>
+        <div class="icon-wrapper">
+            <wii-icon class="clear-button" color="danger" name="trash.svg" (action)="onClear()"></wii-icon>
+        </div>
+    </div>
+    <div #signatureWrapper class="signature-wrapper">
+        <!--suppress AngularUndefinedBinding -->
+        <canvas #signatureCanvas
+                *ngIf="canvasWidth && canvasHeight"
+                [height]="canvasHeight"
+                [width]="canvasWidth"
+                (touchstart)="startDrawing($event)"
+                (touchmove)="moved($event)">
+        </canvas>
+    </div>
+    <div class="page-footer">
+        <ion-button class="larger"
+                    color="primary"
+                    size="large"
+                    expand="full"
+                    (click)="onValidate()">
+            Valider
+            <wii-icon name="check.svg"
+                      color="white"
+                      class="button-icon"></wii-icon>
+        </ion-button>
+    </div>
+</div>
