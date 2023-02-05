@@ -1,0 +1,46 @@
+@import "theme/variables";
+
+.suggestion-list-container {
+    padding: 5px 5px 50px;
+
+    &.empty-elements {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80%;
+        font-size: 18px;
+    }
+
+    .fields-container {
+        display: flex;
+        flex-direction: column;
+        background-color: $white;
+        padding-right: 15px;
+        padding-left: 15px;
+
+        &:after {
+            content: '';
+            position: relative;
+            width: 100%;
+            height: 1px;
+            background-color: $darkGray;
+            margin: 7px 0;
+
+            &:last-child {
+                height: 0;
+            }
+        }
+
+        .field-line {
+            font-size: 14px !important;
+
+            .field-value {
+                font-weight: bold;
+            }
+        }
+
+        &:first-child {
+            padding-top: 15px !important;
+        }
+    }
+}

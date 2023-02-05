@@ -27,6 +27,7 @@ export enum NavPathEnum {
     INVENTORY_ARTICLES = 'inventory-articles',
     INVENTORY_LOCATIONS_ANOMALIES = 'inventory-locations-anomalies',
     INVENTORY_LOCATIONS_MISSIONS = 'inventory-locations-missions',
+    INVENTORY_MISSION_ZONES = 'inventory-mission-zones',
     INVENTORY_LOCATIONS = 'inventory-locations',
     ASSOCIATION = 'association',
     ARTICLE_CREATION = 'article-creation',
@@ -80,4 +81,5 @@ export enum NavPathEnum {
     DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION = 'dispatch-logistic-unit-reference-association',
     DELIVERY_LOGISTIC_UNIT_CONTENT = 'delivery-logistic-unit-content',
     PRISE_UL_DETAILS = 'prise-ul-details',
+    INVENTORY_MISSION_ZONE_CONTROLE = 'inventory-mission-zone-controle',
 }

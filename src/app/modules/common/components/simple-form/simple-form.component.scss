@@ -1,0 +1,108 @@
+@import "theme/variables";
+
+:host {
+    display: flex;
+    flex: 1;
+
+    .simple-form-icon-container {
+        text-align: center;
+        margin-top: calc(#{$spacer} / 1.5);
+
+        & > wii-icon {
+            display: inline-block;
+            height: 50px;
+            width: 50px;
+        }
+    }
+
+    .simple-form-wrapper {
+        margin: $spacerMin 1px 0;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+
+        .simple-form-title {
+            margin: 0 2px;
+            text-transform: uppercase;
+            color: $white;
+            text-align: center;
+            padding-bottom: 1.5rem;
+            padding-top: 1.5rem;
+            font-size: large;
+            font-weight: bold;
+            background-color: $primary;
+        }
+
+        .simple-form-content {
+            flex: 1;
+            margin: $spacer 3px;
+
+            .simple-form-content-wrapper {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+
+                & > *:not(:last-child) {
+                    margin-bottom: 2rem;
+                }
+
+                .simple-form-item-wrapper {
+                    display: flex;
+                    align-items: center;
+
+                    ion-item {
+                        flex: 1;
+                    }
+
+                    .validate-icon {
+                        width: 50px;
+                        margin-left: 10px;
+                    }
+                }
+
+                .simple-form-info {
+                    background-color: $white;
+                    border: 1px solid $lightBlue;
+                    padding: 1rem;
+                    margin-bottom: 3rem;
+                    border-radius: 6px;
+                    box-shadow: rgba(0, 0, 0, 5%) 1px 1px 2px;
+
+                    & > .simple-form-info-item {
+                        font-size: $normalFontSize;
+
+                        &:not(:last-child) {
+                            margin-bottom: $spacerMin;
+                        }
+
+                        .simple-form-info-item-value {
+                            font-weight: bold;
+                        }
+                    }
+                }
+
+                ion-label,
+                ion-item {
+                    font-size: $normalFontSize;
+                }
+
+                ion-item {
+                    box-shadow: rgba(0, 0, 0, 5%) 1px 1px 2px;
+                }
+            }
+        }
+
+        .simple-form-footer {
+            display: flex;
+
+            .submit-button {
+                flex: 1;
+            }
+        }
+    }
+}
+
+ion-nav.keyboard-shown .simple-form-footer {
+    display: none !important;
+}

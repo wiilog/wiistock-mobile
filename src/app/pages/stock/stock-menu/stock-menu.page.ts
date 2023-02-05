@@ -101,6 +101,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                         this.navigateToPriseDeposePage()
                     }
                 },
+                */
                 {
                     icon: 'inventory.svg',
                     label: 'Inventaire',
@@ -108,6 +109,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                         self.navService.push(NavPathEnum.INVENTORY_LOCATIONS);
                     }
                 },
+                /*TODO WIIS-7970
                 {
                     icon: 'association.svg',
                     label: 'Association Articles - UL',

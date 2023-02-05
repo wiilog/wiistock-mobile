@@ -1,0 +1,25 @@
+@import "theme/variables";
+
+:host {
+
+
+    ion-button {
+        text-transform: unset;
+        font-weight: unset;
+    }
+
+    .anomalies-button-container {
+        margin-top: $spacerMin;
+        margin-bottom: $spacerMin;
+
+    }
+
+    .page-content {
+        overflow: auto;
+        padding: $spacerMin;
+    }
+
+    .page-footer {
+        padding: 2px;
+    }
+}

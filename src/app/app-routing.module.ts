@@ -35,6 +35,36 @@ const routes: Routes = [
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('./pages/stock/article-creation/article-creation.module').then(m => m.ArticleCreationModule)
     },
+    {
+        path: NavPathEnum.INVENTORY_ARTICLES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('./pages/stock/inventory/inventory-articles/inventory-articles.module').then(m => m.InventoryArticlesPageModule)
+    },
+    {
+        path: NavPathEnum.INVENTORY_LOCATIONS,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('./pages/stock/inventory/inventory-locations/inventory-locations.module').then(m => m.InventoryLocationsPageModule)
+    },
+    {
+        path: NavPathEnum.INVENTORY_LOCATIONS_ANOMALIES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('./pages/stock/inventory/inventory-locations/inventory-locations-anomalies/inventory-locations-anomalies.module').then(m => m.InventoryLocationsAnomaliesPageModule)
+    },
+    {
+        path: NavPathEnum.INVENTORY_LOCATIONS_MISSIONS,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('./pages/stock/inventory/inventory-locations/inventory-locations-missions/inventory-locations-missions.module').then(m => m.InventoryLocationsMissionsPageModule)
+    },
+    {
+        path: NavPathEnum.INVENTORY_MISSION_ZONE_CONTROLE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/inventory/inventory-mission-zone-controle/inventory-mission-zone-controle.module').then(m => m.InventoryMissionZoneControlePageModule)
+    },
+    {
+        path: NavPathEnum.INVENTORY_MISSION_ZONES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/inventory/inventory-mission-zones/inventory-mission-zones.module').then(m => m.InventoryMissionZonesPageModule)
+    },
 ];
 
 @NgModule({

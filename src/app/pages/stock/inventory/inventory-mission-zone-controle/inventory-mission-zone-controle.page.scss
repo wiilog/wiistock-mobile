@@ -1,0 +1,35 @@
+@import "theme/variables";
+
+ion-content {
+    --background: none;
+
+    wii-panel-header {
+        margin-top: $spacer;
+
+        ::ng-deep .list-header-icon {
+            padding-left: 0.7rem !important;
+        }
+    }
+
+    wii-list-panel {
+        ::ng-deep wii-list-panel-item {
+            margin-right: 0.7rem !important;
+            margin-left: 0.7rem !important;
+        }
+    }
+
+    .page-footer {
+        width: 100%;
+        bottom: 0;
+
+        ::ng-deep wii-barcode-scanner {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            margin-bottom: 0 !important;
+            height: 50px;
+            background-color: $lightGrey;
+        }
+    }
+}

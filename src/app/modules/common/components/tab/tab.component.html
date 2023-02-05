@@ -1,0 +1,8 @@
+<div class="tabs-wrapper">
+    <div class="tab"
+         *ngFor="let tab of config"
+         [class.active]="activeKey === tab.key"
+         (click)="onTabClicked(tab.key)">
+        {{ tab.label }}
+    </div>
+</div>

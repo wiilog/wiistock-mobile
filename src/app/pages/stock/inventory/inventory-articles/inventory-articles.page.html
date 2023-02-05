@@ -1,0 +1,26 @@
+<ion-content>
+    <wii-panel-header *ngIf="selectedLocation"
+                      [title]="titleConfig"
+                      [transparent]="true"
+                      [leftIcon]="iconConfig"
+                      [subtitle]="subtitleConfig"
+                      [light]="true">
+    </wii-panel-header>
+
+    <wii-suggestion-list [elements]="suggestionListConfig">
+    </wii-suggestion-list>
+
+    <div slot="fixed" class="page-footer">
+        <wii-select-item #selectItemComponent
+                         [hidden]="!!dataSubscription"
+                         *ngIf="selectItemType !== undefined && requestParams"
+                         [type]="selectItemType"
+                         [customBarcodeValidator]="barcodeValidator"
+                         (itemChange)="navigateToInventoryValidate($event)"
+                         [checkBarcodeValidity]="true"
+                         [resetEmitter]="resetEmitter$"
+                         [requestParams]="requestParams"
+                         [scanMode]="scannerMode">
+        </wii-select-item>
+    </div>
+</ion-content>

@@ -20,7 +20,7 @@ export class ListPanelComponent {
     public body: Array<ListPanelItemConfig>;
 
     @Input()
-    public boldValues: Array<string>;
+    public boldValues?: Array<string>;
 
     @Input()
     public identifierName?: string;

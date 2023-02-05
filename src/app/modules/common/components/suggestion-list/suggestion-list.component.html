@@ -1,0 +1,20 @@
+<div class="suggestion-list-container" *ngIf="elements && elements.length !== 0; else emptyElements">
+    <div class="title" *ngIf="title">
+        <p>{{ title }}</p>
+    </div>
+    <div class="fields-container" *ngFor="let fields of elements">
+        <span class="field-line" *ngFor="let field of fields">{{ field.name }} :
+            <span class="field-value">{{ field.value }}</span>
+        </span>
+    </div>
+</div>
+<ion-infinite-scroll #infiniteScroll *ngIf="loadMore"
+                     threshold="100px"
+                     (ionInfinite)="loadMore(infiniteScroll)">
+    <ion-infinite-scroll-content loadingSpinner="circular"></ion-infinite-scroll-content>
+</ion-infinite-scroll>
+<ng-template #emptyElements>
+    <div class="suggestion-list-container empty-elements">
+        Aucun élément
+    </div>
+</ng-template>

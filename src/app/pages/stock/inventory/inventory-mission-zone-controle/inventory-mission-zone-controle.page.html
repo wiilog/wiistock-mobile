@@ -1,0 +1,41 @@
+<div scroll-y="true"
+     class="page-content">
+    <wii-panel-header *ngIf="headerConfig"
+                      [leftIcon]="headerConfig.leftIcon"
+                      [rightIcons]="headerConfig.rightIcon"
+                      [title]="headerConfig.title"
+                      [subtitle]="headerConfig.subtitle"
+                      class="page-header">
+    </wii-panel-header>
+    <wii-list-panel *ngIf="missingsRefsListConfig"
+                    [header]="missingsRefsListConfig.header"
+                    [body]="missingsRefsListConfig.body"
+                    [boldValues]="listBoldValues"
+                    [sliding]="true">
+    </wii-list-panel>
+    <wii-list-panel *ngIf="locationsQualityListConfig"
+                    [header]="locationsQualityListConfig.header"
+                    [body]="locationsQualityListConfig.body"
+                    [boldValues]="listBoldValues"
+                    [sliding]="true">
+    </wii-list-panel>
+</div>
+
+<div class="page-footer persisted-page-footer">
+    <wii-barcode-scanner #footerScannerComponent
+                         [hidden]="loading"
+                         [mode]="scannerModeManual"
+                         (add)="addManualRFID($event[0])">
+    </wii-barcode-scanner>
+    <ion-button class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="validateInventoryMissionZoneControl()">
+        Valider
+        <wii-icon name="check.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

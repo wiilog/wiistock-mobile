@@ -51,6 +51,9 @@ import {
 } from "@common/components/panel/form-panel/form-viewer-table/form-viewer-table.component";
 import {FormViewerTextComponent} from "@common/components/panel/form-panel/form-viewer-text/form-viewer-text.component";
 import {FormPanelComponent} from "@common/components/panel/form-panel/form-panel.component";
+import {SuggestionListComponent} from "@common/components/suggestion-list/suggestion-list.component";
+import {TabComponent} from "@common/components/tab/tab.component";
+import {SimpleFormComponent} from "@common/components/simple-form/simple-form.component";
 
 @NgModule({
     imports: [
@@ -90,6 +93,9 @@ import {FormPanelComponent} from "@common/components/panel/form-panel/form-panel
         FormViewerAttachmentsComponent,
         FormViewerTableComponent,
         FormViewerTextComponent,
+        SuggestionListComponent,
+        TabComponent,
+        SimpleFormComponent,
     ],
     exports: [
         IconComponent,
@@ -105,6 +111,9 @@ import {FormPanelComponent} from "@common/components/panel/form-panel/form-panel
         ListPanelComponent,
         ListPanelItemComponent,
         FormPanelComponent,
+        SuggestionListComponent,
+        TabComponent,
+        SimpleFormComponent,
     ]
 })
 export class CommonModule {

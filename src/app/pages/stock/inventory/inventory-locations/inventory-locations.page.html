@@ -1,0 +1,48 @@
+
+<div class="page-content">
+    <div class="anomalies-button-container"
+         *ngIf="!anomalyMode">
+        <ion-button class="anomalies-button"
+                    expand="full"
+                    color="primary"
+                    *ngIf="!dataSubscription && isInventoryManager && hasAnomalies"
+                    (click)="navigateToAnomalies()">
+            Anomalies
+            <wii-icon name="warning-white.svg"
+                      style="height: 15px !important; width: 15px !important;"
+                      color="white"
+                      class="button-icon">
+            </wii-icon>
+        </ion-button>
+    </div>
+
+    <wii-list-panel *ngIf="currentPageMode === PageMode.LOCATIONS && locationsListItemBody"
+                    [body]="locationsListItemBody"
+                    [boldValues]="[]">
+    </wii-list-panel>
+
+    <wii-list-panel *ngIf="currentPageMode === PageMode.MISSIONS && missionsListItemBody"
+                    [body]="missionsListItemBody"
+                    [boldValues]="['name_mission']">
+    </wii-list-panel>
+</div>
+
+
+<div class="page-footer">
+    <wii-select-item #selectItemComponent
+                     *ngIf="currentPageMode === PageMode.LOCATIONS && selectItemType"
+                     [type]="selectItemType"
+                     [hidden]="!!dataSubscription"
+                     [requestParams]="requestParams"
+                     (itemChange)="selectLocation($event)"
+                     [checkBarcodeValidity]="true"
+                     [resetEmitter]="resetEmitter$"
+                     [scanMode]="scannerMode">
+    </wii-select-item>
+
+    <wii-tab *ngIf="!missionFilter"
+             [(activeKey)]="currentPageMode"
+             (activeKeyChange)="reloadPage()"
+             [config]="tabConfig">
+    </wii-tab>
+</div>
