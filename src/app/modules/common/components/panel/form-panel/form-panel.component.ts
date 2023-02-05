@@ -58,9 +58,9 @@ export class FormPanelComponent implements AfterViewInit {
                         [group || name]: group
                             ? {
                                 ...(acc[group] || {}),
-                                [name]: getNewValue(value, (acc[group] || {})[name], config.multiple)
+                                [name]: getNewValue(value, (acc[group] || {})[name], config.multiple || false)
                             }
-                            : getNewValue(value, acc[name], config.multiple)
+                            : getNewValue(value, acc[name], config.multiple || false)
                     }
                     : {})
             }), {})

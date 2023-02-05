@@ -50,6 +50,7 @@ import {
     FormViewerTableComponent
 } from "@common/components/panel/form-panel/form-viewer-table/form-viewer-table.component";
 import {FormViewerTextComponent} from "@common/components/panel/form-panel/form-viewer-text/form-viewer-text.component";
+import {FormPanelComponent} from "@common/components/panel/form-panel/form-panel.component";
 
 @NgModule({
     imports: [
@@ -76,6 +77,7 @@ import {FormViewerTextComponent} from "@common/components/panel/form-panel/form-
         PanelHeaderComponent,
         ListPanelComponent,
         ListPanelItemComponent,
+        FormPanelComponent,
         FormPanelButtonsComponent,
         FormPanelCalendarComponent,
         FormPanelFieldComponent,
@@ -102,6 +104,7 @@ import {FormViewerTextComponent} from "@common/components/panel/form-panel/form-
         PanelHeaderComponent,
         ListPanelComponent,
         ListPanelItemComponent,
+        FormPanelComponent,
     ]
 })
 export class CommonModule {

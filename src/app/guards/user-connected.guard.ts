@@ -20,12 +20,10 @@ export class UserConnectedGuard implements CanActivate {
             this.storageService.getString(StorageKeyEnum.OPERATOR),
             this.storageService.getString(StorageKeyEnum.API_KEY)
         ).pipe(
-            map(([operator, apiKey]) => {
-                console.log("UserConnectedGuard >> ", Boolean(operator && apiKey), this.router.createUrlTree([NavPathEnum.LOGIN]))
-                return (
-                    Boolean(operator && apiKey) || this.router.createUrlTree([NavPathEnum.LOGIN])
-                )
-            })
+            map(([operator, apiKey]) => (
+                Boolean(operator && apiKey)
+                || this.router.createUrlTree([NavPathEnum.LOGIN])
+            ))
         );
     }
 

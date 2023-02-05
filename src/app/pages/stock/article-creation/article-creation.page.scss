@@ -1,8 +1,10 @@
+@import "theme/variables";
+
 .page-content {
     flex: 1;
 }
 
 .custom-fill-button {
-    background-color: white;
+    background-color: $white;
 }
 

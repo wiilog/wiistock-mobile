@@ -55,10 +55,10 @@ export class PanelHeaderComponent {
     public open: boolean;
 
     @Input()
-    public leftBadge: BadgeConfig;
+    public leftBadge?: BadgeConfig;
 
     @Input()
-    public rightBadge: BadgeConfig;
+    public rightBadge?: BadgeConfig;
 
     @Input()
     public headerButtonConfig: {

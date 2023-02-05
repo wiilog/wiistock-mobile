@@ -17,21 +17,22 @@ import {FormPanelComponent} from '@common/components/panel/form-panel/form-panel
 import {FormPanelParam} from '@common/directives/form-panel/form-panel-param';
 import {
     FormPanelSelectComponent
-} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
-import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
+} from '@common/components/panel/form-panel/form-panel-select/form-panel-select.component';
+import {SelectItemTypeEnum} from '@common/components/select-item/select-item-type.enum';
 import {
     FormPanelInputComponent
-} from '@app/common/components/panel/form-panel/form-panel-input/form-panel-input.component';
+} from '@common/components/panel/form-panel/form-panel-input/form-panel-input.component';
 import {
     FormPanelCalendarComponent
-} from '@app/common/components/panel/form-panel/form-panel-calendar/form-panel-calendar.component';
+} from '@common/components/panel/form-panel/form-panel-calendar/form-panel-calendar.component';
 import {
     FormPanelCalendarMode
-} from '@app/common/components/panel/form-panel/form-panel-calendar/form-panel-calendar-mode';
+} from '@common/components/panel/form-panel/form-panel-calendar/form-panel-calendar-mode';
 import {
     FormPanelTextareaComponent
-} from '@app/common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component';
-import {ViewWillEnter} from "@ionic/angular";
+} from '@common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component';
+import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {mergeMap} from "rxjs";
 
 
 @Component({
@@ -39,7 +40,7 @@ import {ViewWillEnter} from "@ionic/angular";
     templateUrl: './article-creation.page.html',
     styleUrls: ['./article-creation.page.scss'],
 })
-export class ArticleCreationPage implements ViewWillEnter, ViewWillEnter {
+export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
 
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
@@ -58,7 +59,7 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillEnter {
         subtitle?: string;
     };
 
-    public PREFIXES_TO_FIELDS = {
+    public PREFIXES_TO_FIELDS: {[prefix: string]: string} = {
         CPO: 'commandNumber',
         PNR: 'reference',
         SHQ: 'quantity',
@@ -97,8 +98,7 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillEnter {
                        private activatedRoute: ActivatedRoute,
                        private storageService: StorageService,
                        private translationService: TranslationService,
-                       navService: NavService) {
-        super(navService);
+                       private navService: NavService) {
     }
 
     public ionViewWillEnter(): void {
@@ -144,17 +144,18 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillEnter {
         if (this.creation) {
             const formattedValue = value.replace(/~~/g, '~');
             const matrixParts = formattedValue.split('~');
-            const values = matrixParts.reduce((accumulator, part) => {
-                if (part) {
-                    const associatedKey = Object.keys(this.PREFIXES_TO_FIELDS).find((key) => part.startsWith(key));
-                    const associatedField = this.PREFIXES_TO_FIELDS[associatedKey];
+            const values = matrixParts
+                .filter((part) => part)
+                .reduce((accumulator: {[field: string]: string}, part) => {
+                    const associatedKey: string|undefined = Object.keys(this.PREFIXES_TO_FIELDS).find((key) => part.startsWith(key));
                     if (associatedKey) {
-                        accumulator[associatedField] = part.substring(associatedKey.length);
+                        const associatedField: string|undefined = this.PREFIXES_TO_FIELDS[associatedKey];
+                        if (associatedKey) {
+                            accumulator[associatedField] = part.substring(associatedKey.length);
+                        }
                     }
                     return accumulator;
-                }
-                return accumulator;
-            }, {});
+                }, {});
             this.validate(values);
         } else {
             this.loading = true;
@@ -185,6 +186,7 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillEnter {
 
     public initForm() {
         const values = this.formPanelComponent ? this.formPanelComponent.values : null;
+
         this.bodyConfig = [
             {
                 item: FormPanelSelectComponent,
@@ -390,16 +392,17 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillEnter {
                         ref: this.reference,
                         supplier: this.supplier
                     }
-                })
+                }).pipe(
+                    mergeMap(({supplierReferences}) => this.sqliteService.importSupplierReferences(supplierReferences))
+                )
             }
-        }).subscribe((response) => {
-            this.sqliteService.importSupplierReferences(response.supplierReferences).subscribe(() => {
-                this.initForm();
-            });
+        }).subscribe(() => {
+            this.initForm();
         })
     }
 
     public rfid() {
+        // TODO
         console.log('RFID')
     }
 
@@ -436,6 +439,7 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillEnter {
     }
 
     public scanMatrix() {
+        // TODO
         console.log('scanMatrix');
     }
 

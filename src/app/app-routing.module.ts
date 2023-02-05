@@ -30,6 +30,11 @@ const routes: Routes = [
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('./pages/stock/stock-menu/stock-menu.module').then(m => m.StockMenuPageModule)
     },
+    {
+        path: NavPathEnum.ARTICLE_CREATION,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('./pages/stock/article-creation/article-creation.module').then(m => m.ArticleCreationModule)
+    },
 ];
 
 @NgModule({

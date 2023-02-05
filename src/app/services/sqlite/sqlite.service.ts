@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {StorageService} from '@app/services/storage/storage.service';
 import {Livraison} from '@entities/livraison';
 import {from, Observable, of, zip} from 'rxjs';
-import {mergeMap, map, take, tap, catchError} from 'rxjs/operators';
+import {mergeMap, map, take, tap, catchError, merge} from 'rxjs/operators';
 import {Handling} from '@entities/handling';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {Anomalie} from "@entities/anomalie";
@@ -883,13 +883,14 @@ export class SqliteService {
     }
 
     public importData(data: any): Observable<any> {
-        console.error('WWWWWWWWWWWWWWWWWWWWWW'  , "import dataxx !!!")
         return of(undefined).pipe(
             mergeMap(() => this.importLocations(data).pipe(tap(() => {console.log('--- > importLocations')}))),
             mergeMap(() => this.importArticlesPrepaByRefArticle(data).pipe(tap(() => {console.log('--- > importArticlesPrepaByRefArticle')}))),
             mergeMap(() => this.importPreparations(data).pipe(tap(() => {console.log('--- > importPreparations')}))),
             mergeMap(() => this.importLivraisons(data).pipe(tap(() => {console.log('--- > importLivraisons')}))),
             mergeMap(() => this.importArticlesInventaire(data).pipe(tap(() => {console.log('--- > importArticlesInventaire')}))),
+            mergeMap(() => this.importInventoryMission(data).pipe(tap(() => {console.log('--- > importInventoryMission')}))),
+            mergeMap(() => this.importInventoryLocationZone(data).pipe(tap(() => {console.log('--- > importInventoryLocationsZone')}))),
             mergeMap(() => this.importHandlings(data).pipe(tap(() => {console.log('--- > importHandlings')}))),
             mergeMap(() => this.importCollectes(data).pipe(tap(() => {console.log('--- > importCollectes')}))),
             mergeMap(() => this.importMouvementTraca(data).pipe(tap(() => {console.log('--- > importMouvementTraca')}))),
@@ -903,6 +904,9 @@ export class SqliteService {
             mergeMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),
             mergeMap(() => this.importTransportRoundData(data).pipe(tap(() => {console.log('--- > importTransportRoundData')}))),
             mergeMap(() => this.importDispatchTypes(data).pipe(tap(() => {console.log('--- > importDispatchTypesData')}))),
+            mergeMap(() => this.importTypes(data).pipe(tap(() => {console.log('--- > importTypes')}))),
+            mergeMap(() => this.importSuppliers(data).pipe(tap(() => {console.log('--- > importSuppliers')}))),
+            mergeMap(() => this.importRefs(data).pipe(tap(() => {console.log('--- > importRefs')}))),
             mergeMap(() => this.importUsers(data).pipe(tap(() => {console.log('--- > importUsersData')}))),
             mergeMap(() => this.importProjects(data).pipe(tap(() => {console.log('--- > importProjects')}))),
             mergeMap(() => (
@@ -1189,4 +1193,103 @@ export class SqliteService {
                 AND mouvement_traca.type = 'prise'
             `);
     }
+
+    public importTypes(data: any): Observable<void> {
+        const types = data['types'] || [];
+        return this.deleteBy('type').pipe(
+            mergeMap(() => (
+                types.length > 0
+                    ? this.insert('type', types)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+    public importInventoryMission(data: any): Observable<any> {
+        const inventoryMission = data['inventoryMission'];
+        return this.deleteBy('inventory_mission')
+            .pipe(
+                mergeMap(() => (
+                    (inventoryMission && inventoryMission.length > 0)
+                        ? this.insert('inventory_mission', inventoryMission.map(({
+                                                                                     id,
+                                                                                     type,
+                                                                                     mission_start,
+                                                                                     mission_end,
+                                                                                     mission_name,
+                                                                                 }: any) => ({
+                            id,
+                            mission_start,
+                            mission_end,
+                            mission_name,
+                            type,
+                        })))
+                        : of(undefined)
+                ))
+            );
+    }
+
+    public importInventoryLocationZone(data: any): Observable<any> {
+        const inventoryLocationZone = data['inventoryLocationZone'];
+        return this.deleteBy('inventory_location_zone')
+            .pipe(
+                mergeMap(() => (
+                    (inventoryLocationZone && inventoryLocationZone.length > 0)
+                        ? this.insert('inventory_location_zone', inventoryLocationZone.map(({
+                                                                                                id,
+                                                                                                location_id,
+                                                                                                location_label,
+                                                                                                mission_id,
+                                                                                                zone_id,
+                                                                                                zone_label,
+                                                                                                done,
+                                                                                            }: any) => ({
+                            id,
+                            location_id,
+                            location_label,
+                            mission_id,
+                            zone_id,
+                            zone_label,
+                            done,
+                        })))
+                        : of(undefined)
+                ))
+            );
+    }
+
+    public importSuppliers(data: any): Observable<void> {
+        const types = data['suppliers'] || [];
+        return this.deleteBy('supplier').pipe(
+            mergeMap(() => (
+                types.length > 0
+                    ? this.insert('supplier', types)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
+    public importRefs(data: any): Observable<void> {
+        const types = data['reference_articles'] || [];
+        return this.deleteBy('reference_article').pipe(
+            mergeMap(() => (
+                types.length > 0
+                    ? this.insert('reference_article', types)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
+    public importSupplierReferences(data: any): Observable<void> {
+        return this.deleteBy('supplier_reference').pipe(
+            mergeMap(() => (
+                data.length > 0
+                    ? this.insert('supplier_reference', data)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
 }
