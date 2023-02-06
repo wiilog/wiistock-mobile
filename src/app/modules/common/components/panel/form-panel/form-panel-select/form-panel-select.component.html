@@ -23,7 +23,9 @@
             <wii-barcode-scanner #barcodeScanner
                                  *ngIf="inputConfig.barcodeScanner"
                                  class="inline"
-                                 (add)="onBarcodeScanned($event[0])">
+                                 (manualAdd)="onBarcodeScanned($event)"
+                                 (scanAdd)="onBarcodeScanned($event)"
+                                 (cameraAdd)="onBarcodeScanned($event)">
             </wii-barcode-scanner>
         </ng-container>
     </div>

@@ -10,7 +10,9 @@
                          [mode]="scanMode"
                          (search)="openSearch()"
                          (createForm)="onPenClick()"
-                         (add)="testIfBarcodeValid($event[0])"
+                         (manualAdd)="testIfBarcodeValid($event)"
+                         (scanAdd)="testIfBarcodeValid($event)"
+                         (cameraAdd)="testIfBarcodeValid($event)"
                          (clear)="onItemSelect(undefined)">
     </wii-barcode-scanner>
 </div>

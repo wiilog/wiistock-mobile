@@ -19,38 +19,44 @@
     <div class="page-footer persisted-page-footer">
         <wii-barcode-scanner #footerScannerComponent
                              [mode]="scannerModeManual"
-                             (add)="scan($event[0])">
+                             (manualAdd)="onRFIDTagScanned($event)"
+                             (scanAdd)="onDatamatrixScanned($event)">
         </wii-barcode-scanner>
 
-        <ion-button *ngIf="creation" fill="outline"
-                    class="custom-fill-button"
-                    expand="block"
-                    (click)="scanMatrix()">
-            Scan 2D
-        </ion-button>
+        <ng-container *ngIf="creation">
+<!--            TODO WIIS-9027 -->
+            <ion-button *ngIf="false"
+                        fill="outline"
+                        class="custom-fill-button"
+                        expand="block"
+                        (click)="scanMatrix()">
+                Scan 2D
+            </ion-button>
 
-        <ion-button *ngIf="creation" class="submit-button larger"
-                    color="primary"
-                    size="large"
-                    expand="full"
-                    (click)="validate()">
-            Valider
-            <wii-icon name="check.svg"
-                      class="button-icon"
-                      color="white">
-            </wii-icon>
-        </ion-button>
-
-        <ion-button *ngIf="!creation" class="submit-button larger"
-                    color="primary"
-                    size="large"
-                    expand="full"
-                    (click)="rfid()">
-            RFID
-            <wii-icon name="check.svg"
-                      class="button-icon"
-                      color="white">
-            </wii-icon>
-        </ion-button>
+            <ion-button class="submit-button larger"
+                        color="primary"
+                        size="large"
+                        expand="full"
+                        (click)="validate()">
+                Valider
+                <wii-icon name="check.svg"
+                          class="button-icon"
+                          color="white">
+                </wii-icon>
+            </ion-button>
+        </ng-container>
+        <ng-container *ngIf="!creation">
+            <ion-button class="submit-button larger"
+                        color="primary"
+                        size="large"
+                        expand="full"
+                        (click)="onRFIDButtonClicked()">
+                Scanner RFID
+                <wii-icon name="check.svg"
+                          class="button-icon"
+                          color="white">
+                </wii-icon>
+            </ion-button>
+        </ng-container>
     </div>
 </ng-container>

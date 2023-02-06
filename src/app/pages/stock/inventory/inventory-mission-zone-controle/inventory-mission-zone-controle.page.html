@@ -25,7 +25,9 @@
     <wii-barcode-scanner #footerScannerComponent
                          [hidden]="loading"
                          [mode]="scannerModeManual"
-                         (add)="addManualRFID($event[0])">
+                         (cameraAdd)="addManualRFID($event)"
+                         (manualAdd)="addManualRFID($event)"
+                         (scanAdd)="addManualRFID($event)">
     </wii-barcode-scanner>
     <ion-button class="submit-button larger"
                 color="primary"

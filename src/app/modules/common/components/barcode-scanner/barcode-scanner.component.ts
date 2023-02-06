@@ -32,7 +32,13 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
     public mode?: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SCAN;
 
     @Output()
-    public add: EventEmitter<[string, boolean]>;
+    public scanAdd: EventEmitter<string>;
+
+    @Output()
+    public cameraAdd: EventEmitter<string>;
+
+    @Output()
+    public manualAdd: EventEmitter<string>;
 
     @Output()
     public search: EventEmitter<undefined>;
@@ -47,7 +53,8 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
 
     public constructor(private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService) {
-        this.add = new EventEmitter<[string, boolean]>();
+        this.scanAdd = new EventEmitter<string>();
+        this.manualAdd = new EventEmitter<string>();
         this.search = new EventEmitter<undefined>();
         this.createForm = new EventEmitter<undefined>();
         this.clear = new EventEmitter<undefined>();
@@ -63,13 +70,13 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
 
     public scan(): void {
         this.barcodeScannerManager.scan().subscribe((barcode) => {
-            this.triggerAdd(barcode, false);
+            this.triggerAdd(this.cameraAdd, barcode);
         });
     }
 
     public addManually() {
         if (this.input) {
-            this.triggerAdd(this.input, true);
+            this.triggerAdd(this.manualAdd, this.input);
             this.clearInput();
         }
         else {
@@ -83,7 +90,7 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
             this.zebraScanSubscription = this.barcodeScannerManager
                 .zebraScan$
                 .subscribe((barcode) => {
-                    this.triggerAdd(barcode, false);
+                    this.triggerAdd(this.scanAdd, barcode);
                 });
         }
     }
@@ -107,9 +114,10 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
         this.input = '';
     }
 
-    private triggerAdd(barcode: string, isManual: boolean): void {
+    private triggerAdd(emitter: EventEmitter<string>, barcode: string): void {
         if (!this.hidden) {
-            this.add.emit([(barcode || '').trim(), isManual]);
+            const smartBarcode = (barcode || '').trim();
+            emitter.emit(smartBarcode);
         }
     }
 

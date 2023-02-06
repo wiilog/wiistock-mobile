@@ -32,7 +32,8 @@ import {
     FormPanelTextareaComponent
 } from '@common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
-import {mergeMap} from "rxjs";
+import {mergeMap, of, Subscription} from "rxjs";
+import {RfidManagerService} from "@app/plugins/rfid-manager/rfid-manager.service";
 
 
 @Component({
@@ -41,6 +42,8 @@ import {mergeMap} from "rxjs";
     styleUrls: ['./article-creation.page.scss'],
 })
 export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
+
+    private static readonly SCANNER_RFID_DELAY: number = 10000; // 10 seconds
 
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
@@ -86,6 +89,9 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         supplier: string;
         supplierReference: string;
     };
+    private tagsReadSubscription?: Subscription;
+
+    private scanLaunchedWithButton?: boolean;
 
     public constructor(private networkService: NetworkService,
                        private apiService: ApiService,
@@ -98,7 +104,9 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                        private activatedRoute: ActivatedRoute,
                        private storageService: StorageService,
                        private translationService: TranslationService,
-                       private navService: NavService) {
+                       private navService: NavService,
+                       private changeDetector: ChangeDetectorRef,
+                       private rfidManager: RfidManagerService) {
     }
 
     public ionViewWillEnter(): void {
@@ -107,18 +115,25 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         this.loading = true;
         this.loadingService.presentLoadingWhile({
             event: () => {
-                return this.apiService.requestApi(ApiService.DEFAULT_ARTICLE_VALUES)
-            }
-        }).subscribe(({defaultValues}) => {
-            this.defaultValues = defaultValues;
+                return this.apiService.requestApi(ApiService.DEFAULT_ARTICLE_VALUES).pipe(
+                    mergeMap(({defaultValues}) => {
+                        this.defaultValues = defaultValues;
 
-            if (this.defaultValues.supplier && this.defaultValues.reference) {
-                this.reference = Number(this.defaultValues.reference);
-                this.supplier = Number(this.defaultValues.supplier);
-                this.cleanAndImportSupplierReferences();
+                        if (this.defaultValues.supplier && this.defaultValues.reference) {
+                            this.reference = Number(this.defaultValues.reference);
+                            this.supplier = Number(this.defaultValues.supplier);
+                            return this.importSupplierReferences(false);
+                        }
+                        else {
+                            return of(undefined);
+                        }
+                    }),
+                    mergeMap(() => this.defaultValues.location ? this.rfidManager.connect() : of(undefined)),
+                    mergeMap(() => this.defaultValues.location ? this.rfidManager.configure() : of(undefined))
+                )
             }
-
-            if (defaultValues.location) {
+        }).subscribe(() => {
+            if (this.defaultValues.location) {
                 this.headerConfig = {
                     leftIcon: {
                         name: 'transfer.svg',
@@ -128,6 +143,16 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                     subtitle: `Emplacement : ${this.defaultValues.location}`
                 }
                 this.loading = false;
+
+                this.rfidManager.launchEventListeners();
+
+                this.tagsReadSubscription = this.rfidManager.tagsRead$
+                    .subscribe(({tags}) => {
+                        const [firstTag] = tags || [];
+                        if (firstTag) {
+                            this.onRFIDTagScanned(firstTag);
+                        }
+                    })
             } else {
                 this.toastService.presentToast('Aucun emplacement par défaut paramétré.');
             }
@@ -135,52 +160,9 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public ionViewWillLeave(): void {
+        this.disconnectRFIDScanner();
         if (this.footerScannerComponent) {
             this.footerScannerComponent.unsubscribeZebraScan();
-        }
-    }
-
-    public scan(value: string) {
-        if (this.creation) {
-            const formattedValue = value.replace(/~~/g, '~');
-            const matrixParts = formattedValue.split('~');
-            const values = matrixParts
-                .filter((part) => part)
-                .reduce((accumulator: {[field: string]: string}, part) => {
-                    const associatedKey: string|undefined = Object.keys(this.PREFIXES_TO_FIELDS).find((key) => part.startsWith(key));
-                    if (associatedKey) {
-                        const associatedField: string|undefined = this.PREFIXES_TO_FIELDS[associatedKey];
-                        if (associatedKey) {
-                            accumulator[associatedField] = part.substring(associatedKey.length);
-                        }
-                    }
-                    return accumulator;
-                }, {});
-            this.validate(values);
-        } else {
-            this.loading = true;
-            this.loadingService.presentLoadingWhile({
-                event: () => {
-                    return this.apiService
-                        .requestApi(ApiService.GET_ARTICLE_BY_RFID_TAG, {
-                            pathParams: {rfid: value},
-                        })
-                }
-            }).subscribe(({article}) => {
-                if (article) {
-                    this.toastService.presentToast('Article existant.');
-                    this.creation = false;
-                    this.bodyConfig = [];
-                } else if (this.defaultValues.location) {
-                    this.creation = true;
-                    this.rfidTag = value;
-                    this.scannerModeManual = BarcodeScannerModeEnum.INVISIBLE;
-                    this.initForm();
-                } else {
-                    this.toastService.presentToast('Aucun emplacement par défaut paramétré.');
-                }
-                this.loading = false;
-            });
         }
     }
 
@@ -213,7 +195,9 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                         onChange: (reference) => {
                             this.reference = reference;
                             if (this.supplier) {
-                                this.cleanAndImportSupplierReferences();
+                                this.importSupplierReferences().subscribe(() => {
+                                    this.initForm();
+                                });
                             }
                         }
                     },
@@ -230,7 +214,9 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                         onChange: (supplier) => {
                             this.supplier = supplier;
                             if (this.reference) {
-                                this.cleanAndImportSupplierReferences();
+                                this.importSupplierReferences().subscribe(() => {
+                                    this.initForm();
+                                })
                             }
                         }
                     },
@@ -384,26 +370,110 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         ]
     }
 
-    public cleanAndImportSupplierReferences() {
-        this.loadingService.presentLoadingWhile({
-            event: () => {
-                return this.apiService.requestApi(ApiService.GET_SUPPLIER_REF_BY_REF_AND_SUPPLIER, {
-                    pathParams: {
-                        ref: this.reference,
-                        supplier: this.supplier
-                    }
-                }).pipe(
-                    mergeMap(({supplierReferences}) => this.sqliteService.importSupplierReferences(supplierReferences))
-                )
-            }
-        }).subscribe(() => {
-            this.initForm();
-        })
+    public importSupplierReferences(loader: boolean = true) {
+        const requestApi = () => {
+            return this.apiService.requestApi(ApiService.GET_SUPPLIER_REF_BY_REF_AND_SUPPLIER, {
+                pathParams: {
+                    ref: this.reference,
+                    supplier: this.supplier
+                }
+            }).pipe(
+                mergeMap(({supplierReferences}) => this.sqliteService.importSupplierReferences(supplierReferences)),
+            );
+        };
+
+        if (loader) {
+            return this.loadingService.presentLoadingWhile({
+                event: () => requestApi()
+            });
+        }
+        else {
+            return requestApi();
+        }
     }
 
-    public rfid() {
-        // TODO
-        console.log('RFID')
+    public onRFIDButtonClicked(): void {
+        if (!this.scanLaunchedWithButton) {
+            this.scanLaunchedWithButton = true;
+            this.rfidManager.startScan();
+
+            setTimeout(() => {
+                if (this.scanLaunchedWithButton) {
+                    this.rfidManager.stopScan();
+                    this.scanLaunchedWithButton = false;
+                }
+            }, ArticleCreationPage.SCANNER_RFID_DELAY);
+        }
+    }
+
+    public onRFIDTagScanned(tag: string): void {
+        if (!this.loading && !this.creation) {
+            this.rfidManager.stopScan();
+            this.loading = true;
+            this.scanLaunchedWithButton = false;
+            this.loadingService.presentLoadingWhile({
+                event: () => {
+                    return this.apiService
+                        .requestApi(ApiService.GET_ARTICLE_BY_RFID_TAG, {
+                            pathParams: {rfid: tag},
+                        })
+                }
+            }).subscribe(({article}) => {
+                if (article) {
+                    this.toastService.presentToast('Article existant.');
+                    this.creation = false;
+                    this.bodyConfig = [];
+                } else if (this.defaultValues.location) {
+                    this.creation = true;
+                    this.rfidTag = tag;
+                    this.scannerModeManual = BarcodeScannerModeEnum.INVISIBLE;
+
+                    if (this.headerConfig) {
+                        this.headerConfig.title = `Tag : ${this.rfidTag}`;
+                    }
+                    this.initForm();
+                    this.disconnectRFIDScanner();
+                    this.changeDetector.detectChanges();
+                } else {
+                    this.toastService.presentToast('Aucun emplacement par défaut paramétré.');
+                }
+                this.loading = false;
+            });
+        }
+    }
+
+    public onDatamatrixScanned(value: string) {
+        if (this.creation) {
+            const formattedValue = value.replace(/~~/g, '~');
+            const matrixParts = formattedValue.split('~');
+            const values = matrixParts
+                .filter((part) => part)
+                .reduce((accumulator: { [field: string]: string }, part) => {
+                    const associatedKey: string | undefined = Object.keys(this.PREFIXES_TO_FIELDS).find((key) => part.startsWith(key));
+                    if (associatedKey) {
+                        const associatedField: string | undefined = this.PREFIXES_TO_FIELDS[associatedKey];
+                        if (associatedKey) {
+                            accumulator[associatedField] = part.substring(associatedKey.length);
+                        }
+                    }
+                    return accumulator;
+                }, {});
+            this.validate(values);
+        }
+    }
+
+    private disconnectRFIDScanner(): void {
+        this.rfidManager.disconnect().subscribe(() => {
+            this.rfidManager.removeEventListeners();
+            this.unsubscribeRFID();
+        });
+    }
+
+    private unsubscribeRFID(): void {
+        if (this.tagsReadSubscription && !this.tagsReadSubscription.closed) {
+            this.tagsReadSubscription.unsubscribe();
+        }
+        this.tagsReadSubscription = undefined;
     }
 
     public validate(matrixValues?: any) {
@@ -442,5 +512,4 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         // TODO
         console.log('scanMatrix');
     }
-
 }
