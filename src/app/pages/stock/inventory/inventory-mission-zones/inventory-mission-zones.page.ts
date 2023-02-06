@@ -11,6 +11,7 @@ import {IconColor} from "@common/components/icon/icon-color";
 import {InventoryLocationMission} from "@entities/inventory_location_mission";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {ViewWillEnter} from "@ionic/angular";
+import {ApiService} from "@app/services/api.service";
 
 
 @Component({
@@ -25,9 +26,13 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
     public listBoldValues?: Array<string>;
     public listZonesConfig?: Array<ListPanelItemConfig>;
     public selectedMissionId?: number;
+    public rfidTags: Array<string> = [];
+    public zones: Array<number>;
+    public treated: boolean = false;
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
+                       private apiService: ApiService,
                        private localDataManager: LocalDataManagerService,
                        private mainHeaderService: MainHeaderService,
                        private toastService: ToastService,
@@ -37,6 +42,7 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
     public ionViewWillEnter(): void {
         this.selectedMissionId = this.navService.param('missionId');
         this.listZonesConfig = [];
+        this.zones = [];
         this.initZoneView();
     }
 
@@ -46,14 +52,20 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
             'mission_id = ' + this.selectedMissionId
         ]).subscribe((inventoryMissionZones: Array<InventoryLocationMission>) => {
             const arrayResult = inventoryMissionZones.reduce((acc: {[zoneLabel: string]: {counter: number, zoneId: number, done: boolean}}, inventoryMissionZone: InventoryLocationMission) => {
+                const missionDone = Boolean(inventoryMissionZone.done)
+                if (!missionDone) {
+                    this.treated = false;
+                }
+
                 if(acc[inventoryMissionZone.zone_label]){
                     acc[inventoryMissionZone.zone_label]['counter']++;
-                    acc[inventoryMissionZone.zone_label]['done'] = Boolean(inventoryMissionZone.done);
+                    acc[inventoryMissionZone.zone_label]['done'] = missionDone;
                 } else {
+                    this.zones.push(inventoryMissionZone.zone_id);
                     acc[inventoryMissionZone.zone_label] = {
                         zoneId: inventoryMissionZone.zone_id,
                         counter: 1,
-                        done: Boolean(inventoryMissionZone.done)
+                        done: missionDone
                     };
                 }
                 return acc;
@@ -70,8 +82,10 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
                             zoneLabel: index,
                             zoneId: arrayResult[index].zoneId,
                             missionId: this.selectedMissionId,
-                            afterValidate: (data: any) => {
-                                this.refreshListConfig(data);
+                            rfidTags: this.rfidTags,
+                            afterValidate: ({tags, zoneId}: any) => {
+                                this.rfidTags = tags;
+                                this.refreshListConfig(zoneId);
                             }
 
                         });
@@ -101,6 +115,23 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
             }]
         ).subscribe(() => {
             this.initZoneView();
+        });
+    }
+
+    public validate() {
+        this.loadingService.presentLoadingWhile({
+            message: 'Correction des quantités, cela peut prendre un certain temps...',
+            event: () => {
+                return this.apiService.requestApi(ApiService.FINISH_MISSION, {
+                    params: {
+                        tags: this.rfidTags,
+                        zones: this.zones,
+                        mission: this.selectedMissionId,
+                    }
+                })
+            }
+        }).subscribe(() => {
+            this.navService.setRoot(NavPathEnum.MAIN_MENU);
         });
     }
 }

@@ -1,5 +1,16 @@
 package com.wiilog.wiistock;
 
-import com.getcapacitor.BridgeActivity;
+import android.os.Bundle;
 
-public class MainActivity extends BridgeActivity {}
+import com.getcapacitor.BridgeActivity;
+import com.wiilog.wiistock.plugins.rfid.manager.RfidManagerPlugin;
+
+public class MainActivity extends BridgeActivity {
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        registerPlugin(RfidManagerPlugin.class);
+        super.onCreate(savedInstanceState);
+    }
+
+}

@@ -35,6 +35,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter {
     public missionId: number;
     public rfidTags: Array<string>;
 
+    public inputRfidTags: Array<string>;
     public headerConfig?: {
         leftIcon: IconConfig;
         rightIcon: IconConfig;
@@ -76,6 +77,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter {
         this.zoneLabel = this.navService.param('zoneLabel');
         this.zoneId = this.navService.param('zoneId');
         this.missionId = this.navService.param('missionId');
+        this.inputRfidTags = this.navService.param('rfidTags');
         this.headerConfig = {
             leftIcon: {
                 name: 'inventory.svg',
@@ -184,7 +186,10 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter {
         }).subscribe((response) => {
             if(response.success){
                 this.navService.pop().subscribe(() => {
-                    this.afterValidate(this.zoneId);
+                    this.afterValidate({
+                        zoneId: this.zoneId,
+                        tags: this.inputRfidTags
+                    });
                 });
             }
         });
@@ -193,6 +198,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter {
     public addManualRFID(rfidTag: string){
         if(!this.rfidTags.includes(rfidTag)){
             this.rfidTags.push(rfidTag);
+            this.inputRfidTags.push(rfidTag);
         }
         this.loadingService.presentLoadingWhile({
             event: () => {
