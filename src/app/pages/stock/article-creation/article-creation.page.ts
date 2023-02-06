@@ -476,14 +476,14 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         this.tagsReadSubscription = undefined;
     }
 
-    public validate(matrixValues?: any) {
-        const params = Object.assign({
+    public validate(matrixValues?: {[field: string]: string}) {
+        const params: {[field: string]: string|boolean|number} = {
             rfidTag: this.rfidTag,
             location: this.defaultValues.location,
-            ...(matrixValues ? {
-                fromMatrix: true
-            } : {})
-        }, this.formPanelComponent.values, matrixValues || {});
+            ...(matrixValues ? {fromMatrix: true} : {}),
+            ...this.formPanelComponent.values,
+            ...(matrixValues || {})
+        };
 
         if (!params.fromMatrix
             && (!params.type || !params.reference || !params.supplier

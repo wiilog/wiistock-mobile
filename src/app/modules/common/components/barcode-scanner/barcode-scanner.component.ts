@@ -55,6 +55,7 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
                        private toastService: ToastService) {
         this.scanAdd = new EventEmitter<string>();
         this.manualAdd = new EventEmitter<string>();
+        this.cameraAdd = new EventEmitter<string>();
         this.search = new EventEmitter<undefined>();
         this.createForm = new EventEmitter<undefined>();
         this.clear = new EventEmitter<undefined>();

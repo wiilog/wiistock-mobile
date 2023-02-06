@@ -43,6 +43,8 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
         this.selectedMissionId = this.navService.param('missionId');
         this.listZonesConfig = [];
         this.zones = [];
+
+
         this.initZoneView();
     }
 
@@ -50,18 +52,14 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
         this.listBoldValues = ['label'];
         this.sqliteService.findBy('inventory_location_zone', [
             'mission_id = ' + this.selectedMissionId
-        ]).subscribe((inventoryMissionZones: Array<InventoryLocationMission>) => {
-            const arrayResult = inventoryMissionZones.reduce((acc: {[zoneLabel: string]: {counter: number, zoneId: number, done: boolean}}, inventoryMissionZone: InventoryLocationMission) => {
+        ]).subscribe((locationsInMission: Array<InventoryLocationMission>) => {
+            const zonesData = locationsInMission.reduce((acc: {[zoneLabel: string]: {counter: number, zoneId: number, done: boolean}}, inventoryMissionZone: InventoryLocationMission) => {
                 const missionDone = Boolean(inventoryMissionZone.done)
-                if (!missionDone) {
-                    this.treated = false;
-                }
 
-                if(acc[inventoryMissionZone.zone_label]){
-                    acc[inventoryMissionZone.zone_label]['counter']++;
-                    acc[inventoryMissionZone.zone_label]['done'] = missionDone;
+                if(acc[inventoryMissionZone.zone_label]) {
+                    acc[inventoryMissionZone.zone_label].counter++;
+                    acc[inventoryMissionZone.zone_label].done = missionDone;
                 } else {
-                    this.zones.push(inventoryMissionZone.zone_id);
                     acc[inventoryMissionZone.zone_label] = {
                         zoneId: inventoryMissionZone.zone_id,
                         counter: 1,
@@ -71,26 +69,32 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
                 return acc;
             }, {});
 
-            this.listZonesConfig = Object.keys(arrayResult).map((index) => {
+            this.treated = Object.keys(zonesData)
+                .every((zoneLabel) => zonesData[zoneLabel].done);
+
+            this.zones = Object.keys(zonesData)
+                .map((zoneLabel) => zonesData[zoneLabel].zoneId);
+
+            this.listZonesConfig = Object.keys(zonesData).map((index) => {
                 return {
                     infos: {
                         label: {value: index},
-                        details: {value: arrayResult[index].counter + ' emplacements à inventorier'}
+                        details: {value: zonesData[index].counter + ' emplacements à inventorier'}
                     },
                     pressAction: () => {
                         this.navService.push(NavPathEnum.INVENTORY_MISSION_ZONE_CONTROLE, {
                             zoneLabel: index,
-                            zoneId: arrayResult[index].zoneId,
+                            zoneId: zonesData[index].zoneId,
                             missionId: this.selectedMissionId,
                             rfidTags: this.rfidTags,
                             afterValidate: ({tags, zoneId}: any) => {
+                                console.warn('afterValidate', tags, zoneId)
                                 this.rfidTags = tags;
                                 this.refreshListConfig(zoneId);
                             }
-
                         });
                     },
-                    ...(arrayResult[index].done ? {
+                    ...(zonesData[index].done ? {
                         rightIcon: {
                             color: 'list-green' as IconColor,
                             name: 'check.svg',

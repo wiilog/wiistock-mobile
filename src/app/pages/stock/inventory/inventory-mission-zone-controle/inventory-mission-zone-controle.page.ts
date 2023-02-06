@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {LoadingService} from '@app/services/loading.service';
@@ -12,7 +12,10 @@ import {ListPanelItemConfig} from "@common/components/panel/model/list-panel/lis
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcode-scanner.component";
 import {ApiService} from "@app/services/api.service";
-import {ViewWillEnter} from "@ionic/angular";
+import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {RfidManagerService} from "@app/plugins/rfid-manager/rfid-manager.service";
+import {mergeMap} from "rxjs";
+import {filter} from "rxjs/operators";
 
 
 @Component({
@@ -20,7 +23,7 @@ import {ViewWillEnter} from "@ionic/angular";
     templateUrl: './inventory-mission-zone-controle.page.html',
     styleUrls: ['./inventory-mission-zone-controle.page.scss'],
 })
-export class InventoryMissionZoneControlePage implements ViewWillEnter {
+export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWillLeave {
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
 
@@ -59,12 +62,16 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter {
 
     public listBoldValues?: Array<string>;
 
+    private rfidScanMode?: boolean;
+
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
                        private localDataManager: LocalDataManagerService,
                        private mainHeaderService: MainHeaderService,
                        private toastService: ToastService,
                        private apiService: ApiService,
+                       private rfidManagerService: RfidManagerService,
+                       private changeDetector: ChangeDetectorRef,
                        private navService: NavService) {
 
         this.rfidTags = [];
@@ -77,15 +84,17 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter {
         this.zoneLabel = this.navService.param('zoneLabel');
         this.zoneId = this.navService.param('zoneId');
         this.missionId = this.navService.param('missionId');
-        this.inputRfidTags = this.navService.param('rfidTags');
+        this.inputRfidTags = this.navService.param('rfidTags') || [];
         this.headerConfig = {
             leftIcon: {
                 name: 'inventory.svg',
             },
             rightIcon: {
                 name: 'rfid_play.svg',
+                width: "35px",
+                height: "35px",
                 action: () => {
-                    this.initZoneControleView();
+                    this.toggleStartAndStopScan();
                 }
             },
             title: this.zoneLabel,
@@ -93,22 +102,74 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter {
         };
         this.listBoldValues = ['title', 'reference', 'location', 'textRight'];
         this.elementsToDisplay = [];
+
+        this.loadingService
+            .presentLoadingWhile({
+                event: () => this.rfidManagerService.connect().pipe(
+                    mergeMap(() => this.rfidManagerService.configure())
+                )
+            })
+            .subscribe(() => {
+                this.rfidScanMode = true;
+                this.rfidManagerService.startScan();
+
+                this.initRfidEvents();
+                this.refreshHeaderConfig();
+            })
+    }
+
+    public ionViewWillLeave(): void {
+        this.rfidManagerService.removeEventListeners();
+        this.rfidManagerService.disconnect();
     }
 
     public refreshHeaderConfig(): void {
-        // TOTO
-        /*this.headerConfig.rightIcon.name =
-            this.headerConfig.rightIcon.name === 'rfid_pause.svg'
-            ? 'rfid_play.svg'
-            : 'rfid_pause.svg';
-
-         */
+        if (this.headerConfig) {
+            this.headerConfig.rightIcon.name = this.rfidScanMode
+                ? 'rfid_pause.svg'
+                : 'rfid_play.svg';
+            this.changeDetector.detectChanges();
+        }
     }
 
-    public initZoneControleView() {
+    private initRfidEvents() {
+        this.rfidManagerService.launchEventListeners();
+        this.rfidManagerService.tagsRead$
+            .pipe(filter(() => Boolean(this.rfidScanMode)))
+            .subscribe(({tags}) => {
+                const newTags = tags.filter((tag) => this.rfidTags.indexOf(tag) === -1);
+                this.rfidTags.push(...newTags);
+                this.inputRfidTags.push(...newTags);
+                console.warn(newTags)
+                console.warn(this.inputRfidTags)
+            });
+
+        this.rfidManagerService.scanStarted$
+            .pipe(filter(() => !this.rfidScanMode))
+            .subscribe(() => {
+                this.rfidScanMode = true;
+                this.refreshHeaderConfig();
+            });
+
+        this.rfidManagerService.scanStopped$
+            .pipe(filter(() => Boolean(this.rfidScanMode)))
+            .subscribe(() => {
+                this.rfidScanMode = false;
+                this.rfidManagerService.stopScan();
+                this.refreshHeaderConfig();
+                this.retrieveZoneRfidSummary();
+            });
+    }
+
+    public toggleStartAndStopScan() {
+        if (!this.rfidScanMode) {
+            this.rfidManagerService.startScan();
+        }
+        else {
+            this.rfidManagerService.stopScan();
+            this.retrieveZoneRfidSummary();
+        }
         this.refreshHeaderConfig();
-        this.refreshMissingsRefsListConfig();
-        this.refreshLocationsQualityListConfig();
     }
 
     public refreshMissingsRefsListConfig(){
@@ -200,19 +261,29 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter {
             this.rfidTags.push(rfidTag);
             this.inputRfidTags.push(rfidTag);
         }
-        this.loadingService.presentLoadingWhile({
-            event: () => {
-                return this.apiService.requestApi(ApiService.ZONE_RFID_SUMMARY, {
-                    params: {
-                        zone: this.zoneId,
-                        mission: this.missionId,
-                        rfidTags: this.rfidTags,
-                    }
-                })
-            }
-        }).subscribe((response) => {
-            this.elementsToDisplay = response.data;
-            this.initZoneControleView();
-        });
+
+        this.retrieveZoneRfidSummary();
+    }
+
+    private retrieveZoneRfidSummary() {
+        if (!this.loading) {
+            this.loading = true;
+            this.loadingService.presentLoadingWhile({
+                event: () => {
+                    return this.apiService.requestApi(ApiService.ZONE_RFID_SUMMARY, {
+                        params: {
+                            zone: this.zoneId,
+                            mission: this.missionId,
+                            rfidTags: this.rfidTags,
+                        }
+                    })
+                }
+            }).subscribe((response) => {
+                this.loading = false;
+                this.elementsToDisplay = response.data;
+                this.refreshMissingsRefsListConfig();
+                this.refreshLocationsQualityListConfig();
+            });
+        }
     }
 }
