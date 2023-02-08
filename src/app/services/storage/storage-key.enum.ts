@@ -23,6 +23,7 @@ export enum StorageKeyEnum {
     PARAMETER_DISPLAY_REFERENCES_ON_TRANSFER_CARDS = 'displayReferencesOnTransferCards',
     PARAMETER_DROP_ON_FREE_LOCATION = 'dropOnFreeLocation',
     PARAMETER_DISPLAY_TARGET_LOCATION_PICKING = 'displayTargetLocationPicking',
+    PARAMETER_RFID_PREFIX = 'rfidPrefix',
 
     API_KEY = 'api-key',
     OPERATOR = 'operator',

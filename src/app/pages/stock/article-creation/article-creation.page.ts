@@ -28,7 +28,7 @@ import {
     FormPanelTextareaComponent
 } from '@common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
-import {mergeMap, Observable, of} from "rxjs";
+import {mergeMap, Observable, of, tap} from "rxjs";
 import {RfidManagerService} from "@app/services/rfid-manager.service";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {map} from "rxjs/operators";
@@ -52,13 +52,15 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
     public bodyConfig: Array<FormPanelParam>;
 
     public scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.WITH_MANUAL;
-    public loading = false;
-    public rfidTag = '';
+    public loading: boolean = false;
+    public rfidTag: string = '';
     public headerConfig?: {
         leftIcon: IconConfig;
         title: string;
         subtitle?: string;
     };
+
+    private rfidPrefix?: string;
 
     public PREFIXES_TO_FIELDS: {[prefix: string]: string} = {
         CPO: 'commandNumber',
@@ -113,6 +115,11 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         this.loadingService.presentLoadingWhile({
             event: () => {
                 return this.retrieveDefaultValues().pipe(
+                    mergeMap(() => this.storageService.getString(StorageKeyEnum.PARAMETER_RFID_PREFIX).pipe(
+                        tap((rfidPrefix) => {
+                            this.rfidPrefix = rfidPrefix || '';
+                        })
+                    )),
                     mergeMap(() => this.defaultValues.location
                         ? this.rfidManager.ensureScannerConnection()
                         : of(undefined)),
@@ -150,6 +157,12 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         this.rfidManager.launchEventListeners();
 
         this.rfidManager.tagsRead$
+            .pipe(
+                map(({tags, ...remaining}) => ({
+                    ...remaining,
+                    tags: (tags || []).filter((tag) => tag.startsWith(this.rfidPrefix || ''))
+                }))
+            )
             .subscribe(({tags}) => {
                 const [firstTag] = tags || [];
                 if (firstTag) {

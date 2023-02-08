@@ -90,12 +90,14 @@ export class StorageService {
             : of(undefined);
     }
 
-    public updateParameters(parameters: { [name: string]: boolean }): Observable<any> {
+    public updateParameters(parameters: { [name: string]: boolean|string }): Observable<any> {
         const parameterKeys = Object.keys(parameters);
         return parameterKeys.length > 0
             ? zip(...(parameterKeys.map((key) => from(Preferences.set({
                 key,
-                value: `${Number(parameters[key])}`
+                value: typeof parameters[key] === 'boolean'
+                    ? `${Number(parameters[key])}`
+                    : `${parameters[key] || ''}`
             })))))
             : of(undefined);
     }

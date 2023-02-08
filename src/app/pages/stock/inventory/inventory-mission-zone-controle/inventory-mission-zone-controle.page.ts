@@ -14,8 +14,10 @@ import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcod
 import {ApiService} from "@app/services/api.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {RfidManagerService} from "@app/services/rfid-manager.service";
-import {mergeMap, of} from "rxjs";
-import {filter} from "rxjs/operators";
+import {mergeMap, of, tap} from "rxjs";
+import {filter, map} from "rxjs/operators";
+import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
+import {StorageService} from "@app/services/storage/storage.service";
 
 
 @Component({
@@ -63,6 +65,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
     public listBoldValues?: Array<string>;
 
     private rfidScanMode?: boolean;
+    private rfidPrefix?: string;
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
@@ -72,6 +75,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
                        private apiService: ApiService,
                        private rfidManager: RfidManagerService,
                        private changeDetector: ChangeDetectorRef,
+                       private storageService: StorageService,
                        private navService: NavService) {
 
         this.rfidTags = [];
@@ -105,10 +109,16 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
 
         this.loadingService
             .presentLoadingWhile({
-                event: () => this.rfidManager.ensureScannerConnection().pipe(
-                    mergeMap((result) => result.success
-                        ? this.rfidManager.startScan()
-                        : of(result)
+                event: () => (
+                    this.storageService.getString(StorageKeyEnum.PARAMETER_RFID_PREFIX).pipe(
+                        tap((rfidPrefix) => {
+                            this.rfidPrefix = rfidPrefix || '';
+                        }),
+                        mergeMap(() => this.rfidManager.ensureScannerConnection()),
+                        mergeMap((result) => result.success
+                            ? this.rfidManager.startScan()
+                            : of(result)
+                        )
                     )
                 )
             })
@@ -137,13 +147,17 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
     private initRfidEvents(): void {
         this.rfidManager.launchEventListeners();
         this.rfidManager.tagsRead$
-            .pipe(filter(() => Boolean(this.rfidScanMode)))
+            .pipe(
+                filter(() => Boolean(this.rfidScanMode)),
+                map(({tags, ...remaining}) => ({
+                    ...remaining,
+                    tags: (tags || []).filter((tag) => tag.startsWith(this.rfidPrefix || ''))
+                }))
+            )
             .subscribe(({tags}) => {
                 const newTags = tags.filter((tag) => this.rfidTags.indexOf(tag) === -1);
                 this.rfidTags.push(...newTags);
                 this.inputRfidTags.push(...newTags);
-                console.warn(newTags)
-                console.warn(this.inputRfidTags)
             });
 
         this.rfidManager.scanStarted$
