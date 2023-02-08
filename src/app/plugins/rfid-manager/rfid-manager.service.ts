@@ -1,8 +1,9 @@
 import {Injectable} from "@angular/core";
 import {registerPlugin} from "@capacitor/core";
-import {DeviceInfoResult, RfidManagerPlugin, RunResult} from "./definitions";
-import {from, Observable, Subject} from "rxjs";
+import {DeviceInfoResult, ErrorCodeEnum, ManagerResult, RfidManagerPlugin, RunResult} from "./definitions";
+import {from, mergeMap, Observable, of, Subject} from "rxjs";
 import {PluginListenerHandle} from "@capacitor/core/types/definitions";
+import {catchError} from "rxjs/operators";
 
 @Injectable()
 export class RfidManagerService {
@@ -94,18 +95,18 @@ export class RfidManagerService {
         this.eventsLaunched = false;
     }
 
-    public connect(): Observable<RunResult> {
-        return from(this.rfidManagerPlugin
-            .run({
-                action: 'connect'
-            }));
+    public ensureScannerConnection(): Observable<ManagerResult> {
+        return this.connect().pipe(
+            mergeMap(() => this.configure()),
+            catchError((error: Error) => this.handleRunError(error))
+        );
     }
 
-    public startScan(): Observable<RunResult> {
-        return from(this.rfidManagerPlugin
-            .run({
-                action: 'startScan'
-            }));
+    public startScan(): Observable<ManagerResult> {
+        return from(this.rfidManagerPlugin.run({action: 'startScan'}))
+            .pipe(
+                catchError((error: Error) => this.handleRunError(error))
+            );
     }
 
     public stopScan(): Observable<RunResult> {
@@ -115,21 +116,51 @@ export class RfidManagerService {
             }));
     }
 
-    public configure(): Observable<RunResult> {
+    public deviceInfo(): Observable<DeviceInfoResult> {
+        return from(this.rfidManagerPlugin.deviceInfo());// TODO test for return type
+    }
+
+    // TODO WIIS-7970
+    public disconnect(): Observable<RunResult> {
+        return from(this.rfidManagerPlugin.run({
+            action: 'disconnect'
+        }));
+    }
+
+    private connect(): Observable<RunResult> {
+        return from(this.rfidManagerPlugin
+            .run({
+                action: 'connect'
+            }));
+    }
+
+    private configure(): Observable<RunResult> {
         return from(this.rfidManagerPlugin
             .run({
                 action: 'configure'
             }));
     }
 
-    public deviceInfo(): Observable<DeviceInfoResult> {
-        return from(this.rfidManagerPlugin.deviceInfo());// TODO test for return type
-    }
-
-    public disconnect(): Observable<RunResult> {
-        return from(this.rfidManagerPlugin.run({
-            action: 'disconnect'
-        }));
+    private handleRunError(error: Error): Observable<ManagerResult> {
+        const code = error.message;
+        const message = (
+            code === ErrorCodeEnum.RETRIEVE_AVAILABLE_READERS_LIST_FAILURE ? 'impossible de récupérer la liste des scanners RFID, vérifier votre connexion bluetooth' :
+            code === ErrorCodeEnum.READER_ALREADY_CONNECTED ? 'la connexion au scanner RFID existe déjà' :
+            code === ErrorCodeEnum.READER_CONNECTION_FAILURE ? 'problème lors de la connexion au scanner RFID' :
+            code === ErrorCodeEnum.READER_CONNECTION_FAILURE_RFID_COMM_OPEN_ERROR ? `problème lors de la connexion au scanner RFID, veuillez fermer les applications zebra l'utilisant (123RFID)` :
+            code === ErrorCodeEnum.READER_CONNECTION_FAILURE_NOT_CONFIGURED ? 'problème lors de la connexion au scanner RFID, veuillez préalablement le configurer' :
+            code === ErrorCodeEnum.NO_READER_FOUND ? 'aucun scanner RFID trouvé' :
+            code === ErrorCodeEnum.READER_CONFIGURATION_FAILED ? 'la configuration du scanner a échoué' :
+            code === ErrorCodeEnum.READER_NOT_CONNECTED ? 'aucun scanner trouvé' :
+                code // default
+        );
+        return of({
+            success: false,
+            error: {
+                code,
+                message: `Erreur RFID : ${message}`
+            }
+        });
     }
 
 }

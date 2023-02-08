@@ -33,7 +33,7 @@ import {
 } from '@common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {mergeMap, of, Subscription} from "rxjs";
-import {RfidManagerService} from "@app/plugins/rfid-manager/rfid-manager.service";
+import {RfidManagerService} from "@app/services/rfid-manager.service";
 
 
 @Component({
@@ -128,12 +128,15 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                             return of(undefined);
                         }
                     }),
-                    mergeMap(() => this.defaultValues.location ? this.rfidManager.connect() : of(undefined)),
-                    mergeMap(() => this.defaultValues.location ? this.rfidManager.configure() : of(undefined))
+                    mergeMap(() => this.defaultValues.location ? this.rfidManager.ensureScannerConnection() : of(undefined)),
                 )
             }
-        }).subscribe(() => {
+        }).subscribe((rfidResult) => {
             if (this.defaultValues.location) {
+                if (rfidResult) {
+                    this.initRfidEvents();
+                }
+
                 this.headerConfig = {
                     leftIcon: {
                         name: 'transfer.svg',
@@ -143,16 +146,6 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                     subtitle: `Emplacement : ${this.defaultValues.location}`
                 }
                 this.loading = false;
-
-                this.rfidManager.launchEventListeners();
-
-                this.tagsReadSubscription = this.rfidManager.tagsRead$
-                    .subscribe(({tags}) => {
-                        const [firstTag] = tags || [];
-                        if (firstTag) {
-                            this.onRFIDTagScanned(firstTag);
-                        }
-                    })
             } else {
                 this.toastService.presentToast('Aucun emplacement par défaut paramétré.');
             }
@@ -164,6 +157,18 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         if (this.footerScannerComponent) {
             this.footerScannerComponent.unsubscribeZebraScan();
         }
+    }
+
+    private initRfidEvents(): void {
+        this.rfidManager.plugin.launchEventListeners();
+
+        this.tagsReadSubscription = this.rfidManager.plugin.tagsRead$
+            .subscribe(({tags}) => {
+                const [firstTag] = tags || [];
+                if (firstTag) {
+                    this.onRFIDTagScanned(firstTag);
+                }
+            })
     }
 
     public initForm() {
@@ -399,7 +404,7 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
 
             setTimeout(() => {
                 if (this.scanLaunchedWithButton) {
-                    this.rfidManager.stopScan();
+                    this.rfidManager.stopScan(false);
                     this.scanLaunchedWithButton = false;
                 }
             }, ArticleCreationPage.SCANNER_RFID_DELAY);
@@ -442,7 +447,7 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         }
     }
 
-    public onDatamatrixScanned(value: string) {
+    public onDatamatrixScanned(value: string): void {
         if (this.creation) {
             const formattedValue = value.replace(/~~/g, '~');
             const matrixParts = formattedValue.split('~');
@@ -463,10 +468,8 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
     }
 
     private disconnectRFIDScanner(): void {
-        this.rfidManager.disconnect().subscribe(() => {
-            this.rfidManager.removeEventListeners();
-            this.unsubscribeRFID();
-        });
+        this.rfidManager.plugin.removeEventListeners();
+        this.unsubscribeRFID();
     }
 
     private unsubscribeRFID(): void {

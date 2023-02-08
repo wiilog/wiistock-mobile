@@ -13,8 +13,8 @@ import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode
 import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcode-scanner.component";
 import {ApiService} from "@app/services/api.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
-import {RfidManagerService} from "@app/plugins/rfid-manager/rfid-manager.service";
-import {mergeMap} from "rxjs";
+import {RfidManagerService} from "@app/services/rfid-manager.service";
+import {mergeMap, of} from "rxjs";
 import {filter} from "rxjs/operators";
 
 
@@ -105,22 +105,24 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
 
         this.loadingService
             .presentLoadingWhile({
-                event: () => this.rfidManagerService.connect().pipe(
-                    mergeMap(() => this.rfidManagerService.configure())
+                event: () => this.rfidManagerService.ensureScannerConnection().pipe(
+                    mergeMap((result) => result.success
+                        ? this.rfidManagerService.startScan()
+                        : of(result)
+                    )
                 )
             })
-            .subscribe(() => {
-                this.rfidScanMode = true;
-                this.rfidManagerService.startScan();
-
-                this.initRfidEvents();
+            .subscribe((result) => {
+                if (result) {
+                    this.rfidScanMode = true;
+                    this.initRfidEvents();
+                }
                 this.refreshHeaderConfig();
             })
     }
 
     public ionViewWillLeave(): void {
-        this.rfidManagerService.removeEventListeners();
-        this.rfidManagerService.disconnect();
+        this.rfidManagerService.plugin.removeEventListeners();
     }
 
     public refreshHeaderConfig(): void {
@@ -132,9 +134,9 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
         }
     }
 
-    private initRfidEvents() {
-        this.rfidManagerService.launchEventListeners();
-        this.rfidManagerService.tagsRead$
+    private initRfidEvents(): void {
+        this.rfidManagerService.plugin.launchEventListeners();
+        this.rfidManagerService.plugin.tagsRead$
             .pipe(filter(() => Boolean(this.rfidScanMode)))
             .subscribe(({tags}) => {
                 const newTags = tags.filter((tag) => this.rfidTags.indexOf(tag) === -1);
@@ -144,24 +146,23 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
                 console.warn(this.inputRfidTags)
             });
 
-        this.rfidManagerService.scanStarted$
+        this.rfidManagerService.plugin.scanStarted$
             .pipe(filter(() => !this.rfidScanMode))
             .subscribe(() => {
                 this.rfidScanMode = true;
                 this.refreshHeaderConfig();
             });
 
-        this.rfidManagerService.scanStopped$
+        this.rfidManagerService.plugin.scanStopped$
             .pipe(filter(() => Boolean(this.rfidScanMode)))
             .subscribe(() => {
                 this.rfidScanMode = false;
-                this.rfidManagerService.stopScan();
                 this.refreshHeaderConfig();
                 this.retrieveZoneRfidSummary();
             });
     }
 
-    public toggleStartAndStopScan() {
+    public toggleStartAndStopScan(): void {
         if (!this.rfidScanMode) {
             this.rfidManagerService.startScan();
         }

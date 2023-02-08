@@ -25,6 +25,7 @@
         ],
         "paths": {
             "@common/*": ["app/modules/common/*"],
+            "@plugins/*": ["app/plugins/*"],
             "@pages/*": ["app/pages/*"],
             "@app/*": ["app/*"],
             "@entities/*": ["entities/*"],
