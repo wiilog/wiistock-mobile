@@ -3,7 +3,6 @@ package com.wiilog.wiistock.plugins.rfid.manager.exceptions;
 public enum ZebraExceptionType {
     ACTION_INVALID,
     ACTION_REQUIRED,
-    READER_ALREADY_CONNECTED,
     RETRIEVE_AVAILABLE_READERS_LIST_FAILURE,
     READER_CONNECTION_FAILURE,
     READER_CONNECTION_FAILURE_NOT_CONFIGURED,

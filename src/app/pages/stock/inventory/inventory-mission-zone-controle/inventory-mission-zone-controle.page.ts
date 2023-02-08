@@ -70,7 +70,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
                        private mainHeaderService: MainHeaderService,
                        private toastService: ToastService,
                        private apiService: ApiService,
-                       private rfidManagerService: RfidManagerService,
+                       private rfidManager: RfidManagerService,
                        private changeDetector: ChangeDetectorRef,
                        private navService: NavService) {
 
@@ -105,9 +105,9 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
 
         this.loadingService
             .presentLoadingWhile({
-                event: () => this.rfidManagerService.ensureScannerConnection().pipe(
+                event: () => this.rfidManager.ensureScannerConnection().pipe(
                     mergeMap((result) => result.success
-                        ? this.rfidManagerService.startScan()
+                        ? this.rfidManager.startScan()
                         : of(result)
                     )
                 )
@@ -122,7 +122,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
     }
 
     public ionViewWillLeave(): void {
-        this.rfidManagerService.plugin.removeEventListeners();
+        this.rfidManager.removeEventListeners();
     }
 
     public refreshHeaderConfig(): void {
@@ -135,8 +135,8 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
     }
 
     private initRfidEvents(): void {
-        this.rfidManagerService.plugin.launchEventListeners();
-        this.rfidManagerService.plugin.tagsRead$
+        this.rfidManager.launchEventListeners();
+        this.rfidManager.tagsRead$
             .pipe(filter(() => Boolean(this.rfidScanMode)))
             .subscribe(({tags}) => {
                 const newTags = tags.filter((tag) => this.rfidTags.indexOf(tag) === -1);
@@ -146,14 +146,14 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
                 console.warn(this.inputRfidTags)
             });
 
-        this.rfidManagerService.plugin.scanStarted$
+        this.rfidManager.scanStarted$
             .pipe(filter(() => !this.rfidScanMode))
             .subscribe(() => {
                 this.rfidScanMode = true;
                 this.refreshHeaderConfig();
             });
 
-        this.rfidManagerService.plugin.scanStopped$
+        this.rfidManager.scanStopped$
             .pipe(filter(() => Boolean(this.rfidScanMode)))
             .subscribe(() => {
                 this.rfidScanMode = false;
@@ -164,10 +164,10 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
 
     public toggleStartAndStopScan(): void {
         if (!this.rfidScanMode) {
-            this.rfidManagerService.startScan();
+            this.rfidManager.startScan();
         }
         else {
-            this.rfidManagerService.stopScan();
+            this.rfidManager.stopScan();
             this.retrieveZoneRfidSummary();
         }
         this.refreshHeaderConfig();

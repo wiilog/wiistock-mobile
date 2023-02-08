@@ -19,21 +19,19 @@ import {
     FormPanelSelectComponent
 } from '@common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 import {SelectItemTypeEnum} from '@common/components/select-item/select-item-type.enum';
-import {
-    FormPanelInputComponent
-} from '@common/components/panel/form-panel/form-panel-input/form-panel-input.component';
+import {FormPanelInputComponent} from '@common/components/panel/form-panel/form-panel-input/form-panel-input.component';
 import {
     FormPanelCalendarComponent
 } from '@common/components/panel/form-panel/form-panel-calendar/form-panel-calendar.component';
-import {
-    FormPanelCalendarMode
-} from '@common/components/panel/form-panel/form-panel-calendar/form-panel-calendar-mode';
+import {FormPanelCalendarMode} from '@common/components/panel/form-panel/form-panel-calendar/form-panel-calendar-mode';
 import {
     FormPanelTextareaComponent
 } from '@common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
-import {mergeMap, of, Subscription} from "rxjs";
+import {mergeMap, Observable, of} from "rxjs";
 import {RfidManagerService} from "@app/services/rfid-manager.service";
+import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
+import {map} from "rxjs/operators";
 
 
 @Component({
@@ -89,7 +87,6 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         supplier: string;
         supplierReference: string;
     };
-    private tagsReadSubscription?: Subscription;
 
     private scanLaunchedWithButton?: boolean;
 
@@ -115,20 +112,10 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         this.loading = true;
         this.loadingService.presentLoadingWhile({
             event: () => {
-                return this.apiService.requestApi(ApiService.DEFAULT_ARTICLE_VALUES).pipe(
-                    mergeMap(({defaultValues}) => {
-                        this.defaultValues = defaultValues;
-
-                        if (this.defaultValues.supplier && this.defaultValues.reference) {
-                            this.reference = Number(this.defaultValues.reference);
-                            this.supplier = Number(this.defaultValues.supplier);
-                            return this.importSupplierReferences(false);
-                        }
-                        else {
-                            return of(undefined);
-                        }
-                    }),
-                    mergeMap(() => this.defaultValues.location ? this.rfidManager.ensureScannerConnection() : of(undefined)),
+                return this.retrieveDefaultValues().pipe(
+                    mergeMap(() => this.defaultValues.location
+                        ? this.rfidManager.ensureScannerConnection()
+                        : of(undefined)),
                 )
             }
         }).subscribe((rfidResult) => {
@@ -160,9 +147,9 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
     }
 
     private initRfidEvents(): void {
-        this.rfidManager.plugin.launchEventListeners();
+        this.rfidManager.launchEventListeners();
 
-        this.tagsReadSubscription = this.rfidManager.plugin.tagsRead$
+        this.rfidManager.tagsRead$
             .subscribe(({tags}) => {
                 const [firstTag] = tags || [];
                 if (firstTag) {
@@ -171,7 +158,7 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
             })
     }
 
-    public initForm() {
+    public initForm(): void {
         const values = this.formPanelComponent ? this.formPanelComponent.values : null;
 
         this.bodyConfig = [
@@ -468,15 +455,7 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
     }
 
     private disconnectRFIDScanner(): void {
-        this.rfidManager.plugin.removeEventListeners();
-        this.unsubscribeRFID();
-    }
-
-    private unsubscribeRFID(): void {
-        if (this.tagsReadSubscription && !this.tagsReadSubscription.closed) {
-            this.tagsReadSubscription.unsubscribe();
-        }
-        this.tagsReadSubscription = undefined;
+        this.rfidManager.removeEventListeners();
     }
 
     public validate(matrixValues?: {[field: string]: string}) {
@@ -514,5 +493,36 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
     public scanMatrix() {
         // TODO
         console.log('scanMatrix');
+    }
+
+    private retrieveDefaultValues(): Observable<void> {
+        return this.storageService.getString(StorageKeyEnum.ARTICLE_CREATION_DEFAULT_VALUES)
+            .pipe(
+                mergeMap((defaultValuesCached) => {
+                    const defaultValuesJson = defaultValuesCached && JSON.parse(defaultValuesCached);
+                    if (defaultValuesJson) {
+                        return of({defaultValues: defaultValuesJson});
+                    }
+                    else {
+                        return this.apiService.requestApi(ApiService.DEFAULT_ARTICLE_VALUES);
+                    }
+                }),
+                mergeMap(({defaultValues}) => defaultValues
+                    ? this.storageService.setItem(StorageKeyEnum.ARTICLE_CREATION_DEFAULT_VALUES, JSON.stringify(defaultValues)).pipe(map(() => ({defaultValues})))
+                    : of({defaultValues})),
+                mergeMap(({defaultValues}) => {
+                    this.defaultValues = defaultValues;
+
+                    if (this.defaultValues.supplier && this.defaultValues.reference) {
+                        this.reference = Number(this.defaultValues.reference);
+                        this.supplier = Number(this.defaultValues.supplier);
+                        return this.importSupplierReferences(false);
+                    }
+                    else {
+                        return of(undefined);
+                    }
+                }),
+                map(() => undefined)
+            );
     }
 }

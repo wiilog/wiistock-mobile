@@ -43,11 +43,7 @@ public class ZebraRfidManager {
     }
 
     public void connect() throws ZebraRfidException {
-        if (this.connectedReader != null && this.connectedReader.isConnected()) {
-            throw new ZebraRfidException(ZebraExceptionType.READER_ALREADY_CONNECTED);
-        }
-
-        if (this.connectedReader == null) {
+        if (this.connectedReader == null || !this.connectedReader.isConnected()) {
             Activity activity = this.plugin.getActivity();
             Readers readers = new Readers(activity, ENUM_TRANSPORT.BLUETOOTH);
 
@@ -208,41 +204,52 @@ public class ZebraRfidManager {
         }
     }
 
-    public JSObject getConnectedDeviceInfo() throws ZebraRfidException {
-        this.checkReaderAvailability();
+    public JSObject getConnectedDeviceInfo() {
 
-        JSObject readerObject = new JSObject();
-        COMMUNICATION_STANDARD communicationStandard = this.connectedReader.ReaderCapabilities.getCommunicationStandard();
-        readerObject
-                .put("id", this.connectedReader.ReaderCapabilities.ReaderID.getID())
-                .put("modelName", this.connectedReader.ReaderCapabilities.getModelName())
-                .put("communicationStandard", communicationStandard != null ? communicationStandard.toString() : null)
-                .put("countryCode", this.connectedReader.ReaderCapabilities.getCountryCode())
-                .put("firmwareVersion", this.connectedReader.ReaderCapabilities.getFirwareVersion())
-                .put("RSSIFilter", this.connectedReader.ReaderCapabilities.isRSSIFilterSupported())
-                .put("tagEventReporting", this.connectedReader.ReaderCapabilities.isTagEventReportingSupported())
-                .put("tagLocatingReporting", this.connectedReader.ReaderCapabilities.isTagLocationingSupported())
-                .put("NXPCommandSupport", this.connectedReader.ReaderCapabilities.isNXPCommandSupported())
-                .put("blockEraseSupport", this.connectedReader.ReaderCapabilities.isBlockEraseSupported())
-                .put("blockWriteSupport", this.connectedReader.ReaderCapabilities.isBlockWriteSupported())
-                .put("blockPermalockSupport", this.connectedReader.ReaderCapabilities.isBlockPermalockSupported())
-                .put("recommisionSupport", this.connectedReader.ReaderCapabilities.isRecommisionSupported())
-                .put("writeWMISupport", this.connectedReader.ReaderCapabilities.isWriteUMISupported())
-                .put("radioPowerControlSupport", this.connectedReader.ReaderCapabilities.isRadioPowerControlSupported())
-                .put("hoppingEnabled", this.connectedReader.ReaderCapabilities.isHoppingEnabled())
-                .put("stateAwareSingulationCapable", this.connectedReader.ReaderCapabilities.isTagInventoryStateAwareSingulationSupported())
-                .put("UTCClockCapable", this.connectedReader.ReaderCapabilities.isUTCClockSupported())
-                .put("numOperationsInAccessSequence", this.connectedReader.ReaderCapabilities.getMaxNumOperationsInAccessSequence())
-                .put("numPreFilters", this.connectedReader.ReaderCapabilities.getMaxNumPreFilters())
-                .put("numAntennaSupported", this.connectedReader.ReaderCapabilities.getNumAntennaSupported());
+        boolean isConnected = this.connectedDevice != null
+                && this.connectedReader != null
+                && this.connectedReader.isConnected();
 
         JSObject result = new JSObject();
-        result
-                .put("reader", readerObject)
-                .put("address", this.connectedDevice.getAddress())
-                .put("name", this.connectedDevice.getName())
-                .put("serialNumber", this.connectedDevice.getSerialNumber())
-                .put("transport", this.connectedDevice.getTransport());
+        result.put("connected", isConnected);
+
+        if (isConnected) {
+            JSObject readerObject = new JSObject();
+            COMMUNICATION_STANDARD communicationStandard = this.connectedReader.ReaderCapabilities.getCommunicationStandard();
+            readerObject
+                    .put("id", this.connectedReader.ReaderCapabilities.ReaderID.getID())
+                    .put("modelName", this.connectedReader.ReaderCapabilities.getModelName())
+                    .put("communicationStandard", communicationStandard != null ? communicationStandard.toString() : null)
+                    .put("countryCode", this.connectedReader.ReaderCapabilities.getCountryCode())
+                    .put("firmwareVersion", this.connectedReader.ReaderCapabilities.getFirwareVersion())
+                    .put("RSSIFilter", this.connectedReader.ReaderCapabilities.isRSSIFilterSupported())
+                    .put("tagEventReporting", this.connectedReader.ReaderCapabilities.isTagEventReportingSupported())
+                    .put("tagLocatingReporting", this.connectedReader.ReaderCapabilities.isTagLocationingSupported())
+                    .put("NXPCommandSupport", this.connectedReader.ReaderCapabilities.isNXPCommandSupported())
+                    .put("blockEraseSupport", this.connectedReader.ReaderCapabilities.isBlockEraseSupported())
+                    .put("blockWriteSupport", this.connectedReader.ReaderCapabilities.isBlockWriteSupported())
+                    .put("blockPermalockSupport", this.connectedReader.ReaderCapabilities.isBlockPermalockSupported())
+                    .put("recommisionSupport", this.connectedReader.ReaderCapabilities.isRecommisionSupported())
+                    .put("writeWMISupport", this.connectedReader.ReaderCapabilities.isWriteUMISupported())
+                    .put("radioPowerControlSupport", this.connectedReader.ReaderCapabilities.isRadioPowerControlSupported())
+                    .put("hoppingEnabled", this.connectedReader.ReaderCapabilities.isHoppingEnabled())
+                    .put("stateAwareSingulationCapable", this.connectedReader.ReaderCapabilities.isTagInventoryStateAwareSingulationSupported())
+                    .put("UTCClockCapable", this.connectedReader.ReaderCapabilities.isUTCClockSupported())
+                    .put("numOperationsInAccessSequence", this.connectedReader.ReaderCapabilities.getMaxNumOperationsInAccessSequence())
+                    .put("numPreFilters", this.connectedReader.ReaderCapabilities.getMaxNumPreFilters())
+                    .put("numAntennaSupported", this.connectedReader.ReaderCapabilities.getNumAntennaSupported());
+
+            result
+                    .put("reader", readerObject)
+                    .put("address", this.connectedDevice.getAddress())
+                    .put("name", this.connectedDevice.getName())
+                    .put("serialNumber", this.connectedDevice.getSerialNumber())
+                    .put("transport", this.connectedDevice.getTransport());
+        }
+        else {
+            this.connectedDevice = null;
+            this.connectedReader = null;
+        }
 
         return result;
     }
@@ -255,6 +262,10 @@ public class ZebraRfidManager {
             this.connectedReader = null;
             throw new ZebraRfidException(ZebraExceptionType.READER_NOT_CONNECTED);
         }
+    }
+
+    public ReaderDevice getConnectedDevice() {
+        return this.connectedDevice;
     }
 
     public RFIDReader getConnectedReader() {
@@ -274,12 +285,4 @@ public class ZebraRfidManager {
             ZebraRfidManager.RFID_EVENTS_LISTENERS.clear();
         }
     }
-
-    private void tryReaderConnect(RFIDReader reader,
-                                  RFIDResults[] availableExceptionForRetry,
-                                  int retryNumber) throws ZebraRfidException {
-
-    }
-
-
 }

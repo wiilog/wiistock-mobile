@@ -43,7 +43,7 @@ public class ZebraRfidEvent implements RfidEventsListener {
     @Override
     public void eventStatusNotify(RfidStatusEvents events) {
 
-        // TODO reconnect id disconnected ??
+        // TODO reconnect if scanner disconnected ??
 
         Events.StatusEventData statusEventData = events.StatusEventData;
         STATUS_EVENT_TYPE statusEventType = statusEventData.getStatusEventType();

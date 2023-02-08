@@ -16,6 +16,8 @@ import com.wiilog.wiistock.plugins.rfid.manager.exceptions.ZebraRfidException;
 import com.wiilog.wiistock.plugins.rfid.manager.rfid.ZebraRfidManager;
 
 import com.getcapacitor.annotation.Permission;
+import com.zebra.rfid.api3.RFIDReader;
+import com.zebra.rfid.api3.ReaderDevice;
 
 @CapacitorPlugin(
         name = "RfidManager",
@@ -51,13 +53,8 @@ public class RfidManagerPlugin extends Plugin {
 
     @PluginMethod()
     public void deviceInfo(PluginCall call) {
-        try {
-            JSObject readerInfo = this.zebraRfidManager.getConnectedDeviceInfo();
-            call.resolve(readerInfo);
-        }
-        catch(ZebraRfidException exception) {
-            this.resolveError(call, exception);
-        }
+        JSObject readerInfo = this.zebraRfidManager.getConnectedDeviceInfo();
+        call.resolve(readerInfo);
     }
 
     public void triggerPluginEvent(RfidEvent event, JSObject data) {

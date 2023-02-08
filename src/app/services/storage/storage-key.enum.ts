@@ -43,5 +43,6 @@ export enum StorageKeyEnum {
     COUNTERS_PREPARATIONS_TREATED = 'counters_preparations_treated',
     COUNTERS_COLLECTS_TREATED = 'counters_collects_treated',
     COUNTERS_DELIVERIES_TREATED = 'counters_deliveries_treated',
+    ARTICLE_CREATION_DEFAULT_VALUES = 'article_creation_default_values',
 
 }

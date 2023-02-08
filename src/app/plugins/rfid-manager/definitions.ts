@@ -27,11 +27,16 @@ export interface ManagerResult extends RunResult {
     };
 }
 
+export interface TagsReadData {
+    tags: Array<string>;
+}
+
 export interface DeviceInfoResult {
-    address: string;
-    name: string;
-    serialNumber: string;
-    transport: string;
+    connected: boolean;
+    address?: string;
+    name?: string;
+    serialNumber?: string;
+    transport?: string;
 
     reader: {
         id: number;
@@ -61,7 +66,6 @@ export interface DeviceInfoResult {
 export enum ErrorCodeEnum {
     ACTION_INVALID = 'ACTION_INVALID',
     ACTION_REQUIRED = 'ACTION_REQUIRED',
-    READER_ALREADY_CONNECTED = 'READER_ALREADY_CONNECTED',
     RETRIEVE_AVAILABLE_READERS_LIST_FAILURE = 'RETRIEVE_AVAILABLE_READERS_LIST_FAILURE',
     READER_CONNECTION_FAILURE = 'READER_CONNECTION_FAILURE',
     READER_CONNECTION_FAILURE_NOT_CONFIGURED = 'READER_CONNECTION_FAILURE_NOT_CONFIGURED',
@@ -78,7 +82,9 @@ export enum ErrorCodeEnum {
 }
 
 export interface RfidManagerPlugin extends Plugin {
+
     deviceInfo(): Promise<DeviceInfoResult>;
+
     run(options: RunOptions): Promise<RunResult>;
 
     addListener(event: PluginEvent, listener: (data: any) => void): Promise<PluginListenerHandle>;

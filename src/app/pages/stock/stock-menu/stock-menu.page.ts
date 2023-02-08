@@ -131,18 +131,19 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public ionViewWillEnter(): void {
+        this.avoidSync = this.navService.param<boolean>('avoidSync');
         this.navigationSubscription = merge(
             this.mainHeaderService.navigationChange$,
             this.platform.backButton
         )
             .subscribe(() => {
-                this.setAvoidSync(true);
+                this.avoidSync = true;
             });
 
         if (!this.avoidSync) {
             this.synchronise();
         } else {
-            this.setAvoidSync(false);
+            this.avoidSync = false;
             this.refreshSlidersData();
         }
 
