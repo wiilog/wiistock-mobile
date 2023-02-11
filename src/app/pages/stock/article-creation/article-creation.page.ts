@@ -52,11 +52,12 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
 
     public bodyConfig: Array<FormPanelParam>;
 
-    public scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.WITH_MANUAL;
+    public scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_MANUAL;
     public loading: boolean = false;
     public rfidTag: string = '';
     public headerConfig?: {
         leftIcon: IconConfig;
+        rightIcon?: IconConfig;
         title: string;
         subtitle?: string;
     };
@@ -114,6 +115,7 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         this.creation = false;
         this.bodyConfig = [];
         this.loading = true;
+        this.scannerMode = BarcodeScannerModeEnum.ONLY_MANUAL;
         this.loadingService.presentLoadingWhile({
             event: () => {
                 return this.retrieveDefaultValues().pipe(
@@ -135,8 +137,7 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
 
                 this.headerConfig = {
                     leftIcon: {
-                        name: 'transfer.svg',
-                        color: 'tertiary'
+                        name: 'new-article-RFID.svg'
                     },
                     title: `Balayer étiquette RFID`,
                     subtitle: `Emplacement : ${this.defaultValues.location}`
@@ -433,10 +434,19 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                 } else if (this.defaultValues.location) {
                     this.creation = true;
                     this.rfidTag = tag;
-                    this.scannerModeManual = BarcodeScannerModeEnum.INVISIBLE;
+                    this.scannerMode = BarcodeScannerModeEnum.INVISIBLE;
 
                     if (this.headerConfig) {
-                        this.headerConfig.title = `Tag : ${this.rfidTag}`;
+                        this.headerConfig.title = `CODE RFID : ${this.rfidTag}`;
+                        this.headerConfig.rightIcon = {
+                            name: 'scan-photo.svg',
+                            color: 'primary',
+                            action: () => {
+                                if (this.footerScannerComponent) {
+                                    this.footerScannerComponent.scan();
+                                }
+                            }
+                        };
                     }
                     this.initForm();
                     this.disconnectRFIDScanner();

@@ -4,6 +4,13 @@ import {ToastService} from '@app/services/toast.service';
 import {Observable, Subscription} from 'rxjs';
 import {BarcodeScannerModeEnum} from './barcode-scanner-mode.enum';
 
+interface DisplayConfig {
+    search: boolean;
+    plus: boolean;
+    photo: boolean;
+    selectedLabel: boolean;
+    input: boolean;
+}
 
 @Component({
     selector: 'wii-barcode-scanner',
@@ -12,13 +19,64 @@ import {BarcodeScannerModeEnum} from './barcode-scanner-mode.enum';
 })
 export class BarcodeScannerComponent implements OnInit, OnDestroy {
 
-    public readonly ONLY_MANUAL_MODE = BarcodeScannerModeEnum.ONLY_MANUAL;
-    public readonly WITH_MANUAL_MODE = BarcodeScannerModeEnum.WITH_MANUAL;
-    public readonly ONLY_SCAN_MODE = BarcodeScannerModeEnum.ONLY_SCAN;
-    public readonly TOOL_SEARCH_MODE = BarcodeScannerModeEnum.TOOL_SEARCH;
-    public readonly TOOLS_FULL_MODE = BarcodeScannerModeEnum.TOOLS_FULL;
-    public readonly ONLY_SEARCH_MODE = BarcodeScannerModeEnum.ONLY_SEARCH;
-    public readonly TOOL_SELECTED_LABEL = BarcodeScannerModeEnum.TOOL_SELECTED_LABEL;
+    private static readonly AllDisplayConfigs: { [mode: number]: DisplayConfig } = {
+        [BarcodeScannerModeEnum.ONLY_MANUAL]: {
+            search: false,
+            plus: false,
+            photo: false,
+            selectedLabel: false,
+            input: true,
+        },
+        [BarcodeScannerModeEnum.ONLY_SCAN]: {
+            search: false,
+            plus: false,
+            photo: true,
+            selectedLabel: false,
+            input: false,
+        },
+        [BarcodeScannerModeEnum.WITH_MANUAL]: {
+            search: false,
+            plus: false,
+            photo: true,
+            selectedLabel: false,
+            input: true,
+        },
+        [BarcodeScannerModeEnum.TOOL_SEARCH]: {
+            search: true,
+            plus: false,
+            photo: true,
+            selectedLabel: false,
+            input: false,
+        },
+        [BarcodeScannerModeEnum.TOOL_SELECTED_LABEL]: {
+            search: false,
+            plus: false,
+            photo: true,
+            selectedLabel: true,
+            input: false,
+        },
+        [BarcodeScannerModeEnum.TOOLS_FULL]: {
+            search: true,
+            plus: true,
+            photo: true,
+            selectedLabel: false,
+            input: false,
+        },
+        [BarcodeScannerModeEnum.ONLY_SEARCH]: {
+            search: true,
+            plus: false,
+            photo: false,
+            selectedLabel: false,
+            input: false,
+        },
+        [BarcodeScannerModeEnum.INVISIBLE]: {
+            search: false,
+            plus: false,
+            photo: false,
+            selectedLabel: false,
+            input: false,
+        },
+    };
 
     public input: string;
 
@@ -129,5 +187,12 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
 
     public onSelectedLabelClick(): void {
         this.clear.emit();
+    }
+
+    public get displayConfig(): DisplayConfig {
+        const mode = this.mode !== undefined ? this.mode : -1;
+        return BarcodeScannerComponent.AllDisplayConfigs[mode]
+            // fallback
+            || BarcodeScannerComponent.AllDisplayConfigs[BarcodeScannerModeEnum.INVISIBLE];
     }
 }

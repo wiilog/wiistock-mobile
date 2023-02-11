@@ -4,6 +4,7 @@
          scroll-y="true">
 
         <wii-panel-header [leftIcon]="headerConfig.leftIcon"
+                          [rightIcons]="headerConfig.rightIcon"
                           [title]="headerConfig.title"
                           [transparent]="true"
                           [subtitle]="headerConfig.subtitle"
@@ -17,10 +18,12 @@
     </div>
 
     <div class="page-footer persisted-page-footer">
-        <wii-barcode-scanner #footerScannerComponent
-                             [mode]="scannerModeManual"
+        <wii-barcode-scanner *ngIf="scannerMode !== undefined"
+                             #footerScannerComponent
+                             [mode]="scannerMode"
                              (manualAdd)="onRFIDTagScanned($event)"
-                             (scanAdd)="onDatamatrixScanned($event)">
+                             (scanAdd)="onDatamatrixScanned($event)"
+                             (cameraAdd)="onDatamatrixScanned($event)">
         </wii-barcode-scanner>
 
         <ng-container *ngIf="creation">
@@ -52,7 +55,8 @@
                         expand="full"
                         (click)="onRFIDButtonClicked()">
                 Scanner RFID
-                <wii-icon name="check.svg"
+                <wii-icon name="RFID-wifi.svg"
+                          width="20px"
                           class="button-icon"
                           color="white">
                 </wii-icon>

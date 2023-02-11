@@ -1,26 +1,26 @@
 <div class="tools"
-     *ngIf="mode === ONLY_SCAN_MODE || mode === WITH_MANUAL_MODE || mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE || mode === ONLY_SEARCH_MODE || mode === TOOL_SELECTED_LABEL">
-    <wii-icon *ngIf="mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE || mode === ONLY_SEARCH_MODE"
+     *ngIf="displayConfig.search || displayConfig.plus || displayConfig.photo || displayConfig.selectedLabel">
+    <wii-icon *ngIf="displayConfig.search"
               name="search.svg"
               color="primary"
               class="tools-icon"
               (action)="onSearchClick()">
     </wii-icon>
-    <wii-icon *ngIf="mode === TOOLS_FULL_MODE"
+    <wii-icon *ngIf="displayConfig.plus"
               name="plus.svg"
               color="primary"
               class="tools-icon"
               (action)="onPenClick()">
     </wii-icon>
 
-    <wii-icon name="scan-photo.svg"
+    <wii-icon *ngIf="displayConfig.photo"
+              name="scan-photo.svg"
               color="primary"
               class="tools-icon"
-              *ngIf="mode === ONLY_SCAN_MODE || mode === WITH_MANUAL_MODE || mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE || mode === TOOL_SELECTED_LABEL"
               (action)="scan()">
     </wii-icon>
 
-    <ng-container *ngIf="mode === TOOL_SELECTED_LABEL && selectedLabel$">
+    <ng-container *ngIf="displayConfig.selectedLabel && selectedLabel$">
         <div class="tools-selected-label ion-activatable ripple-parent"
              (click)="onSelectedLabelClick()"
              *ngIf="selectedLabel$ | async as selectedLabelValue">
@@ -32,7 +32,7 @@
 </div>
 
 <div class="input-manual"
-           *ngIf="mode === WITH_MANUAL_MODE || mode === ONLY_MANUAL_MODE">
+           *ngIf="displayConfig.input">
     <ion-item>
         <ion-input type="text" placeholder="Entrée manuelle..." [(ngModel)]="input"></ion-input>
         <wii-icon name="plus.svg"
