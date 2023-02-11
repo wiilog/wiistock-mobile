@@ -11,7 +11,8 @@
         "sync": "yarn cordova-res android --skip-config --copy && yarn capacitor sync",
         "build": "yarn ng build --configuration production && yarn sync",
         "build:dev": "yarn ng build --configuration development && yarn sync",
-        "build:android": "yarn build && yarn capacitor copy && yarn capacitor copy android && yarn capacitor open android",
+        "build:android": "yarn build && yarn android:open",
+        "android:open": "yarn capacitor copy && yarn capacitor copy android && yarn capacitor open android",
         "watch": "yarn build:dev && yarn ionic capacitor run android --livereload --external",
         "wiis:version": "node scripts/set-app-version"
     },

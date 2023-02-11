@@ -116,36 +116,43 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
                 this.fillForm(barCode);
             });
 
-        this.urlServerSubscription = this.storageService.getString(StorageKeyEnum.URL_SERVER).subscribe((url) => {
-            if(url) {
-                this.appVersionSubscription = this.appVersionService.isAvailableVersion()
-                    .pipe(
-                        map((availableVersion) => ({
-                            ...availableVersion,
-                            apkUrl: `${url}/${LoginPage.PATH_DOWNLOAD_APK}`
-                        }))
-                    )
-                    .subscribe({
-                        next: ({available, currentVersion, apkUrl}) => {
-                            this.appVersionInvalid = !available;
-                            this.currentVersion = currentVersion;
-                            this.apkUrl = apkUrl;
-                            this.finishLoading();
-                            setTimeout(() => {
-                                this.autoLoginIfAllowed();
-                            });
-                        },
-                        error: () => {
-                            this.finishLoading();
-                            this.toastService.presentToast('Erreur : la liaison avec le serveur est impossible', {duration: ToastService.LONG_DURATION});
-                        }
-                    });
-            } else {
-                this.toastService.presentToast('Veuillez mettre à jour l\'url', {duration: ToastService.LONG_DURATION});
-                this.finishLoading();
-                this.goToParams();
-            }
-        });
+        this.urlServerSubscription = this.storageService.getString(StorageKeyEnum.URL_SERVER)
+            .pipe(
+                mergeMap((url) => zip(
+                    of(url || this.localDevServer),
+                    !url && this.localDevServer ? this.storageService.setItem(StorageKeyEnum.URL_SERVER, this.localDevServer) : of(undefined)
+                ))
+            )
+            .subscribe(([url]) => {
+                if(url) {
+                    this.appVersionSubscription = this.appVersionService.isAvailableVersion()
+                        .pipe(
+                            map((availableVersion) => ({
+                                ...availableVersion,
+                                apkUrl: `${url}/${LoginPage.PATH_DOWNLOAD_APK}`
+                            }))
+                        )
+                        .subscribe({
+                            next: ({available, currentVersion, apkUrl}) => {
+                                this.appVersionInvalid = !available;
+                                this.currentVersion = currentVersion;
+                                this.apkUrl = apkUrl;
+                                this.finishLoading();
+                                setTimeout(() => {
+                                    this.autoLoginIfAllowed();
+                                });
+                            },
+                            error: () => {
+                                this.finishLoading();
+                                this.toastService.presentToast('Erreur : la liaison avec le serveur est impossible', {duration: ToastService.LONG_DURATION});
+                            }
+                        });
+                } else {
+                    this.toastService.presentToast('Veuillez mettre à jour l\'url', {duration: ToastService.LONG_DURATION});
+                    this.finishLoading();
+                    this.goToParams();
+                }
+            });
 
         /* TODO WIIS-7970
         this.notificationSubscription = this.notificationService
@@ -205,71 +212,71 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
                                             });
                                         }),
                                         */
-                                // TODO WIIS-7970 remove
-                                mergeMap(() => this.navService.setRoot(NavPathEnum.MAIN_MENU)),
-                                map(() => ({success: true}))
-                            )
-                    } else {
-                        return of({success: false})
-                    }
-                })
-            )
-            .subscribe({
-                next: ({success}) => {
-                    this.finishLoading();
-                    if (!success) {
-                        this.toastService.presentToast('Identifiants incorrects.');
-                    }
-                },
-                error: () => {
-                    this.finishLoading();
-                    this.toastService.presentToast('Un problème est survenu, veuillez vérifier la connexion, vos identifiants et l\'URL saisie dans les paramètres', {duration: ToastService.LONG_DURATION});
-                }
-            });
+                                        // TODO WIIS-7970 remove
+                                        mergeMap(() => this.navService.setRoot(NavPathEnum.MAIN_MENU)),
+                                        map(() => ({success: true}))
+                                    )
+                            } else {
+                                return of({success: false})
+                            }
+                        })
+                    )
+                    .subscribe({
+                        next: ({success}) => {
+                            this.finishLoading();
+                            if (!success) {
+                                this.toastService.presentToast('Identifiants incorrects.');
+                            }
+                        },
+                        error: () => {
+                            this.finishLoading();
+                            this.toastService.presentToast('Un problème est survenu, veuillez vérifier la connexion, vos identifiants et l\'URL saisie dans les paramètres', {duration: ToastService.LONG_DURATION});
+                        }
+                    });
+            }
+            else {
+                this.toastService.presentToast('Vous devez être connecté à internet pour vous authentifier');
+            }
+        }
     }
-    else {
-        this.toastService.presentToast('Vous devez être connecté à internet pour vous authentifier');
+
+    public goToParams(): void {
+        if (!this.loading) {
+            this.navService.push(NavPathEnum.PARAMS);
+        }
     }
-}
-}
 
-public goToParams(): void {
-if(!this.loading) {
-    this.navService.push(NavPathEnum.PARAMS);
-}
-}
+    public set loading(loading: boolean) {
+        this._loading = loading;
+        if (this._loading) {
+            SplashScreen.show();
+        } else {
+            SplashScreen.hide();
+        }
+    }
 
-public set loading(loading: boolean) {
-this._loading = loading;
-if(this._loading) {
-    SplashScreen.show();
-} else {
-    SplashScreen.hide();
-}
-}
+    public get loading(): boolean {
+        return this._loading;
+    }
 
-public get loading(): boolean {
-return this._loading;
-}
+    public fillForm(key: string): void {
+        this.loginKey = key;
+        this.logForm();
+    }
 
-public fillForm(key: string): void {
-this.loginKey = key;
-this.logForm();
-}
+    private finishLoading() {
+        this.loading = false;
+        this.changeDetector.detectChanges();
+    }
 
-private finishLoading() {
-this.loading = false;
-this.changeDetector.detectChanges();
-}
-
-private autoLoginIfAllowed() {
-/* TODO WIIS-7970
-if(!environment.production
-    && autoConnect
-    && this.wantToAutoConnect) {
-    this.fillForm(loginKey);
-}
-*/
+    private autoLoginIfAllowed() {
+        /* TODO WIIS-7970
+        if(!environment.production
+            && autoConnect
+            && this.wantToAutoConnect) {
+            this.fillForm(loginKey);
+        }
+        */
     }
 
     private unsubscribeZebra(): void {
@@ -291,5 +298,11 @@ if(!environment.production
             this.notificationSubscription.unsubscribe();
         }
         this.notificationSubscription = undefined;
+    }
+
+    private get localDevServer(): string|undefined {
+        return !environment.production
+            ? `http://${window.location.hostname}`
+            : undefined
     }
 }
