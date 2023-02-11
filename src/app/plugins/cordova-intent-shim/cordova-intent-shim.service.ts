@@ -1,8 +1,8 @@
 import {Injectable} from "@angular/core";
 import {Observable, Subject} from "rxjs";
-import {DatawedgeScanningResult} from "@plugins/cordova-intent-shim/definitions";
+import {DatawedgeScanningResult} from "./definitions";
 
-declare let window: any;
+declare const window: any;
 
 @Injectable()
 export class CordovaIntentShimService {

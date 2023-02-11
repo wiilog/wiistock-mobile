@@ -1,7 +1,8 @@
 import {Injectable, NgZone} from '@angular/core';
-// import { BarcodeScanner } from '@ionic-native/barcode-scanner/ngx'; // TODO WIIS-7970
-import {Observable, Subject} from 'rxjs';
+import {mergeMap, Observable, of, Subject, throwError} from 'rxjs';
 import {CordovaIntentShimService} from "@plugins/cordova-intent-shim/cordova-intent-shim.service";
+import {CordovaBarcodeScannerService} from "@plugins/cordova-barcode-scanner/cordova-barcode-scanner.service";
+import {BarcodeScanResult} from "@plugins/cordova-barcode-scanner/definitions";
 
 
 @Injectable({
@@ -15,7 +16,8 @@ export class BarcodeScannerManagerService {
 
     private zebraBroadcastReceiverAlreadyReceived: boolean;
 
-    public constructor(private intentShimService: CordovaIntentShimService) {
+    public constructor(private intentShimService: CordovaIntentShimService,
+                       private barcodeScanner: CordovaBarcodeScannerService) {
         this._datawedgeScan$ = new Subject<string>();
 
         this.ngZone = new NgZone({enableLongStackTrace : false});
@@ -42,17 +44,13 @@ export class BarcodeScannerManagerService {
     }
 
     public scan(): Observable<string> {
-        const subject = new Subject<string>();
-
-        // TODO WIIS-7970
-        // this.barcodeScanner.scan().then(res => {
-        //     if (!res.cancelled) {
-        //         subject.next(res.text);
-        //     }
-        //     subject.complete();
-        // });
-
-        return subject;
+        return this.barcodeScanner.scan().pipe(
+            mergeMap((result: BarcodeScanResult) => (
+                result.cancelled
+                    ? throwError(() => new Error('Cancelled'))
+                    : of(result.text)
+            ))
+        );
     }
 
     public startDatawedgeScanning(): Observable<void> {
