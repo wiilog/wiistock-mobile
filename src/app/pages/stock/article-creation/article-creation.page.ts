@@ -32,6 +32,7 @@ import {mergeMap, Observable, of, tap} from "rxjs";
 import {RfidManagerService} from "@app/services/rfid-manager.service";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {map} from "rxjs/operators";
+import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
 
 
 @Component({
@@ -105,7 +106,8 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                        private translationService: TranslationService,
                        private navService: NavService,
                        private changeDetector: ChangeDetectorRef,
-                       private rfidManager: RfidManagerService) {
+                       private rfidManager: RfidManagerService,
+                       private barcodeScannerManager: BarcodeScannerManagerService) {
     }
 
     public ionViewWillEnter(): void {
@@ -503,9 +505,12 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         }
     }
 
-    public scanMatrix() {
-        // TODO
-        console.log('scanMatrix');
+    public onScan2DTouchstart(): void {
+        this.barcodeScannerManager.startDatawedgeScanning();
+    }
+
+    public onScan2DTouchend(): void {
+        this.barcodeScannerManager.stopDatawedgeScanning();
     }
 
     private retrieveDefaultValues(): Observable<void> {

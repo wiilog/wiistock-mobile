@@ -1,6 +1,7 @@
 import {Injectable, NgZone} from '@angular/core';
 // import { BarcodeScanner } from '@ionic-native/barcode-scanner/ngx'; // TODO WIIS-7970
 import {Observable, Subject} from 'rxjs';
+import {CordovaIntentShimService} from "@plugins/cordova-intent-shim/cordova-intent-shim.service";
 
 
 @Injectable({
@@ -8,31 +9,26 @@ import {Observable, Subject} from 'rxjs';
 })
 export class BarcodeScannerManagerService {
 
-    private static readonly ZEBRA_VALUE_ATTRIBUTE: string = 'com.symbol.datawedge.data_string';
-
-    private readonly _zebraScan$: Subject<string>;
+    private readonly _datawedgeScan$: Subject<string>;
 
     private ngZone: NgZone;
 
     private zebraBroadcastReceiverAlreadyReceived: boolean;
 
-    public constructor() {
-        this._zebraScan$ = new Subject<string>();
+    public constructor(private intentShimService: CordovaIntentShimService) {
+        this._datawedgeScan$ = new Subject<string>();
 
         this.ngZone = new NgZone({enableLongStackTrace : false});
         this.zebraBroadcastReceiverAlreadyReceived = false;
     }
 
-    public registerZebraBroadcastReceiver(): void {
+    public launchDatawedgeScanListener(): void {
         if (!this.zebraBroadcastReceiverAlreadyReceived) {
             this.zebraBroadcastReceiverAlreadyReceived = true;
-            (<any>window).plugins.intentShim.registerBroadcastReceiver({
-                    filterActions: ['com.wiilog.wiistock.ACTION'],
-                    filterCategories: ['android.intent.category.DEFAULT']
-                },
-                (intent: any) => {
+            this.intentShimService.onWiistockDatawedgeScanning()
+                .subscribe((intent) => {
                     this.ngZone.run(() => {
-                        this._zebraScan$.next(intent.extras[BarcodeScannerManagerService.ZEBRA_VALUE_ATTRIBUTE]);
+                        this._datawedgeScan$.next(intent.extras["com.symbol.datawedge.data_string"]);
                     });
                 });
         }
@@ -41,8 +37,8 @@ export class BarcodeScannerManagerService {
     /**
      * @return An observable fired when the zebra scanner is used. The param is the string barcode.
      */
-    public get zebraScan$(): Observable<string> {
-        return this._zebraScan$;
+    public get datawedgeScan$(): Observable<string> {
+        return this._datawedgeScan$;
     }
 
     public scan(): Observable<string> {
@@ -57,6 +53,14 @@ export class BarcodeScannerManagerService {
         // });
 
         return subject;
+    }
+
+    public startDatawedgeScanning(): Observable<void> {
+        return this.intentShimService.triggerDatawedgeScan('START_SCANNING');
+    }
+
+    public stopDatawedgeScanning(): Observable<void> {
+        return this.intentShimService.triggerDatawedgeScan('STOP_SCANNING');
     }
 
 }

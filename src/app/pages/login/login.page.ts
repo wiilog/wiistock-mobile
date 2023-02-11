@@ -94,13 +94,13 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
         // const autoConnect = this.currentNavParams.get('autoConnect'); // TODO WIIS-7970
         // this.wantToAutoConnect = (typeof autoConnect === 'boolean' ? autoConnect : true); // TODO WIIS-7970
 
-        this.barcodeScannerManager.registerZebraBroadcastReceiver();
+        this.barcodeScannerManager.launchDatawedgeScanListener();
         // this.notificationService.userIsLogged = false; // TODO WIIS-7970
 
         this.loggedUser$ = this.storageService.getString(StorageKeyEnum.OPERATOR, UserService.MAX_PSEUDO_LENGTH);
 
         this.unsubscribeZebra();
-        this.zebraSubscription = this.barcodeScannerManager.zebraScan$
+        this.zebraSubscription = this.barcodeScannerManager.datawedgeScan$
             .pipe(
                 filter((barCode: string) => Boolean(
                     barCode

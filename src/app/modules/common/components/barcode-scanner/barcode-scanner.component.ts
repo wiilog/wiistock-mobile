@@ -89,7 +89,7 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
         this.unsubscribeZebraScan();
         if (this.mode !== BarcodeScannerModeEnum.ONLY_SEARCH) {
             this.zebraScanSubscription = this.barcodeScannerManager
-                .zebraScan$
+                .datawedgeScan$
                 .subscribe((barcode) => {
                     this.triggerAdd(this.scanAdd, barcode);
                 });

@@ -24,12 +24,12 @@
         </wii-barcode-scanner>
 
         <ng-container *ngIf="creation">
-<!--            TODO WIIS-9027 -->
-            <ion-button *ngIf="false"
-                        fill="outline"
+            <ion-button fill="outline"
                         class="custom-fill-button"
                         expand="block"
-                        (click)="scanMatrix()">
+                        (touchstart)="onScan2DTouchstart()"
+                        (touchend)="onScan2DTouchend()"
+                        (touchcancel)="onScan2DTouchend()">
                 Scan 2D
             </ion-button>
 
