@@ -398,7 +398,9 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'endDate', value: 'VARCHAR(255)'},
             {column: 'emergency', value: 'VARCHAR(255)'},
             {column: 'locationFromLabel', value: 'VARCHAR(255)'},
+            {column: 'locationFromId', value: 'INTEGER'},
             {column: 'locationToLabel', value: 'VARCHAR(255)'},
+            {column: 'locationToId', value: 'INTEGER'},
             {column: 'typeId', value: 'INTEGER'},
             {column: 'typeLabel', value: 'VARCHAR(255)'},
             {column: 'statusLabel', value: 'VARCHAR(255)'},
@@ -406,7 +408,10 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'partial', value: 'INTEGER'},
             {column: 'color', value: 'VARCHAR(255)'},
             {column: 'destination', value: 'VARCHAR(255)'},
-            {column: 'draft', value: 'INTEGER'}
+            {column: 'packReferences', value: 'TEXT'},
+            {column: 'packs', value: 'TEXT'},
+            {column: 'draft', value: 'INTEGER'},
+            {column: 'groupedSignatureStatusColor', value: 'VARCHAR(255)'},
         ]
     },
     {
@@ -435,7 +440,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'state', value: 'VARCHAR(255)'},
             {column: 'category', value: 'VARCHAR(255)'},
             {column: 'displayOrder', value: 'INTEGER'},
-            {column: 'commentNeeded', value: 'INTEGER'}
+            {column: 'commentNeeded', value: 'INTEGER'},
+            {column: 'groupedSignatureType', value: 'VARCHAR(255)'},
         ]
     },
     {

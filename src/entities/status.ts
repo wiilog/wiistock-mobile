@@ -6,4 +6,5 @@ export interface Status {
     displayOrder: number;
     page: string;
     commentNeeded: number;
+    groupedSignatureType?: string;
 }

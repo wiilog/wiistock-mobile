@@ -73,6 +73,7 @@ export class ApiService {
     public static readonly DISPATCH_WAYBILL = {method: POST, service: '/waybill/{dispatch}'};
     public static readonly GET_REFERENCE = {method: GET, service: '/get-reference'};
     public static readonly GET_ASSOCIATED_DOCUMENT_TYPE_ELEMENTS = {method: GET, service: '/get-associated-document-type-elements'};
+    public static readonly GET_ASSOCIATED_REF = {method: GET, service: '/get-associated-ref-intels/{pack}/{dispatch}'};
     public static readonly DISPATCH_VALIDATE = {method: POST, service: '/dispatch-validate'};
     public static readonly DEFAULT_LOCATION_ARTICLE_CREATION = {method: GET, service: '/default-article-location'};
     public static readonly GET_ARTICLE_BY_RFID_TAG = {method: GET, service: '/article-by-rfid-tag/{rfid}'};
