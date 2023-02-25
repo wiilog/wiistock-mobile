@@ -364,7 +364,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
     }
 
     public get smartType(): string|number {
-        return this.type || 'default';
+        return this.config[this.type] ? this.type : 'default';
     }
 
     private applySearch(text: string = ''): void {

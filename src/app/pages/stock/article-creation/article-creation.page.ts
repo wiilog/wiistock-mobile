@@ -59,7 +59,6 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         leftIcon: IconConfig;
         rightIcon?: IconConfig;
         title: string;
-        subtitle?: string;
     };
 
     private rfidPrefix?: string;
@@ -83,7 +82,7 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
     public supplier: number;
 
     public defaultValues: {
-        location: string;
+        destination: number;
         type: string;
         reference: string;
         label: string;
@@ -119,33 +118,23 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         this.loadingService.presentLoadingWhile({
             event: () => {
                 return this.retrieveDefaultValues().pipe(
-                    mergeMap(() => this.storageService.getString(StorageKeyEnum.PARAMETER_RFID_PREFIX).pipe(
-                        tap((rfidPrefix) => {
-                            this.rfidPrefix = rfidPrefix || '';
-                        })
-                    )),
-                    mergeMap(() => this.defaultValues.location
-                        ? this.rfidManager.ensureScannerConnection()
-                        : of(undefined)),
+                    mergeMap(() => this.storageService.getString(StorageKeyEnum.PARAMETER_RFID_PREFIX)),
+                    mergeMap((rfidPrefix) => this.rfidManager.ensureScannerConnection().pipe(map(() => rfidPrefix))),
                 )
             }
-        }).subscribe((rfidResult) => {
-            if (this.defaultValues.location) {
-                if (rfidResult) {
-                    this.initRfidEvents();
-                }
-
-                this.headerConfig = {
-                    leftIcon: {
-                        name: 'new-article-RFID.svg'
-                    },
-                    title: `Balayer étiquette RFID`,
-                    subtitle: `Emplacement : ${this.defaultValues.location}`
-                }
-                this.loading = false;
-            } else {
-                this.toastService.presentToast('Aucun emplacement par défaut paramétré.');
+        }).subscribe((rfidPrefix) => {
+            this.rfidPrefix = rfidPrefix || '';
+            if (this.rfidPrefix) {
+                this.initRfidEvents();
             }
+
+            this.headerConfig = {
+                leftIcon: {
+                    name: 'new-article-RFID.svg'
+                },
+                title: `Balayer étiquette RFID`,
+            }
+            this.loading = false;
         })
     }
 
@@ -186,9 +175,13 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                     value: values ? values.type : (this.defaultValues.type || null),
                     inputConfig: {
                         searchType: SelectItemTypeEnum.TYPE,
+                        required: true,
                         requestParams: [
                             `category = 'article'`,
                         ],
+                    },
+                    errors: {
+                        required: `Le type est requis`,
                     },
                 }
             },
@@ -200,6 +193,7 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                     value: values ? values.reference : (this.defaultValues.reference || null),
                     inputConfig: {
                         searchType: SelectItemTypeEnum.REFERENCE_ARTICLE,
+                        required: true,
                         onChange: (reference) => {
                             this.reference = reference;
                             if (this.supplier) {
@@ -208,6 +202,25 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                                 });
                             }
                         }
+                    },
+                    errors: {
+                        required: `La référence de l'article est requise`,
+                    },
+                }
+            },
+            {
+                item: FormPanelSelectComponent,
+                config: {
+                    label: 'Emplacement de destination',
+                    value: values ? values.destination : (this.defaultValues.destination || null),
+                    name: 'destination',
+                    inputConfig: {
+                        searchType: SelectItemTypeEnum.LOCATION,
+                        required: true,
+                        disabled: false,
+                    },
+                    errors: {
+                        required: `L'emplacement de destination de l'article est requis`,
                     },
                 }
             },
@@ -219,6 +232,7 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                     value: values ? values.supplier : (this.defaultValues.supplier || null),
                     inputConfig: {
                         searchType: SelectItemTypeEnum.SUPPLIER,
+                        required: true,
                         onChange: (supplier) => {
                             this.supplier = supplier;
                             if (this.reference) {
@@ -227,6 +241,9 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                                 })
                             }
                         }
+                    },
+                    errors: {
+                        required: `Le fournisseur de l'article est requis`,
                     },
                 }
             },
@@ -238,7 +255,11 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                     value: values ? values.supplier_reference : (this.defaultValues.supplierReference || null),
                     inputConfig: {
                         searchType: SelectItemTypeEnum.SUPPLIER_REFERENCE,
-                        disabled: !this.supplier || !this.reference
+                        required: true,
+                        disabled: !this.supplier || !this.reference,
+                    },
+                    errors: {
+                        required: `La référence fournisseur est requise`,
                     },
                 }
             },
@@ -249,7 +270,11 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                     name: 'label',
                     value: values ? values.label : (this.defaultValues.label || null),
                     inputConfig: {
-                        type: 'text'
+                        type: 'text',
+                        required: true,
+                    },
+                    errors: {
+                        required: `Le libellé de l'article est requis`,
                     },
                 }
             },
@@ -260,7 +285,11 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                     name: 'quantity',
                     value: values ? values.quantity : (this.defaultValues.quantity || null),
                     inputConfig: {
-                        type: 'number'
+                        type: 'number',
+                        required: true,
+                    },
+                    errors: {
+                        required: `La quantité est requise`,
                     },
                 }
             },
@@ -292,17 +321,6 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                     label: 'Numéro de lot',
                     value: values ? values.batch : null,
                     name: 'batch',
-                    inputConfig: {
-                        type: 'text',
-                    },
-                }
-            },
-            {
-                item: FormPanelInputComponent,
-                config: {
-                    label: 'Zone de destination',
-                    value: values ? values.destination : null,
-                    name: 'destination',
                     inputConfig: {
                         type: 'text',
                     },
@@ -431,7 +449,7 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                     this.toastService.presentToast('Article existant.');
                     this.creation = false;
                     this.bodyConfig = [];
-                } else if (this.defaultValues.location) {
+                } else {
                     this.creation = true;
                     this.rfidTag = tag;
                     this.scannerMode = BarcodeScannerModeEnum.INVISIBLE;
@@ -451,8 +469,6 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                     this.initForm();
                     this.disconnectRFIDScanner();
                     this.changeDetector.detectChanges();
-                } else {
-                    this.toastService.presentToast('Aucun emplacement par défaut paramétré.');
                 }
                 this.loading = false;
             });
@@ -486,18 +502,13 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
     public validate(matrixValues?: {[field: string]: string}) {
         const params: {[field: string]: string|boolean|number} = {
             rfidTag: this.rfidTag,
-            location: this.defaultValues.location,
             ...(matrixValues ? {fromMatrix: true} : {}),
             ...this.formPanelComponent.values,
             ...(matrixValues || {})
         };
-
-        if (!params.fromMatrix
-            && (!params.type || !params.reference || !params.supplier
-            || !params.supplier_reference || !params.label || !params.quantity)) {
-            this.toastService
-                .presentToast('Veuillez scanner un code-barre ou saisir un type, une référence, ' +
-                    'un fournisseur, une référence fournisseur, un label et une quantité pour l\'article.')
+        const formError = this.formPanelComponent.firstError;
+        if (!params.fromMatrix && formError) {
+            this.toastService.presentToast(formError)
         } else {
             this.loadingService.presentLoadingWhile({
                 event: () => {
@@ -506,7 +517,7 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
                     })
                 }
             }).subscribe((response) => {
-                this.toastService.presentToast(response.message).subscribe(() => {
+                this.toastService.presentToast(response.message || response.msg).subscribe(() => {
                     if (response.success) {
                         this.navService.pop();
                     }
