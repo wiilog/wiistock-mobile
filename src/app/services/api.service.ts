@@ -76,7 +76,7 @@ export class ApiService {
     public static readonly GET_ASSOCIATED_REF = {method: GET, service: '/get-associated-ref-intels/{pack}/{dispatch}'};
     public static readonly DISPATCH_VALIDATE = {method: POST, service: '/dispatch-validate'};
     public static readonly DEFAULT_LOCATION_ARTICLE_CREATION = {method: GET, service: '/default-article-location'};
-    public static readonly GET_ARTICLE_BY_RFID_TAG = {method: GET, service: '/article-by-rfid-tag/{rfid}'};
+    public static readonly GET_ARTICLE_BY_RFID_TAG = {method: GET, service: '/article-by-rfid-tag/{rfidTag}'};
     public static readonly DEFAULT_ARTICLE_VALUES = {method: GET, service: '/default-article-values'};
     public static readonly CREATE_ARTICLE = {method: POST, service: '/create-article'};
     public static readonly GET_SUPPLIER_REF_BY_REF_AND_SUPPLIER = {method: GET, service: '/supplier_reference/{ref}/{supplier}'};
@@ -190,7 +190,10 @@ export class ApiService {
         Object
             .keys(object)
             .forEach((key) => {
-                formData.set(key, object[key])
+                if (object[key] !== undefined
+                    && object[key] !== null) {
+                    formData.set(key, object[key]);
+                }
             });
         return formData;
     }

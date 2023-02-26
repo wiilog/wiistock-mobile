@@ -88,7 +88,6 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
                             missionId: this.selectedMissionId,
                             rfidTags: this.rfidTags,
                             afterValidate: ({tags, zoneId}: any) => {
-                                console.warn('afterValidate', tags, zoneId)
                                 this.rfidTags = tags;
                                 this.refreshListConfig(zoneId);
                             }

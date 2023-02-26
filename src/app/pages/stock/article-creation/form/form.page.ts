@@ -1,16 +1,11 @@
-import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {BarcodeScannerComponent} from '@common/components/barcode-scanner/barcode-scanner.component';
 import {ApiService} from '@app/services/api.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {ToastService} from '@app/services/toast.service';
 import {LoadingService} from '@app/services/loading.service';
-import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {StorageService} from '@app/services/storage/storage.service';
-import {ActivatedRoute} from '@angular/router';
 import {NavService} from '@app/services/nav/nav.service';
-import {TranslationService} from '@app/services/translations.service';
-import {AlertService} from '@app/services/alert.service';
-import {NetworkService} from '@app/services/network.service';
 import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {IconConfig} from '@common/components/panel/model/icon-config';
 import {FormPanelComponent} from '@common/components/panel/form-panel/form-panel.component';
@@ -28,21 +23,18 @@ import {
     FormPanelTextareaComponent
 } from '@common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
-import {mergeMap, Observable, of, tap} from "rxjs";
-import {RfidManagerService} from "@app/services/rfid-manager.service";
+import {mergeMap, Observable, of} from "rxjs";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {map} from "rxjs/operators";
 import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
 
 
 @Component({
-    selector: 'wii-prise',
-    templateUrl: './article-creation.page.html',
-    styleUrls: ['./article-creation.page.scss'],
+    selector: 'wii-article-creation-form',
+    templateUrl: './form.page.html',
+    styleUrls: ['./form.page.scss'],
 })
-export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
-
-    private static readonly SCANNER_RFID_DELAY: number = 10000; // 10 seconds
+export class FormPage implements ViewWillEnter, ViewWillLeave {
 
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
@@ -52,16 +44,15 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
 
     public bodyConfig: Array<FormPanelParam>;
 
-    public scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_MANUAL;
+    public readonly scannerMode = BarcodeScannerModeEnum.INVISIBLE;
     public loading: boolean = false;
     public rfidTag: string = '';
+
     public headerConfig?: {
         leftIcon: IconConfig;
         rightIcon?: IconConfig;
         title: string;
     };
-
-    private rfidPrefix?: string;
 
     public PREFIXES_TO_FIELDS: {[prefix: string]: string} = {
         CPO: 'commandNumber',
@@ -76,8 +67,6 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         BIN: 'destination',
     };
 
-    public creation = false;
-
     public reference: number;
     public supplier: number;
 
@@ -91,76 +80,48 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         supplierReference: string;
     };
 
-    private scanLaunchedWithButton?: boolean;
-
-    public constructor(private networkService: NetworkService,
-                       private apiService: ApiService,
+    public constructor(private apiService: ApiService,
                        private sqliteService: SqliteService,
-                       private alertService: AlertService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
-                       private changeDetectorRef: ChangeDetectorRef,
-                       private localDataManager: LocalDataManagerService,
-                       private activatedRoute: ActivatedRoute,
                        private storageService: StorageService,
-                       private translationService: TranslationService,
                        private navService: NavService,
-                       private changeDetector: ChangeDetectorRef,
-                       private rfidManager: RfidManagerService,
                        private barcodeScannerManager: BarcodeScannerManagerService) {
     }
 
     public ionViewWillEnter(): void {
-        this.creation = false;
         this.bodyConfig = [];
-        this.loading = true;
-        this.scannerMode = BarcodeScannerModeEnum.ONLY_MANUAL;
-        this.loadingService.presentLoadingWhile({
-            event: () => {
-                return this.retrieveDefaultValues().pipe(
-                    mergeMap(() => this.storageService.getString(StorageKeyEnum.PARAMETER_RFID_PREFIX)),
-                    mergeMap((rfidPrefix) => this.rfidManager.ensureScannerConnection().pipe(map(() => rfidPrefix))),
-                )
-            }
-        }).subscribe((rfidPrefix) => {
-            this.rfidPrefix = rfidPrefix || '';
-            if (this.rfidPrefix) {
-                this.initRfidEvents();
-            }
+        this.rfidTag = this.navService.param<string>('rfidTag');
 
-            this.headerConfig = {
-                leftIcon: {
-                    name: 'new-article-RFID.svg'
-                },
-                title: `Balayer étiquette RFID`,
-            }
+        this.headerConfig = {
+            leftIcon: {
+                name: 'new-article-RFID.svg'
+            },
+            title: `CODE RFID : ${this.rfidTag}`,
+            rightIcon: {
+                name: 'scan-photo.svg',
+                color: 'primary',
+                action: () => {
+                    if (this.footerScannerComponent) {
+                        this.footerScannerComponent.scan();
+                    }
+                }
+            },
+        }
+
+        this.loading = true;
+        this.loadingService.presentLoadingWhile({
+            event: () => this.retrieveDefaultValues()
+        }).subscribe(() => {
+            this.initForm();
             this.loading = false;
-        })
+        });
     }
 
     public ionViewWillLeave(): void {
-        this.disconnectRFIDScanner();
         if (this.footerScannerComponent) {
             this.footerScannerComponent.unsubscribeZebraScan();
         }
-    }
-
-    private initRfidEvents(): void {
-        this.rfidManager.launchEventListeners();
-
-        this.rfidManager.tagsRead$
-            .pipe(
-                map(({tags, ...remaining}) => ({
-                    ...remaining,
-                    tags: (tags || []).filter((tag) => tag.startsWith(this.rfidPrefix || ''))
-                }))
-            )
-            .subscribe(({tags}) => {
-                const [firstTag] = tags || [];
-                if (firstTag) {
-                    this.onRFIDTagScanned(firstTag);
-                }
-            })
     }
 
     public initForm(): void {
@@ -418,111 +379,46 @@ export class ArticleCreationPage implements ViewWillEnter, ViewWillLeave {
         }
     }
 
-    public onRFIDButtonClicked(): void {
-        if (!this.scanLaunchedWithButton) {
-            this.scanLaunchedWithButton = true;
-            this.rfidManager.startScan();
-
-            setTimeout(() => {
-                if (this.scanLaunchedWithButton) {
-                    this.rfidManager.stopScan(false);
-                    this.scanLaunchedWithButton = false;
-                }
-            }, ArticleCreationPage.SCANNER_RFID_DELAY);
-        }
-    }
-
-    public onRFIDTagScanned(tag: string): void {
-        if (!this.loading && !this.creation) {
-            this.rfidManager.stopScan();
-            this.loading = true;
-            this.scanLaunchedWithButton = false;
-            this.loadingService.presentLoadingWhile({
-                event: () => {
-                    return this.apiService
-                        .requestApi(ApiService.GET_ARTICLE_BY_RFID_TAG, {
-                            pathParams: {rfid: tag},
-                        })
-                }
-            }).subscribe(({article}) => {
-                if (article) {
-                    this.toastService.presentToast('Article existant.');
-                    this.creation = false;
-                    this.bodyConfig = [];
-                } else {
-                    this.creation = true;
-                    this.rfidTag = tag;
-                    this.scannerMode = BarcodeScannerModeEnum.INVISIBLE;
-
-                    if (this.headerConfig) {
-                        this.headerConfig.title = `CODE RFID : ${this.rfidTag}`;
-                        this.headerConfig.rightIcon = {
-                            name: 'scan-photo.svg',
-                            color: 'primary',
-                            action: () => {
-                                if (this.footerScannerComponent) {
-                                    this.footerScannerComponent.scan();
-                                }
-                            }
-                        };
-                    }
-                    this.initForm();
-                    this.disconnectRFIDScanner();
-                    this.changeDetector.detectChanges();
-                }
-                this.loading = false;
-            });
-        }
-    }
-
     public onDatamatrixScanned(value: string): void {
-        if (this.creation) {
-            const formattedValue = value.replace(/~~/g, '~');
-            const matrixParts = formattedValue.split('~');
-            const values = matrixParts
-                .filter((part) => part)
-                .reduce((accumulator: { [field: string]: string }, part) => {
-                    const associatedKey: string | undefined = Object.keys(this.PREFIXES_TO_FIELDS).find((key) => part.startsWith(key));
+        const formattedValue = value.replace(/~~/g, '~');
+        const matrixParts = formattedValue.split('~');
+        const values = matrixParts
+            .filter((part) => part)
+            .reduce((accumulator: { [field: string]: string }, part) => {
+                const associatedKey: string | undefined = Object.keys(this.PREFIXES_TO_FIELDS).find((key) => part.startsWith(key));
+                if (associatedKey) {
+                    const associatedField: string | undefined = this.PREFIXES_TO_FIELDS[associatedKey];
                     if (associatedKey) {
-                        const associatedField: string | undefined = this.PREFIXES_TO_FIELDS[associatedKey];
-                        if (associatedKey) {
-                            accumulator[associatedField] = part.substring(associatedKey.length);
-                        }
+                        accumulator[associatedField] = part.substring(associatedKey.length);
                     }
-                    return accumulator;
-                }, {});
-            this.validate(values);
-        }
-    }
-
-    private disconnectRFIDScanner(): void {
-        this.rfidManager.removeEventListeners();
+                }
+                return accumulator;
+            }, {});
+        this.validate(values);
     }
 
     public validate(matrixValues?: {[field: string]: string}) {
         const params: {[field: string]: string|boolean|number} = {
             rfidTag: this.rfidTag,
-            ...(matrixValues ? {fromMatrix: true} : {}),
+            ...(matrixValues ? {fromMatrix: 1} : {}),
             ...this.formPanelComponent.values,
             ...(matrixValues || {})
         };
+
         const formError = this.formPanelComponent.firstError;
         if (!params.fromMatrix && formError) {
             this.toastService.presentToast(formError)
         } else {
+            this.loading = true;
             this.loadingService.presentLoadingWhile({
-                event: () => {
-                    return this.apiService.requestApi(ApiService.CREATE_ARTICLE, {
-                        params
-                    })
-                }
+                event: () => this.apiService.requestApi(ApiService.CREATE_ARTICLE, {params})
             }).subscribe((response) => {
-                this.toastService.presentToast(response.message || response.msg).subscribe(() => {
-                    if (response.success) {
-                        this.navService.pop();
-                    }
-                })
-            })
+                this.loading = false;
+                this.toastService.presentToast(response.message || response.msg);
+                if (response.success) {
+                    this.navService.pop();
+                }
+            });
         }
     }
 

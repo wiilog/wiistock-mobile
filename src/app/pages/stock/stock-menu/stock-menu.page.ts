@@ -122,7 +122,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                         icon: 'new-article-RFID.svg',
                         label: 'Créer article',
                         action: () => {
-                            self.navService.push(NavPathEnum.ARTICLE_CREATION);
+                            self.navService.push(NavPathEnum.ARTICLE_CREATION_SCAN_RFID_TAG);
                         }
                     }]
                     : [])

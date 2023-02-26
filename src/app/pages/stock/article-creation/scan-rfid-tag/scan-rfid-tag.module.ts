@@ -1,8 +1,8 @@
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {IonicModule} from '@ionic/angular';
-import {ArticleCreationRoutingModule} from './article-creation-routing.module';
-import {ArticleCreationPage} from './article-creation.page';
+import {ScanRfidTagRoutingModule} from './scan-rfid-tag-routing.module';
+import {ScanRfidTagPage} from './scan-rfid-tag.page';
 import {CommonModule as NgCommonModule} from '@angular/common';
 import {CommonModule} from '@common/common.module';
 
@@ -11,10 +11,10 @@ import {CommonModule} from '@common/common.module';
         NgCommonModule,
         FormsModule,
         IonicModule,
-        ArticleCreationRoutingModule,
+        ScanRfidTagRoutingModule,
         CommonModule
     ],
-    declarations: [ArticleCreationPage]
+    declarations: [ScanRfidTagPage]
 })
-export class ArticleCreationModule {
+export class ScanRfidTagModule {
 }

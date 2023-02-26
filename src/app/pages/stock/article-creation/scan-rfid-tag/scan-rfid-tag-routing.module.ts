@@ -1,13 +1,13 @@
 import {NgModule} from '@angular/core';
 import {Routes, RouterModule} from '@angular/router';
 
-import {ArticleCreationPage} from './article-creation.page';
+import {ScanRfidTagPage} from './scan-rfid-tag.page';
 import {CanLeaveGuard} from '@app/guards/can-leave/can-leave.guard';
 
 const routes: Routes = [
     {
         path: '',
-        component: ArticleCreationPage,
+        component: ScanRfidTagPage,
         canDeactivate: [CanLeaveGuard]
     }
 ];
@@ -16,5 +16,5 @@ const routes: Routes = [
     imports: [RouterModule.forChild(routes)],
     exports: [RouterModule],
 })
-export class ArticleCreationRoutingModule {
+export class ScanRfidTagRoutingModule {
 }

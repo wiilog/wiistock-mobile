@@ -1,0 +1,28 @@
+<div class="page-content"
+     scroll-y="true">
+
+    <wii-panel-header [leftIcon]="{name: 'new-article-RFID.svg'}"
+                      title="Balayer étiquette RFID"
+                      [transparent]="true"
+                      class="page-header">
+    </wii-panel-header>
+</div>
+
+<div class="page-footer persisted-page-footer">
+    <wii-barcode-scanner [mode]="scannerMode"
+                         (manualAdd)="onRFIDTagScanned($event)">
+    </wii-barcode-scanner>
+
+    <ion-button class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="onRFIDButtonClicked()">
+        Scanner RFID
+        <wii-icon name="RFID-wifi.svg"
+                  width="20px"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

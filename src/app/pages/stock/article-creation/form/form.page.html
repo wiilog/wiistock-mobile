@@ -1,0 +1,46 @@
+<ng-container *ngIf="headerConfig">
+    <div class="page-content"
+         scroll-y="true">
+
+        <wii-panel-header [leftIcon]="headerConfig.leftIcon"
+                          [rightIcons]="headerConfig.rightIcon"
+                          [title]="headerConfig.title"
+                          [transparent]="true"
+                          class="page-header">
+        </wii-panel-header>
+
+        <wii-form-panel #formPanelComponent
+                        *ngIf="bodyConfig"
+                        [body]="bodyConfig">
+        </wii-form-panel>
+    </div>
+
+    <div class="page-footer persisted-page-footer">
+        <wii-barcode-scanner #footerScannerComponent
+                             [mode]="scannerMode"
+                             (scanAdd)="onDatamatrixScanned($event)"
+                             (cameraAdd)="onDatamatrixScanned($event)">
+        </wii-barcode-scanner>
+
+        <ion-button fill="outline"
+                    class="datamatrix-scan-button"
+                    expand="block"
+                    (touchstart)="onScan2DTouchstart()"
+                    (touchend)="onScan2DTouchend()"
+                    (touchcancel)="onScan2DTouchend()">
+            Scan 2D
+        </ion-button>
+
+        <ion-button class="submit-button larger"
+                    color="primary"
+                    size="large"
+                    expand="full"
+                    (click)="validate()">
+            Valider
+            <wii-icon name="check.svg"
+                      class="button-icon"
+                      color="white">
+            </wii-icon>
+        </ion-button>
+    </div>
+</ng-container>

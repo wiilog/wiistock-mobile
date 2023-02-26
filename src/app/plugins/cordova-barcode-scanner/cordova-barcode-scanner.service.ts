@@ -27,14 +27,12 @@ export class CordovaBarcodeScannerService {
         const subject$ = new Subject<BarcodeScanResult>();
         cordova.plugins.barcodeScanner.scan(
             function (result: BarcodeScanResult) {
-                console.log(result)
                 subject$.next(result);
                 subject$.complete();
             },
             function (error: any) {
                 subject$.error(error);
                 subject$.complete();
-                console.log(error)
             },
             finalOptions
         );

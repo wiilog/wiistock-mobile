@@ -31,9 +31,14 @@ const routes: Routes = [
         loadChildren: () => import('./pages/stock/stock-menu/stock-menu.module').then(m => m.StockMenuPageModule)
     },
     {
-        path: NavPathEnum.ARTICLE_CREATION,
+        path: NavPathEnum.ARTICLE_CREATION_SCAN_RFID_TAG,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('./pages/stock/article-creation/article-creation.module').then(m => m.ArticleCreationModule)
+        loadChildren: () => import('./pages/stock/article-creation/scan-rfid-tag/scan-rfid-tag.module').then(m => m.ScanRfidTagModule)
+    },
+    {
+        path: NavPathEnum.ARTICLE_CREATION_FORM,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('./pages/stock/article-creation/form/form.module').then(m => m.FormModule)
     },
     {
         path: NavPathEnum.INVENTORY_ARTICLES,
