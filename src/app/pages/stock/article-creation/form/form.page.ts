@@ -125,8 +125,7 @@ export class FormPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public initForm(): void {
-        const values = this.formPanelComponent ? this.formPanelComponent.values : null;
-
+        const values = this.formPanelComponent && Object.keys(this.formPanelComponent.values).length > 0 ? this.formPanelComponent.values : null;
         this.bodyConfig = [
             {
                 item: FormPanelSelectComponent,
@@ -259,7 +258,7 @@ export class FormPage implements ViewWillEnter, ViewWillLeave {
                 config: {
                     label: 'Prix unitaire',
                     name: 'price',
-                    value: values ? values.quantity : (this.defaultValues.quantity || null),
+                    value: 0,
                     inputConfig: {
                         type: 'number'
                     },
