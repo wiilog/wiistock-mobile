@@ -40,6 +40,8 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
     public missionId: number;
     public rfidTags: Array<string>;
 
+    public numberOfScannedItems: number;
+
     public inputRfidTags: Array<string>;
     public headerConfig?: {
         leftIcon: IconConfig;
@@ -84,6 +86,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
     public ionViewWillEnter(): void {
         this.loading = false;
         this.rfidTags = [];
+        this.numberOfScannedItems = 0
         this.afterValidate = this.navService.param('afterValidate');
         this.zoneLabel = this.navService.param('zoneLabel');
         this.zoneId = this.navService.param('zoneId');
@@ -140,6 +143,8 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
             this.headerConfig.rightIcon.name = this.rfidScanMode
                 ? 'rfid_pause.svg'
                 : 'rfid_play.svg';
+            const plural = this.numberOfScannedItems > 1 ? 's' : '';
+            this.headerConfig.subtitle = `${this.numberOfScannedItems} objet${plural} scanné${plural}`;
             this.changeDetector.detectChanges();
         }
     }
@@ -295,7 +300,9 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
                 }
             }).subscribe((response) => {
                 this.loading = false;
-                this.elementsToDisplay = response.data;
+                this.numberOfScannedItems = response.data.numScannedObjects;
+                this.refreshHeaderConfig();
+                this.elementsToDisplay = response.data.lines;
                 this.refreshMissingsRefsListConfig();
                 this.refreshLocationsQualityListConfig();
             });
