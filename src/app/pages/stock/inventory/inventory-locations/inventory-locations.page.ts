@@ -177,7 +177,7 @@ export class InventoryLocationsPage implements ViewWillEnter, ViewWillLeave, Can
 
         zip(
             this.sqliteService.findBy<ArticleInventaire|Anomalie>(this.anomalyMode ? 'anomalie_inventaire' : 'article_inventaire'),
-            this.sqliteService.findBy<InventoryMission>('inventory_mission'),
+            this.sqliteService.findBy<InventoryMission>('inventory_mission', [], {'mission_end': 'ASC'}),
             this.sqliteService.findBy<Anomalie>(
                 'anomalie_inventaire',
                 this.missionFilter ? [`mission_id = ${this.missionFilter}`] : []
