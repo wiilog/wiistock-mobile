@@ -46,6 +46,11 @@ export class InventoryLocationsPage implements ViewWillEnter, ViewWillLeave, Can
         { label: 'Missions', key: PageMode.MISSIONS }
     ];
 
+    public typesLabel: {[type: string]: string} = {
+        article: 'Art/Ref',
+        location: 'Emplacement',
+    };
+
     public locationsListItemBody: Array<ListPanelItemConfig>;
     public missionsListItemBody: Array<ListPanelItemConfig>;
 
@@ -270,7 +275,7 @@ export class InventoryLocationsPage implements ViewWillEnter, ViewWillLeave, Can
                                         this.selectMission(id, type);
                                     },
                                     badge: {
-                                        label: type,
+                                        label: this.typesLabel[type],
                                         color: {
                                             background: `#CBCBCB`,
                                             font: `#666666`,
