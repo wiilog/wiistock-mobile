@@ -190,18 +190,16 @@ export class ApiService {
         Object
             .keys(object)
             .forEach((key) => {
-                if (object[key] !== undefined
-                    && object[key] !== null) {
-                    formData.set(key, object[key]);
-                }
+                formData.set(key, object[key]);
             });
         return formData;
     }
 
     private static ObjectToHttpParams(method: string,
-                                      object: { [x: string]: any }): HttpParams|FormData {
+                                      object: { [_: string]: any }): HttpParams|FormData {
         const paramsObject = Object
             .keys(object)
+            .filter((key: string) => object[key] !== null && object[key] !== undefined)
             .reduce((acc, key) => ({
                 ...acc,
                 [key]: ((typeof object[key] !== 'string') && (typeof object[key] !== 'number') && !(object[key] instanceof Blob))
