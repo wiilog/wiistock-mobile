@@ -1,0 +1,75 @@
+<div class="card-list" *ngIf="config">
+    <div class="list-icon-container"
+         *ngIf="listIconName">
+        <wii-icon [name]="listIconName"
+                  [color]="color">
+        </wii-icon>
+    </div>
+
+    <wii-panel-header *ngIf="header"
+                      class="list-header"
+                      [title]="header.title"
+                      [subtitle]="header.subtitle"
+                      [info]="header.info"
+                      [leftIcon]="header.leftIcon"
+                      [rightIcons]="header.rightIcon">
+    </wii-panel-header>
+
+    <ion-card *ngFor="let cardConfig of config"
+              (click)="onCardClick(cardConfig)">
+        <ion-card-header *ngIf="cardConfig.title"
+                         [class.flex]="cardConfig.titleFlex"
+                         [style.background-color]="cardConfig.customColor">
+            <p class="header-wrapper" [class.text-right]="index % 2 !== 0 && !cardConfig.titleFlex"
+               *ngFor="let titleConfig of getCardTitle(cardConfig.title); let index = index">
+                <span class="title-label" *ngIf="titleConfig.label">{{ titleConfig.label }}&nbsp;:&nbsp;</span>
+                <span class="title-value">{{ titleConfig.value }}</span>
+            </p>
+        </ion-card-header>
+        <ion-card-content>
+            <div class="content">
+                <p class="badges-container"
+                   *ngIf="cardConfig.badges && cardConfig.badges.length > 0">
+                    <wii-badge *ngFor="let badge of cardConfig.badges"
+                               [config]="badge">
+                    </wii-badge>
+                </p>
+                <div class="list-element-body-wrapper">
+                    <p *ngFor="let contentLine of cardConfig.content">
+                        <ng-container *ngIf="contentLine.label">
+                            <span class="content-label">{{ contentLine.label }}&nbsp;:&nbsp;</span>
+                            <span class="content-value">{{ contentLine.value }}</span>
+                        </ng-container>
+                        <ng-container *ngIf="contentLine.itemConfig; let itemConfig">
+                            <wii-list-panel-item [infos]="itemConfig.infos"
+                                                 [color]="itemConfig.color"
+                                                 [backgroundColor]="itemConfig.backgroundColor"
+                                                 [loading]="itemConfig.loading"
+                                                 [disabled]="itemConfig.disabled"
+                                                 [pressAction]="itemConfig.pressAction"
+                                                 [rightIcon]="itemConfig.rightIcon"
+                                                 [rightIconBase64]="itemConfig.rightIconBase64"
+                                                 [boldValues]="cardConfig.itemBoldValues">
+                            </wii-list-panel-item>
+                        </ng-container>
+                    </p>
+                </div>
+                <div class="actions" *ngIf="cardConfig.rightIcon">
+                    <wii-icon (click)="cardConfig.rightIcon.action && cardConfig.rightIcon.action()"
+                              [name]="cardConfig.rightIcon ? cardConfig.rightIcon.name : 'arrow-right.svg'"
+                              [color]="cardConfig.rightIcon && cardConfig.rightIcon.color"
+                              [attr.class]="cardConfig.rightIcon ? 'right-icon' : 'arrow'">
+                    </wii-icon>
+                </div>
+                <p *ngIf="cardConfig.info" class="content-info">{{cardConfig.info}}</p>
+                <p *ngIf="cardConfig.error" class="content-error">{{cardConfig.error}}</p>
+            </div>
+        </ion-card-content>
+        <div *ngIf="cardConfig.table" class="table-container">
+            <div class="table-title">{{ cardConfig.table.title }}</div>
+            <div class="table-values">
+                <span *ngFor="let value of cardConfig.table.values">{{ value }}</span>
+            </div>
+        </div>
+    </ion-card>
+</div>

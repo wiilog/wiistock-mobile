@@ -1,0 +1,146 @@
+@import "theme/variables";
+
+
+$card-padding: 4px 12px !important;
+
+:host {
+    display: block;
+
+    .list-icon-container {
+        text-align: center;
+        margin-top: calc(#{$spacer} / 1.5);
+        margin-bottom: calc(#{$spacer} / 1.5);
+
+        & > wii-icon {
+            display: inline-block;
+            height: 50px;
+            width: 50px;
+        }
+    }
+
+    .list-header {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    ion-card-header {
+        padding: $card-padding;
+
+        * {
+            color: $white !important;
+        }
+
+        &.flex {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .header-wrapper {
+            margin: 0;
+        }
+    }
+
+    @each $name, $color in $colors {
+        &.#{$name} ion-card-header {
+            background-color: #{$color};
+        }
+    }
+
+    ion-card-content {
+        padding: $card-padding;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: $black;
+
+        .content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            .list-element-body-wrapper {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+            }
+            .badges-container {
+                display: flex;
+                justify-content: space-between;
+                margin-top: $spacerMin;
+                margin-bottom: $spacerMin;
+
+                .wii-badge {
+                    &:first-child {
+                        margin-left: 0;
+                    }
+
+                    &:last-child {
+                        margin-right: 0;
+                    }
+                }
+            }
+
+            .content-info,
+            .content-error {
+                font-size: 90%;
+                font-style: italic;
+
+                &.content-info {
+                    color: $primary;
+                }
+                &.content-error {
+                    color: $danger;
+                }
+            }
+        }
+
+        .actions {
+            display: flex;
+
+            .right-icon {
+                width: 25px !important;
+                height: 25px !important;
+            }
+
+            .arrow {
+                width: 15px !important;
+                height: 15px !important;
+            }
+        }
+    }
+
+    ion-card-header .title-label,
+    ion-card-header .title-value,
+    ion-card-content .content-label,
+    ion-card-content .content-value {
+        display: inline-block;
+        &.title-value,
+        &.content-value {
+            font-weight: bold;
+        }
+    }
+}
+
+.table-container {
+    .table-title {
+        background-color: #E8E8E8;
+        padding: 5px 12px;
+        color: $black;
+        font-weight: 600;
+    }
+
+    .table-values {
+        display: flex;
+        flex-direction: column;
+
+        padding: 0 12px;
+        color: $black;
+
+        span {
+            padding: 6px 4px;
+
+            &:not(:last-child) {
+                border-bottom: 1px solid #A9A9A9;
+            }
+        }
+    }
+}

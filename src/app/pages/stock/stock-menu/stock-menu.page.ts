@@ -109,14 +109,13 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                         self.navService.push(NavPathEnum.INVENTORY_LOCATIONS);
                     }
                 },
-                /*TODO WIIS-7970
                 {
                     icon: 'association.svg',
                     label: 'Association Articles - UL',
                     action: () => {
                         self.navService.push(NavPathEnum.ASSOCIATION);
                     }
-                },*/
+                },
                 ...(hasRightDisplayCreateArticleButton
                     ? [{
                         icon: 'new-article-RFID.svg',

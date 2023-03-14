@@ -54,6 +54,7 @@ import {FormPanelComponent} from "@common/components/panel/form-panel/form-panel
 import {SuggestionListComponent} from "@common/components/suggestion-list/suggestion-list.component";
 import {TabComponent} from "@common/components/tab/tab.component";
 import {SimpleFormComponent} from "@common/components/simple-form/simple-form.component";
+import {CardListComponent} from "@common/components/card-list/card-list.component";
 
 @NgModule({
     imports: [
@@ -96,6 +97,7 @@ import {SimpleFormComponent} from "@common/components/simple-form/simple-form.co
         SuggestionListComponent,
         TabComponent,
         SimpleFormComponent,
+        CardListComponent,
     ],
     exports: [
         IconComponent,
@@ -114,6 +116,7 @@ import {SimpleFormComponent} from "@common/components/simple-form/simple-form.co
         SuggestionListComponent,
         TabComponent,
         SimpleFormComponent,
+        CardListComponent,
     ]
 })
 export class CommonModule {

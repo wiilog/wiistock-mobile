@@ -70,6 +70,11 @@ const routes: Routes = [
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/inventory/inventory-mission-zones/inventory-mission-zones.module').then(m => m.InventoryMissionZonesPageModule)
     },
+    {
+        path: NavPathEnum.ASSOCIATION,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/association/association.module').then(m => m.AssociationModule)
+    },
 ];
 
 @NgModule({

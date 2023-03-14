@@ -23,7 +23,10 @@ export class AlertService {
             this.openAlert.dismiss();
         }
 
-        const alert = await this.alertController.create(options);
+        const alert = await this.alertController.create({
+            cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+            ...options,
+        });
         if(alert) {
             this.openAlert = alert;
             alert.onDidDismiss().then(onDismiss);

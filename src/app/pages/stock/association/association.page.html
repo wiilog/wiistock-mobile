@@ -1,0 +1,40 @@
+<ng-container *ngIf="!loading && headerConfig">
+    <wii-main-loader [loading]="loading"></wii-main-loader>
+
+    <div class="page-content"
+         scroll-y="true"
+         *ngIf="!loading">
+
+        <wii-panel-header [rightIcons]="headerConfig.rightIcon"
+                          [leftIcon]="headerConfig.leftIcon"
+                          [title]="headerConfig.title"
+                          [subtitle]="headerConfig.subtitle"
+                          [info]="headerConfig.info"
+                          class="page-header">
+        </wii-panel-header>
+
+        <wii-card-list *ngIf="listBody && articlesList.length > 0"
+                       [config]="listBody">
+        </wii-card-list>
+    </div>
+
+    <div class="page-footer persisted-page-footer">
+        <wii-barcode-scanner #footerScannerComponent
+                             [hidden]="loading"
+                             [mode]="scannerModeManual"
+                             (manualAdd)="scan($event)">
+        </wii-barcode-scanner>
+
+        <ion-button class="submit-button larger"
+                    color="primary"
+                    size="large"
+                    expand="full"
+                    (click)="validate()">
+            Valider
+            <wii-icon name="check.svg"
+                      class="button-icon"
+                      color="white">
+            </wii-icon>
+        </ion-button>
+    </div>
+</ng-container>
