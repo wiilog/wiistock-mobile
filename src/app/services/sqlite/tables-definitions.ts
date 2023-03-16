@@ -396,6 +396,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'statusId', value: 'INTEGER'},
             {column: 'startDate', value: 'VARCHAR(255)'},
             {column: 'endDate', value: 'VARCHAR(255)'},
+            {column: 'carrierTrackingNumber', value: 'VARCHAR(255)'},
             {column: 'emergency', value: 'VARCHAR(255)'},
             {column: 'locationFromLabel', value: 'VARCHAR(255)'},
             {column: 'locationFromId', value: 'INTEGER'},
@@ -409,8 +410,10 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'color', value: 'VARCHAR(255)'},
             {column: 'destination', value: 'VARCHAR(255)'},
             {column: 'packReferences', value: 'TEXT'},
+            {column: 'quantities', value: 'TEXT'},
             {column: 'packs', value: 'TEXT'},
             {column: 'draft', value: 'INTEGER'},
+            {column: 'comment', value: 'TEXT'},
             {column: 'groupedSignatureStatusColor', value: 'VARCHAR(255)'},
         ]
     },
