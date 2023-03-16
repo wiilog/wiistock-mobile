@@ -126,7 +126,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
                 )
             })
             .subscribe((result) => {
-                if (result) {
+                if (result?.success) {
                     this.rfidScanMode = true;
                     this.initRfidEvents();
                 }
