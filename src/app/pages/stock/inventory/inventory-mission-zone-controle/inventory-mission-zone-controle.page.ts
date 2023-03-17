@@ -66,8 +66,10 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
 
     public listBoldValues?: Array<string>;
 
-    private rfidScanMode?: boolean;
+    private rfidScanMode: boolean = false;
     private rfidPrefix?: string;
+
+    private availableRFIDScan?: boolean;
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
@@ -118,18 +120,15 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
                             this.rfidPrefix = rfidPrefix || '';
                         }),
                         mergeMap(() => this.rfidManager.ensureScannerConnection()),
-                        mergeMap((result) => result.success
-                            ? this.rfidManager.startScan()
-                            : of(result)
-                        )
                     )
                 )
             })
             .subscribe((result) => {
                 if (result?.success) {
-                    this.rfidScanMode = true;
+                    this.availableRFIDScan = true;
                     this.initRfidEvents();
                 }
+
                 this.refreshHeaderConfig();
             })
     }
@@ -182,14 +181,18 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
     }
 
     public toggleStartAndStopScan(): void {
-        if (!this.rfidScanMode) {
-            this.rfidManager.startScan();
+        if (this.availableRFIDScan) {
+            if (!this.rfidScanMode) {
+                this.rfidManager.startScan();
+            } else {
+                this.rfidManager.stopScan();
+                this.retrieveZoneRfidSummary();
+            }
+            this.refreshHeaderConfig();
         }
         else {
-            this.rfidManager.stopScan();
-            this.retrieveZoneRfidSummary();
+            this.toastService.presentToast('Lancement du scan RFID impossible');
         }
-        this.refreshHeaderConfig();
     }
 
     public refreshMissingsRefsListConfig(){
