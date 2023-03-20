@@ -14,7 +14,7 @@ import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcod
 import {ApiService} from "@app/services/api.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {RfidManagerService} from "@app/services/rfid-manager.service";
-import {mergeMap, of, tap} from "rxjs";
+import {mergeMap, tap} from "rxjs";
 import {filter, map} from "rxjs/operators";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {StorageService} from "@app/services/storage/storage.service";
@@ -52,7 +52,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
 
     public afterValidate: (data: any) => void;
 
-    public elementsToDisplay: Array<{reference: string, location: string, ratio: number}>;
+    public elementsToDisplay: Array<{reference?: string, location: string, missing: boolean, ratio?: number}>;
 
     public missingsRefsListConfig: {
         header: HeaderConfig;
@@ -196,7 +196,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
     }
 
     public refreshMissingsRefsListConfig(){
-        const missingsRefsToDisplay = this.elementsToDisplay.filter((missingRef) => missingRef.ratio === 0);
+        const missingsRefsToDisplay = this.elementsToDisplay.filter(({missing}) => missing);
         const plural = missingsRefsToDisplay.length > 1 ? 's' : '';
         const msgToDisplay = `référence${plural} manquante${plural}`;
 
@@ -213,7 +213,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
                 infos: {
                     reference: {
                         label: 'Référence',
-                        value: reference
+                        value: String(reference)
                     },
                     location: {
                         label: 'Emplacement',
@@ -225,7 +225,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
     }
 
     public refreshLocationsQualityListConfig(){
-        const locationQualityToDisplay = this.elementsToDisplay.filter((missingRef) => missingRef.ratio > 0);
+        const locationQualityToDisplay = this.elementsToDisplay.filter(({missing}) => !missing);
         const plural = locationQualityToDisplay.length > 1 ? 's' : '';
 
         this.locationsQualityListConfig = {
@@ -238,12 +238,8 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
                     width: '25px'
                 }
             },
-            body: locationQualityToDisplay.map(({location, reference, ratio}) => ({
+            body: locationQualityToDisplay.map(({location, ratio}) => ({
                 infos: {
-                    reference: {
-                        label: 'Référence',
-                        value: reference
-                    },
                     location: {
                         label: 'Emplacement',
                         value: location
@@ -290,25 +286,40 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
 
     private retrieveZoneRfidSummary() {
         if (!this.loading) {
-            this.loading = true;
-            this.loadingService.presentLoadingWhile({
-                event: () => {
-                    return this.apiService.requestApi(ApiService.ZONE_RFID_SUMMARY, {
-                        params: {
-                            zone: this.zoneId,
-                            mission: this.missionId,
-                            rfidTags: this.rfidTags,
-                        }
-                    })
-                }
-            }).subscribe((response) => {
-                this.loading = false;
-                this.numberOfScannedItems = response.data.numScannedObjects;
-                this.refreshHeaderConfig();
-                this.elementsToDisplay = response.data.lines;
-                this.refreshMissingsRefsListConfig();
-                this.refreshLocationsQualityListConfig();
-            });
+            if (this.rfidTags?.length > 0) {
+                this.loading = true;
+                this.loadingService.presentLoadingWhile({
+                    event: () => {
+                        return this.apiService.requestApi(ApiService.ZONE_RFID_SUMMARY, {
+                            params: {
+                                rfidTags: this.rfidTags,
+                            },
+                            pathParams: {
+                                zone: this.zoneId,
+                                mission: this.missionId,
+                            }
+                        })
+                    }
+                }).subscribe({
+                    next: (response) => {
+                        this.loading = false;
+                        this.numberOfScannedItems = response.data.numScannedObjects;
+                        this.elementsToDisplay = response.data.lines;
+
+                        this.refreshHeaderConfig();
+                        this.refreshMissingsRefsListConfig();
+                        this.refreshLocationsQualityListConfig();
+
+                        this.changeDetector.detectChanges();
+                    },
+                    error: () => {
+                        this.loading = false;
+                    }
+                });
+            }
+            else {
+                this.toastService.presentToast("Aucun tag RFID détecté");
+            }
         }
     }
 }
