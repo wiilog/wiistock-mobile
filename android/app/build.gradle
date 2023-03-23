@@ -6,8 +6,8 @@ android {
         applicationId "com.wiilog.wiistock"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 20230220
-        versionName "6.26.3#rfid"
+        versionCode 20230223
+        versionName "6.27.1#rfid"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
