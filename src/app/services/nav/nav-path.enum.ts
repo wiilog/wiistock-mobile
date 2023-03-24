@@ -83,4 +83,9 @@ export enum NavPathEnum {
     DELIVERY_LOGISTIC_UNIT_CONTENT = 'delivery-logistic-unit-content',
     PRISE_UL_DETAILS = 'prise-ul-details',
     INVENTORY_MISSION_ZONE_CONTROLE = 'inventory-mission-zone-controle',
+    TRUCK_ARRIVAL_MENU = 'truck-arrival-menu',
+    TRUCK_ARRIVAL_DRIVER = 'truck-arrival-driver',
+    TRUCK_ARRIVAL_LINES = 'truck-arrival-lines',
+    TRUCK_ARRIVAL_RESERVES = 'truck-arrival-reserves',
+    TRUCK_ARRIVAL_RESERVE_DETAILS = 'truck-arrival-reserve-details',
 }

@@ -508,8 +508,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
     {
         name: 'supplier_reference',
         schema: [
-            {column: 'label', value: 'VARCHAR(255)'},
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'label', value: 'VARCHAR(255)'},
         ]
     },
     {
@@ -569,5 +569,25 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'zone_label', value: 'VARCHAR(255)'},
             {column: 'done', value: 'INTEGER'},
         ]
-    }
+    },
+    {
+        name: 'driver',
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'prenom', value: 'VARCHAR(255)'},
+            {column: 'id_transporteur', value: 'INTEGER'},
+        ]
+    },
+    {
+        name: 'carrier',
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'logo', value: 'TEXT'},
+            {column: 'minTrackingNumberLength', value: 'INTEGER'},
+            {column: 'maxTrackingNumberLength', value: 'INTEGER'},
+            {column: 'recurrent', value: 'INTEGER'},
+        ]
+    },
 ];

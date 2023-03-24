@@ -8,10 +8,12 @@ export enum StorageKeyEnum {
     RIGHT_GROUP = 'group',
     RIGHT_UNGROUP = 'ungroup',
     RIGHT_EMPTY_ROUND = 'emptyRound',
+    TRUCK_ARRIVAL = 'truckArrival',
     RIGHT_GROUPED_SIGNATURE = 'groupedSignature',
     RIGHT_CREATE_ARTICLE_FROM_NOMADE = 'createArticleFromNomade',
     DEMO_MODE = 'demoMode',
 
+    FORCE_GROUPED_SIGNATURE = 'forceDispatchSignature',
     PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER = 'skipValidationsManualTransfer',
     PARAMETER_SKIP_VALIDATION_DELIVERY = 'skipValidationsLivraisons',
     PARAMETER_SKIP_VALIDATION_MANUAL_DELIVERY = 'manualDeliveryDisableValidations',

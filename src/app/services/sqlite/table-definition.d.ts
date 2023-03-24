@@ -48,4 +48,6 @@ export type TableName =   'emplacement'
                         | 'reference'
                         | 'project'
                         | 'inventory_mission'
-                        | 'inventory_location_zone';
+                        | 'inventory_location_zone'
+                        | 'driver'
+                        | 'carrier';

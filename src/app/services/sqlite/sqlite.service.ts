@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {StorageService} from '@app/services/storage/storage.service';
 import {Livraison} from '@entities/livraison';
 import {from, Observable, of, zip} from 'rxjs';
-import {mergeMap, map, take, tap, catchError, merge} from 'rxjs/operators';
+import {mergeMap, map, take, tap, catchError} from 'rxjs/operators';
 import {Handling} from '@entities/handling';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {Anomalie} from "@entities/anomalie";
@@ -15,6 +15,8 @@ import {TableName} from '@app/services/sqlite/table-definition';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {DemandeLivraisonArticle} from '@entities/demande-livraison-article';
 import {CapacitorSQLite, CapacitorSQLitePlugin} from '@capacitor-community/sqlite';
+import {Carrier} from '@entities/carrier';
+import {Driver} from "@entities/driver";
 
 @Injectable({
     providedIn: 'root'
@@ -764,7 +766,7 @@ export class SqliteService {
     }
 
     public importArticlesInventaire(data: any): Observable<any> {
-        let articlesInventaire = data['inventoryMission'];
+        let articlesInventaire = data['articlesInventaire'];
         return this.deleteBy('article_inventaire')
             .pipe(
                 mergeMap(() => (
@@ -899,11 +901,13 @@ export class SqliteService {
             mergeMap(() => this.importAllowedNaturesData(data).pipe(tap(() => {console.log('--- > importAllowedNaturesData')}))),
             mergeMap(() => this.importFreeFieldsData(data).pipe(tap(() => {console.log('--- > importFreeFieldData')}))),
             mergeMap(() => this.importTranslations(data).pipe(tap(() => {console.log('--- > importTranslations')}))),
+            mergeMap(() => this.importDrivers(data).pipe(tap(() => {console.log('--- > importDrivers')}))),
             mergeMap(() => this.importDispatchesData(data).pipe(tap(() => {console.log('--- > importDispatchesData')}))),
             mergeMap(() => this.importStatusData(data).pipe(tap(() => {console.log('--- > importStatusData')}))),
             mergeMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),
             mergeMap(() => this.importTransportRoundData(data).pipe(tap(() => {console.log('--- > importTransportRoundData')}))),
             mergeMap(() => this.importDispatchTypes(data).pipe(tap(() => {console.log('--- > importDispatchTypesData')}))),
+            mergeMap(() => this.importTransporteursData(data).pipe(tap(() => (console.log('--- > importTransporteursData'))))),
             mergeMap(() => this.importTypes(data).pipe(tap(() => {console.log('--- > importTypes')}))),
             mergeMap(() => this.importSuppliers(data).pipe(tap(() => {console.log('--- > importSuppliers')}))),
             mergeMap(() => this.importRefs(data).pipe(tap(() => {console.log('--- > importRefs')}))),
@@ -1255,6 +1259,32 @@ export class SqliteService {
                         : of(undefined)
                 ))
             );
+    }
+
+    public importDrivers(data: any): Observable<any> {
+        let drivers = data['drivers'];
+        return this.deleteBy('driver')
+            .pipe(
+                mergeMap(() => (
+                    (drivers && drivers.length > 0)
+                        ? this.insert('driver', drivers.map((driver: Driver) => ({
+                            ...driver,
+                        })))
+                        : of(undefined)
+                ))
+            );
+    }
+
+    public importTransporteursData(data: any): Observable<any> {
+        const apiCarriers: Array<Carrier> = data[`carriers`];
+        return this.deleteBy('carrier').pipe(
+            mergeMap(() => (
+                apiCarriers && apiCarriers.length > 0
+                    ? this.insert('carrier', apiCarriers)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
     }
 
     public importSuppliers(data: any): Observable<void> {

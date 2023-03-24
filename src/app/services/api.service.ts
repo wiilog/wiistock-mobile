@@ -75,7 +75,6 @@ export class ApiService {
     public static readonly GET_ASSOCIATED_DOCUMENT_TYPE_ELEMENTS = {method: GET, service: '/get-associated-document-type-elements'};
     public static readonly GET_ASSOCIATED_REF = {method: GET, service: '/get-associated-ref-intels/{pack}/{dispatch}'};
     public static readonly DISPATCH_VALIDATE = {method: POST, service: '/dispatch-validate'};
-    public static readonly DEFAULT_LOCATION_ARTICLE_CREATION = {method: GET, service: '/default-article-location'};
     public static readonly GET_ARTICLE_BY_RFID_TAG = {method: GET, service: '/article-by-rfid-tag/{rfidTag}'};
     public static readonly DEFAULT_ARTICLE_VALUES = {method: GET, service: '/default-article-values'};
     public static readonly CREATE_ARTICLE = {method: POST, service: '/create-article'};
@@ -83,6 +82,11 @@ export class ApiService {
     public static readonly ZONE_RFID_SUMMARY = {method: POST, service: '/inventory-missions/{mission}/summary/{zone}'};
     public static readonly INVENTORY_MISSION_VALIDATE_ZONE = {method: POST, service: '/inventory-mission-validate-zone'};
     public static readonly FINISH_MISSION = {method: POST, service: '/finish-mission'};
+    public static readonly FINISH_TRUCK_ARRIVAL = {method: POST, service: '/finish-truck-arrival'};
+    public static readonly GET_WAYBILL_DATA = {method: GET, service: '/get-waybill-data/{dispatch}'};
+    public static readonly GET_CARRIERS = {method: GET, service: '/get-carriers-data'};
+    public static readonly GET_TRUCK_ARRIVALS_DEFAULT_UNLOADING_LOCATION = {method: GET, service: '/get-truck-arrival-default-unloading-location'};
+    public static readonly GET_TRUCK_ARRIVALS_LINES_NUMBER = {method: GET, service: '/get-truck-arrival-lines-number'};
 
 
     private static readonly DEFAULT_HEADERS = {
