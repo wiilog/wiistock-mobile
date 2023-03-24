@@ -26,6 +26,13 @@
          [class.ion-activatable]="(!rightIcon || !rightIcon.action) && pressAction"
          [class.ripple-parent]="(!rightIcon || !rightIcon.action) && pressAction"
          (click)="onPress()">
+        <div class="list-element-icon-left" *ngIf="leftIcon">
+            <wii-icon [name]="leftIcon.name"
+                      [color]="leftIcon.color"
+                      (action)="leftIcon.action && leftIcon.action()"
+                      [buttonWithoutRipple]="!leftIcon.action">
+            </wii-icon>
+        </div>
         <div class="list-element-body-wrapper">
             <div class="list-element-item"
                  *ngFor="let line of infosArray">
@@ -33,6 +40,11 @@
                 <span class="element-value"
                       [class.element-value-bold]="!boldValues || boldValues.indexOf(line.key) > -1">
                     {{ line.value }}
+                    <wii-icon *ngIf="line.emergency"
+                              class="line-icon"
+                              name="exclamation.svg"
+                              color="danger">
+                    </wii-icon>
                 </span>
             </div>
         </div>
@@ -60,12 +72,20 @@
             </ion-spinner>
         </div>
 
+        <div *ngIf="rightButton">
+            <ion-button class="right-button"
+                        color="{{rightButton.color || 'primary'}}"
+                        fill="outline"
+                        size="small"
+                        (click)="rightButton.action && rightButton.action()">
+                {{rightButton.text}}
+            </ion-button>
+        </div>
+
         <ion-ripple-effect *ngIf="(!rightIcon || !rightIcon.action) && pressAction"></ion-ripple-effect>
     </div>
-    <p class="badges-container"
-       *ngIf="badge">
-        <wii-badge [config]="badge">
-        </wii-badge>
+    <p class="badges-container" *ngIf="badge">
+        <wii-badge [config]="badge"></wii-badge>
     </p>
     <div class="list-element-disabled"
          *ngIf="disabled">

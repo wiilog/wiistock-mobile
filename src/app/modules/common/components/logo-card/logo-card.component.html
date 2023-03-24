@@ -1,0 +1,9 @@
+<ng-container *ngIf="src" class="logo-card-wrapper">
+    <div class="logo-card-img-container {{ selected ? 'selected' : '' }}"
+         (click)="onLogoClick($event)">
+        <img src="{{ src }}"
+             class="logo-card-img"
+             id="{{ id }}"
+             alt="{{ alt }}">
+    </div>
+</ng-container>

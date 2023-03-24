@@ -1,5 +1,5 @@
 export interface FormPanelInputConfig {
-    type: 'number'|'text';
+    type: 'number'|'text'|'password';
     min?: number;
     max?: number;
     required?: boolean;

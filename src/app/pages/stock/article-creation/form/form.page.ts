@@ -154,7 +154,7 @@ export class FormPage implements ViewWillEnter, ViewWillLeave {
                     inputConfig: {
                         searchType: SelectItemTypeEnum.REFERENCE_ARTICLE,
                         required: true,
-                        onChange: (reference) => {
+                        onChange: (reference: any) => {
                             this.reference = reference;
                             if (this.supplier) {
                                 this.importSupplierReferences().subscribe(() => {
@@ -193,7 +193,7 @@ export class FormPage implements ViewWillEnter, ViewWillLeave {
                     inputConfig: {
                         searchType: SelectItemTypeEnum.SUPPLIER,
                         required: true,
-                        onChange: (supplier) => {
+                        onChange: (supplier: any) => {
                             this.supplier = supplier;
                             if (this.reference) {
                                 this.importSupplierReferences().subscribe(() => {

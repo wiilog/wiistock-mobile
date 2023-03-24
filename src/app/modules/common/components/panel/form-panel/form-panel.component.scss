@@ -31,4 +31,24 @@
             }
         }
     }
+
+    .bold-title {
+        font-weight: bold;
+        font-size: $normalFontSize;
+        margin-top: $spacer;
+        margin-left: 1.25rem !important;
+
+        p {
+            margin: 0;
+        }
+
+        wii-icon {
+            margin-right: 5px;
+        }
+    }
+
+    .inline-flex {
+        display: inline-flex !important;
+        margin-top: 0 !important;
+    }
 }

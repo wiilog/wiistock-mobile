@@ -12,7 +12,8 @@
                       [subtitle]="header.subtitle"
                       [info]="header.info"
                       [leftIcon]="header.leftIcon"
-                      [rightIcons]="header.rightIcon">
+                      [rightIcons]="header.rightIcon"
+                      [rightIconLayout]="header.rightIconLayout">
     </wii-panel-header>
 
     <ion-card *ngFor="let cardConfig of config"
@@ -48,6 +49,8 @@
                                                  [disabled]="itemConfig.disabled"
                                                  [pressAction]="itemConfig.pressAction"
                                                  [rightIcon]="itemConfig.rightIcon"
+                                                 [rightButton]="itemConfig.rightButton"
+                                                 [leftIcon]="itemConfig.leftIcon"
                                                  [rightIconBase64]="itemConfig.rightIconBase64"
                                                  [boldValues]="cardConfig.itemBoldValues">
                             </wii-list-panel-item>
@@ -55,7 +58,7 @@
                     </p>
                 </div>
                 <div class="actions" *ngIf="cardConfig.rightIcon">
-                    <wii-icon (click)="cardConfig.rightIcon.action && cardConfig.rightIcon.action()"
+                    <wii-icon (click)="$event.stopPropagation(); cardConfig.rightIcon.action && cardConfig.rightIcon.action()"
                               [name]="cardConfig.rightIcon ? cardConfig.rightIcon.name : 'arrow-right.svg'"
                               [color]="cardConfig.rightIcon && cardConfig.rightIcon.color"
                               [attr.class]="cardConfig.rightIcon ? 'right-icon' : 'arrow'">

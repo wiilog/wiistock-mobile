@@ -50,11 +50,28 @@
                 &.element-value-bold {
                     font-weight: bold;
                 }
+
+                .line-icon {
+                    display: inline-flex;
+                    width: 0.75rem;
+                }
             }
         }
 
         .list-element-icon {
             padding-left: .5rem;
+            display: flex;
+            wii-icon, img {
+                height: 1.7rem;
+                width: 1.7rem;
+            }
+            ion-spinner * {
+                width: 25px;
+            }
+        }
+
+        .list-element-icon-left {
+            padding-right: .5rem;
             display: flex;
             wii-icon, img {
                 height: 1.7rem;
@@ -98,4 +115,8 @@ ion-item-options {
 ::ng-deep ion-item {
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
+}
+
+.right-button {
+    height: 2rem;
 }

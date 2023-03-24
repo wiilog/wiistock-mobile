@@ -1,0 +1,33 @@
+@import "theme/variables";
+
+:host {
+    display: flex;
+    width: 50%;
+
+    .logo-card-img {
+        width: auto;
+        max-width: 85%;
+        height: auto;
+        max-height: 80%;
+        margin: auto;
+
+    }
+
+    .logo-card-img-container {
+        background-color: white;
+        height: 3rem;
+        flex-wrap: wrap;
+        display: flex;
+        padding-left: $spacer / 2;
+        padding-right: $spacer / 2;
+        box-shadow: $card-box-shadow;
+        border-radius: 5%;
+        width: 100%;
+        margin: ($spacer / 4) ($spacer / 4);
+        min-height: 70px;
+    }
+
+    .selected {
+        border: 1px solid black;
+    }
+}

@@ -15,6 +15,7 @@ export class ListPanelItemComponent {
         [name: string]: {
             label?: string;
             value: string;
+            emergency?: boolean;
         };
     };
 
@@ -35,6 +36,16 @@ export class ListPanelItemComponent {
 
     @Input()
     public badge?: BadgeConfig;
+
+    @Input()
+    public leftIcon?: IconConfig;
+
+    @Input()
+    public rightButton?: {
+        text: string;
+        color?: string;
+        action?: () => void;
+    }
 
     @Input()
     public rightIconBase64?: string;
@@ -63,14 +74,14 @@ export class ListPanelItemComponent {
     };
 
     @Input()
-    public pressAction?: (infos: {[name: string]: {label?: string; value: string;};}) => void;
+    public pressAction?: (infos: {[name: string]: {label?: string; value: string; emergency?: boolean;};}) => void;
 
     @HostBinding('class')
     public _backgroundColor?: string;
 
     public constructor(private elementRef: ElementRef) {}
 
-    public get infosArray(): Array<{label?: string; value: string; key: string;}> {
+    public get infosArray(): Array<{label?: string; value: string; key: string;emergency?: boolean;}> {
         return Object.keys(this.infos).map((key) => ({
             key,
             ...(this.infos[key])

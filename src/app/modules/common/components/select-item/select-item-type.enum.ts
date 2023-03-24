@@ -18,5 +18,7 @@ export enum SelectItemTypeEnum {
     REFERENCE_ARTICLE,
     SUPPLIER,
     SUPPLIER_REFERENCE,
-    PROJECT
+    PROJECT,
+    CARRIER,
+    DRIVER,
 }

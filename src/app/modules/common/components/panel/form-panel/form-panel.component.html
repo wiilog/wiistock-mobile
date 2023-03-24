@@ -23,6 +23,13 @@
         <ng-container *ngFor="let param of body">
             <!--suppress JSUnusedGlobalSymbols -->
             <ng-container *ngFor="let _ of getOccurrences(param); let last = last">
+                <div *ngIf="param.config.section" class="{{param.config.section.bold ? 'bold-title' : ''}} inline-flex">
+                    <wii-icon *ngIf="param.config.section.logo"
+                              name="{{param.config.section.logo}}"
+                              width="16px">
+                    </wii-icon>
+                    <p>{{param.config.section.title}}</p>
+                </div>
                 <ng-template #formElements
                              wiiFormPanel
                              [param]="param">

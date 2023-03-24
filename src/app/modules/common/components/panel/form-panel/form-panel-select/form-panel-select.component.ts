@@ -26,6 +26,9 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
     public inputConfig: FormPanelSelectConfig;
 
     @Input()
+    public section?: {title: string; bold: boolean; logo?: string;};
+
+    @Input()
     public label: string;
 
     @Input()

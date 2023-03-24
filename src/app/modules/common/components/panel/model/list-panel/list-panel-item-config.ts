@@ -7,6 +7,7 @@ export interface ListPanelItemConfig {
         [name: string]: {
             label?: string;
             value: string;
+            emergency?: boolean;
         };
     };
     loading?: boolean;
@@ -16,6 +17,12 @@ export interface ListPanelItemConfig {
     pressAction?: (infos: {[name: string]: {label?: string; value: string;};}) => void;
     rightIcon?: IconConfig;
     rightIconBase64?: string;
+    leftIcon?: IconConfig;
+    rightButton?: {
+        text: string;
+        color?: string;
+        action?: () => void;
+    };
     sliding?: boolean;
     badge?: BadgeConfig;
     slidingConfig?: {

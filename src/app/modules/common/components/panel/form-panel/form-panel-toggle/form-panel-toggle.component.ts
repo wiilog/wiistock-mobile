@@ -42,6 +42,10 @@ export class FormPanelToggleComponent implements FormPanelItemComponent<FormPane
 
     public onValueChange(value: boolean) {
         this.valueChange.emit(value);
+
+        if(this.inputConfig.onChange) {
+            this.inputConfig.onChange(value);
+        }
     }
 
     public get error(): string|undefined {

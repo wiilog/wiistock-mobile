@@ -29,6 +29,9 @@ export class FormPanelCameraComponent implements FormPanelItemComponent<FormPane
     public name: string;
 
     @Input()
+    public disabled?: boolean;
+
+    @Input()
     public errors?: { [errorName: string]: string };
 
     @Input()
@@ -48,11 +51,12 @@ export class FormPanelCameraComponent implements FormPanelItemComponent<FormPane
     }
 
     public onPhotoClicked(index: number): void {
-        if (this.inputConfig.multiple) {
-            (this.value as Array<string>).splice(index, 1);
-        }
-        else {
-            this.value = undefined;
+        if (!this.inputConfig.disabled) {
+            if (this.inputConfig.multiple) {
+                (this.value as Array<string>).splice(index, 1);
+            } else {
+                this.value = undefined;
+            }
         }
     }
 
