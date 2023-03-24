@@ -1,0 +1,44 @@
+@import "theme/variables";
+
+.image-container {
+    display: flex;
+    flex-direction: column;
+    background: black;
+    height: 100%;
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-height: 50px;
+        padding: 20px;
+
+        h1 {
+            margin: 0;
+            padding: 5px 0;
+            font-size: 1rem;
+            color: white;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        wii-icon {
+            height: 25px;
+        }
+    }
+
+    .image-centerer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 1 1 auto;
+        overflow-y: scroll;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: scale-down;
+        }
+    }
+}

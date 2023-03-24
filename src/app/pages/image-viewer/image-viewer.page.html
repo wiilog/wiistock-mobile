@@ -1,0 +1,10 @@
+<div class="image-container">
+    <div class="header">
+        <h1>{{ label }}</h1>
+        <wii-icon name="cross.svg" class="button-icon" color="white" width="20" (click)="close()"></wii-icon>
+    </div>
+
+    <div class="image-centerer">
+        <img *ngIf="url" [src]="url" [alt]="label">
+    </div>
+</div>

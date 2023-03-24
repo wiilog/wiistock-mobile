@@ -100,6 +100,30 @@ const routes: Routes = [
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/demande/demande-menu/demande-menu.module').then(m => m.DemandeMenuPageModule)
     },
+    {
+        path: NavPathEnum.IMAGE_VIEWER,
+        loadChildren: () => import('@pages/image-viewer/image-viewer.module').then(m => m.ImageViewerPageModule)
+    },
+    {
+        path: NavPathEnum.DISPATCH_NEW,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/demande/dispatch/dispatch-new/dispatch-new.module').then(m => m.DispatchNewModule)
+    },
+    {
+        path: NavPathEnum.DISPATCH_REQUEST_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/demande/dispatch/dispatch-request-menu/dispatch-request-menu.module').then(m => m.DispatchRequestMenuModule)
+    },
+    {
+        path: NavPathEnum.HANDLING_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/demande/handling/handling-menu/handling-menu.module').then(m => m.HandlingMenuPageModule)
+    },
+    {
+        path: NavPathEnum.HANDLING_VALIDATE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/demande/handling/handling-validate/handling-validate.module').then(m => m.HandlingValidatePageModule)
+    },
 ];
 
 @NgModule({

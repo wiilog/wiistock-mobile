@@ -1,0 +1,18 @@
+<wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
+
+<div *ngIf="hasLoaded"
+     scroll-y="true"
+     class="page-content">
+    <wii-card-list *ngIf="hasLoaded && handlingsListConfig && handlingsListConfig.length > 0"
+                   [listIconName]="handlingsIconName"
+                   [color]="handlingsListColor"
+                   [config]="handlingsListConfig">
+    </wii-card-list>
+</div>
+<wii-barcode-scanner [mode]="scannerMode"
+                     [selectedLabel$]="selectedSubject$"
+                     (manualAdd)="onBarcodeScanned($event)"
+                     (cameraAdd)="onBarcodeScanned($event)"
+                     (scanAdd)="onBarcodeScanned($event)"
+                     (clear)="onSearchCleared()">
+</wii-barcode-scanner>

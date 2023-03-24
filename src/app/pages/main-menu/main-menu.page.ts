@@ -287,15 +287,23 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                 else if (data.type === 'dispatch') {
                     this.pageIsRedirecting = true;
                     const dispatchId = Number(data.id);
-                    this.navService
-                        .push(NavPathEnum.TRACKING_MENU)
-                        .pipe(
-                            mergeMap(() => this.navService.push(NavPathEnum.DISPATCH_MENU, {withoutLoading: true})),
-                            mergeMap(() => this.navService.push(NavPathEnum.DISPATCH_PACKS, {dispatchId}))
-                        )
-                        .subscribe(() => {
-                            this.pageIsRedirecting = false;
-                        });
+                    this.storageService.getRight(StorageKeyEnum.FORCE_GROUPED_SIGNATURE).subscribe((forceSignature) => {
+                        if (forceSignature) {
+                            this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE).subscribe(() => {
+                                this.pageIsRedirecting = false;
+                            })
+                        } else {
+                            this.navService
+                                .push(NavPathEnum.TRACKING_MENU)
+                                .pipe(
+                                    flatMap(() => this.navService.push(NavPathEnum.DISPATCH_MENU, {withoutLoading: true})),
+                                    flatMap(() => this.navService.push(NavPathEnum.DISPATCH_PACKS, {dispatchId}))
+                                )
+                                .subscribe(() => {
+                                    this.pageIsRedirecting = false;
+                                });
+                        }
+                    })
                 }
                 else if (data.type === 'service') {
                     this.pageIsRedirecting = true;

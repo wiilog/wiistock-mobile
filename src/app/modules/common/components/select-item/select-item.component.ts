@@ -55,7 +55,7 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
     @ViewChild('barcodeScanner', {static: false})
     public barcodeScanner: BarcodeScannerComponent;
 
-    public selectedLabel$: Subject<string>;
+    public selectedLabel$: Subject<string|undefined>;
 
     private resetEmitterSubscription?: Subscription;
 
@@ -102,9 +102,9 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
     public constructor(private toastService: ToastService,
                        private changeDetector: ChangeDetectorRef,
                        private alertService: AlertService) {
-        this.itemChange = new EventEmitter<any>();
-        this.createItem = new EventEmitter<boolean>();
-        this.selectedLabel$ = new Subject<string>();
+        this.itemChange = new EventEmitter();
+        this.createItem = new EventEmitter();
+        this.selectedLabel$ = new Subject();
     }
 
     public ngAfterViewInit() {

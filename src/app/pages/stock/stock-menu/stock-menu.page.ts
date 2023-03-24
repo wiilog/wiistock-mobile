@@ -51,7 +51,6 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
             }
         }).subscribe((hasRightDisplayCreateArticleButton) => {
             self.menuConfig = [
-                /* TODO WIIS-7970
                 {
                     icon: 'preparation.svg',
                     label: 'Préparation',
@@ -68,7 +67,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                 },
                 {
                     icon: 'manual-delivery.svg',
-                    label: 'Livraison manuelle',
+                    label: 'Livraison<br/>manuelle',
                     action: () => {
                         self.navService.push(NavPathEnum.MANUAL_DELIVERY);
                     }
@@ -96,12 +95,11 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                 },
                 {
                     icon: 'manual-transfer.svg',
-                    label: 'Transfert manuel',
+                    label: 'Transfert<br/>manuel',
                     action: () => {
                         this.navigateToPriseDeposePage()
                     }
                 },
-                */
                 {
                     icon: 'inventory.svg',
                     label: 'Inventaire',

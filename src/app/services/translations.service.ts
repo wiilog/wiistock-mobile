@@ -26,7 +26,7 @@ export class TranslationService {
         }), {});
     }
 
-    public get(...args: [string, string, string] | []): Observable<Translations> {
+    public get(...args: [string|null, string, string] | []): Observable<Translations> {
         const [topMenu, menu, subMenu] = args || [];
         return this.sqliteService
             .findBy('translations', args.length > 0

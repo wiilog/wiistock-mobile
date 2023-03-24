@@ -1,0 +1,21 @@
+<wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
+
+<div *ngIf="hasLoaded"
+     scroll-y="true"
+     class="page-content">
+    <wii-card-list *ngIf="hasLoaded && dispatches && dispatches.length > 0"
+                   [listIconName]="dispatchIconName"
+                   [color]="dispatchListColor"
+                   [config]="dispatchListConfig">
+    </wii-card-list>
+</div>
+
+<ion-fab *ngIf="hasLoaded"
+         vertical="end"
+         horizontal="bottom"
+         slot="fixed">
+    <ion-fab-button color="primary"
+                    (click)="onAddClick()">
+        <ion-icon class="big-icon" name="add-outline"></ion-icon>
+    </ion-fab-button>
+</ion-fab>
