@@ -207,8 +207,7 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
             actions.push(action);
         }
 
-        // TODO WIIS-7970 remove false
-        if (false && rights.demande) {
+        if (rights.demande) {
             const action = () => {
                 this.navService.push(NavPathEnum.DEMANDE_MENU);
             };

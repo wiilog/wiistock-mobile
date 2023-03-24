@@ -1,0 +1,31 @@
+<wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
+
+<div *ngIf="hasLoaded"
+     scroll-y="true"
+     class="page-content">
+    <wii-card-list *ngIf="hasLoaded && demandesLivraison && demandesLivraison.length > 0"
+                   [listIconName]="demandeLivraisonIconName"
+                   [color]="demandeLivraisonListColor"
+                   [config]="demandesListConfig">
+    </wii-card-list>
+</div>
+
+<ion-fab *ngIf="hasLoaded"
+         vertical="end"
+         horizontal="bottom"
+         slot="fixed">
+    <ion-fab-button (click)="onMenuClick()">
+        <ion-icon class="big-icon"  name="menu-outline"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="top"
+                  [activated]="fabListActivated">
+        <ion-fab-button color="light"
+                        (click)="onAddClick()">
+            <ion-icon name="add-outline"></ion-icon>
+        </ion-fab-button>
+        <ion-fab-button color="light"
+                        (click)="onRefreshClick()">
+            <ion-icon name="refresh"></ion-icon>
+        </ion-fab-button>
+    </ion-fab-list>
+</ion-fab>

@@ -75,6 +75,31 @@ const routes: Routes = [
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/association/association.module').then(m => m.AssociationModule)
     },
+    {
+        path: NavPathEnum.DEMANDE_LIVRAISON_ARTICLE_TAKE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/demande/demande-livraison/demande-livraison-article-take/demande-livraison-article-take.module').then(m => m.DemandeLivraisonArticleTakePageModule)
+    },
+    {
+        path: NavPathEnum.DEMANDE_LIVRAISON_ARTICLES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/demande/demande-livraison/demande-livraison-articles/demande-livraison-articles.module').then(m => m.DemandeLivraisonArticlesPageModule)
+    },
+    {
+        path: NavPathEnum.DEMANDE_LIVRAISON_HEADER,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/demande/demande-livraison/demande-livraison-header/demande-livraison-header.module').then(m => m.DemandeLivraisonHeaderPageModule)
+    },
+    {
+        path: NavPathEnum.DEMANDE_LIVRAISON_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu.module').then(m => m.DemandeLivraisonMenuPageModule)
+    },
+    {
+        path: NavPathEnum.DEMANDE_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/demande/demande-menu/demande-menu.module').then(m => m.DemandeMenuPageModule)
+    },
 ];
 
 @NgModule({

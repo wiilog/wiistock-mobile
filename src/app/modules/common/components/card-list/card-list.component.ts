@@ -29,7 +29,7 @@ export class CardListComponent {
         }
     }
 
-    public getCardTitle(titleConfig: {label: string;value: string;} | Array<{label: string;value: string;}>): Array<{label: string;value: string;}> {
+    public getCardTitle(titleConfig: {label?: string;value?: string;} | Array<{label?: string; value?: string;}>): Array<{label?: string; value?: string;}> {
         if (!titleConfig) {
             return [];
         }

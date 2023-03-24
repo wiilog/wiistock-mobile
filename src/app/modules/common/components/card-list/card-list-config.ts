@@ -4,7 +4,7 @@ import {BadgeConfig} from '@common/components/badge/badge-config';
 
 export interface CardListConfig {
     badges?: Array<BadgeConfig>;
-    title?: {label: string;value: string;} | Array<{label: string;value: string;}>;
+    title?: {label?: string; value?: string;} | Array<{label?: string; value?: string;}>;
     titleFlex?: boolean;
     content: Array<{
         label?: string;

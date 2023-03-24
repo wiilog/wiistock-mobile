@@ -1,0 +1,22 @@
+<wii-main-loader [loading]="loading"></wii-main-loader>
+
+<div class="page-content"
+     scroll-y="true"
+     *ngIf="!loading">
+    <wii-list-panel *ngIf="headerConfig && listBoldValues"
+                    [header]="headerConfig"
+                    [body]="bodyConfig"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+</div>
+
+<div class="page-footer persisted-page-footer">
+    <wii-select-item #selectItemComponent
+                     [type]="scannerType"
+                     (itemChange)="selectArticleQuantity($event)"
+                     [checkBarcodeValidity]="true"
+                     [resetEmitter]="resetSelectItemEmitter$"
+                     [requestParams]="['to_delete IS NULL']"
+                     [scanMode]="scannerMode">
+    </wii-select-item>
+</div>
