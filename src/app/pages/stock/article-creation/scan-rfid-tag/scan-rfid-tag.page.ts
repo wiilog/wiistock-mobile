@@ -61,9 +61,7 @@ export class ScanRfidTagPage implements ViewWillEnter, ViewWillLeave {
         }).subscribe({
             next: ([rfidPrefix]) => {
                 this.rfidPrefix = rfidPrefix || '';
-                if (this.rfidPrefix) {
-                    this.initRfidEvents();
-                }
+                this.initRfidEvents();
                 this.loading = false;
                 this.alreadyLoaded = true;
             },
