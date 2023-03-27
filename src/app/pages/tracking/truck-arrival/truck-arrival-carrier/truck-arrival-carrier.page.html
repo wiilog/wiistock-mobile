@@ -1,0 +1,36 @@
+<div class="page-content"
+     scroll-y="true">
+    <wii-form-panel #formPanelComponent
+                    [body]="bodyConfig">
+    </wii-form-panel>
+    <div class="logo-cards-container">
+        <wii-logo-card *ngFor="let carrierI of carriers"
+                       [src]="carrierI.logo"
+                       [alt]="carrierI.label"
+                       [selected]="carrier !== undefined && carrier.id === carrierI.id"
+                       (action)="onLogoClick($event, carrierI.id)">
+            {{ carrierI.logo }}
+        </wii-logo-card>
+    </div>
+    <wii-barcode-scanner #footerScannerComponent
+                         (cameraAdd)="testIfBarcodeEquals($event)"
+                         (scanAdd)="testIfBarcodeEquals($event)"
+                         (manualAdd)="testIfBarcodeEquals($event)"
+                         [mode]="scannerMode">
+    </wii-barcode-scanner>
+</div>
+
+<div class="page-footer">
+    <ion-button class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                [hidden]="false"
+                (click)="next()">
+        Suivant
+        <wii-icon name="chevron-droite-blanc.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

@@ -1,0 +1,20 @@
+@import "theme/variables";
+
+.page-content {
+    padding-top: 0;
+    padding-left: 0;
+    padding-right: 0;
+
+    wii-panel-header.page-header {
+        margin-top: $spacer;
+        margin-bottom: $spacer;
+    }
+
+    .custom-fill-button {
+        background-color: white;
+    }
+
+    &.spacing {
+        padding-bottom: 8px !important;
+    }
+}

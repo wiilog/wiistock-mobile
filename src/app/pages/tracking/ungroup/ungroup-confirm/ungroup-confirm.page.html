@@ -1,0 +1,25 @@
+<div class="page-content" scroll-y="true">
+    <wii-list-panel *ngIf="listConfig"
+                    [header]="listConfig.header"
+                    [body]="listConfig.body"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+</div>
+
+<div class="page-footer">
+    <ion-button class="larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="onSubmit()">
+        <span class="button-text-wrapper">
+            <span class="title">Valider</span>
+            <br/>
+            <span class="subtitle">Dégroupage</span>
+        </span>
+        <wii-icon class="button-icon"
+                  name="check.svg"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

@@ -4,6 +4,7 @@ import {from, Observable} from 'rxjs';
 import {Router, NavigationStart} from '@angular/router';
 import {LoadingController} from '@ionic/angular';
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
+import {map} from "rxjs/operators";
 
 @Injectable({
     providedIn: 'root'
@@ -50,18 +51,13 @@ export class NavService {
             const reversedParamStack = [...this.stack].reverse();
             reversedParamStack.shift();
 
-            let index = null;
-            for (let i = 0; i < reversedParamStack.length; i++) {
-                if (reversedParamStack[i].path === path) {
-                    index = i + 1;
-                    break;
-                }
-            }
+            const lastIndex = reversedParamStack.findIndex((param) => param.path === path);
 
-            if (index === null) {
+            if (lastIndex === -1) {
                 throw new Error(`Could not find route ${path}`);
             }
 
+            const index = lastIndex + 1;
             this.stack.splice(this.stack.length - index, index);
 
             const currentParams = this.stack[this.stack.length - 1].params;
@@ -69,7 +65,7 @@ export class NavService {
                 currentParams[key] = value;
             }
 
-            return from(this.navController.navigateBack(path) as unknown as Observable<void>);
+            return from(this.navController.navigateBack(path)).pipe(map(() => undefined));
         }
     }
 

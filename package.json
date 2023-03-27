@@ -28,6 +28,7 @@
         "@capacitor-community/sqlite": "^4.6.1-2",
         "@capacitor/android": "4.6.2",
         "@capacitor/app": "4.1.1",
+        "@capacitor/browser": "^4.1.1",
         "@capacitor/camera": "^4.1.4",
         "@capacitor/core": "4.6.2",
         "@capacitor/haptics": "4.1.0",

@@ -1,0 +1,58 @@
+<div *ngIf="!loading && dispatchHeaderConfig"
+     scroll-y="true"
+     class="page-content"
+     [class.spacing]="fromCreate">
+    <wii-panel-header *ngIf="dispatchHeaderConfig"
+                      class="page-header"
+                      [title]="dispatchHeaderConfig.title"
+                      [subtitle]="dispatchHeaderConfig.subtitle"
+                      [info]="dispatchHeaderConfig.info"
+                      [transparent]="dispatchHeaderConfig.transparent"
+                      [leftIcon]="dispatchHeaderConfig.leftIcon"
+                      [rightIcons]="dispatchHeaderConfig.rightIcon">
+    </wii-panel-header>
+    <ion-item *ngIf="fromCreate && ableToCreateWaybill">
+        <ion-label>Lettre de voiture</ion-label>
+        <ion-toggle slot="end"
+                    [checked]="this.hasWayBillData"
+                    (click)="goToWayBill()">
+
+        </ion-toggle>
+    </ion-item>
+
+    <wii-list-panel *ngIf="packsTreatedListConfig"
+                    [header]="packsTreatedListConfig.header"
+                    [body]="packsTreatedListConfig.body"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+    <wii-list-panel *ngIf="!fromCreate && packsToTreatListConfig"
+                    [header]="packsToTreatListConfig.header"
+                    [body]="packsToTreatListConfig.body"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+</div>
+
+<div class="page-footer persisted-page-footer">
+    <wii-barcode-scanner #footerScannerComponent
+                         [hidden]="loading"
+                         [mode]="scannerMode"
+                         *ngIf="!viewMode"
+                         (manualAdd)="takePack($event)"
+                         (scanAdd)="takePack($event)"
+                         (cameraAdd)="takePack($event)">
+    </wii-barcode-scanner>
+    <ion-button class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                *ngIf="!viewMode"
+                (click)="validate()">
+        Valider
+        <wii-icon name="check.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>
+
+

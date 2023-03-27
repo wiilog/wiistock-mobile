@@ -10,7 +10,7 @@ import {ToastService} from '@app/services/toast.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 // import {ILocalNotification} from '@ionic-native/local-notifications'; // TODO WIIS-7970
-// import {NotificationService} from '@app/common/services/notification.service'; // TODO WIIS-7970
+// import {NotificationService} from '@app/services/notification.service'; // TODO WIIS-7970
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {AlertService} from '@app/services/alert.service';
 import {NetworkService} from '@app/services/network.service';
@@ -296,8 +296,8 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                             this.navService
                                 .push(NavPathEnum.TRACKING_MENU)
                                 .pipe(
-                                    flatMap(() => this.navService.push(NavPathEnum.DISPATCH_MENU, {withoutLoading: true})),
-                                    flatMap(() => this.navService.push(NavPathEnum.DISPATCH_PACKS, {dispatchId}))
+                                    mergeMap(() => this.navService.push(NavPathEnum.DISPATCH_MENU, {withoutLoading: true})),
+                                    mergeMap(() => this.navService.push(NavPathEnum.DISPATCH_PACKS, {dispatchId}))
                                 )
                                 .subscribe(() => {
                                     this.pageIsRedirecting = false;

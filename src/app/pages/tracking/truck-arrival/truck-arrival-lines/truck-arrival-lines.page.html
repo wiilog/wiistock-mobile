@@ -1,0 +1,29 @@
+<div class="page-content"
+     scroll-y="true">
+    <wii-list-panel
+        *ngIf="truckArrivalLinesListConfig"
+        [body]="truckArrivalLinesListConfig">
+    </wii-list-panel>
+</div>
+
+<div class="page-footer persisted-page-footer">
+    <wii-barcode-scanner #footerScannerComponent
+                         [hidden]="loading"
+                         [mode]="scannerModeManual"
+                         (manualAdd)="testIfBarcodeEquals($event)"
+                         (scanAdd)="testIfBarcodeEquals($event)"
+                         (cameraAdd)="testIfBarcodeEquals($event)">
+    </wii-barcode-scanner>
+
+    <ion-button class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="next()">
+        Suivant
+        <wii-icon name="check.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

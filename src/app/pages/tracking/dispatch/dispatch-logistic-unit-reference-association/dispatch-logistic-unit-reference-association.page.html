@@ -1,0 +1,33 @@
+<div *ngIf="formConfig && headerConfig"
+     scroll-y="true"
+     class="page-content">
+    <wii-panel-header *ngIf="headerConfig"
+                      class="page-header"
+                      [transparent]="headerConfig.transparent"
+                      [title]="headerConfig.title"
+                      [subtitle]="headerConfig.subtitle"
+                      [leftIcon]="headerConfig.leftIcon">
+    </wii-panel-header>
+    <wii-form-panel #formPanelComponent
+                    *ngIf="formConfig"
+                    [body]="formConfig"
+                    (loaded)="formIsLoaded()"
+                    [isForm]="true"></wii-form-panel>
+</div>
+
+<div class="page-footer persisted-page-footer">
+    <ion-button class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                *ngIf="!viewMode && !disableValidate"
+                (click)="validate()">
+        Valider
+        <wii-icon name="check.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>
+
+

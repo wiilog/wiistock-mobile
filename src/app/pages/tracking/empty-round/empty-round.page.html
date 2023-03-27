@@ -1,0 +1,12 @@
+<div class="page-content">
+    <wii-panel-header *ngIf="emptyRoundHeader"
+                      class="page-header"
+                      [title]="emptyRoundHeader.title"
+                      [subtitle]="emptyRoundHeader.subtitle"
+                      [rightIcons]="emptyRoundHeader.rightIcon">
+    </wii-panel-header>
+
+    <wii-form-panel #formPanelComponent
+                    [body]="formBodyConfig">
+    </wii-form-panel>
+</div>

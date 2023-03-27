@@ -56,6 +56,7 @@ import {TabComponent} from "@common/components/tab/tab.component";
 import {SimpleFormComponent} from "@common/components/simple-form/simple-form.component";
 import {CardListComponent} from "@common/components/card-list/card-list.component";
 import {LogoCardComponent} from "@common/components/logo-card/logo-card.component";
+import {NumberInputComponent} from "@common/components/number-input/number-input.component";
 
 @NgModule({
     imports: [
@@ -100,6 +101,7 @@ import {LogoCardComponent} from "@common/components/logo-card/logo-card.componen
         SimpleFormComponent,
         CardListComponent,
         LogoCardComponent,
+        NumberInputComponent,
     ],
     exports: [
         IconComponent,
@@ -120,6 +122,7 @@ import {LogoCardComponent} from "@common/components/logo-card/logo-card.componen
         SimpleFormComponent,
         CardListComponent,
         LogoCardComponent,
+        NumberInputComponent,
     ]
 })
 export class CommonModule {

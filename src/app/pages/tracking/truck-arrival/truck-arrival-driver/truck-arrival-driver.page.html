@@ -1,0 +1,20 @@
+<div class="page-content">
+    <wii-form-panel #formPanelComponent
+                    [body]="bodyConfig">
+    </wii-form-panel>
+</div>
+
+<div class="page-footer">
+    <ion-button class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                [hidden]="false"
+                (click)="next()">
+        Suivant
+        <wii-icon name="check.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

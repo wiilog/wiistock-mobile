@@ -159,6 +159,106 @@ const routes: Routes = [
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/prise-depose/prise-ul-details/prise-ul-details.module').then(m => m.PriseUlDetailsPageModule)
     },
+    {
+        path: NavPathEnum.DISPATCH_GROUPED_SIGNATURE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-grouped-signature/dispatch-grouped-signature.module').then(m => m.DispatchGroupedSignaturePageModule)
+    },
+    {
+        path: NavPathEnum.DISPATCH_GROUPED_SIGNATURE_FINISH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-grouped-signature-finish/dispatch-grouped-signature-finish.module').then(m => m.DispatchGroupedSignatureFinishPageModule)
+    },
+    {
+        path: NavPathEnum.DISPATCH_GROUPED_SIGNATURE_VALIDATE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-grouped-signature-validate/dispatch-grouped-signature-validate.module').then(m => m.DispatchGroupedSignatureValidatePageModule)
+    },
+    {
+        path: NavPathEnum.DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-logistic-unit-reference-association/dispatch-logistic-unit-reference-association.module').then(m => m.DispatchLogisticUnitReferenceAssociationModule)
+    },
+    {
+        path: NavPathEnum.DISPATCH_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-menu/dispatch-menu.module').then(m => m.DispatchMenuPageModule)
+    },
+    {
+        path: NavPathEnum.DISPATCH_PACK_CONFIRM,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-pack-confirm/dispatch-pack-confirm.module').then(m => m.DispatchPackConfirmPageModule)
+    },
+    {
+        path: NavPathEnum.DISPATCH_PACKS,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-packs/dispatch-packs.module').then(m => m.DispatchPacksPageModule)
+    },
+    {
+        path: NavPathEnum.DISPATCH_VALIDATE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-validate/dispatch-validate.module').then(m => m.DispatchValidatePageModule)
+    },
+    {
+        path: NavPathEnum.DISPATCH_WAYBILL,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-waybill/dispatch-waybill-page.module').then(m => m.DispatchWaybillPageModule)
+    },
+    {
+        path: NavPathEnum.EMPTY_ROUND,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/empty-round/empty-round.module').then(m => m.EmptyRoundPageModule)
+    },
+    {
+        path: NavPathEnum.GROUP_CONTENT,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/group/group-content/group-content.module').then(m => m.GroupContentPageModule)
+    },
+    {
+        path: NavPathEnum.GROUP_SCAN_GROUP,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/group/group-scan-group/group-scan-group.module').then(m => m.GroupScanGroupPageModule)
+    },
+    {
+        path: NavPathEnum.TRACKING_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/tracking-menu/tracking-menu.module').then(m => m.TrackingMenuPageModule)
+    },
+    {
+        path: NavPathEnum.TRACKING_MOVEMENT_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/tracking-movement-menu/tracking-movement-menu.module').then(m => m.TrackingMovementMenuPageModule)
+    },
+    {
+        path: NavPathEnum.TRUCK_ARRIVAL_CARRIER,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/truck-arrival/truck-arrival-carrier/truck-arrival-carrier-page.module').then(m => m.TruckArrivalCarrierPageModule)
+    },
+    {
+        path: NavPathEnum.TRUCK_ARRIVAL_DRIVER,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/truck-arrival/truck-arrival-driver/truck-arrival-driver-page.module').then(m => m.TruckArrivalDriverPageModule)
+    },
+    {
+        path: NavPathEnum.TRUCK_ARRIVAL_LINES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/truck-arrival/truck-arrival-lines/truck-arrival-lines-page.module').then(m => m.TruckArrivalLinesPageModule)
+    },
+    {
+        path: NavPathEnum.TRUCK_ARRIVAL_RESERVES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/truck-arrival/truck-arrival-reserves/truck-arrival-reserves-page.module').then(m => m.TruckArrivalReservesPageModule)
+    },
+    {
+        path: NavPathEnum.TRUCK_ARRIVAL_RESERVE_DETAILS,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/truck-arrival/truck-arrival-reserve-details/truck-arrival-reserve-details-page.module').then(m => m.TruckArrivalReserveDetailsPageModule)
+    },
+    {
+        path: NavPathEnum.UNGROUP_CONFIRM,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/ungroup/ungroup-confirm/ungroup-confirm.module').then(m => m.UngroupConfirmPageModule)
+    },
 ];
 
 @NgModule({

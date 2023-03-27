@@ -1,0 +1,28 @@
+<div scroll-y="true"
+     class="page-content">
+    <wii-card-list  *ngIf="!loading && dispatchesListConfig && dispatchesListConfig.length > 0"
+                   [listIconName]="dispatchesIconName"
+                   [color]="dispatchesListColor"
+                   [config]="dispatchesListConfig">
+    </wii-card-list>
+</div>
+<wii-select-item #selectItemComponent
+                 *ngIf="!loading && dispatchesListConfig && dispatchesListConfig.length > 0"
+                 [type]="selectItemType"
+                 (itemChange)="onScanningDispatch($event)"
+                 [checkBarcodeValidity]="true"
+                 [resetEmitter]="resetEmitter$"
+                 [scanMode]="barcodeScannerSearchMode">
+</wii-select-item>
+<ion-button *ngIf="hasRightDisplayGroupedSignatureButton"
+            class="submit-button larger"
+            color="primary"
+            size="large"
+            expand="full"
+            (click)="goToGroupedSignature()">
+    Signature groupée
+    <wii-icon name="check.svg"
+              class="button-icon"
+              color="white">
+    </wii-icon>
+</ion-button>

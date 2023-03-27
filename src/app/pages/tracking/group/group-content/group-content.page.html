@@ -1,0 +1,17 @@
+<div class="page-content" scroll-y="true">
+    <wii-list-panel *ngIf="listConfig"
+                    [header]="listConfig.header"
+                    [body]="listConfig.body"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+</div>
+
+<div class="page-footer persisted-page-footer">
+    <wii-barcode-scanner #footerScannerComponent
+                         [mode]="scannerModeManual"
+                         (manualAdd)="onPackScan($event)"
+                         (scanAdd)="onPackScan($event)"
+                         (cameraAdd)="onPackScan($event)">
+    </wii-barcode-scanner>
+</div>
+

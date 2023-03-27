@@ -12,7 +12,7 @@ import {environment} from '@environments/environment';
 // import {autoConnect, loginKey} from '../../dev-credentials.json'; // TODO WIIS-7970
 import {ServerImageKeyEnum} from '@app/services/server-image/server-image-key.enum';
 import {ServerImageComponent} from '@common/components/server-image/server-image.component';
-// import {NotificationService} from '@app/common/services/notification.service'; // TODO WIIS-7970
+// import {NotificationService} from '@app/services/notification.service'; // TODO WIIS-7970
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 // import {ILocalNotification} from '@ionic-native/local-notifications'; // TODO WIIS-7970
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
@@ -91,7 +91,7 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
         if(this.serverImageLogo) {
             this.serverImageLogo.reload();
         }
-        // const autoConnect = this.currentNavParams.get('autoConnect'); // TODO WIIS-7970
+        // const autoConnect = this.navService.param('autoConnect'); // TODO WIIS-7970
         // this.wantToAutoConnect = (typeof autoConnect === 'boolean' ? autoConnect : true); // TODO WIIS-7970
 
         this.barcodeScannerManager.launchDatawedgeScanListener();

@@ -1,0 +1,44 @@
+<div class="page-content"
+     scroll-y="true">
+    <wii-number-input *ngIf="reserveType === QUANTITY"
+                      [label]="WII_INPUT_NUMBER_LABEL"
+                      [min]="1"
+                      [value]="1"
+                      (valueChange)="setReserveQuantity($event)">
+
+    </wii-number-input>
+
+    <wii-tab *ngIf="reserveType === QUANTITY"
+             [(activeKey)]="defaultQuantityType"
+             (activeKeyChange)="onChangeQuantityType($event)"
+             [config]="tabConfig">
+    </wii-tab>
+
+    <wii-form-panel #formPanelComponent
+                    *ngIf="reserveDetailsListConfig"
+                    [body]="reserveDetailsListConfig">
+    </wii-form-panel>
+</div>
+
+<div class="page-footer persisted-page-footer">
+    <ion-button *ngIf="!newReserve"
+                class="submit-button delete-reserve"
+                color="primary"
+                size="large"
+                fill="outline"
+                expand="block"
+                (click)="deleteReserve()">
+        Supprimer la réserve
+    </ion-button>
+    <ion-button class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="validate()">
+        Valider
+        <wii-icon name="check.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

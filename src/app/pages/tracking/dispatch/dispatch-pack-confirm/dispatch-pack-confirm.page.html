@@ -1,0 +1,22 @@
+<div class="page-content">
+    <wii-form-panel *ngIf="headerConfig"
+                    #formPanelComponent
+                    [header]="headerConfig"
+                    [body]="bodyConfig"
+                    [details]="detailsConfig"
+                    detailPosition="bottom">
+    </wii-form-panel>
+</div>
+<div class="page-footer">
+    <ion-button class="larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="onFormSubmit()">
+        Valider
+        <wii-icon class="button-icon"
+                  name="check.svg"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

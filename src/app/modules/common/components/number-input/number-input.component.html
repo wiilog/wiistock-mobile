@@ -1,0 +1,21 @@
+<div class="input-container">
+  <ion-label color="medium">{{ label }}</ion-label>
+  <div class="input-wrapper">
+    <ion-button class="edit-input-button"
+                color="white"
+                (click)="onInputUpdated('minus')">
+      -
+    </ion-button>
+    <ion-item>
+      <ion-input (change)="emitValueChange()"
+                 type="number"
+                 [(ngModel)]="value">
+      </ion-input>
+    </ion-item>
+    <ion-button class="edit-input-button"
+                color="white"
+                (click)="onInputUpdated('plus')">
+      +
+    </ion-button>
+  </div>
+</div>

@@ -1,0 +1,42 @@
+<div scroll-y="true"
+     class="page-content">
+    <ion-button fill="outline"
+                class="custom-fill-button"
+                expand="block"
+                (click)="resetFilters()">
+        Réinitialiser les filtres
+    </ion-button>
+    <div class="filters" *ngIf="(filters.from || filters.to || filters.status || filters.type) && labelFrom && labelTo">
+        <p class="filter" *ngIf="filters.from">{{labelFrom}} : {{filters.from.text}}</p>
+        <p class="filter" *ngIf="filters.to">{{labelTo}} : {{filters.to.text}}</p>
+        <p class="filter" *ngIf="filters.status">Statut : {{filters.status.text}}</p>
+        <p class="filter" *ngIf="filters.type">Type : {{filters.type.text}}</p>
+    </div>
+    <wii-card-list  [color]="dispatchesListColor"
+                    [config]="dispatchesToSignListConfig"
+                    [header]="headerDispatchsToSign">
+    </wii-card-list>
+    <wii-card-list [color]="dispatchesListColor"
+                   [config]="dispatchesListConfig"
+                   [header]="headerFilteredDispatchs">
+    </wii-card-list>
+</div>
+
+<wii-barcode-scanner #footerScannerComponent
+                     [mode]="scannerMode"
+                     [hidden]="!dispatches || dispatches.length === 0"
+                     (manualAdd)="testIfBarcodeEquals($event)"
+                     (scanAdd)="testIfBarcodeEquals($event)"
+                     (cameraAdd)="testIfBarcodeEquals($event)">
+</wii-barcode-scanner>
+<ion-button class="submit-button larger"
+            color="primary"
+            size="large"
+            expand="full"
+            (click)="validateGroupedSignature()">
+    Valider
+    <wii-icon name="check.svg"
+              class="button-icon"
+              color="white">
+    </wii-icon>
+</ion-button>

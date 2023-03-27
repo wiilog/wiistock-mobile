@@ -1,0 +1,33 @@
+<wii-panel-header *ngIf="statusHeaderConfig"
+                  class="page-header"
+                  [transparent]="statusHeaderConfig.transparent"
+                  [title]="statusHeaderConfig.title"
+                  [subtitle]="statusHeaderConfig.subtitle"
+                  [leftIcon]="statusHeaderConfig.leftIcon">
+</wii-panel-header>
+
+<div scroll-y="true">
+    <ion-radio-group [(ngModel)]="selectedStatus"
+                     name="status"
+                     ngDefaultControl>
+        <ion-item *ngFor="let status of statuses"
+                  class="status-item">
+            <ion-label>{{ status.label }}</ion-label>
+            <ion-radio slot="start" [value]="status"></ion-radio>
+        </ion-item>
+    </ion-radio-group>
+</div>
+
+<div class="page-footer">
+    <ion-button class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="validate()">
+        Valider
+        <wii-icon name="check.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>
