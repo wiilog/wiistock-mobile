@@ -1,0 +1,55 @@
+@import "../../../../theme/variables";
+
+.page-content {
+    overflow: hidden;
+    flex-direction: column;
+
+    .nav-container {
+        display: flex;
+        & > ion-button {
+            flex: 1;
+        }
+    }
+
+    wii-panel-header {
+        margin: $spacerMin;
+    }
+
+    &,
+    & > wii-form-panel,
+    & > .sub-pack-container {
+        flex: 1;
+        display: flex;
+    }
+
+    & > .sub-pack-container > wii-list-panel {
+        flex: 1;
+    }
+}
+
+
+.no-articles {
+    height: 50%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: #666;
+    margin-left: 32px;
+
+    img {
+        width: 50px;
+    }
+
+    .icon-circle{
+        background-color: #CBCBCB;
+        border-radius: 50%;
+        width: 100px;
+        height: 100px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+}

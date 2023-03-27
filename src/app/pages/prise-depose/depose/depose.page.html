@@ -1,0 +1,40 @@
+<wii-main-loader [loading]="loading"></wii-main-loader>
+
+<div class="page-content"
+     scroll-y="true"
+     *ngIf="!loading">
+    <wii-list-panel *ngIf="deposeListConfig"
+                    [header]="deposeListConfig.header"
+                    [body]="deposeListConfig.body"
+                    [identifierName]="listIdentifierName"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+
+    <wii-list-panel *ngIf="displayPrisesList && priseListConfig"
+                    [header]="priseListConfig.header"
+                    [body]="priseListConfig.body"
+                    [identifierName]="listIdentifierName"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+</div>
+
+<div class="page-footer persisted-page-footer">
+    <wii-barcode-scanner #footerScannerComponent
+                         [hidden]="loading"
+                         [mode]="scannerModeManual"
+                         (scanAdd)="testColisDepose($event)"
+                         (manualAdd)="testColisDepose($event)"
+                         (cameraAdd)="testColisDepose($event)">
+    </wii-barcode-scanner>
+    <ion-button class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="finishTaking()">
+        Valider
+        <wii-icon name="check.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

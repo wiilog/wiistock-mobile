@@ -1,0 +1,35 @@
+<div class="page-content">
+    <div class="nav-container" *ngIf="isGroup">
+        <ion-button [color]="currentPage === Page.EDIT ? 'primary' : 'light'" (click)="onPageClicked(Page.EDIT)">Mouvement</ion-button>
+        <ion-button [color]="currentPage === Page.SUB_PACKS ? 'primary' : 'light'" (click)="onPageClicked(Page.SUB_PACKS)">Contenu colis</ion-button>
+    </div>
+
+    <wii-form-panel *ngIf="currentPage === Page.EDIT && headerConfig"
+                    #formPanelComponent
+                    [header]="headerConfig"
+                    [body]="bodyConfig">
+    </wii-form-panel>
+
+    <div class="sub-pack-container"
+         scroll-y="true"
+         *ngIf="currentPage === Page.SUB_PACKS">
+        <wii-list-panel *ngIf="headerConfig && subPacksConfig"
+                        [header]="headerConfig"
+                        [body]="subPacksConfig">
+        </wii-list-panel>
+    </div>
+</div>
+<div class="page-footer"
+     *ngIf="currentPage === Page.EDIT">
+    <ion-button class="larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="onFormSubmit()">
+        Valider
+        <wii-icon class="button-icon"
+                  name="check.svg"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

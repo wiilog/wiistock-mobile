@@ -1,0 +1,10 @@
+<h1>Sélectionner emplacement</h1>
+<wii-select-item #selectItemComponent
+                 [type]="selectItemType"
+                 (createItem)="createEmp()"
+                 (itemChange)="selectLocation($event)"
+                 [checkBarcodeValidity]="!isDemoMode"
+                 [hidden]="loading"
+                 [resetEmitter]="resetEmitter$"
+                 [scanMode]="barcodeScannerMode">
+</wii-select-item>

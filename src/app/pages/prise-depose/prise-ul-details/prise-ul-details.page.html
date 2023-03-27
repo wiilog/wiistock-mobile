@@ -1,0 +1,44 @@
+<ng-template #noArticles>
+    <div class="no-articles">
+        <div class="icon-circle">
+            <img src="../../../../assets/icons/UL-grey.svg" width="150px">
+        </div>
+        <span>Aucun article dans cette unité logistique</span>
+    </div>
+</ng-template>
+
+<div class="page-content">
+    <div class="nav-container">
+        <ion-button [color]="currentPage === Page.MOVEMENT ? 'primary' : 'light'" (click)="onPageClicked(Page.MOVEMENT)">Mouvement</ion-button>
+        <ion-button [color]="currentPage === Page.UL_CONTENT ? 'primary' : 'light'" (click)="onPageClicked(Page.UL_CONTENT)">Contenu UL</ion-button>
+    </div>
+
+    <wii-form-panel *ngIf="currentPage === Page.MOVEMENT && headerConfig"
+                    #formPanelComponent
+                    [header]="headerConfig"
+                    [body]="bodyConfig">
+    </wii-form-panel>
+
+    <div class="sub-pack-container"
+         scroll-y="true"
+         *ngIf="currentPage === Page.UL_CONTENT">
+        <wii-list-panel *ngIf="headerConfig && logisticUnitContentConfig.length > 0; else noArticles"
+                        [header]="headerConfig"
+                        [body]="logisticUnitContentConfig">
+        </wii-list-panel>
+    </div>
+</div>
+<div class="page-footer"
+     *ngIf="currentPage === Page.MOVEMENT">
+    <ion-button class="larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="onFormSubmit()">
+        Valider
+        <wii-icon class="button-icon"
+                  name="check.svg"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

@@ -124,6 +124,41 @@ const routes: Routes = [
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/demande/handling/handling-validate/handling-validate.module').then(m => m.HandlingValidatePageModule)
     },
+    {
+        path: NavPathEnum.NEW_EMPLACEMENT,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/new-emplacement/new-emplacement.module').then(m => m.NewEmplacementPageModule)
+    },
+    {
+        path: NavPathEnum.DEPOSE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/prise-depose/depose/depose.module').then(m => m.DeposePageModule)
+    },
+    {
+        path: NavPathEnum.EMPLACEMENT_SCAN,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/prise-depose/emplacement-scan/emplacement-scan.module').then(m => m.EmplacementScanPageModule)
+    },
+    {
+        path: NavPathEnum.MOVEMENT_CONFIRM,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/prise-depose/movement-confirm/movement-confirm.module').then(m => m.MovementConfirmPageModule)
+    },
+    {
+        path: NavPathEnum.MOVEMENT_CONFIRM_SUB_PACK,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/prise-depose/movement-confirm/movement-confirm.module').then(m => m.MovementConfirmPageModule)
+    },
+    {
+        path: NavPathEnum.PRISE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/prise-depose/prise/prise.module').then(m => m.PrisePageModule)
+    },
+    {
+        path: NavPathEnum.PRISE_UL_DETAILS,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/prise-depose/prise-ul-details/prise-ul-details.module').then(m => m.PriseUlDetailsPageModule)
+    },
 ];
 
 @NgModule({
