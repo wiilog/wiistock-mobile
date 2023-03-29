@@ -17,11 +17,13 @@ import {FormPanelSigningConfig} from '@common/components/panel/model/form-panel/
 })
 export class FormPanelSigningComponent implements OnDestroy, FormPanelItemComponent<FormPanelSigningConfig> {
 
+    private static readonly MAX_MULTIPLE_SIGNATURE = 1;
+
     @Input()
     public inputConfig: FormPanelSigningConfig;
 
     @Input()
-    public value?: string;
+    public value?: string|Array<string>;
 
     @Input()
     public label: string;
@@ -36,19 +38,27 @@ export class FormPanelSigningComponent implements OnDestroy, FormPanelItemCompon
     public inline?: boolean;
 
     @Output()
-    public valueChange: EventEmitter<string>;
+    public valueChange: EventEmitter<string|Array<string>>;
 
     private itemClickedSubscription?: Subscription;
 
     public constructor(private modalController: ModalController,
                        private loadingService: LoadingService) {
-        this.valueChange = new EventEmitter<string>();
+        this.valueChange = new EventEmitter();
     }
 
     public get error(): string|undefined {
         return (this.inputConfig.required && !this.value && this.errors)
             ? this.errors['required']
             : undefined;
+    }
+
+    public onSignatureClicked(index: number): void {
+        if (this.inputConfig.multiple) {
+            (this.value as Array<string>).splice(index, 1);
+        } else {
+            this.value = undefined;
+        }
     }
 
     public onItemClicked(): void {
@@ -61,7 +71,7 @@ export class FormPanelSigningComponent implements OnDestroy, FormPanelItemCompon
                         from(this.modalController.create({
                             component: SignaturePadComponent,
                             componentProps: {
-                                signature: this.value
+                                signature: this.inputConfig.multiple ? '' : this.value
                             },
                             showBackdrop: true
                         }))
@@ -71,9 +81,15 @@ export class FormPanelSigningComponent implements OnDestroy, FormPanelItemCompon
                         modal.onDidDismiss().then((returnedData) => {
                             const data = returnedData && returnedData.data;
                             if (data && (data.signature === false || data.signature)) {
-                                this.value = data.signature
-                                    ? data.signature // not false
-                                    : undefined; // if false we delete previous image
+                                if (this.inputConfig.multiple) {
+                                    if (!Array.isArray(this.value)) {
+                                        this.value = [];
+                                    }
+                                    this.value.push(data.signature);
+                                }
+                                else {
+                                    this.value = data.signature || undefined;
+                                }
                                 this.valueChange.emit(this.value);
                             }
                         });
@@ -96,5 +112,17 @@ export class FormPanelSigningComponent implements OnDestroy, FormPanelItemCompon
             this.itemClickedSubscription.unsubscribe();
             this.itemClickedSubscription = undefined;
         }
+    }
+
+    public get displaySigningButton(): boolean {
+        const max = this.inputConfig.max || FormPanelSigningComponent.MAX_MULTIPLE_SIGNATURE;
+        return (
+            (
+                this.inputConfig.multiple
+                && this.value
+                && (this.value as Array<string>).length < max
+            )
+            || !this.value
+        );
     }
 }

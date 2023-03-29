@@ -185,7 +185,7 @@ export class MovementConfirmPage implements ViewWillEnter {
                             },
                             errors: {
                                 required: 'Votre commentaire est requis',
-                                maxlength: 'Votre commentaire est trop long'
+                                maxlength: 'Votre commentaire est trop long',
                             }
                         }
                     },

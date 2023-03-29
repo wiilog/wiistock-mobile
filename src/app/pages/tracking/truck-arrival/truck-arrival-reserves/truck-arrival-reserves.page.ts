@@ -187,7 +187,8 @@ export class TruckArrivalReservesPage implements ViewWillEnter {
                     name: 'signatures',
                     value: signatures,
                     inputConfig: {
-
+                        multiple: true,
+                        max: 2,
                     }
                 }
             }

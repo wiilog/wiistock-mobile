@@ -2,15 +2,34 @@
                 [required]="inputConfig.required"
                 [inline]="inline">
     <ng-container field>
-        <img *ngIf="value else noValue"
-             class="signature-image"
-             alt="signature"
-             [src]="value"
-             (click)="onItemClicked()"/>
+        <div class="signature-image-container">
+            <ng-container *ngIf="!inputConfig.multiple && value">
+                <ng-container [ngTemplateOutlet]="signatureTemplate"
+                              [ngTemplateOutletContext]="{src: value}">
+                </ng-container>
+            </ng-container>
+            <ng-container *ngIf="inputConfig.multiple">
+                <ng-container *ngFor="let src of value; let index = index"
+                              [ngTemplateOutlet]="signatureTemplate"
+                              [ngTemplateOutletContext]="{src: src, index: index}">
+                </ng-container>
+            </ng-container>
+        </div>
+        <wii-icon *ngIf="displaySigningButton"
+                  class="add-signature"
+                  color="success"
+                  name="plus.svg"
+                  (action)="onItemClicked()">
+        </wii-icon>
     </ng-container>
 </wii-form-field>
 
-<ng-template #noValue>
-    <wii-icon class="add-signature" color="success" name="plus.svg" (action)="onItemClicked()"></wii-icon>
+<ng-template #signatureTemplate
+             let-src="src"
+             let-index="index">
+    <img class="signature-image"
+         alt="signature"
+         [src]="src"
+         (click)="onSignatureClicked(index)"/>
 </ng-template>
 
