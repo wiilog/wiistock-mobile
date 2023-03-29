@@ -1,8 +1,10 @@
 <div class="page-content"
      scroll-y="true">
-    <wii-list-panel
-        *ngIf="truckArrivalLinesListConfig"
-        [body]="truckArrivalLinesListConfig">
+    <div class="num-track-counter">
+        <span>Total numéro de tracking transporteur : {{ truckArrivalLinesListConfig ? truckArrivalLinesListConfig.length : 0 }}</span>
+    </div>
+    <wii-list-panel *ngIf="truckArrivalLinesListConfig"
+                    [body]="truckArrivalLinesListConfig">
     </wii-list-panel>
 </div>
 

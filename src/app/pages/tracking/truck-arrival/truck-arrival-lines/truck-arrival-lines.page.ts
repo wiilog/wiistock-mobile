@@ -174,7 +174,7 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
             const alreadyAddedToList = this.truckArrivalLines.findIndex((line) => line.number === truckArrivalLineNumber) !== -1;
             const alreadyExistInDatabase = this.truckArrivalLinesNumber.findIndex((line) => line.number === truckArrivalLineNumber) !== -1;
             if (!alreadyAddedToList && !alreadyExistInDatabase) {
-                this.truckArrivalLines.push({
+                this.truckArrivalLines.unshift({
                     number: truckArrivalLineNumber,
                 });
             } else {
