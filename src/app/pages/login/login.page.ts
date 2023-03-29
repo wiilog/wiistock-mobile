@@ -9,7 +9,7 @@ import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {environment} from '@environments/environment';
-// import {autoConnect, loginKey} from '../../dev-credentials.json'; // TODO WIIS-7970
+import {credentials} from '@environments/credentials';
 import {ServerImageKeyEnum} from '@app/services/server-image/server-image-key.enum';
 import {ServerImageComponent} from '@common/components/server-image/server-image.component';
 // import {NotificationService} from '@app/services/notification.service'; // TODO WIIS-7970
@@ -91,8 +91,8 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
         if(this.serverImageLogo) {
             this.serverImageLogo.reload();
         }
-        // const autoConnect = this.navService.param('autoConnect'); // TODO WIIS-7970
-        // this.wantToAutoConnect = (typeof autoConnect === 'boolean' ? autoConnect : true); // TODO WIIS-7970
+
+        this.wantToAutoConnect = this.navService.param('autoConnect') ?? true;
 
         this.barcodeScannerManager.launchDatawedgeScanListener();
         // this.notificationService.userIsLogged = false; // TODO WIIS-7970
@@ -216,7 +216,8 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
                                         mergeMap(() => this.navService.setRoot(NavPathEnum.MAIN_MENU)),
                                         map(() => ({success: true}))
                                     )
-                            } else {
+                            }
+                            else {
                                 return of({success: false})
                             }
                         })
@@ -270,13 +271,12 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
     }
 
     private autoLoginIfAllowed() {
-        /* TODO WIIS-7970
-        if(!environment.production
-            && autoConnect
+        if (!environment.production
+            && credentials.autoConnect
+            && credentials.loginKey
             && this.wantToAutoConnect) {
-            this.fillForm(loginKey);
+            this.fillForm(credentials.loginKey);
         }
-        */
     }
 
     private unsubscribeZebra(): void {

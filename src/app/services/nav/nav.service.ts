@@ -1,20 +1,20 @@
 import {Injectable} from '@angular/core';
 import {NavController, Platform} from '@ionic/angular';
-import {from, Observable} from 'rxjs';
+import {from, mergeMap, Observable, of} from 'rxjs';
 import {Router, NavigationStart} from '@angular/router';
-import {LoadingController} from '@ionic/angular';
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {map} from "rxjs/operators";
+import {NavParams} from "@app/services/nav/nav-params";
 
 @Injectable({
     providedIn: 'root'
 })
 export class NavService {
-    private stack: Array<{ path: string, params: any }> = [];
+
+    private stack: Array<{ path: NavPathEnum, params: NavParams }> = [];
     private justNavigated: boolean;
 
     public constructor(private platform: Platform,
-                       private loader: LoadingController,
                        private navController: NavController,
                        private router: Router) {
         this.router.events.subscribe(event => {
@@ -28,73 +28,83 @@ export class NavService {
         });
     }
 
-    public push(path: NavPathEnum, params: any = {}): Observable<boolean> {
-        this.removeLoaders();
-
+    public push(path: NavPathEnum, params: NavParams = {}): Observable<boolean> {
         this.justNavigated = true;
         this.stack.push({path, params});
 
         return from(this.navController.navigateForward(path));
     }
 
-    public pop(options?: { path: NavPathEnum, params?: any}): Observable<void> {
-        this.removeLoaders();
-
+    public pop(options?: { path: NavPathEnum, params?: NavParams} | {number: number}): Observable<void> {
         this.justNavigated = true;
 
-        const {path, params} = options || {};
+        // @ts-ignore
+        const {path, params, number} = options || {};
 
-        if (!path) {
-            this.stack.pop();
-            return from(this.navController.pop());
-        } else {
+        if (path) {
+            // get last corresponding element in stack matching given path
             const reversedParamStack = [...this.stack].reverse();
-            reversedParamStack.shift();
+            const reverseIndex = reversedParamStack.findIndex((param) => param.path === path);
 
-            const lastIndex = reversedParamStack.findIndex((param) => param.path === path);
-
-            if (lastIndex === -1) {
+            if (reverseIndex === -1) {
                 throw new Error(`Could not find route ${path}`);
             }
 
-            const index = lastIndex + 1;
-            this.stack.splice(this.stack.length - index, index);
+            // keep as last the found stacked element and remove the rest of the stack
+            this.spliceStack(this.stack.length - reverseIndex, params);
 
-            const currentParams = this.stack[this.stack.length - 1].params;
-            for (const [key, value] of Object.entries(params || {})) {
-                currentParams[key] = value;
-            }
-
-            return from(this.navController.navigateBack(path)).pipe(map(() => undefined));
+            return from(this.navController.navigateBack(path))
+                .pipe(map(() => undefined));
+        }
+        else {
+            this.stack.pop();
+            return from(this.navController.pop()).pipe(
+                mergeMap(() => (
+                    number && number > 1
+                        ? this.pop({number: number - 1})
+                        : of(undefined)
+                ))
+            );
         }
     }
 
-    public setRoot(path: string, params: any = {}): Observable<boolean> {
-        this.removeLoaders();
-
+    public setRoot(path: NavPathEnum, params: NavParams = {}): Observable<boolean> {
         this.justNavigated = true;
-        this.stack = [params];
+        this.stack = [{path, params}];
 
         return from(this.navController.navigateRoot(path));
     }
 
-    public params<T = any>(paramsId?: number): T {
-        const stacked = paramsId !== undefined
-            ? (this.stack[paramsId] || {})
-            : this.stack[this.stack.length - 1];
-        return stacked.params;
+    public params(stackId?: number): NavParams {
+        const stackIndex = stackId !== undefined
+            ? stackId
+            : (this.stack.length - 1);
+        return this.stack[stackIndex].params || {};
     }
 
     public param<T = any>(key: string): T {
-        return this.stack[this.stack.length - 1].params[key];
+        const stackIndex = this.stack.length - 1;
+        return this.stack[stackIndex].params[key];
     }
 
-    private removeLoaders() {
-        this.loader.getTop().then(loader => {
-            if(loader) {
-                this.loader.dismiss();
-            }
-        });
+    public currentPath(stackId?: number): NavPathEnum|undefined {
+        const stackIndex = stackId !== undefined
+            ? stackId
+            : (this.stack.length - 1);
+        return this.stack[stackIndex].path;
+    }
+
+    private spliceStack(index: number, newParams: NavParams = {}): void {
+        // remove elements in stack after the request path params
+        this.stack.splice(index);
+
+        const stackElement = this.stack[this.stack.length - 1];
+        if (stackElement) {
+            stackElement.params = {
+                ...(stackElement.params || {}),
+                ...(newParams || {}),
+            };
+        }
     }
 
 }

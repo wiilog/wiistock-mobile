@@ -1,11 +1,13 @@
 import {Injectable} from '@angular/core';
 import {App} from '@capacitor/app';
-import {HttpClient, HttpResponse, HttpParams} from '@angular/common/http';
+import {HttpClient, HttpParams, HttpResponse} from '@angular/common/http';
 import {from, Observable, of, throwError, zip} from 'rxjs';
 import {StorageService} from '@app/services/storage/storage.service';
-import {catchError, filter, mergeMap, map, tap, timeout} from 'rxjs/operators';
+import {catchError, filter, map, mergeMap, tap, timeout} from 'rxjs/operators';
 import {UserService} from '@app/services/user.service';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
+import {NavService} from "@app/services/nav/nav.service";
+import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 
 const GET = 'get';
 const POST = 'post';
@@ -97,6 +99,7 @@ export class ApiService {
     private static readonly VERIFICATION_SERVICE_TIMEOUT: number = 10000;
 
     public constructor(private storageService: StorageService,
+                       private navService: NavService,
                        private httpClient: HttpClient,
                        private userService: UserService) {
     }
@@ -153,7 +156,10 @@ export class ApiService {
                     return this.httpClient.request(method, url, options);
                 }),
                 catchError((response: HttpResponse<any>) => {
-                    if(response.status === 401) {
+                    const currentPath = this.navService.currentPath();
+
+                    if (currentPath !== NavPathEnum.LOGIN
+                        && response.status === 401) {
                         this.userService.doLogout();
                         return of(response);
                     }

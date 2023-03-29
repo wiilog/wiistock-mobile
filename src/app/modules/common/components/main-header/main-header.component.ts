@@ -1,5 +1,5 @@
 import {Component, ElementRef, EventEmitter, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
-import {Observable, of, Subscription, zip} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {filter, mergeMap, map, take, tap} from 'rxjs/operators';
 import {TitleConfig} from './title-config';
 import {MainHeaderService} from '@app/services/main-header.service';
@@ -280,7 +280,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             if(titleConfig && titleConfig.stackIndex) {
                 const nbNavigateBack = (this.pagesInStack - titleConfig.stackIndex);
                 if(nbNavigateBack > 0) {
-                    this.popSubscription = this.runMultiplePop(nbNavigateBack).subscribe(() => {
+                    this.popSubscription = this.navService.pop({number: nbNavigateBack}).subscribe(() => {
                         if(this.popSubscription && !this.popSubscription.closed) {
                             this.popSubscription.unsubscribe();
                             this.popSubscription = undefined;
@@ -323,12 +323,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                 this.userService.doLogout();
             }
         })
-    }
-
-    private runMultiplePop(popNumber: number): Observable<void> {
-        return popNumber > 0
-            ? this.navService.pop().pipe(mergeMap(() => this.runMultiplePop(popNumber - 1)))
-            : of(undefined);
     }
 
     private refreshTitles(navigationId: number, currentPagePath: NavPathEnum, paramsId: number): void {

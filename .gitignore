@@ -70,3 +70,6 @@ Thumbs.db
 # cordova-res
 /resources/android/icon/*
 /resources/android/splash/*
+
+# wiilog
+/src/environments/credentials.ts
