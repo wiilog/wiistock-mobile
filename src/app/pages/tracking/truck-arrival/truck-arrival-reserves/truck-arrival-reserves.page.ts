@@ -222,7 +222,26 @@ export class TruckArrivalReservesPage implements ViewWillEnter {
                 })
             }).subscribe((response) => {
                 if (response.success) {
-                    this.navService.pop({path: NavPathEnum.TRACKING_MENU});
+                    this.alertService.show({
+                        header: ``,
+                        cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+                        message: '<img src="assets/icons/validation.svg" class="validation-modal-icon"><br><b>Arrivage camion créé avec succès</b>',
+                        buttons: [{
+                            text: 'OK',
+                            cssClass: 'alert-success',
+                            handler: () => {
+                                this.navService.pop({path: NavPathEnum.TRACKING_MENU});
+                            }
+                        }]
+                    }).then((alert) => {
+                        setTimeout(() => {
+                            alert.dismiss().then((success) => {
+                                if(success){
+                                    this.navService.pop({path: NavPathEnum.TRACKING_MENU});
+                                }
+                            });
+                        }, 3000);
+                    });
                 } else {
                     this.toastService.presentToast(response.msg);
                 }
