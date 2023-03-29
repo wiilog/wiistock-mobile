@@ -9,7 +9,7 @@
                 </ng-container>
             </ng-container>
             <ng-container *ngIf="inputConfig.multiple">
-                <ng-container *ngFor="let src of value; let index = index"
+                <ng-container *ngFor="let src of iterableValue; let index = index"
                               [ngTemplateOutlet]="signatureTemplate"
                               [ngTemplateOutletContext]="{src: src, index: index}">
                 </ng-container>

@@ -125,4 +125,12 @@ export class FormPanelSigningComponent implements OnDestroy, FormPanelItemCompon
             || !this.value
         );
     }
+
+    public get iterableValue(): Array<string> {
+        return (
+            !this.value ? [] :
+            typeof this.value === 'string' ? [this.value] :
+            this.value // Array.isArray(value) === true
+        )
+    }
 }
