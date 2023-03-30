@@ -96,13 +96,6 @@ export class SearchItemComponent implements OnInit, OnDestroy {
         [SelectItemTypeEnum.INVENTORY_ARTICLE]: SearchItemComponent.MakeMapForInventoryArticles(false),
         [SelectItemTypeEnum.INVENTORY_ANOMALIES_LOCATION]: SearchItemComponent.MakeMapForInventoryLocations(true),
         [SelectItemTypeEnum.INVENTORY_ANOMALIES_ARTICLE]: SearchItemComponent.MakeMapForInventoryArticles(true),
-        [SelectItemTypeEnum.DEMANDE_LIVRAISON_TYPE]: {
-            label: 'label',
-            valueField: 'id',
-            templateIndex: 'default',
-            databaseTable: 'demande_livraison_type',
-            placeholder: 'Sélectionnez un type'
-        },
         [SelectItemTypeEnum.TYPE]: {
             label: 'label',
             valueField: 'id',

@@ -172,7 +172,10 @@ export class DispatchNewPage implements ViewWillEnter {
                     name: 'type',
                     inputConfig: {
                         required: true,
-                        searchType: SelectItemTypeEnum.DISPATCH_TYPE,
+                        searchType: SelectItemTypeEnum.TYPE,
+                        requestParams: [
+                            `category = 'acheminements'`,
+                        ],
                     },
                     errors: {
                         required: 'Vous devez sélectionner un type.'

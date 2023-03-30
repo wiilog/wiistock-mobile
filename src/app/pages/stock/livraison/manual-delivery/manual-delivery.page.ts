@@ -142,8 +142,10 @@ export class ManualDeliveryPage implements ViewWillLeave {
                     inputConfig: {
                         required: true,
                         defaultIfSingle: true,
-                        searchType: SelectItemTypeEnum.DEMANDE_LIVRAISON_TYPE,
-                        requestParams: ['to_delete IS NULL'],
+                        searchType: SelectItemTypeEnum.TYPE,
+                        requestParams: [
+                            `category = 'demande livraison'`,
+                        ],
                     },
                     errors: {
                         required: 'Vous devez sélectionner un type'

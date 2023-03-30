@@ -109,8 +109,10 @@ export class DemandeLivraisonHeaderPage implements ViewWillEnter, ViewWillLeave 
                     value: type,
                     inputConfig: {
                         required: true,
-                        searchType: SelectItemTypeEnum.DEMANDE_LIVRAISON_TYPE,
-                        requestParams: ['to_delete IS NULL'],
+                        searchType: SelectItemTypeEnum.TYPE,
+                        requestParams: [
+                            `category = 'demande livraison'`,
+                        ],
                         onChange: (typeId: any) => {
                             this.createFormBodyConfig(operator, freeFields, Number(typeId))
                         }
