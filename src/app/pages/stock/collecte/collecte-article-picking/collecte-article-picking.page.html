@@ -1,0 +1,21 @@
+<div class="page-footer">
+    <wii-select-item #selectItemComponent
+                     *ngIf="showArticlePicking"
+                     [type]="selectItemType"
+                     (itemChange)="pickArticle($event)"
+                     [customBarcodeValidator]="barcodeValidator"
+                     [checkBarcodeValidity]="true"
+                     [scanMode]="selectItemMode">
+    </wii-select-item>
+    <ion-button class="anomalies-button larger"
+                size="large"
+                expand="full"
+                color="primary"
+                (click)="onGenerateNewArticle()">
+        <span class="button-text-wrapper">
+            <span class="title">GÉNÉRER</span>
+            <br/>
+            <span class="subtitle">NOUVEL ARTICLE</span>
+        </span>
+    </ion-button>
+</div>

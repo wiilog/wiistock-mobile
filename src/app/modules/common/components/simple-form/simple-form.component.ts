@@ -21,7 +21,7 @@ export class SimpleFormComponent implements OnInit {
     @Input()
     public info?: Array<{
         label: string;
-        value: string;
+        value?: string;
     }>;
 
     @Input()

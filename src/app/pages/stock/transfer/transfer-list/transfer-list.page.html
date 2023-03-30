@@ -1,0 +1,9 @@
+<div *ngIf="hasLoaded"
+     scroll-y="true"
+     class="page-content">
+    <wii-card-list *ngIf="hasLoaded && transfersListConfig && transfersListConfig.length > 0"
+                   [listIconName]="transfersIconName"
+                   [color]="transfersListColor"
+                   [config]="transfersListConfig">
+    </wii-card-list>
+</div>

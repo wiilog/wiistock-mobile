@@ -1,0 +1,33 @@
+<div *ngIf="headerConfig && formConfig && listConfig" scroll-y="true" class="page-content">
+    <wii-form-panel #formPanelComponent
+                    *ngIf="formConfig"
+                    [body]="formConfig"
+                    [isForm]="true"></wii-form-panel>
+
+    <wii-list-panel *ngIf="headerConfig && listConfig"
+                    [header]="headerConfig"
+                    [body]="listConfig"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+</div>
+
+<div class="page-footer">
+    <wii-barcode-scanner #footerScannerComponent
+                         [mode]="scannerMode"
+                         (scanAdd)="addArticle($event)"
+                         (manualAdd)="addArticle($event)"
+                         (cameraAdd)="addArticle($event)">
+    </wii-barcode-scanner>
+
+    <ion-button class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="validate()">
+        Valider
+        <wii-icon name="check.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

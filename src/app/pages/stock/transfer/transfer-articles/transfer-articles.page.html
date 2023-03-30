@@ -1,0 +1,45 @@
+<ng-container *ngIf="!loader && headerConfig">
+    <div scroll-y="true"
+         class="page-content">
+        <wii-panel-header [leftIcon]="headerConfig.leftIcon"
+                          [title]="headerConfig.title"
+                          [subtitle]="headerConfig.subtitle"
+                          [info]="headerConfig.info"
+                          [transparent]="true"
+                          class="page-header">
+        </wii-panel-header>
+
+        <wii-list-panel *ngIf="listTreatedConfig"
+                        [header]="listTreatedConfig.header"
+                        [body]="listTreatedConfig.body"
+                        [boldValues]="listBoldValues">
+        </wii-list-panel>
+
+        <wii-list-panel *ngIf="listToTreatConfig"
+                        [header]="listToTreatConfig.header"
+                        [body]="listToTreatConfig.body"
+                        [boldValues]="listBoldValues">
+        </wii-list-panel>
+    </div>
+
+    <div class="page-footer">
+        <wii-barcode-scanner #footerScannerComponent
+                             (manualAdd)="testIfBarcodeEquals($event)"
+                             (scanAdd)="testIfBarcodeEquals($event)"
+                             (cameraAdd)="testIfBarcodeEquals($event)"
+                             [mode]="barcodeScannerMode">
+        </wii-barcode-scanner>
+        <ion-button *ngIf="!skipValidation"
+                    class="submit-button larger"
+                    color="primary"
+                    size="large"
+                    expand="full"
+                    (click)="validate()">
+            Valider
+            <wii-icon name="check.svg"
+                      class="button-icon"
+                      color="white">
+            </wii-icon>
+        </ion-button>
+    </div>
+</ng-container>

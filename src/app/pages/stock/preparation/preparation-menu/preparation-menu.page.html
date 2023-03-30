@@ -1,0 +1,11 @@
+<wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
+
+<div *ngIf="hasLoaded"
+     scroll-y="true"
+     class="page-content">
+    <wii-card-list *ngIf="hasLoaded && preparations && preparations.length > 0"
+                   [listIconName]="preparationsIconName"
+                   [color]="preparationsListColor"
+                   [config]="preparationsListConfig">
+    </wii-card-list>
+</div>

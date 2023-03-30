@@ -6,7 +6,7 @@ export interface ListPanelItemConfig {
     infos: {
         [name: string]: {
             label?: string;
-            value: string;
+            value?: string;
             emergency?: boolean;
         };
     };
@@ -14,7 +14,7 @@ export interface ListPanelItemConfig {
     disabled?: boolean;
     color?: string;
     backgroundColor?: string;
-    pressAction?: (infos: {[name: string]: {label?: string; value: string;};}) => void;
+    pressAction?: (infos: {[name: string]: {label?: string; value?: string;};}) => void;
     rightIcon?: IconConfig;
     rightIconBase64?: string;
     leftIcon?: IconConfig;

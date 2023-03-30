@@ -60,9 +60,6 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
     private resetEmitterSubscription?: Subscription;
 
     public readonly config = {
-        [SelectItemTypeEnum.DEMANDE_LIVRAISON_TYPE]: {
-            invalidMessage: 'Le type scanné n\'est pas présent dans la liste',
-        },
         [SelectItemTypeEnum.DEMANDE_LIVRAISON_ARTICLES]: {
             invalidMessage: 'L\'article scanné n\'est pas présent dans la liste',
         },

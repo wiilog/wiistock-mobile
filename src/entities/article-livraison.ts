@@ -1,5 +1,5 @@
 export interface ArticleLivraison {
-    id: number;
+    id: number|null;
     label: string;
     reference: string;
     quantity: number;

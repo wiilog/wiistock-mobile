@@ -1,0 +1,26 @@
+<div scroll-y="true" class="page-content" *ngIf="logisticUnitHeaderConfig && articlesConfig">
+    <wii-panel-header [leftIcon]="logisticUnitHeaderConfig.leftIcon"
+                      [title]="logisticUnitHeaderConfig.title"
+                      [subtitle]="logisticUnitHeaderConfig.subtitle"
+                      [transparent]="true"
+                      class="page-header">
+    </wii-panel-header>
+
+    <wii-list-panel *ngIf="articlesConfig"
+                    [body]="articlesConfig.body"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+</div>
+
+<ion-button *ngIf="extraArticles.length > 0" class="submit-button larger"
+            color="primary"
+            size="large"
+            expand="full"
+            (click)="back()">
+    Articles à enlever
+    <wii-icon name="cross-white.svg"
+              class="button-icon"
+              color="white">
+    </wii-icon>
+</ion-button>
+

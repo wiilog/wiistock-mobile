@@ -1,0 +1,18 @@
+<div *ngIf="hasLoaded"
+     scroll-y="true"
+     class="page-content">
+    <wii-card-list *ngIf="hasLoaded && deliveryOrders && deliveryOrders.length > 0"
+                   [listIconName]="deliveryOrdersIconName"
+                   [color]="deliveryOrdersListColor"
+                   [config]="deliveryOrdersListConfig">
+    </wii-card-list>
+</div>
+<wii-select-item #selectItemComponent
+                 *ngIf="hasLoaded && deliveryOrders && deliveryOrders.length > 0"
+                 [type]="selectItemType"
+                 (itemChange)="filterByLocation($event)"
+                 [checkBarcodeValidity]="true"
+                 [requestParams]="locationFilterRequestParams"
+                 [resetEmitter]="resetEmitter$"
+                 [scanMode]="barcodeScannerSearchMode">
+</wii-select-item>

@@ -93,7 +93,6 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                 needsRegistrationNumber: Boolean(needsRegistrationNumber),
             };
 
-
             this.truckArrivalDefaultUnloadingLocationId = defaultUnloadingLocationId;
             this.generateForm();
         });

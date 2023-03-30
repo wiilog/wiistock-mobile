@@ -1,5 +1,5 @@
 export interface ArticleCollecte {
-    id: number;
+    id: number|null;
     label: string;
     reference: string;
     quantite: number;

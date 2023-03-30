@@ -193,20 +193,22 @@ export class DispatchNewPage implements ViewWillEnter {
                     }
                 }
             }] : []),
-            ...(this.fieldParams.displayDropLocation ? [{
-                item: FormPanelSelectComponent,
-                config: {
-                    label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de dépose'),
-                    name: 'dropLocation',
-                    inputConfig: {
-                        required: Boolean(this.fieldParams.needsDropLocation),
-                        searchType: SelectItemTypeEnum.LOCATION,
-                    },
-                    errors: {
-                        required: 'Vous devez sélectionner un emplacement de dépose.'
+            ...(this.fieldParams.displayDropLocation
+                ? [{
+                    item: FormPanelSelectComponent,
+                    config: {
+                        label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de dépose'),
+                        name: 'dropLocation',
+                        inputConfig: {
+                            required: Boolean(this.fieldParams.needsDropLocation),
+                            searchType: SelectItemTypeEnum.LOCATION,
+                        },
+                        errors: {
+                            required: 'Vous devez sélectionner un emplacement de dépose.'
+                        }
                     }
-                }
-            }] : []),
+                }]
+                : []),
             ...(this.fieldParams.displayComment ? [{
                 item: FormPanelTextareaComponent,
                 config: {

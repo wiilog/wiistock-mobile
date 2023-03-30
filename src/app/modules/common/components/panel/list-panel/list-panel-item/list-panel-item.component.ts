@@ -14,7 +14,7 @@ export class ListPanelItemComponent {
     public infos: {
         [name: string]: {
             label?: string;
-            value: string;
+            value?: string;
             emergency?: boolean;
         };
     };
@@ -74,14 +74,14 @@ export class ListPanelItemComponent {
     };
 
     @Input()
-    public pressAction?: (infos: {[name: string]: {label?: string; value: string; emergency?: boolean;};}) => void;
+    public pressAction?: (infos: {[name: string]: {label?: string; value?: string; emergency?: boolean;};}) => void;
 
     @HostBinding('class')
     public _backgroundColor?: string;
 
     public constructor(private elementRef: ElementRef) {}
 
-    public get infosArray(): Array<{label?: string; value: string; key: string;emergency?: boolean;}> {
+    public get infosArray(): Array<{label?: string; value?: string; key: string;emergency?: boolean;}> {
         return Object.keys(this.infos).map((key) => ({
             key,
             ...(this.infos[key])

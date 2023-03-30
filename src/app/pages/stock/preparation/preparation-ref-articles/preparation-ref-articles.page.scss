@@ -1,0 +1,32 @@
+@import "theme/variables";
+
+ion-content {
+    display: flex;
+    flex-direction: column;
+    --background: none;
+
+    wii-panel-header.page-header {
+        margin-top: $spacer;
+        margin-bottom: $spacer;
+    }
+
+    wii-suggestion-list {
+        flex: 1 1 auto;
+    }
+
+    .page-footer {
+        width: 100%;
+        bottom: 0;
+
+        ::ng-deep wii-barcode-scanner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            margin-bottom: 0 !important;
+            height: 50px;
+            background-color: $lightGrey;
+        }
+    }
+
+}

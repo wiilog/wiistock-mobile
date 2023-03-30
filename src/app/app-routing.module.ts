@@ -259,6 +259,106 @@ const routes: Routes = [
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/tracking/ungroup/ungroup-confirm/ungroup-confirm.module').then(m => m.UngroupConfirmPageModule)
     },
+    {
+        path: NavPathEnum.COLLECTE_ARTICLE_PICKING,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/collecte/collecte-article-picking/collecte-article-picking.module').then(m => m.CollecteArticlePickingPageModule)
+    },
+    {
+        path: NavPathEnum.COLLECTE_ARTICLE_TAKE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/collecte/collecte-article-take/collecte-article-take.module').then(m => m.CollecteArticleTakePageModule)
+    },
+    {
+        path: NavPathEnum.COLLECTE_ARTICLES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/collecte/collecte-articles/collecte-articles.module').then(m => m.CollecteArticlesPageModule)
+    },
+    {
+        path: NavPathEnum.COLLECTE_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/collecte/collecte-menu/collecte-menu.module').then(m => m.CollecteMenuPageModule)
+    },
+    {
+        path: NavPathEnum.DELIVERY_LOGISTIC_UNIT_CONTENT,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/livraison/delivery-logistic-unit-content/delivery-logistic-unit-content.module').then(m => m.DeliveryLogisticUnitContentModule)
+    },
+    {
+        path: NavPathEnum.DEMANDE_LIVRAISON_ARTICLE_TAKE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/demande/demande-livraison/demande-livraison-article-take/demande-livraison-article-take.module').then(m => m.DemandeLivraisonArticleTakePageModule)
+    },
+    {
+        path: NavPathEnum.LIVRAISON_ARTICLES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/livraison/livraison-articles/livraison-articles.module').then(m => m.LivraisonArticlesPageModule)
+    },
+    {
+        path: NavPathEnum.LIVRAISON_EMPLACEMENT,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/livraison/livraison-emplacement/livraison-emplacement.module').then(m => m.LivraisonEmplacementPageModule)
+    },
+    {
+        path: NavPathEnum.DEMANDE_LIVRAISON_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu.module').then(m => m.DemandeLivraisonMenuPageModule)
+    },
+    {
+        path: NavPathEnum.MANUAL_DELIVERY,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/livraison/manual-delivery/manual-delivery.module').then(m => m.ManualDeliveryPageModule)
+    },
+    {
+        path: NavPathEnum.MANUAL_DELIVERY_LOCATION,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/livraison/manual-delivery-location/manual-delivery-location.module').then(m => m.ManualDeliveryLocationModule)
+    },
+    {
+        path: NavPathEnum.PREPARATION_ARTICLE_TAKE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/preparation/preparation-article-take/preparation-article-take.module').then(m => m.PreparationArticleTakePageModule)
+    },
+    {
+        path: NavPathEnum.PREPARATION_ARTICLES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/preparation/preparation-articles/preparation-articles.module').then(m => m.PreparationArticlesPageModule)
+    },
+    {
+        path: NavPathEnum.PREPARATION_EMPLACEMENT,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/preparation/preparation-emplacement/preparation-emplacement.module').then(m => m.PreparationEmplacementPageModule)
+    },
+    {
+        path: NavPathEnum.PREPARATION_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/preparation/preparation-menu/preparation-menu.module').then(m => m.PreparationMenuPageModule)
+    },
+    {
+        path: NavPathEnum.PREPARATION_REF_ARTICLES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/preparation/preparation-ref-articles/preparation-ref-articles.module').then(m => m.PreparationRefArticlesPageModule)
+    },
+    {
+        path: NavPathEnum.STOCK_MOVEMENT_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/stock-movement-menu/stock-movement-menu.module').then(m => m.StockMovementMenuPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSFER_ARTICLES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/transfer/transfer-articles/transfer-articles.module').then(m => m.TransferArticlesPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSFER_LIST,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/transfer/transfer-list/transfer-list.module').then(m => m.TransferListPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSFER_VALIDATE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/transfer/transfer-validate/transfer-validate.module').then(m => m.TransferValidatePageModule)
+    },
 ];
 
 @NgModule({
