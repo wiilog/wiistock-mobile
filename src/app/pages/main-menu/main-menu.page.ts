@@ -180,8 +180,7 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
 
         const actions = [];
 
-        // TODO WIIS-7970 remove false
-        if (false && rights.tracking) {
+        if (rights.tracking) {
             const action = () => {
                 this.navService.push(NavPathEnum.TRACKING_MENU, {
                     fromStock: false
