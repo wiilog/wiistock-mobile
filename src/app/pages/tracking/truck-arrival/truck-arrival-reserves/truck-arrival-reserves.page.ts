@@ -230,14 +230,22 @@ export class TruckArrivalReservesPage implements ViewWillEnter {
                             text: 'OK',
                             cssClass: 'alert-success',
                             handler: () => {
-                                this.navService.pop({path: NavPathEnum.TRACKING_MENU});
+                                this.navService
+                                    .pop({path: NavPathEnum.TRACKING_MENU})
+                                    .subscribe(() => {
+                                        this.mainHeaderService.emitSubTitle('');
+                                    })
                             }
                         }]
                     }).then((alert) => {
                         setTimeout(() => {
                             alert.dismiss().then((success) => {
                                 if(success){
-                                    this.navService.pop({path: NavPathEnum.TRACKING_MENU});
+                                    this.navService
+                                        .pop({path: NavPathEnum.TRACKING_MENU})
+                                        .subscribe(() => {
+                                            this.mainHeaderService.emitSubTitle('');
+                                        })
                                 }
                             });
                         }, 3000);

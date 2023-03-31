@@ -36,6 +36,7 @@ export class TrackingMenuPage implements ViewWillEnter {
     }
 
     public ionViewWillEnter(): void {
+        this.mainHeaderService.emitSubTitle('');
         this.menuConfig = [];
         zip(
             this.storageService.getRight(StorageKeyEnum.RIGHT_GROUP),
