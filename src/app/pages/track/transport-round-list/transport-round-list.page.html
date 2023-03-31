@@ -1,0 +1,120 @@
+<ng-template #noRounds>
+    <div class="no-rounds" *ngIf="!loading">
+        <img src="assets/icons/no-round.svg" width="150px">
+        <span>Aucune tournée ne vous a été attribué</span>
+    </div>
+</ng-template>
+
+<div class="round-container" *ngIf="transportRoundsByDates; else noRounds">
+    <div *ngFor="let transportRounds of transportRoundsByDates|keyvalue">
+        <div class="round-date">
+            <span>{{ formatDate(transportRounds.key) }}</span>
+        </div>
+        <div class="rounds-wrapper">
+            <div *ngFor="let round of transportRounds.value">
+                <wii-simple-card color="#6433D7" [titles]="'T' + round.number" (click)="view(round)">
+                    <div class="card-top">
+                        <div>
+                            <div class="line">
+                                <div class="counter">
+                                    <img src="assets/icons/delivery-truck.svg" width="15">
+                                    <span>
+                                    <strong>{{ round.ready_deliveries }}/{{ round.total_ready_deliveries }}</strong>
+                                    livraison(s) prête(s)
+                                </span>
+                                </div>
+                            </div>
+                            <div class="line">
+                                <div class="counter">
+                                    <img src="assets/icons/pack-black.svg" width="15">
+                                    <span>
+                                    <strong>{{ round.loaded_packs }}/{{ round.total_loaded }}</strong>
+                                    colis chargé(s)
+                                </span>
+                                </div>
+                            </div>
+                            <div class="line">
+                                <div class="counter">
+                                    <img src="assets/icons/location-black.svg" width="15" height="15">
+                                    <span>
+                                    <strong>{{ round.done_transports }}/{{ round.total_transports }}</strong>
+                                    transport(s) effectué(s)
+                                </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="status">
+                            {{ round.status }}
+                        </div>
+                    </div>
+                    <div class="estimated" *ngIf="round.status !== 'En cours' || round.to_finish">
+                        <div>{{ round.estimated_distance }} km estimés</div>
+                        <div>{{ round.estimated_time }} estimées</div>
+                    </div>
+                    <div class="line" *ngIf="round.status === 'En attente livreur'">
+                        <ion-button color="primary"
+                                    [class.disabled]="round.loaded_packs === round.total_loaded"
+                                    size="small"
+                                    (click)="load($event, round)">
+                            Charger
+                        </ion-button>
+                        <ion-button color="primary"
+                                    [class.disabled]="round.loaded_packs !== round.total_loaded"
+                                    size="small"
+                                    (click)="start($event, round)">
+                            Débuter la tournée
+                        </ion-button>
+                    </div>
+                    <ng-container *ngIf="round.to_finish">
+                        <hr *ngIf="round.status !== 'Terminée' || (round.not_delivered && round.returned_packs != round.packs_to_return && round.packs_to_return != 0) || (round.done_collects && round.deposited_packs != round.packs_to_deposit && round.packs_to_deposit != 0)">
+                        <div class="line" *ngIf="round.not_delivered && round.returned_packs != round.packs_to_return">
+                            <div class="counter">
+                                <img src="assets/icons/cancelled-delivery.svg" width="15">
+                                <span>
+                                    <strong>
+                                        {{ round.not_delivered }} livraison{{ round.not_delivered > 1 ? 's' : '' }} non livrée{{ round.not_delivered > 1 ? 's' : '' }}
+                                    </strong>
+                                    {{ round.returned_packs }}/{{ round.packs_to_return }} colis retourné{{ round.packs_to_return > 1 ? 's' : '' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="line" *ngIf="round.done_collects && round.deposited_packs != round.packs_to_deposit">
+                            <div class="counter">
+                                <img src="assets/icons/collect-hand.svg" width="15">
+                                <span>
+                                    <strong>{{ round.done_collects }} collecte{{ round.done_collects > 1 ? 's' : '' }} effectuée{{ round.done_collects > 1 ? 's' : '' }}</strong>
+                                    {{ round.deposited_packs }}/{{ round.packs_to_deposit }} objet{{ round.packs_to_deposit > 1 ? 's' : '' }} déposé{{ round.packs_to_deposit > 1 ? 's' : '' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="line">
+                            <ion-button color="primary"
+                                        size="small"
+                                        *ngIf="(round.not_delivered && round.returned_packs != round.packs_to_return && round.packs_to_return != 0) || (round.done_collects && round.deposited_packs != round.packs_to_deposit && round.packs_to_deposit != 0)"
+                                        [style.width]="round.status === 'Terminée' ? '100%' : '50%'"
+                                        (click)="depositPacks($event, round)">
+                                Déposer les colis
+                            </ion-button>
+                            <ion-button *ngIf="round.status !== 'Terminée'"
+                                        color="primary"
+                                        size="small"
+                                        (click)="finishRound($event, round)">
+                                Terminer la tournée
+                            </ion-button>
+                        </div>
+                    </ng-container>
+                </wii-simple-card>
+            </div>
+        </div>
+    </div>
+</div>
+<ion-fab *ngIf="!loading"
+         vertical="end"
+         horizontal="bottom"
+         slot="fixed">
+    <ion-fab-button color="primary"
+                    (click)="synchronise()">
+        <ion-icon class="big-icon" name="refresh"></ion-icon>
+    </ion-fab-button>
+</ion-fab>

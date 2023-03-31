@@ -1,0 +1,21 @@
+<div class="page-content" scroll-y="true" *ngIf="transport">
+    <wii-form-panel #formPanelComponent
+                    [header]="headerConfig"
+                    [body]="bodyConfig"
+                    [details]="detailsConfig"
+                    detailPosition="bottom">
+    </wii-form-panel>
+</div>
+<div class="page-footer" *ngIf="transport">
+    <ion-button class="larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="onFormSubmit()">
+        Terminer la {{ transport.kind === 'delivery' ? 'livraison' : 'collecte' }}
+        <wii-icon class="button-icon"
+                  name="check.svg"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

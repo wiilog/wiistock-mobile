@@ -1,0 +1,112 @@
+@import "theme/variables";
+
+.round-container {
+    overflow-y: auto;
+    padding: 6px 7px;
+
+    .round-date {
+        color: #030F4C;
+        font-weight: 700;
+        margin-top: 10px;
+        margin-bottom: 7px;
+        padding: 0 2px;
+
+        &::first-letter {
+            text-transform: uppercase;
+        }
+    }
+
+    .rounds-wrapper {
+        & > div {
+            margin-bottom: 10px;
+        }
+
+        wii-simple-card ::ng-deep {
+            width: 100%;
+            margin-bottom: 14px;
+            border-radius: 5px;
+
+                .card-top {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                }
+
+                .status {
+                    color: #030F4C;
+                    background-color: rgba(3, 15, 76, 0.2);
+                    padding: 4px 12px;
+                    border-radius: 5px;
+                    font-size: 12px;
+                }
+
+                .line {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 5px;
+
+                    .counter {
+                        display: flex;
+                        align-items: center;
+
+                        img {
+                            margin-right: 5px;
+                        }
+
+                        span {
+                            font-size: 14px;
+                        }
+                    }
+
+                    ion-button {
+                        flex: 1 1 auto;
+                        width: 50%;
+                        font-size: 12px;
+                        text-transform: unset;
+                        --box-shadow: none;
+                        margin-top: 5px;
+
+                        &:disabled {
+                            background-color: $medium;
+                        }
+                    }
+                }
+
+                .estimated {
+                    display: flex;
+                    margin-top: 10px;
+
+                    div {
+                        width: 50%;
+                        text-align: left;
+                        font-size: 12px;
+                        color: #666666;
+                    }
+                }
+        }
+    }
+}
+
+ion-fab {
+    bottom: $spacer;
+    right: $spacer;
+}
+
+.no-rounds {
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: #666;
+
+    img {
+        margin-bottom: 10px;
+        width: 100px;
+    }
+}
+
+hr {
+    border-bottom: 1px solid $darkGray;
+}

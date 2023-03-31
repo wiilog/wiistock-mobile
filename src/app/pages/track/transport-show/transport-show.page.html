@@ -1,0 +1,103 @@
+<div class="ion-page" *ngIf="transport">
+    <div class="page-content">
+        <div class="item-group">
+            <div class="item header">
+                <div class="transport-infos">
+                    <wii-icon [name]="transport.kind === 'delivery' ? 'truck.svg' : 'collect-hand.svg'" color="purple"></wii-icon>
+                    <div>
+                        <b>{{ transport.kind === 'delivery' ? 'Livraison' : 'Collecte' }}</b><br>
+                        <i>OTR{{ transport.number }}</i>
+                    </div>
+                </div>
+                <div class="type">
+                    <img [src]="transport.type_icon">
+                    {{ transport.type }}
+                </div>
+            </div>
+        </div>
+
+        <div class="date-infos">
+            <span *ngIf="transport.collect" class="type to-collect">
+                <wii-icon name="collect-hand.svg" color="white"></wii-icon>
+                Collecte à prévoir
+            </span>
+
+            <b>Date et heure de {{ transport.kind === 'delivery' ? 'livraison attendue' : 'collecte prévue' }}</b>
+            <span class="date">
+                {{ transport.expected_at }}
+                <span *ngIf="transport.emergency" class="emergency">
+                <wii-icon name="emergency.svg" color="danger"></wii-icon>
+                    {{ transport.emergency }}
+            </span>
+            </span>
+        </div>
+
+        <div class="item-group">
+            <div class="item client-info">
+                <wii-icon name="user.svg" color="black"></wii-icon>
+                <div class="inline">
+                    <b>{{ transport.contact.name }}</b>
+                    <span class="text-muted">N° dossier {{ transport.contact.file_number }}</span>
+                </div>
+            </div>
+
+            <div class="item client-info">
+                <wii-icon name="phone.svg" color="black"></wii-icon>
+                <div>
+                    <div class="client-value">
+                        <b>Contact</b><br>
+                        <div [innerHTML]="transport.contact.contact"></div>
+                    </div>
+                    <div class="client-value">
+                        <b>Personne à prévenir</b><br>
+                        <div [innerHTML]="transport.contact.person_to_contact"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="item client-info">
+                <wii-icon name="location-black.svg" color="black"></wii-icon>
+                <div>
+                    <b>Adresse</b>
+                    <div [innerHTML]="transport.contact.address">
+                    </div>
+                </div>
+            </div>
+
+            <div class="item client-info" *ngIf="transport.contact.observation">
+                <wii-icon name="question-mark.svg" color="black"></wii-icon>
+                <div>
+                    <b>Remarque</b><br>
+                    <div [innerHTML]="transport.contact.observation"></div>
+                </div>
+            </div>
+
+            <div class="item client-info" *ngIf="shouldDisplayFreeFields">
+                <wii-icon name="info.svg" color="black"></wii-icon>
+                <div>
+                    <ng-container *ngFor="let freeField of transport.free_fields">
+                        <div *ngIf="freeField.value !== ''" class="free-field">
+                            <b>{{ freeField.label }}</b><br>
+                            {{ freeField.value }}
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+
+        <wii-pack-count *ngIf="transport"
+                        mode="expected"
+                        [title]="transport.kind === 'delivery' ? 'Colis à livrer' : 'Objets à collecter'"
+                        [transport]="transport">
+        </wii-pack-count>
+    </div>
+    <div class="page-footer">
+        <ion-button color="primary" fill="outline" (click)="fail()" [disabled]="transport.cancelled || mode === modeViewOnly">
+            {{ transport.kind === 'delivery' ? 'Non livrée' : 'Non collectée' }}
+        </ion-button>
+
+        <ion-button color="primary" (click)="depositOrCollect()" [disabled]="mode === modeViewOnly">
+            {{ transport.kind === 'delivery' ? 'Déposer les colis' : 'Collecter les objets' }}
+        </ion-button>
+    </div>
+</div>

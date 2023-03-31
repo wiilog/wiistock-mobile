@@ -1,0 +1,25 @@
+ion-page {
+    display: block;
+    overflow-y: scroll;
+}
+
+.contact {
+    display: flex;
+    justify-content: flex-start;
+    padding: 10px;
+
+    wii-icon {
+        width: 15px !important;
+        margin-right: 10px;
+    }
+}
+
+.page-footer {
+}
+
+.page-footer {
+    position: sticky;
+    width: 100%;
+    bottom: 0;
+    z-index: 100;
+}

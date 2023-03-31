@@ -1,0 +1,27 @@
+<wii-panel-header *ngIf="panelHeaderConfig"
+                  class="page-header"
+                  [transparent]="panelHeaderConfig.transparent"
+                  [title]="panelHeaderConfig.title"
+                  [subtitle]="panelHeaderConfig.subtitle">
+</wii-panel-header>
+
+<div class="page-footer">
+    <wii-select-item #selectItemComponent
+                     [type]="selectItemType"
+                     (itemChange)="selectLocation($event)"
+                     [checkBarcodeValidity]="true"
+                     [resetEmitter]="resetEmitter$"
+                     [scanMode]="scannerMode">
+    </wii-select-item>
+    <ion-button class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="validate()">
+        Valider
+        <wii-icon name="check.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

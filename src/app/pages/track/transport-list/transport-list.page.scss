@@ -1,0 +1,32 @@
+@import "theme/variables";
+
+.ion-page {
+    display: block;
+    overflow-y: scroll;
+}
+
+.transport-list {
+    padding: 5px;
+}
+
+ion-button {
+    text-transform: unset;
+    font-weight: unset;
+}
+
+wii-icon:not(.priority):not(.priority):not(.priority):not(.priority) {
+    min-width: 15px;
+    width: 15px !important;
+    margin-right: 15px;
+}
+
+.card-container {
+    margin-bottom: 7px;
+}
+
+.transports-count {
+    display: block;
+    font-weight: bold;
+    color: $primary;
+    padding: 4px 8px;
+}

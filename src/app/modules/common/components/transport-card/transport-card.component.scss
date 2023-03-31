@@ -1,0 +1,61 @@
+.transport-content {
+    display: flex;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+
+    .transport-infos {
+        flex: 1 1 auto;
+
+        wii-icon {
+            width: 15px !important;
+            margin-right: 5px;
+            min-width: 15px;
+            margin-left: 0 !important;
+        }
+
+        .transport-kind {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            font-weight: bold;
+
+            .packs-count {
+                font-weight: normal;
+                font-style: italic;
+                font-size: 14px;
+                color: #666666;
+                margin-left: 6px;
+            }
+        }
+
+        .transport-kind > div:not(:first-child) {
+            margin-left: 10px;
+        }
+
+        .transport-kind > div, .transport-time, .transport-location {
+            display: flex;
+            align-items: center;
+
+            wii-icon {
+                margin-bottom: auto;
+            }
+        }
+    }
+
+    .transport-actions {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 15px;
+
+        wii-icon {
+            width: 30px !important;
+            margin-left: 0 !important;
+
+            &:not(:last-child) {
+                margin-bottom: 10px;
+            }
+        }
+    }
+}

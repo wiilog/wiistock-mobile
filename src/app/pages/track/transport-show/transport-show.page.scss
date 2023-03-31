@@ -1,0 +1,159 @@
+@import "theme/variables";
+
+.ion-page {
+    display: block;
+    overflow-y: scroll;
+}
+
+.item-group {
+    background: white;
+    box-shadow: rgb(0 0 0 / 15%) 0 3px 1px -2px;
+    margin: 5px 4px;
+    padding: 3px;
+
+    .item {
+        padding: 8px 10px;
+    }
+
+    .item:not(:last-of-type) {
+        border-bottom: 1px solid $darkGray;
+    }
+}
+
+
+.item.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+
+    .transport-infos {
+        display: flex;
+
+        wii-icon {
+            width: 40px;
+            margin-right: 10px;
+        }
+    }
+}
+
+.type {
+    display: flex;
+    background-color: $lightGrey;
+    color: #666666;
+    padding: 4px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    width: max-content;
+    height: min-content;
+    margin-bottom: 3px;
+
+    &.to-collect {
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        background: $purple;
+        color: white;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+
+    img {
+        width: 15px !important;
+        margin-right: 4px;
+    }
+
+    wii-icon {
+        width: 15px !important;
+        margin-right: 4px !important;
+    }
+}
+
+.client-info {
+    display: flex;
+
+    a {
+        color: black !important;
+    }
+
+    wii-icon {
+        height: 15px;
+        width: 15px;
+        min-width: 15px;
+        margin-top: 3px;
+    }
+
+    & > div {
+        flex: 1 1 auto;
+        margin-left: 10px;
+
+        .client-value {
+            margin-top: 5px;
+        }
+
+        &.inline {
+            display: flex;
+
+            & :not(:first-child) {
+                margin-left: 10px;
+            }
+        }
+
+        .free-field {
+            display: inline-block;
+            width: 49%;
+        }
+
+        p:first-child, div:first-child {
+            margin-top: 0;
+        }
+
+        p:last-child, div:first-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+.date-infos {
+    padding: 10px;
+
+    .date {
+        display: flex;
+    }
+}
+
+.emergency {
+    display: inline-flex;
+    color: $danger;
+    font-weight: bold;
+    font-size: 12px;
+    margin-left: 10px;
+
+    wii-icon {
+        width: 15px !important;
+        margin-right: 5px !important;
+    }
+}
+
+.text-muted {
+    color: $medium;
+}
+
+.page-footer {
+    display: flex;
+    justify-content: space-evenly;
+    position: sticky;
+    width: 100%;
+    bottom: 0;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    background-color: $lightGrey;
+
+    ion-button {
+        width: 47.5%;
+        margin: 0 !important;
+        font-size: 13px !important;
+        text-transform: none !important;
+    }
+}

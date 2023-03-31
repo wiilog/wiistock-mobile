@@ -1,0 +1,37 @@
+<div *ngIf="transport || round" class="page-content" scroll-y="true">
+    <wii-form-panel #formPanelComponent *ngIf="headerConfig" [header]="headerConfig"></wii-form-panel>
+
+    <ng-container *ngIf="transport">
+        <div *ngFor="let nature of transport.natures_to_collect">
+            <wii-number-input [label]="nature.nature"
+                              min="1"
+                              [value]="nature.collected_quantity || 1"
+                              (valueChange)="setCollectedQuantity(nature.nature_id, $event)"></wii-number-input>
+        </div>
+    </ng-container>
+
+    <ng-container *ngIf="round && !transport">
+        <ng-container *ngFor="let transport of round.lines">
+            <div *ngFor="let nature of (transport.natures_to_collect || (transport.collect ? transport.collect.natures_to_collect : []))">
+                <wii-number-input [label]="nature.nature"
+                                  min="1"
+                                  [value]="nature.collected_quantity || 1"
+                                  (valueChange)="setDepositedQuantity(nature.nature_id, $event)"></wii-number-input>
+            </div>
+        </ng-container>
+    </ng-container>
+</div>
+
+<div class="page-footer">
+    <ion-button class="larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="finishTransport()">
+        Valider
+        <wii-icon class="button-icon"
+                  name="check.svg"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

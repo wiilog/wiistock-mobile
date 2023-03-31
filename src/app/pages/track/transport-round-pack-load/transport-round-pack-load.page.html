@@ -1,0 +1,35 @@
+<div scroll-y="true"
+     class="page-content">
+  <wii-list-panel *ngIf="packsLoadedListConfig"
+                  [header]="packsLoadedListConfig.header"
+                  [body]="packsLoadedListConfig.body"
+                  [boldValues]="listBoldValues"
+                  sliding="true">
+  </wii-list-panel>
+  <wii-list-panel *ngIf="packsToLoadListConfig"
+                  [header]="packsToLoadListConfig.header"
+                  [body]="packsToLoadListConfig.body"
+                  [boldValues]="listBoldValues"
+                  sliding="true">
+  </wii-list-panel>
+</div>
+
+<div class="page-footer persisted-page-footer">
+  <wii-barcode-scanner #footerScannerComponent
+                       [mode]="scannerMode"
+                       (add)="loadPack($event[0])">
+  </wii-barcode-scanner>
+  <ion-button class="submit-button larger"
+              color="primary"
+              size="large"
+              expand="full"
+              (click)="validate()">
+    Valider
+    <wii-icon name="check.svg"
+              class="button-icon"
+              color="white">
+    </wii-icon>
+  </ion-button>
+</div>
+
+

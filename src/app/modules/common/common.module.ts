@@ -57,6 +57,10 @@ import {SimpleFormComponent} from "@common/components/simple-form/simple-form.co
 import {CardListComponent} from "@common/components/card-list/card-list.component";
 import {LogoCardComponent} from "@common/components/logo-card/logo-card.component";
 import {NumberInputComponent} from "@common/components/number-input/number-input.component";
+import {PackCountComponent} from "@common/components/pack-count/pack-count.component";
+import {SimpleCardComponent} from "@common/components/simple-card/simple-card.component";
+import {LeafletMapComponent} from "@common/components/leaflet-map/leaflet-map.component";
+import {TransportCardComponent} from "@common/components/transport-card/transport-card.component";
 
 @NgModule({
     imports: [
@@ -102,6 +106,10 @@ import {NumberInputComponent} from "@common/components/number-input/number-input
         CardListComponent,
         LogoCardComponent,
         NumberInputComponent,
+        PackCountComponent,
+        SimpleCardComponent,
+        LeafletMapComponent,
+        TransportCardComponent,
     ],
     exports: [
         IconComponent,
@@ -123,6 +131,10 @@ import {NumberInputComponent} from "@common/components/number-input/number-input
         CardListComponent,
         LogoCardComponent,
         NumberInputComponent,
+        PackCountComponent,
+        SimpleCardComponent,
+        LeafletMapComponent,
+        TransportCardComponent,
     ]
 })
 export class CommonModule {

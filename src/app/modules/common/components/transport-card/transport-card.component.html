@@ -1,0 +1,54 @@
+<wii-simple-card [titles]="titles"
+                 color="#6433D7"
+                 [disabled]="transport.cancelled || (transport.kind === 'delivery' && transport.packs.length === 0)"
+                 stackedRightContent="true">
+    <div class="transport-content">
+        <div class="transport-infos">
+            <div class="transport-kind">
+                <div *ngIf="transport.kind === 'delivery'">
+                    <wii-icon class="button-icon" name="delivery-truck.svg" color="black"></wii-icon>
+                    <span>Livraison</span>
+                </div>
+                <div *ngIf="transport.kind === 'collect' || transport.collect">
+                    <wii-icon class="button-icon" name="collect-hand.svg" color="black"></wii-icon>
+                    Collecte
+                </div>
+                <ng-container *ngIf="transport.kind !== 'collect'">
+                    <span class="packs-count">{{ notRejectedPacks }} colis</span>
+                </ng-container>
+            </div>
+
+            <div class="transport-time">
+                <wii-icon class="button-icon" name="clock.svg" color="black"></wii-icon>
+                <span *ngIf="transport.kind === 'delivery' && !transport.fulfilled_time">
+                    <b>{{ transport.expected_time }}</b> estimée {{ transport.estimated_time }}
+                </span>
+                <span *ngIf="transport.kind === 'collect' && !transport.fulfilled_time">
+                     <b>{{ transport.time_slot }}</b> estimée {{ transport.estimated_time }}
+                </span>
+                <span *ngIf="transport.fulfilled_time">
+                     <b>{{ transport.kind === 'collect' ? transport.time_slot : transport.expected_time }}</b> Fait à {{ transport.fulfilled_time }}
+                </span>
+            </div>
+
+            <div class="transport-location">
+                <wii-icon class="button-icon" name="location-black.svg" color="black" width="12px"></wii-icon>
+                <span [innerHTML]="transport.contact.address"></span>
+            </div>
+        </div>
+        <div class="transport-actions">
+            <wii-icon *ngIf="transport.cancelled" class="button-icon" name="round-cross.svg" color="medium"></wii-icon>
+            <ng-container *ngIf="!transport.cancelled && (transport.success || transport.failure)">
+                <wii-icon class="button-icon" [name]="transport.success ? 'check.svg' : 'cross.svg'"
+                          [color]="transport.success ? 'success' : 'danger'"></wii-icon>
+                <wii-icon *ngIf="transport.collect && (transport.collect.success || transport.collect.failure)" class="button-icon"
+                          [name]="transport.collect.success ? 'check.svg' : 'cross.svg'"
+                          [color]="transport.collect.success ? 'success' : 'danger'"></wii-icon>
+            </ng-container>
+            <wii-icon *ngIf="!transport.success && !transport.failure && !transport.cancelled"
+                      class="button-icon" name="gps.svg"
+                      (click)="navigate($event)"
+                      [color]="mode === modeViewOnly ? 'medium' : 'black'"></wii-icon>
+        </div>
+    </div>
+</wii-simple-card>

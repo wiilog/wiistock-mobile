@@ -6,11 +6,6 @@ import {UserConnectedGuard} from "@app/guards/user-connected.guard";
 
 const routes: Routes = [
     {
-        path: '',
-        redirectTo: NavPathEnum.LOGIN,
-        pathMatch: 'full'
-    },
-    {
         path: NavPathEnum.LOGIN,
         canActivate: [UserDisconnectedGuard],
         loadChildren: () => import('./pages/login/login.module').then(m => m.LoginPageModule)
@@ -69,6 +64,11 @@ const routes: Routes = [
         path: NavPathEnum.INVENTORY_MISSION_ZONES,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/inventory/inventory-mission-zones/inventory-mission-zones.module').then(m => m.InventoryMissionZonesPageModule)
+    },
+    {
+        path: NavPathEnum.INVENTORY_VALIDATE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/inventory/inventory-validate/inventory-validate.module').then(m => m.InventoryValidatePageModule)
     },
     {
         path: NavPathEnum.ASSOCIATION,
@@ -260,6 +260,16 @@ const routes: Routes = [
         loadChildren: () => import('@pages/tracking/ungroup/ungroup-confirm/ungroup-confirm.module').then(m => m.UngroupConfirmPageModule)
     },
     {
+        path: NavPathEnum.UNGROUP_SCAN_LOCATION,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/ungroup/ungroup-scan-location/ungroup-scan-location.module').then(m => m.UngroupScanLocationPageModule)
+    },
+    {
+        path: NavPathEnum.UNGROUP_SCAN_GROUP,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/ungroup/ungroup-scan-group/ungroup-scan-group.module').then(m => m.UngroupScanGroupPageModule)
+    },
+    {
         path: NavPathEnum.COLLECTE_ARTICLE_PICKING,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/collecte/collecte-article-picking/collecte-article-picking.module').then(m => m.CollecteArticlePickingPageModule)
@@ -285,9 +295,9 @@ const routes: Routes = [
         loadChildren: () => import('@pages/stock/livraison/delivery-logistic-unit-content/delivery-logistic-unit-content.module').then(m => m.DeliveryLogisticUnitContentModule)
     },
     {
-        path: NavPathEnum.DEMANDE_LIVRAISON_ARTICLE_TAKE,
+        path: NavPathEnum.LIVRAISON_ARTICLE_TAKE,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('@pages/demande/demande-livraison/demande-livraison-article-take/demande-livraison-article-take.module').then(m => m.DemandeLivraisonArticleTakePageModule)
+        loadChildren: () => import('@pages/stock/livraison/livraison-article-take/livraison-article-take.module').then(m => m.LivraisonArticleTakePageModule)
     },
     {
         path: NavPathEnum.LIVRAISON_ARTICLES,
@@ -300,9 +310,9 @@ const routes: Routes = [
         loadChildren: () => import('@pages/stock/livraison/livraison-emplacement/livraison-emplacement.module').then(m => m.LivraisonEmplacementPageModule)
     },
     {
-        path: NavPathEnum.DEMANDE_LIVRAISON_MENU,
+        path: NavPathEnum.LIVRAISON_MENU,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('@pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu.module').then(m => m.DemandeLivraisonMenuPageModule)
+        loadChildren: () => import('@pages/stock/livraison/livraison-menu/livraison-menu.module').then(m => m.LivraisonMenuPageModule)
     },
     {
         path: NavPathEnum.MANUAL_DELIVERY,
@@ -358,6 +368,81 @@ const routes: Routes = [
         path: NavPathEnum.TRANSFER_VALIDATE,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/transfer/transfer-validate/transfer-validate.module').then(m => m.TransferValidatePageModule)
+    },
+    {
+        path: NavPathEnum.FINISH_TRANSPORT,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/finish-transport/finish-transport.module').then(m => m.FinishTransportPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_COLLECT_NATURES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-collect-natures/transport-collect-natures.module').then(m => m.TransportCollectNaturesPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_DEPOSIT_LOCATION,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-deposit-location/transport-deposit-location.module').then(m => m.TransportDepositLocationPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_DEPOSIT_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-deposit-menu/transport-deposit-menu.module').then(m => m.TransportDepositMenuPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_DEPOSIT_PACKS,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-deposit-packs/transport-deposit-packs.module').then(m => m.TransportDepositPacksPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_PACK_DELIVER,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-pack-deliver/transport-pack-deliver.module').then(m => m.TransportPackDeliverPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_ROUND_FINISH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-round-finish/transport-round-finish.module').then(m => m.TransportRoundFinishPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-round-finish-pack-drop/transport-round-finish-pack-drop.module').then(m => m.TransportRoundFinishPackDropPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP_VALIDATE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-round-finish-pack-drop-validate/transport-round-finish-pack-drop-validate.module').then(m => m.TransportRoundFinishPackDropValidatePageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_ROUND_LIST,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-round-list/transport-round-list.module').then(m => m.TransportRoundListPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_ROUND_PACK_LOAD,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-round-pack-load/transport-round-pack-load.module').then(m => m.TransportRoundPackLoadPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_ROUND_PACK_LOAD_VALIDATE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-round-pack-load-validate/transport-round-pack-load-validate.module').then(m => m.TransportRoundPackLoadConfirmPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_SHOW,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-show/transport-show.module').then(m => m.TransportShowPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_FAILURE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-failure/transport-failure.module').then(m => m.TransportFailurePageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_LIST,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-list/transport-list.module').then(m => m.TransportListPageModule)
     },
 ];
 

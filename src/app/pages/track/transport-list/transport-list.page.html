@@ -1,0 +1,26 @@
+<div *ngIf="round" class="ion-page">
+    <wii-form-panel #formPanelComponent *ngIf="headerConfig" [header]="headerConfig"></wii-form-panel>
+
+    <ion-button color="primary" expand="full" (click)="toggleMap()">
+        <wii-icon class="button-icon" name="double-arrow-down.svg" color="white" [style.transform]="mapVisible ? 'rotate(180deg)' : ''"></wii-icon>
+        {{ mapVisible ? 'Cacher' : 'Voir' }} le circuit de la tournée
+    </ion-button>
+    <wii-leaflet-map *ngIf="mapVisible" [markers]="markers"></wii-leaflet-map>
+
+    <span *ngIf="round.status === 'En attente livreur'" class="transports-count">
+        {{ round.ready_deliveries }}/{{ round.total_ready_deliveries }} livraison{{ round.ready_deliveries > 1 ? 's' : '' }} prête{{ round.ready_deliveries > 1 ? 's' : '' }}
+    </span>
+
+    <span *ngIf="round.status === 'En cours'" class="transports-count">
+        {{ round.done_transports }}/{{ round.total_transports }} transport{{ round.done_transports > 1 ? 's' : '' }} effectué{{ round.done_transports > 1 ? 's' : '' }}
+    </span>
+
+    <div class="transport-list">
+        <div *ngFor="let transport of round.lines" class="card-container">
+            <wii-transport-card [transport]="transport"
+                                [mode]="mode"
+                                (click)="showTransport(transport)">
+            </wii-transport-card>
+        </div>
+    </div>
+</div>

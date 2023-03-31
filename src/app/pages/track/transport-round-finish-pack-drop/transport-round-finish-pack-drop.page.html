@@ -1,0 +1,38 @@
+<div scroll-y="true"
+     class="page-content">
+    <div class="disclaimer">
+        <img src="../../../assets/icons/emergency.svg" width="15px" height="15px">
+        <span>Les colis doivent impérativement être déposés afin de pouvoir clôturer la tournée. Veuillez les scanner.</span>
+    </div>
+    <wii-list-panel *ngIf="packsDroppedListConfig"
+                    [header]="packsDroppedListConfig.header"
+                    [body]="packsDroppedListConfig.body"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+    <wii-list-panel *ngIf="packsToDropListConfig"
+                    [header]="packsToDropListConfig.header"
+                    [body]="packsToDropListConfig.body"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+</div>
+
+<div class="page-footer persisted-page-footer">
+    <wii-barcode-scanner #footerScannerComponent
+                         [mode]="scannerMode"
+                         (add)="loadPack($event[0])">
+    </wii-barcode-scanner>
+    <ion-button class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="validate()"
+                [disabled]="disabled">
+        Valider
+        <wii-icon name="check.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>
+
+
