@@ -8,7 +8,7 @@
     <wii-select-item #selectItemComponent
                      [type]="selectItemType"
                      (itemChange)="selectLocation($event)"
-                     checkBarcodeValidity="true"
+                     [checkBarcodeValidity]="true"
                      [scanMode]="barcodeScannerMode">
     </wii-select-item>
 </div>

@@ -20,7 +20,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
     public _item: any;
 
     @Input()
-    public type: SelectItemTypeEnum;
+    public type?: SelectItemTypeEnum;
 
     @Input()
     public requestParams?: Array<string> = [];
@@ -365,14 +365,16 @@ export class SearchItemComponent implements OnInit, OnDestroy {
         this.itemComponent.hideLoading();
     }
 
-    public findItem(search: string|number, searchAttribute: string = this.config[this.type]['label']): any {
+    public findItem(search: string|number, searchAttribute: string = this.config[this.smartType]['label']): any {
         return this.dbItems
             ? this.dbItems.find((element) => (String(element[searchAttribute]).trim() === String(search).trim()))
             : undefined;
     }
 
     public get smartType(): string|number {
-        return this.config[this.type] ? this.type : 'default';
+        return this.type !== undefined && this.config[this.type]
+            ? this.type
+            : 'default';
     }
 
     private applySearch(text: string = ''): void {

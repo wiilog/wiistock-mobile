@@ -19,7 +19,9 @@
 <div class="page-footer persisted-page-footer">
     <wii-barcode-scanner #footerScannerComponent
                          [mode]="scannerMode"
-                         (add)="loadPack($event[0])">
+                         (manualAdd)="loadPack($event)"
+                         (cameraAdd)="loadPack($event)"
+                         (scanAdd)="loadPack($event)">
     </wii-barcode-scanner>
     <ion-button class="submit-button larger"
                 color="primary"

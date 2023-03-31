@@ -4,20 +4,22 @@
                   [header]="packsLoadedListConfig.header"
                   [body]="packsLoadedListConfig.body"
                   [boldValues]="listBoldValues"
-                  sliding="true">
+                  [sliding]="true">
   </wii-list-panel>
   <wii-list-panel *ngIf="packsToLoadListConfig"
                   [header]="packsToLoadListConfig.header"
                   [body]="packsToLoadListConfig.body"
                   [boldValues]="listBoldValues"
-                  sliding="true">
+                  [sliding]="true">
   </wii-list-panel>
 </div>
 
 <div class="page-footer persisted-page-footer">
   <wii-barcode-scanner #footerScannerComponent
                        [mode]="scannerMode"
-                       (add)="loadPack($event[0])">
+                       (manualAdd)="loadPack($event)"
+                       (cameraAdd)="loadPack($event)"
+                       (scanAdd)="loadPack($event)">
   </wii-barcode-scanner>
   <ion-button class="submit-button larger"
               color="primary"

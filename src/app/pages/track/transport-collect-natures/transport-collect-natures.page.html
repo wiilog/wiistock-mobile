@@ -4,7 +4,7 @@
     <ng-container *ngIf="transport">
         <div *ngFor="let nature of transport.natures_to_collect">
             <wii-number-input [label]="nature.nature"
-                              min="1"
+                              [min]="1"
                               [value]="nature.collected_quantity || 1"
                               (valueChange)="setCollectedQuantity(nature.nature_id, $event)"></wii-number-input>
         </div>
@@ -14,7 +14,7 @@
         <ng-container *ngFor="let transport of round.lines">
             <div *ngFor="let nature of (transport.natures_to_collect || (transport.collect ? transport.collect.natures_to_collect : []))">
                 <wii-number-input [label]="nature.nature"
-                                  min="1"
+                                  [min]="1"
                                   [value]="nature.collected_quantity || 1"
                                   (valueChange)="setDepositedQuantity(nature.nature_id, $event)"></wii-number-input>
             </div>
