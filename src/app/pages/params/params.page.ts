@@ -2,14 +2,11 @@ import {Component} from '@angular/core';
 import {ApiService} from '@app/services/api.service';
 import {LoadingService} from '@app/services/loading.service';
 import {ToastService} from '@app/services/toast.service';
-import {from, Subscription, throwError} from 'rxjs';
+import {Subscription, throwError} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
 import {StorageService} from '@app/services/storage/storage.service';
 import {NavService} from '@app/services/nav/nav.service';
-import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
-// import {localAddress} from '../../dev-credentials.json'; // TODO WIIS-7970
-import {environment} from "@environments/environment";
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 // import {NotificationService} from '@app/services/notification.service'; // TODO WIIS-7970
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
@@ -43,13 +40,7 @@ export class ParamsPage implements ViewWillEnter, ViewWillLeave {
     public ionViewWillEnter(): void {
         // this.notificationService.userIsLogged = false; // TODO WIIS-7970
         this.serverUrlSubscription = this.storageService.getString(StorageKeyEnum.URL_SERVER).subscribe((baseUrl) => {
-            // TODO WIIS-7970
-            // if(!environment.production && localAddress && !baseUrl) {
-            //     this.URL = localAddress;
-            //     this.registerURL();
-            // } else {
-                this.URL = !baseUrl ? '' : baseUrl;
-            // }
+            this.URL = !baseUrl ? '' : baseUrl;
         });
     }
 

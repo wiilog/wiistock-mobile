@@ -68,7 +68,6 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
             // }
         });
 
-        // TODO WIIS-7970 backButton
         this.backButtonListenerHandle = App.addListener('backButton', () => {
             this.onBackButton();
         });
