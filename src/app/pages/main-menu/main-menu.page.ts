@@ -78,9 +78,9 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
         // });
     }
 
-    public ionViewWillLeave(): void {
+    public async ionViewWillLeave() {
         if (this.backButtonListenerHandle) {
-            this.backButtonListenerHandle.remove();
+            await this.backButtonListenerHandle.remove();
             this.backButtonListenerHandle = undefined;
         }
         if (this.synchronisationSubscription) {

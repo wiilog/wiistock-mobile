@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Preferences} from '@capacitor/preferences';
-import {from, Observable, of, zip} from 'rxjs';
+import {catchError, from, Observable, of, zip} from 'rxjs';
 import {mergeMap, map} from 'rxjs/operators';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 
@@ -105,10 +105,10 @@ export class StorageService {
     public getString(key: StorageKeyEnum, maxLength?: number): Observable<string|null> {
         return from(Preferences.get({key}))
             .pipe(
-                map(({value: user}) => (
-                    user !== null && maxLength
-                        ? (user || '').substring(0, maxLength)
-                        : user
+                map(({value}) => (
+                    value !== null && maxLength
+                        ? (value || '').substring(0, maxLength)
+                        : value
                 ))
             );
     }
@@ -136,26 +136,32 @@ export class StorageService {
     }
 
     public resetCounters(): Observable<void> {
-        return this.setItem(StorageKeyEnum.COUNTERS, JSON.parse('{}'));
+        return this.setItem(StorageKeyEnum.COUNTERS, JSON.stringify({}));
     }
 
     public incrementCounter(key: StorageKeyEnum): Observable<void> {
-        // TODO WIIS-7970 check fonctionnel ?
-        return this.getString(StorageKeyEnum.COUNTERS).pipe(
-            map((countersStr) => countersStr || {}),
+        return this.getCounters().pipe(
             mergeMap((counters: any) => {
                 counters[key] = (counters[key] || 0) + 1;
-                return this.setItem(StorageKeyEnum.COUNTERS, counters) as Observable<void>;
+                return this.setItem(StorageKeyEnum.COUNTERS, JSON.stringify(counters)) as Observable<void>;
             })
         );
     }
 
     public getCounter(key: StorageKeyEnum): Observable<number> {
+        return this.getCounters().pipe(
+            map((counters) => Number(counters[key]) || 0)
+        );
+    }
 
-        // TODO WIIS-7970 check fonctionnel ? enlever le any
+    public getCounters(): Observable<{[key: string]: number}> {
         return this.getString(StorageKeyEnum.COUNTERS).pipe(
-            map((counters: any) => counters[key]),
-            map((counter) => Number(counter) || 0)
+            map((countersStr) => (
+                countersStr
+                    ? (JSON.parse(countersStr) || {})
+                    : {}
+            )),
+            catchError(() => of({})),
         );
     }
 

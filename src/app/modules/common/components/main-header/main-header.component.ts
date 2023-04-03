@@ -126,23 +126,23 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                 pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Association UL - Articles',
                 filter: (params) => (
-                    params.get('customAction')
+                    params.customAction
                 )
             },
             {
                 pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Prise',
                 filter: (params) => (
-                    (typeof params.get('fromDepose') === 'boolean') &&
-                    !params.get('fromDepose') && !params.get('customAction')
+                    (typeof params.fromDepose === 'boolean') &&
+                    !params.fromDepose && !params.customAction
                 )
             },
             {
                 pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Dépose',
                 filter: (params) => (
-                    (typeof params.get('fromDepose') === 'boolean') &&
-                    params.get('fromDepose') && !params.get('customAction')
+                    (typeof params.fromDepose === 'boolean') &&
+                    params.fromDepose && !params.customAction
                 )
             },
             {pagePath: NavPathEnum.STOCK_MOVEMENT_MENU, label: 'Transfert manuel'},
@@ -174,27 +174,27 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {
                 pagePath: NavPathEnum.TRANSPORT_COLLECT_NATURES,
                 label: 'Déposer colis',
-                filter: params => params.get('round'),
+                filter: params => params.round,
             },
             {
                 pagePath: NavPathEnum.TRANSPORT_SHOW,
                 label: 'Livraison',
                 filter: (params) => (
-                    params.get('transport').kind === 'delivery'
+                    params.transport?.kind === 'delivery'
                 )
             },
             {
                 pagePath: NavPathEnum.TRANSPORT_SHOW,
                 label: 'Collecte',
                 filter: (params) => (
-                    params.get('transport').kind === 'collect'
+                    params.transport?.kind === 'collect'
                 )
             },
             {
                 pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Passage à vide',
                 filter: (params) => (
-                    params.get('fromEmptyRound')
+                    params.fromEmptyRound
                 )
             },
             {pagePath: NavPathEnum.TRUCK_ARRIVAL_CARRIER, label: 'Arrivage camion'},

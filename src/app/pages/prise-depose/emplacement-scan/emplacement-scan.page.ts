@@ -107,7 +107,7 @@ export class EmplacementScanPage implements ViewWillEnter, ViewWillLeave {
                     livraisonToRedirect: this.livraisonToRedirect,
                     fromStock: this.fromStock,
                     createTakeAndDrop: this.navService.param('createTakeAndDrop') || false,
-                    finishAction: this.finishAction
+                    finishAction: this.finishAction || (() => {this.navService.pop();})
                 });
             }
         });
