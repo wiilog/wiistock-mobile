@@ -9,12 +9,14 @@ import {LocalDataManagerService} from '@app/services/local-data-manager.service'
 import {ToastService} from '@app/services/toast.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
+import {App} from '@capacitor/app';
 // import {ILocalNotification} from '@ionic-native/local-notifications'; // TODO WIIS-7970
 // import {NotificationService} from '@app/services/notification.service'; // TODO WIIS-7970
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {AlertService} from '@app/services/alert.service';
 import {NetworkService} from '@app/services/network.service';
 import {ApiService} from '@app/services/api.service';
+import {PluginListenerHandle} from "@capacitor/core/types/definitions";
 
 
 @Component({
@@ -30,10 +32,9 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
 
     public messageLoading?: string;
 
-    // TODO migration // TODO WIIS-7970
     private exitAlert?: HTMLIonAlertElement;
 
-    private backButtonSubscription?: Subscription;
+    private backButtonListenerHandle?: PluginListenerHandle;
     private synchronisationSubscription?: Subscription;
     private synchroniseActionSubscription?: Subscription;
     private notificationSubscription?: Subscription;
@@ -68,9 +69,10 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
         });
 
         // TODO WIIS-7970 backButton
-        // this.backButtonSubscription = this.platform.backButton.subscribe(() => {
-        //     this.onBackButton();
-        // });
+        this.backButtonListenerHandle = App.addListener('backButton', () => {
+            this.onBackButton();
+        });
+
         // TODO WIIS-7970
         // this.notificationSubscription = this.notificationService.$localNotification.subscribe((notification) => {
         //     this.doSynchronisationAndNotificationRedirection(notification);
@@ -78,9 +80,9 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public ionViewWillLeave(): void {
-        if (this.backButtonSubscription) {
-            this.backButtonSubscription.unsubscribe();
-            this.backButtonSubscription = undefined;
+        if (this.backButtonListenerHandle) {
+            this.backButtonListenerHandle.remove();
+            this.backButtonListenerHandle = undefined;
         }
         if (this.synchronisationSubscription) {
             this.synchronisationSubscription.unsubscribe();
@@ -145,7 +147,7 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
         return $res;
     }
 
-    private async onBackButton(): Promise<void> {
+    private async onBackButton() {
         if (this.exitAlert) {
             this.exitAlert.dismiss();
             this.exitAlert = undefined;
@@ -165,8 +167,7 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                     {
                         text: 'Confirmer',
                         handler: () => {
-                            // TODO WIIS-7970
-                            // navigator['app'].exitApp();
+                            App.exitApp();
                         },
                         cssClass: 'alert-success'
                     }
