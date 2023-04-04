@@ -56,6 +56,8 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
         }
     }> = [];
 
+    private loaded: boolean = false;
+
     public constructor(private navService: NavService,
                        public sqliteService: SqliteService,
                        public apiService: ApiService,
@@ -70,7 +72,7 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
         this.mainHeaderService.emitSubTitle('Etape 3/4');
 
         // if first initialisation
-        if(!this.truckArrivalLines) {
+        if(!this.loaded) {
             this.carrier = this.navService.param('carrier') ?? null;
             this.driver = this.navService.param('driver') ?? null;
             this.truckArrivalUnloadingLocation = this.navService.param('truckArrivalUnloadingLocation') ?? [];
@@ -81,10 +83,9 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
             event: () => this.apiService.requestApi(ApiService.GET_TRUCK_ARRIVALS_LINES_NUMBER, {})
         }).subscribe((truckArrivalLineNumbers) => {
             this.loading = false;
+            this.loaded = true;
             this.truckArrivalLinesNumber = truckArrivalLineNumbers;
-            if(this.truckArrivalLines && this.truckArrivalLines.length === 0) {
-                this.refreshTruckArrivalLinesCards();
-            }
+            this.refreshTruckArrivalLinesCards();
         });
     }
 
@@ -163,7 +164,8 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
                 } else {
                     this.checkIfAlreadyExist(truckArrivalLineNumber);
                 }
-            } else {
+            }
+            else {
                 this.checkIfAlreadyExist(truckArrivalLineNumber);
             }
         }
