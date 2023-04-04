@@ -247,14 +247,14 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                 map(() => ({res, quantity}))
                             ))
                         )
-                        .subscribe(
-                            ({res, quantity}) => {
+                        .subscribe({
+                            next: ({res, quantity}) => {
                                 const article = (
                                     res
                                     && res.success
                                     && res.article
                                 );
-                                if(article && quantity > 0 && article.currentLogisticUnitId) {
+                                if (article && quantity > 0 && article.currentLogisticUnitId) {
                                     this.alertService.show({
                                         message: `L'article ${article.barCode} sera enlevé de l'unité logistique ${article.currentLogisticUnitCode}`,
                                         buttons: [{
@@ -271,14 +271,14 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                     this.processTackingBarCode(barCode, isManualAdd, quantity, article);
                                 }
                             },
-                            () => {
+                            error: () => {
                                 if (loader) {
                                     loader.dismiss();
                                 }
                                 this.barcodeCheckLoading = false;
                                 this.toastService.presentToast('Erreur serveur');
                             }
-                        );
+                        });
                 }
                 else {
                     this.toastService.presentToast('Vous devez être connecté à internet pour effectuer une prise');
