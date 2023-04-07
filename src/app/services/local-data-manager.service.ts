@@ -393,17 +393,17 @@ export class LocalDataManagerService {
                     return needAnotherSynchronise ? this.importData() : of(false);
                 })
             )
-            .subscribe(
-                () => {
+            .subscribe({
+                next: () => {
                     this.translationService.changedTranslations$.next();
                     synchronise$.next({finished: true});
                     synchronise$.complete();
                 },
-                (error) => {
+                error: (error) => {
                     synchronise$.error(error);
                     synchronise$.complete();
                 }
-            );
+            });
 
         return synchronise$;
     }

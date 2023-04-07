@@ -8,7 +8,7 @@ import {mergeMap} from 'rxjs/operators';
 import {LoadingService} from '@app/services/loading.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
-// import {FCM} from 'cordova-plugin-fcm-with-dependecy-updated/ionic/ngx'; // TODO WIIS-7970
+import {NotificationService} from "@app/services/notification.service";
 
 
 @Injectable({
@@ -23,8 +23,8 @@ export class UserService {
     public constructor(private storageService: StorageService,
                        private sqliteService: SqliteService,
                        private loadingService: LoadingService,
+                       private notificationService: NotificationService,
                        private navService: NavService,
-                       // private fcm: FCM,  // TODO WIIS-7970
                        private mainHeaderService: MainHeaderService) {
         this.logoutOnProgress = false;
     }
@@ -35,7 +35,7 @@ export class UserService {
             zip(
                 this.sqliteService.resetDataBase(),
                 this.storageService.clearStorage([StorageKeyEnum.URL_SERVER]),
-                // this.fcm.deleteInstanceId() // TODO WIIS-7970
+                this.notificationService.unsubscribe()
             )
                 .pipe(
                     mergeMap(() => this.navService.setRoot(NavPathEnum.LOGIN, {autoConnect: false})),

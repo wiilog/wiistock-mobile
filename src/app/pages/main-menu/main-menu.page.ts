@@ -1,4 +1,4 @@
-import {Component, NgZone} from '@angular/core';
+import {ChangeDetectorRef, Component, NgZone} from '@angular/core';
 import {MenuConfig} from '@common/components/menu/menu-config';
 import {Observable, Subject, Subscription, zip} from 'rxjs';
 import {mergeMap, map} from 'rxjs/operators';
@@ -10,13 +10,13 @@ import {ToastService} from '@app/services/toast.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {App} from '@capacitor/app';
-// import {ILocalNotification} from '@ionic-native/local-notifications'; // TODO WIIS-7970
-// import {NotificationService} from '@app/services/notification.service'; // TODO WIIS-7970
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {AlertService} from '@app/services/alert.service';
 import {NetworkService} from '@app/services/network.service';
 import {ApiService} from '@app/services/api.service';
 import {PluginListenerHandle} from "@capacitor/core/types/definitions";
+import {NotificationService} from "@app/services/notification.service";
+import {LocalNotificationSchema} from "@capacitor/local-notifications";
 
 
 @Component({
@@ -40,7 +40,7 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
     private notificationSubscription?: Subscription;
 
     private pageIsRedirecting: boolean;
-    // private lastNotificationRedirected: ILocalNotification; // TODO WIIS-7970
+    private lastNotificationRedirected: LocalNotificationSchema;
 
     public constructor(private alertService: AlertService,
                        private apiService: ApiService,
@@ -49,9 +49,10 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                        private localDataManager: LocalDataManagerService,
                        private toastService: ToastService,
                        private networkService: NetworkService,
+                       private changeDetector: ChangeDetectorRef,
                        private platform: Platform,
                        private ngZone: NgZone,
-                       // private notificationService: NotificationService, // TODO WIIS-7970
+                       private notificationService: NotificationService,
                        private navService: NavService) {
         this.loading = true;
         this.displayNotifications = false;
@@ -59,23 +60,21 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public ionViewWillEnter(): void {
-        const notification = this.navService.params();
+        const notification = this.navService.param<LocalNotificationSchema>('notification');
 
         this.synchronise().subscribe(() => {
-            // TODO WIIS-7970
-            // if (notification && this.lastNotificationRedirected !== notification) {
-            //     this.doNotificationRedirection(notification);
-            // }
+            if (notification && this.lastNotificationRedirected !== notification) {
+                this.doNotificationRedirection(notification);
+            }
         });
 
         this.backButtonListenerHandle = App.addListener('backButton', () => {
             this.onBackButton();
         });
 
-        // TODO WIIS-7970
-        // this.notificationSubscription = this.notificationService.$localNotification.subscribe((notification) => {
-        //     this.doSynchronisationAndNotificationRedirection(notification);
-        // });
+        this.notificationSubscription = this.notificationService.notificationTapped$.subscribe((notification) => {
+            this.doSynchronisationAndNotificationRedirection(notification);
+        });
     }
 
     public async ionViewWillLeave() {
@@ -96,6 +95,7 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
         this.networkService.hasNetwork().then((hasNetwork) => {
             if (hasNetwork) {
                 this.loading = true;
+                this.changeDetector.detectChanges();
 
                 this.synchronisationSubscription = this.localDataManager.synchroniseData()
                     .pipe(
@@ -236,55 +236,52 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
         }
     }
 
-    private doSynchronisationAndNotificationRedirection(/* notification: ILocalNotification*/ /* TODO WIIS-7970*/): void {
-        // TODO WIIS-7970
-        // if(notification && !this.synchroniseActionSubscription) {
-        //     this.synchroniseActionSubscription = this.synchronise()
-        //         .subscribe({
-        //             next: () => {
-        //                 this.doNotificationRedirection(notification);
-        //                 this.unsubscribeSynchroniseAction();
-        //             },
-        //             error: () => {
-        //                 this.unsubscribeSynchroniseAction();
-        //             },
-        //             complete: () => {
-        //                 this.unsubscribeSynchroniseAction();
-        //             }
-        //         });
-        // }
+    private doSynchronisationAndNotificationRedirection(notification: LocalNotificationSchema): void {
+        if(notification && !this.synchroniseActionSubscription) {
+            this.synchroniseActionSubscription = this.synchronise()
+                .subscribe({
+                    next: () => {
+                        this.doNotificationRedirection(notification);
+                        this.unsubscribeSynchroniseAction();
+                    },
+                    error: () => {
+                        this.unsubscribeSynchroniseAction();
+                    },
+                    complete: () => {
+                        this.unsubscribeSynchroniseAction();
+                    }
+                });
+        }
     }
 
-    // TODO WIIS-7970
-    /*
-    private doNotificationRedirection(notification: ILocalNotification) {
+    private doNotificationRedirection(notification: LocalNotificationSchema) {
         if (!this.pageIsRedirecting && notification) {
             this.lastNotificationRedirected = notification;
             this.ngZone.run(() => {
-                const {data} = notification;
-                if(data.type === 'transport') {
+                const {extra} = notification;
+                if(extra.type === 'transport') {
                     this.apiService.requestApi(ApiService.FETCH_ROUND, {
-                        params: {request: data.id},
+                        params: {request: extra.id},
                     }).subscribe(round => {
                         this.navService
                             .push(NavPathEnum.TRANSPORT_ROUND_LIST)
                             .pipe(mergeMap(() => this.navService.push(NavPathEnum.TRANSPORT_LIST, {
                                 round,
-                                cancelledTransport: data.id,
+                                cancelledTransport: extra.id,
                             })))
                             .subscribe(() => {
                                 this.pageIsRedirecting = false;
                             });
                     });
                 }
-                else if (data.type === 'round') {
+                else if (extra.type === 'round') {
                     this.navService.push(NavPathEnum.TRANSPORT_ROUND_LIST).subscribe(() => {
                         this.pageIsRedirecting = false;
                     });
                 }
-                else if (data.type === 'dispatch') {
+                else if (extra.type === 'dispatch') {
                     this.pageIsRedirecting = true;
-                    const dispatchId = Number(data.id);
+                    const dispatchId = Number(extra.id);
                     this.storageService.getRight(StorageKeyEnum.FORCE_GROUPED_SIGNATURE).subscribe((forceSignature) => {
                         if (forceSignature) {
                             this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE).subscribe(() => {
@@ -303,9 +300,9 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                         }
                     })
                 }
-                else if (data.type === 'service') {
+                else if (extra.type === 'service') {
                     this.pageIsRedirecting = true;
-                    const handlingId = Number(data.id);
+                    const handlingId = Number(extra.id);
                     this.sqliteService.findOneBy('handling', {id: handlingId}).subscribe((handling) => {
                         if (handling) {
                             this.navService
@@ -323,9 +320,9 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                         }
                     })
                 }
-                else if (data.type === 'transfer') {
+                else if (extra.type === 'transfer') {
                     this.pageIsRedirecting = true;
-                    const transferId = Number(data.id);
+                    const transferId = Number(extra.id);
                     this.sqliteService.findOneBy('transfer_order', {id: transferId}).subscribe((transferOrder) => {
                         if (transferOrder) {
                             this.navService
@@ -343,9 +340,9 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                         }
                     })
                 }
-                else if (data.type === 'preparation') {
+                else if (extra.type === 'preparation') {
                     this.pageIsRedirecting = true;
-                    const preparationId = Number(data.id);
+                    const preparationId = Number(extra.id);
                     this.sqliteService.findOneBy('preparation', {id: preparationId}).subscribe((preparation) => {
                         if (preparation) {
                             this.navService
@@ -363,9 +360,9 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                         }
                     })
                 }
-                else if (data.type === 'delivery') {
+                else if (extra.type === 'delivery') {
                     this.pageIsRedirecting = true;
-                    const deliveryId = Number(data.id);
+                    const deliveryId = Number(extra.id);
                     this.sqliteService.findOneBy('livraison', {id: deliveryId}).subscribe((delivery) => {
                         if (delivery) {
                             this.navService
@@ -383,9 +380,9 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                         }
                     })
                 }
-                else if (data.type === 'collect') {
+                else if (extra.type === 'collect') {
                     this.pageIsRedirecting = true;
-                    const collectId = Number(data.id);
+                    const collectId = Number(extra.id);
                     this.sqliteService.findOneBy('collecte', {id: collectId}).subscribe((collect) => {
                         if (collect) {
                             this.navService
@@ -415,7 +412,7 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
             });
         }
     }
-*/
+
     private unsubscribeNotification(): void {
         if (this.notificationSubscription && !this.notificationSubscription.closed) {
             this.notificationSubscription.unsubscribe();

@@ -8,10 +8,10 @@ import {StorageService} from '@app/services/storage/storage.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
-// import {NotificationService} from '@app/services/notification.service'; // TODO WIIS-7970
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {NetworkService} from '@app/services/network.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {NotificationService} from "@app/services/notification.service";
 
 
 @Component({
@@ -31,14 +31,14 @@ export class ParamsPage implements ViewWillEnter, ViewWillLeave {
                        private loadingService: LoadingService,
                        private sqliteService: SqliteService,
                        private toastService: ToastService,
-                       // private notificationService: NotificationService, // TODO WIIS-7970
+                       private notificationService: NotificationService,
                        private networkService: NetworkService,
                        private navService: NavService) {
         this.URL = '';
     }
 
     public ionViewWillEnter(): void {
-        // this.notificationService.userIsLogged = false; // TODO WIIS-7970
+        this.notificationService.userIsLogged = false;
         this.serverUrlSubscription = this.storageService.getString(StorageKeyEnum.URL_SERVER).subscribe((baseUrl) => {
             this.URL = !baseUrl ? '' : baseUrl;
         });

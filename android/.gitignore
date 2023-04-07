@@ -102,3 +102,5 @@ app/src/main/assets/capacitor.plugins.json
 app/src/main/res/xml/config.xml
 
 app/src/main/AndroidManifest.xml.orig
+
+app/google-services.json

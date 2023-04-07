@@ -12,15 +12,15 @@ import {environment} from '@environments/environment';
 import {credentials} from '@environments/credentials';
 import {ServerImageKeyEnum} from '@app/services/server-image/server-image-key.enum';
 import {ServerImageComponent} from '@common/components/server-image/server-image.component';
-// import {NotificationService} from '@app/services/notification.service'; // TODO WIIS-7970
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
-// import {ILocalNotification} from '@ionic-native/local-notifications'; // TODO WIIS-7970
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {UserService} from '@app/services/user.service';
 import {NetworkService} from '@app/services/network.service';
 import {SplashScreen} from "@capacitor/splash-screen";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
+import {NotificationService} from "@app/services/notification.service";
+import {LocalNotificationSchema} from "@capacitor/local-notifications";
 
 
 @Component({
@@ -44,7 +44,7 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
 
     public apkUrl: string;
 
-    // public tappedNotification: ILocalNotification; // TODO WIIS-7970
+    public tappedNotification: LocalNotificationSchema;
 
     public loggedUser$: Observable<string|null>;
     public pendingDeposits: boolean = false;
@@ -62,14 +62,13 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
                        private apiService: ApiService,
                        private networkService: NetworkService,
                        private router: Router,
-
                        private changeDetector: ChangeDetectorRef,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private sqliteService: SqliteService,
                        private activatedRoute: ActivatedRoute,
                        private appVersionService: AppVersionService,
                        private storageService: StorageService,
-                       // private notificationService: NotificationService, // TODO WIIS-7970
+                       private notificationService: NotificationService,
                        private navService: NavService) {
         this.loading = true;
         this.appVersionInvalid = false;
@@ -95,7 +94,7 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
         this.wantToAutoConnect = this.navService.param('autoConnect') ?? true;
 
         this.barcodeScannerManager.launchDatawedgeScanListener();
-        // this.notificationService.userIsLogged = false; // TODO WIIS-7970
+        this.notificationService.userIsLogged = false;
 
         this.loggedUser$ = this.storageService.getString(StorageKeyEnum.OPERATOR, UserService.MAX_PSEUDO_LENGTH);
 
@@ -154,13 +153,11 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
                 }
             });
 
-        /* TODO WIIS-7970
         this.notificationSubscription = this.notificationService
-            .$localNotification
+            .notificationTapped$
             .subscribe((notification) => {
                 this.tappedNotification = notification;
             });
-*/
     }
 
     public ionViewWillLeave(): void {
@@ -202,18 +199,13 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
                                         tap(() => {
                                             this.loginKey = '';
                                         }),
-                                        /* TODO WIIS-7970
                                         mergeMap(() => this.notificationService.initialize()),
-                                        mergeMap((notificationOptions) => {
+                                        mergeMap(() => {
                                             this.notificationService.userIsLogged = true;
-                                            const {notification} = notificationOptions || {};
                                             return this.navService.setRoot(NavPathEnum.MAIN_MENU, {
-                                                notification: this.tappedNotification || notification
+                                                notification: this.tappedNotification
                                             });
                                         }),
-                                        */
-                                        // TODO WIIS-7970 remove
-                                        mergeMap(() => this.navService.setRoot(NavPathEnum.MAIN_MENU)),
                                         map(() => ({success: true}))
                                     )
                             }

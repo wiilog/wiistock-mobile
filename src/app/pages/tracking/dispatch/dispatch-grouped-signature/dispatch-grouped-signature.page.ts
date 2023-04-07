@@ -123,7 +123,7 @@ export class DispatchGroupedSignaturePage implements ViewWillEnter, ViewWillLeav
             if (this.filters.type) {
                 filtersSQL.push(`typeId = ${this.filters.type.id}`)
             }
-            console.log(filtersSQL);
+
             this.loadingSubscription = this.loadingService.presentLoading()
                 .pipe(
                     tap(loader => loaderElement = loader),
@@ -254,7 +254,6 @@ export class DispatchGroupedSignaturePage implements ViewWillEnter, ViewWillLeav
                 );
             })
             .map((dispatch: Dispatch) => {
-                console.log(dispatch);
                 return {
                     title: {label: 'Statut', value: dispatch.statusLabel},
                     customColor: dispatch.groupedSignatureStatusColor || dispatch.color,
