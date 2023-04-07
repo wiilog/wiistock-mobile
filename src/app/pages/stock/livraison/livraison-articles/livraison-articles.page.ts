@@ -569,28 +569,46 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
         }
     }
 
-    /* TODO WIIS-7970 refaire */
     private getBodyConfig(articles: Array<ArticleLivraison>, notTreatedList: boolean = false) {
         const groupedArticlesByLogisticUnit = articles
-            .reduce((acc, article) => {
-                // @ts-ignore
-                (acc[article['currentLogisticUnitCode']] = acc[article['currentLogisticUnitCode']] || []).push(article);
+            .reduce((acc: {[code:string]: Array<ArticleLivraison>}, article) => {
+                const currentLogisticUnitCode = article.currentLogisticUnitCode;
+                if (currentLogisticUnitCode) {
+                    if (!acc[currentLogisticUnitCode]) {
+                        acc[currentLogisticUnitCode] = [];
+                    }
+
+                    acc[currentLogisticUnitCode].push(article);
+                }
+
                 return acc;
             }, {});
 
-        // @ts-ignore
-        let bodyConfig = [];
-        Object.keys(groupedArticlesByLogisticUnit).map((logisticUnit?: string) => {
-            // @ts-ignore
-            const articles = groupedArticlesByLogisticUnit[logisticUnit];
-
-            if (logisticUnit !== `null`) {
+        const naturesIds = Object.keys(groupedArticlesByLogisticUnit)
+            .filter((logisticUnit) => logisticUnit && logisticUnit !== `null`)
+            .map((logisticUnit: string) => {
+                const articles = groupedArticlesByLogisticUnit[logisticUnit];
                 const firstArticle = articles[0];
+                return firstArticle?.currentLogisticUnitNatureId;
+            })
+            .filter((natureId) => natureId) as Array<string>;
 
-                this.sqliteService.findOneBy(`nature`, {id: firstArticle.currentLogisticUnitNatureId})
-                    .subscribe((nature: Nature) => {
-                        bodyConfig.push({
-                            // @ts-ignore
+        let bodyConfig: any = [];
+
+        (
+            naturesIds.length > 0
+                ? this.sqliteService.findBy('nature', [`id IN (${naturesIds.join(',')})`])
+                : of([])
+        )
+            .subscribe((natures: Array<Nature>) => {
+                bodyConfig = Object.keys(groupedArticlesByLogisticUnit).map((logisticUnit: string) => {
+                    const articles = groupedArticlesByLogisticUnit[logisticUnit] || [];
+
+                    if (logisticUnit !== `null`) {
+                        const firstArticle = articles[0];
+                        const nature = natures.find(({id}) => ((id as unknown as string) == firstArticle.currentLogisticUnitNatureId));
+
+                        return {
                             infos: this.createLogisticUnitInfo(articles, logisticUnit, nature ? nature.label : undefined, firstArticle.currentLogisticUnitLocation),
                             ...nature ? ({
                                 color: nature.color
@@ -619,36 +637,35 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                                     }
                                 }
                             },
-                        })
-                    });
-            } else {
-                // @ts-ignore
-                articles.forEach((article) => {
-                    bodyConfig.push({
-                        infos: this.createArticleInfo(article),
-                        ...notTreatedList ? ({
-                            rightIcon: {
-                                color: 'grey' as IconColor,
-                                name: 'up.svg',
-                                action: () => {
-                                    this.testIfBarcodeEquals(article, false)
-                                }
-                            },
-                        }) : {
-                            rightIcon: {
-                                name: 'trash.svg',
-                                color: 'danger' as IconColor,
-                                action: () => {
-                                    article.has_moved = 0;
-                                    this.updateList(articles)
-                                }
-                            }
-                        },
-                    })
+                        };
+                    }
+                    else {
+                        return articles.map((article) => ({
+                            infos: this.createArticleInfo(article),
+                            ...notTreatedList
+                                ? ({
+                                    rightIcon: {
+                                        color: 'grey' as IconColor,
+                                        name: 'up.svg',
+                                        action: () => {
+                                            this.testIfBarcodeEquals(article, false)
+                                        }
+                                    },
+                                })
+                                : {
+                                    rightIcon: {
+                                        name: 'trash.svg',
+                                        color: 'danger' as IconColor,
+                                        action: () => {
+                                            article.has_moved = 0;
+                                            this.updateList(articles)
+                                        }
+                                    }
+                                },
+                        }));
+                    }
                 });
-            }
-        });
-// @ts-ignore
+            });
         return bodyConfig;
     }
 
@@ -676,7 +693,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
         }
     }
 
-    private createLogisticUnitInfo(articles: Array<ArticleLivraison>, logisticUnit: string, natureLabel: string|undefined, location: string) {
+    private createLogisticUnitInfo(articles: Array<ArticleLivraison>, logisticUnit: string, natureLabel: string|undefined, location?: string) {
         const articlesCount = articles.length;
 
         return {

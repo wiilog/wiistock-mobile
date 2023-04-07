@@ -23,6 +23,7 @@ import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode
 import {Nature} from "@entities/nature";
 import {LoadingService} from "@app/services/loading.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {ArticleLivraison} from "@entities/article-livraison";
 
 
 @Component({
@@ -678,29 +679,48 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
 
     private getBodyConfig(articles: Array<ArticlePrepa>, notTreatedList: boolean = false) {
         const groupedArticlesByLogisticUnit = articles
-            .reduce((acc, article) => {
-                // @ts-ignore
-                (acc[article['lineLogisticUnitCode']] = acc[article['lineLogisticUnitCode']] || []).push(article);
+            .reduce((acc: {[code:string]: Array<ArticlePrepa>}, article) => {
+                const lineLogisticUnitCode = article.lineLogisticUnitCode;
+                if (lineLogisticUnitCode) {
+                    if (!acc[lineLogisticUnitCode]) {
+                        acc[lineLogisticUnitCode] = [];
+                    }
+
+                    acc[lineLogisticUnitCode].push(article);
+                }
+
                 return acc;
             }, {});
 
-        // @ts-ignore
-        let bodyConfig = [];
-        Object.keys(groupedArticlesByLogisticUnit).map((logisticUnit?: string) => {
-            // @ts-ignore
-            const articles = groupedArticlesByLogisticUnit[logisticUnit];
-
-            if (logisticUnit !== `null`) {
+        const naturesIds = Object.keys(groupedArticlesByLogisticUnit)
+            .filter((logisticUnit) => logisticUnit && logisticUnit !== `null`)
+            .map((logisticUnit: string) => {
+                const articles = groupedArticlesByLogisticUnit[logisticUnit];
                 const firstArticle = articles[0];
+                return firstArticle?.lineLogisticUnitNatureId;
+            })
+            .filter((natureId) => natureId) as Array<string>;
 
-                this.sqliteService.findOneBy(`nature`, {id: firstArticle.lineLogisticUnitNatureId})
-                    .subscribe((nature: Nature) => {
-                        bodyConfig.push({
-                            // @ts-ignore
+        let bodyConfig: any = [];
+
+        (
+            naturesIds.length > 0
+                ? this.sqliteService.findBy('nature', [`id IN (${naturesIds.join(',')})`])
+                : of([])
+        )
+            .subscribe((natures: Array<Nature>) => {
+                bodyConfig = Object.keys(groupedArticlesByLogisticUnit).map((logisticUnit: string) => {
+                    const articles = groupedArticlesByLogisticUnit[logisticUnit] || [];
+
+                    if (logisticUnit !== `null`) {
+                        const firstArticle = articles[0];
+                        const nature = natures.find(({id}) => ((id as unknown as string) == firstArticle.lineLogisticUnitNatureId));
+
+                        return {
                             infos: this.createLogisticUnitInfo(articles, logisticUnit, nature ? nature.label : undefined, firstArticle.lineLogisticUnitLocation),
-                            ...nature ? ({
-                                color: nature.color
-                            }) : {},
+                            ...nature
+                                ? ({color: nature.color})
+                                : {},
                             ...notTreatedList ? ({
                                 rightIcon: {
                                     color: 'grey' as IconColor,
@@ -713,32 +733,28 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
                                 // @ts-ignore
                                 pressAction: () => this.showLogisticUnitContent(articles, logisticUnit)
                             }) : {},
-                        })
-                    })
-            } else {
-                // @ts-ignore
-                articles.forEach((article) => {
-                    bodyConfig.push({
-                        infos: this.createArticleInfo(article),
-                        ...notTreatedList ? ({
-                            rightIcon: {
-                                color: 'grey' as IconColor,
-                                name: 'up.svg',
-                                action: () => {
-                                    this.testIfBarcodeEquals(article.barcode, false)
-                                }
-                            },
-                        }) : {},
-                    })
+                        };
+                    } else {
+                        return articles.map((article) => ({
+                            infos: this.createArticleInfo(article),
+                            ...notTreatedList ? ({
+                                rightIcon: {
+                                    color: 'grey' as IconColor,
+                                    name: 'up.svg',
+                                    action: () => {
+                                        this.testIfBarcodeEquals(article.barcode as string, false)
+                                    }
+                                },
+                            }) : {},
+                        }));
+                    }
                 });
-            }
-        });
+            });
 
-        // @ts-ignore
         return bodyConfig;
     }
 
-    private createLogisticUnitInfo(articles: Array<ArticlePrepa>, logisticUnit: string, natureLabel: string, location: string) {
+    private createLogisticUnitInfo(articles: Array<ArticlePrepa>, logisticUnit: string, natureLabel?: string, location?: string) {
         const articlesCount = articles.length;
 
         return {
