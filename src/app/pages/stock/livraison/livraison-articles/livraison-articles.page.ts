@@ -571,18 +571,21 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
 
     private getBodyConfig(articles: Array<ArticleLivraison>, notTreatedList: boolean = false) {
         const groupedArticlesByLogisticUnit = articles
-            .reduce((acc: {[code:string]: Array<ArticleLivraison>}, article) => {
+            .reduce((acc: any, article) => {
                 const currentLogisticUnitCode = article.currentLogisticUnitCode;
                 if (currentLogisticUnitCode) {
-                    if (!acc[currentLogisticUnitCode]) {
-                        acc[currentLogisticUnitCode] = [];
+                    if (!acc.logisticUnits[currentLogisticUnitCode]) {
+                        acc.logisticUnits[currentLogisticUnitCode] = [];
                     }
 
-                    acc[currentLogisticUnitCode].push(article);
+                    acc.logisticUnits[currentLogisticUnitCode].push(article);
+                }
+                else {
+                    acc.references.push(article);
                 }
 
                 return acc;
-            }, {});
+            }, {logisticUnits: {}, references: []});
 
         const naturesIds = Object.keys(groupedArticlesByLogisticUnit)
             .filter((logisticUnit) => logisticUnit && logisticUnit !== `null`)
@@ -593,7 +596,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
             })
             .filter((natureId) => natureId) as Array<string>;
 
-        let bodyConfig: any = [];
+        const bodyConfig: any = [];
 
         (
             naturesIds.length > 0
@@ -601,46 +604,10 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                 : of([])
         )
             .subscribe((natures: Array<Nature>) => {
-                bodyConfig = Object.keys(groupedArticlesByLogisticUnit).map((logisticUnit: string) => {
-                    const articles = groupedArticlesByLogisticUnit[logisticUnit] || [];
-
-                    if (logisticUnit !== `null`) {
-                        const firstArticle = articles[0];
-                        const nature = natures.find(({id}) => ((id as unknown as string) == firstArticle.currentLogisticUnitNatureId));
-
-                        return {
-                            infos: this.createLogisticUnitInfo(articles, logisticUnit, nature ? nature.label : undefined, firstArticle.currentLogisticUnitLocation),
-                            ...nature ? ({
-                                color: nature.color
-                            }) : {},
-                            ...notTreatedList ? ({
-                                rightIcon: {
-                                    color: 'grey' as IconColor,
-                                    name: 'up.svg',
-                                    action: () => {
-                                        this.testIfBarcodeEquals(logisticUnit, false)
-                                    }
-                                },
-                                // @ts-ignore
-                                pressAction: () => this.showLogisticUnitContent(articles, logisticUnit)
-                            }) : {
-                                rightIcon: {
-                                    name: 'trash.svg',
-                                    color: 'danger' as IconColor,
-                                    action: () => {
-                                        articles
-                                            // @ts-ignore
-                                            .filter((article) => article.currentLogisticUnitCode === logisticUnit)
-                                            // @ts-ignore
-                                            .forEach((article) => article.has_moved = 0);
-                                        this.updateList(articles)
-                                    }
-                                }
-                            },
-                        };
-                    }
-                    else {
-                        return articles.map((article) => ({
+                // Without logistic units
+                if (groupedArticlesByLogisticUnit.references.length > 0) {
+                    bodyConfig.push(
+                        ...groupedArticlesByLogisticUnit.references.map((article: any) => ({
                             infos: this.createArticleInfo(article),
                             ...notTreatedList
                                 ? ({
@@ -662,9 +629,48 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                                         }
                                     }
                                 },
-                        }));
-                    }
+                        }))
+                    );
+                }
+
+                const currentBodyConfig = Object.keys(groupedArticlesByLogisticUnit).map((logisticUnit: string) => {
+                    const articles = groupedArticlesByLogisticUnit[logisticUnit] || [];
+
+                    const firstArticle = articles[0];
+                    const nature = natures.find(({id}) => ((id as unknown as string) == firstArticle.currentLogisticUnitNatureId));
+
+                    return {
+                        infos: this.createLogisticUnitInfo(articles, logisticUnit, nature ? nature.label : undefined, firstArticle.currentLogisticUnitLocation),
+                        ...nature ? ({color: nature.color}) : {},
+                        ...notTreatedList
+                            ? {
+                                rightIcon: {
+                                    color: 'grey' as IconColor,
+                                    name: 'up.svg',
+                                    action: () => {
+                                        this.testIfBarcodeEquals(logisticUnit, false)
+                                    }
+                                },
+                                pressAction: () => this.showLogisticUnitContent(articles, logisticUnit)
+                            }
+                            : {
+                                rightIcon: {
+                                    name: 'trash.svg',
+                                    color: 'danger' as IconColor,
+                                    action: () => {
+                                        articles
+                                            .filter((article: any) => article.currentLogisticUnitCode === logisticUnit)
+                                            .forEach((article: any) => article.has_moved = 0);
+                                        this.updateList(articles)
+                                    }
+                                }
+                            },
+                    };
                 });
+
+                if (currentBodyConfig.length > 0) {
+                    bodyConfig.push(...currentBodyConfig);
+                }
             });
         return bodyConfig;
     }

@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {BarcodeScannerComponent} from '@common/components/barcode-scanner/barcode-scanner.component';
 import {Preparation} from '@entities/preparation';
 import {ArticlePrepa} from '@entities/article-prepa';
@@ -66,6 +66,7 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
                        private apiService: ApiService,
                        private storageService: StorageService,
                        private loadingService: LoadingService,
+                       private changeDetector: ChangeDetectorRef,
                        private navService: NavService) {
         this.loadingStartPreparation = false;
     }
@@ -407,6 +408,7 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
 
                 this.listToTreatConfig = this.createListToTreatConfig();
                 this.listTreatedConfig = this.createListTreatedConfig();
+                // this.changeDetector
 
                 return of(undefined);
             }));
@@ -679,29 +681,32 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
 
     private getBodyConfig(articles: Array<ArticlePrepa>, notTreatedList: boolean = false) {
         const groupedArticlesByLogisticUnit = articles
-            .reduce((acc: {[code:string]: Array<ArticlePrepa>}, article) => {
+            .reduce((acc: any, article) => {
                 const lineLogisticUnitCode = article.lineLogisticUnitCode;
                 if (lineLogisticUnitCode) {
-                    if (!acc[lineLogisticUnitCode]) {
-                        acc[lineLogisticUnitCode] = [];
+                    if (!acc.logisticUnits[lineLogisticUnitCode]) {
+                        acc.logisticUnits[lineLogisticUnitCode] = [];
                     }
 
-                    acc[lineLogisticUnitCode].push(article);
+                    acc.logisticUnits[lineLogisticUnitCode].push(article);
+                }
+                else {
+                    acc.references.push(article);
                 }
 
                 return acc;
-            }, {});
+            }, {logisticUnits: {}, references: []});
 
-        const naturesIds = Object.keys(groupedArticlesByLogisticUnit)
+        const naturesIds = Object.keys(groupedArticlesByLogisticUnit.logisticUnits)
             .filter((logisticUnit) => logisticUnit && logisticUnit !== `null`)
             .map((logisticUnit: string) => {
-                const articles = groupedArticlesByLogisticUnit[logisticUnit];
+                const articles = groupedArticlesByLogisticUnit.logisticUnits[logisticUnit];
                 const firstArticle = articles[0];
                 return firstArticle?.lineLogisticUnitNatureId;
             })
             .filter((natureId) => natureId) as Array<string>;
 
-        let bodyConfig: any = [];
+        const bodyConfig: any = [];
 
         (
             naturesIds.length > 0
@@ -709,46 +714,54 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
                 : of([])
         )
             .subscribe((natures: Array<Nature>) => {
-                bodyConfig = Object.keys(groupedArticlesByLogisticUnit).map((logisticUnit: string) => {
+                // Without logistic units
+                if (groupedArticlesByLogisticUnit.references.length > 0) {
+                    bodyConfig.push(
+                        ...groupedArticlesByLogisticUnit.references.map((article: any) => ({
+                            infos: this.createArticleInfo(article),
+                            ...notTreatedList
+                                ? ({
+                                    rightIcon: {
+                                        color: 'grey' as IconColor,
+                                        name: 'up.svg',
+                                        action: () => {
+                                            this.testIfBarcodeEquals(article.barcode as string, false)
+                                        }
+                                    },
+                                })
+                                : {},
+                        }))
+                    );
+                }
+
+                // With logistic units
+                const currentBodyConfig = Object.keys(groupedArticlesByLogisticUnit).map((logisticUnit: string) => {
                     const articles = groupedArticlesByLogisticUnit[logisticUnit] || [];
 
-                    if (logisticUnit !== `null`) {
-                        const firstArticle = articles[0];
-                        const nature = natures.find(({id}) => ((id as unknown as string) == firstArticle.lineLogisticUnitNatureId));
+                    const firstArticle = articles[0];
+                    const nature = natures.find(({id}) => ((id as unknown as string) == firstArticle.lineLogisticUnitNatureId));
 
-                        return {
-                            infos: this.createLogisticUnitInfo(articles, logisticUnit, nature ? nature.label : undefined, firstArticle.lineLogisticUnitLocation),
-                            ...nature
-                                ? ({color: nature.color})
-                                : {},
-                            ...notTreatedList ? ({
+                    return {
+                        infos: this.createLogisticUnitInfo(articles, logisticUnit, nature ? nature.label : undefined, firstArticle.lineLogisticUnitLocation),
+                        ...nature ? ({color: nature.color}) : {},
+                        ...notTreatedList
+                            ? ({
                                 rightIcon: {
                                     color: 'grey' as IconColor,
                                     name: 'up.svg',
                                     action: () => {
-                                        // @ts-ignore
                                         this.testIfBarcodeEquals(logisticUnit, false)
                                     }
                                 },
-                                // @ts-ignore
                                 pressAction: () => this.showLogisticUnitContent(articles, logisticUnit)
-                            }) : {},
-                        };
-                    } else {
-                        return articles.map((article) => ({
-                            infos: this.createArticleInfo(article),
-                            ...notTreatedList ? ({
-                                rightIcon: {
-                                    color: 'grey' as IconColor,
-                                    name: 'up.svg',
-                                    action: () => {
-                                        this.testIfBarcodeEquals(article.barcode as string, false)
-                                    }
-                                },
-                            }) : {},
-                        }));
-                    }
+                            })
+                            : {},
+                    };
                 });
+
+                if (currentBodyConfig.length > 0) {
+                    bodyConfig.push(...currentBodyConfig);
+                }
             });
 
         return bodyConfig;
