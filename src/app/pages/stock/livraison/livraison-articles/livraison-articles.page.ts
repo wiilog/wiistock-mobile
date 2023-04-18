@@ -60,6 +60,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
     public skipQuantities: boolean = false;
     public loadingStartLivraison: boolean;
     public displayTargetLocationPicking: boolean = false;
+    public displayReferenceCodeAndScan: boolean;
 
     public constructor(private toastService: ToastService,
                        private sqliteService: SqliteService,
@@ -102,11 +103,13 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                 this.sqliteService.findBy('article_livraison', [`id_livraison = ${this.livraison.id}`]),
                 this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_DELIVERY),
                 this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_QUANTITIES_DELIVERY),
-                this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_TARGET_LOCATION_PICKING)
-            ).subscribe(([articles, skipValidation, skipQuantities, displayTargetLocationPicking]: [Array<ArticleLivraison>, boolean, boolean, boolean]) => {
+                this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_TARGET_LOCATION_PICKING),
+                this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_REFERENCE_CODE_AND_SCAN)
+            ).subscribe(([articles, skipValidation, skipQuantities, displayTargetLocationPicking, displayReferenceCodeAndScan]: [Array<ArticleLivraison>, boolean, boolean, boolean, boolean]) => {
                 this.skipValidation = skipValidation;
                 this.skipQuantities = skipQuantities;
                 this.displayTargetLocationPicking = displayTargetLocationPicking;
+                this.displayReferenceCodeAndScan = displayReferenceCodeAndScan;
                 this.articles = articles;
 
                 this.updateList(articles, true);
@@ -339,9 +342,11 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
 
         const logisticUnit = logisticUnits(this.articlesNT).find((logisticUnit: string) => logisticUnit === text);
 
-        const article = fromText
-            ? this.articlesNT.find((article) => (article.barcode === text))
-            : text;
+        const article = this.displayReferenceCodeAndScan
+            ? this.articlesNT.find((article) => (article.reference === text))
+            : (fromText
+                ? this.articlesNT.find((article) => (article.barcode === text))
+                : text);
 
         if (article && article.currentLogisticUnitId) {
             this.toastService.presentToast(`Cet article est présent dans l'unité logistique <strong>${article.currentLogisticUnitCode}</strong>, vous ne pouvez pas le livrer seul.`);
@@ -377,10 +382,11 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
             } else {
                 const treatedArticleIndex = this.articlesT.findIndex((article) => (article.barcode === text));
                 const treatedLogisticUnitIndex = logisticUnits(this.articlesT).findIndex((logisticUnit: string) => logisticUnit === text);
+                const message = this.displayReferenceCodeAndScan ? 'Le code référence' : "L'objet";
                 if(treatedArticleIndex !== -1 || treatedLogisticUnitIndex !== -1) {
-                    this.toastService.presentToast(`L'objet <strong>${text}</strong> a déjà été scanné.`);
+                    this.toastService.presentToast(`${message} <strong>${text}</strong> a déjà été scanné.`);
                 } else {
-                    this.toastService.presentToast(`L'objet <strong>${text}</strong> n'est pas dans la liste.`);
+                    this.toastService.presentToast(`${message} <strong>${text}</strong> n'est pas dans la liste.`);
                 }
             }
         }
@@ -503,18 +509,18 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
         };
     }
 
-    private createArticleInfo({label, barcode, location, quantity, targetLocationPicking}: ArticleLivraison): { [name: string]: { label: string; value: string; } } {
+    private createArticleInfo({label, barcode, location, quantity, targetLocationPicking, reference}: ArticleLivraison): { [name: string]: { label: string; value: string; } } {
         return {
             label: {
                 label: 'Label',
                 value: label
             },
             ...(
-                barcode
+                barcode && reference
                     ? {
                         barCode: {
-                            label: 'Code barre',
-                            value: barcode
+                            label: this.displayReferenceCodeAndScan ? 'Code reférence' : 'Code barre',
+                            value: this.displayReferenceCodeAndScan ? reference : barcode
                         }
                     }
                     : {}
