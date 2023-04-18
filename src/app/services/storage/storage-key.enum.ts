@@ -24,6 +24,7 @@ export enum StorageKeyEnum {
     PARAMETER_SKIP_VALIDATION_TO_TREAT_TRANSFER = 'skipValidationsToTreatTransfer',
     PARAMETER_DISPLAY_REFERENCES_ON_TRANSFER_CARDS = 'displayReferencesOnTransferCards',
     PARAMETER_DROP_ON_FREE_LOCATION = 'dropOnFreeLocation',
+    PARAMETER_DELIVERY_REQUEST_ALLOWED_DROP_ON_FREE_LOCATION = 'deliveryRequestDropOnFreeLocation',
     PARAMETER_DISPLAY_TARGET_LOCATION_PICKING = 'displayTargetLocationPicking',
     PARAMETER_RFID_PREFIX = 'rfidPrefix',
 

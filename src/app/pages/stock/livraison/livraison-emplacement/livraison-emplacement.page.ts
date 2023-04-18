@@ -43,6 +43,7 @@ export class LivraisonEmplacementPage implements ViewWillEnter, ViewWillLeave{
 
     public resetEmitter$: EventEmitter<void>;
 
+    public dropOnFreeLocation: boolean;
     private validateIsLoading: boolean;
     private validateLivraison: () => void;
 
@@ -64,6 +65,9 @@ export class LivraisonEmplacementPage implements ViewWillEnter, ViewWillLeave{
             this.skipValidation = skipValidation;
             this.validateLivraison = this.navService.param('validateLivraison');
             this.livraison = this.navService.param('livraison');
+            this.storageService.getRight(StorageKeyEnum.PARAMETER_DELIVERY_REQUEST_ALLOWED_DROP_ON_FREE_LOCATION).subscribe((dropOnFreeLocation: boolean) => {
+                this.dropOnFreeLocation = dropOnFreeLocation;
+            });
 
             this.resetEmitter$.emit();
 
@@ -82,7 +86,7 @@ export class LivraisonEmplacementPage implements ViewWillEnter, ViewWillLeave{
     }
 
     public selectLocation(locationToTest: Emplacement): void {
-        if (this.livraison.location === locationToTest.label) {
+        if (this.dropOnFreeLocation || this.livraison.location === locationToTest.label) {
             this.location = locationToTest;
             this.panelHeaderConfig = this.createPanelHeaderConfig();
             if (this.skipValidation) {
