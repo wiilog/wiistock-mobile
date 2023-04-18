@@ -46,6 +46,7 @@ export class AppComponent {
         SplashScreen.show();
         from(this.platform.ready())
             .pipe(
+                mergeMap(() => this.sqliteService.ensureDatabaseOpened()),
                 mergeMap(() => this.sqliteService.resetDataBase()),
                 mergeMap(() => this.serverImageService.loadFromStorage()),
                 mergeMap(() => this.storageService.clearStorage([

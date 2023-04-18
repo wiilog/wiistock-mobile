@@ -633,8 +633,8 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                     );
                 }
 
-                const currentBodyConfig = Object.keys(groupedArticlesByLogisticUnit).map((logisticUnit: string) => {
-                    const articles = groupedArticlesByLogisticUnit[logisticUnit] || [];
+                const currentBodyConfig = Object.keys(groupedArticlesByLogisticUnit.logisticUnits).map((logisticUnit: string) => {
+                    const articles = groupedArticlesByLogisticUnit.logisticUnits[logisticUnit] || [];
 
                     const firstArticle = articles[0];
                     const nature = natures.find(({id}) => ((id as unknown as string) == firstArticle.currentLogisticUnitNatureId));

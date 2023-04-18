@@ -109,7 +109,7 @@ export class SqliteService {
     /**
      * @return TRUE if the connection was opened or has been opened. FALSE if database does not exist
      */
-    private ensureDatabaseOpened(): Observable<boolean> {
+    public ensureDatabaseOpened(): Observable<boolean> {
         return from(this.sqlite.isDBOpen({database: SqliteService.DB_NAME})).pipe(
             catchError(() => of(this.sqlite.createConnection({database: SqliteService.DB_NAME})).pipe(
                 map(() => ({result: false}))
@@ -133,14 +133,13 @@ export class SqliteService {
     }
 
     public execute(statement: string): Observable<{ changes?: number, lastId?: number}> {
-        return this.ensureDatabaseOpened()
+        // we use run instead of execute to retrieve last insert id
+        return from(this.sqlite.run({
+            database: SqliteService.DB_NAME,
+            statement,
+            values: [],
+        }))
             .pipe(
-                // we use run instead of execute to retrieve last insert id
-                mergeMap(() => from(this.sqlite.run({
-                    database: SqliteService.DB_NAME,
-                    statement,
-                    values: [],
-                }))),
                 map((result) => result?.changes || {}),
                 // print queries on SQLite errors
                 tap({
@@ -153,13 +152,12 @@ export class SqliteService {
 
 
     public query<T = any>(query: string): Observable<Array<T>> {
-        return this.ensureDatabaseOpened()
+        return from(this.sqlite.query({
+            database: SqliteService.DB_NAME,
+            statement: query,
+            values: []
+        }))
             .pipe(
-                mergeMap(() => from(this.sqlite.query({
-                    database: SqliteService.DB_NAME,
-                    statement: query,
-                    values: []
-                }))),
                 map((result) => result?.values || []),
                 // print queries on SQLite errors
                 tap({

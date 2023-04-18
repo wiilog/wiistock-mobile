@@ -61,13 +61,15 @@ export class LivraisonEmplacementPage implements ViewWillEnter, ViewWillLeave{
     }
 
     public ionViewWillEnter(): void {
-        this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_DELIVERY).subscribe((skipValidation) => {
+        zip(
+            this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_DELIVERY),
+            this.storageService.getRight(StorageKeyEnum.PARAMETER_DELIVERY_REQUEST_ALLOWED_DROP_ON_FREE_LOCATION)
+        )
+        .subscribe(([skipValidation, dropOnFreeLocation]) => {
             this.skipValidation = skipValidation;
+            this.dropOnFreeLocation = dropOnFreeLocation;
             this.validateLivraison = this.navService.param('validateLivraison');
             this.livraison = this.navService.param('livraison');
-            this.storageService.getRight(StorageKeyEnum.PARAMETER_DELIVERY_REQUEST_ALLOWED_DROP_ON_FREE_LOCATION).subscribe((dropOnFreeLocation: boolean) => {
-                this.dropOnFreeLocation = dropOnFreeLocation;
-            });
 
             this.resetEmitter$.emit();
 
