@@ -1,16 +1,16 @@
 import {Component} from '@angular/core';
 import {Platform} from '@ionic/angular';
 import {ScssHelperService} from '@app/services/scss-helper.service';
-import {from} from 'rxjs';
+import {Observable} from 'rxjs';
 import {NavService} from '@app/services/nav/nav.service';
-import {mergeMap, tap} from 'rxjs/operators';
+import {map, mergeMap, tap} from 'rxjs/operators';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {StorageService} from '@app/services/storage/storage.service';
 import {ServerImageService} from '@app/services/server-image/server-image.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {StatusBar, Style} from "@capacitor/status-bar";
-import {SplashScreen} from "@capacitor/splash-screen";
+import {LoadingService} from "@app/services/loading.service";
 
 @Component({
     selector: 'wii-root',
@@ -26,6 +26,7 @@ export class AppComponent {
     private readonly darkColor?: string;
 
     public constructor(private platform: Platform,
+                       private loadingService: LoadingService,
                        private navService: NavService,
                        private sqliteService: SqliteService,
                        private storageService: StorageService,
@@ -34,7 +35,18 @@ export class AppComponent {
         this.platformReady = false;
         this.primaryColor = this.scssHelper.getVariable('ion-color-primary');
         this.darkColor = this.scssHelper.getVariable('ion-color-dark');
-        this.initializeApp();
+
+        this.platform.ready().then(() => {
+            this.loadingService
+                .presentLoadingWhile({
+                    event: () => this.initializeApp()
+                })
+                .subscribe(() => {
+                    this.platformReady = true;
+                    StatusBar.setStyle({ style: Style.Dark });
+                    this.setStatusBarColor();
+                });
+        });
     }
 
     public onHeaderChange(withHeader: boolean): void {
@@ -42,11 +54,9 @@ export class AppComponent {
         this.setStatusBarColor();
     }
 
-    public initializeApp(): void {
-        SplashScreen.show();
-        from(this.platform.ready())
+    public initializeApp(): Observable<void> {
+        return this.sqliteService.ensureDatabaseOpened()
             .pipe(
-                mergeMap(() => this.sqliteService.ensureDatabaseOpened()),
                 mergeMap(() => this.sqliteService.resetDataBase()),
                 mergeMap(() => this.serverImageService.loadFromStorage()),
                 mergeMap(() => this.storageService.clearStorage([
@@ -56,12 +66,8 @@ export class AppComponent {
                 ])),
                 mergeMap(() => this.serverImageService.saveToStorage()),
                 mergeMap(() => this.navService.setRoot(NavPathEnum.LOGIN)),
-            )
-            .subscribe(() => {
-                this.platformReady = true;
-                StatusBar.setStyle({ style: Style.Dark });
-                this.setStatusBarColor();
-            });
+                map(() => undefined)
+            );
     }
 
     private setStatusBarColor(): void {

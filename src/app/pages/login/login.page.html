@@ -1,6 +1,4 @@
 <div class="page-content">
-    <wii-main-loader [loading]="loading"></wii-main-loader>
-
     <div class="logo-container" *ngIf="!loading">
         <wii-server-image #serverImageLogo
                           alt="Follow GT"
@@ -42,7 +40,7 @@
 </div>
 
 <ng-template #pendingDepositsTemplate>
-    <ng-container *ngIf="pendingDeposits && loggedUser$">
+    <ng-container *ngIf="pendingDropTrackingMovements && loggedUser$">
         <div class="logged-user" *ngIf="loggedUser$|async as loggedUser else userTemplate">
             <div class="logged-user-info">
                 L'utilisateur {{ loggedUser }} doit se reconnecter car il reste des prises en cours
