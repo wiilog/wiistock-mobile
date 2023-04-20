@@ -32,7 +32,7 @@ export class LivraisonArticleTakePage implements ViewWillEnter {
         this.simpleFormConfig = {
             title: 'Confirmation quantité',
             info: [
-                {label: 'Article', value: this.article.reference},
+                {label: 'Article', value: `${this.article.barcode}`},
                 {label: 'Quantité à livrer', value: `${this.article.quantity}`}
             ],
             fields: [

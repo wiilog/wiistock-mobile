@@ -2,6 +2,7 @@ export interface ArticleLivraison {
     id: number|null;
     label: string;
     reference: string;
+    refArticleReference: string;
     quantity: number;
     is_ref: number;
     id_livraison: number;

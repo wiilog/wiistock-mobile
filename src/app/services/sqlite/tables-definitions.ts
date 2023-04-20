@@ -183,6 +183,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
             {column: 'label', value: 'TEXT'},
             {column: 'reference', value: 'TEXT'},
+            {column: 'refArticleReference', value: 'TEXT'},
             {column: 'location', value: 'TEXT'},
             {column: 'barcode', value: 'TEXT'},
             {column: 'quantity', value: 'INTEGER'},
