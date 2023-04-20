@@ -342,7 +342,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
 
         const logisticUnit = logisticUnits(this.articlesNT).find((logisticUnit: string) => logisticUnit === text);
 
-        const article = this.displayReferenceCodeAndScan
+        const article = this.displayReferenceCodeAndScan && fromText
             ? this.articlesNT.find((article) => (article.reference === text))
             : (fromText
                 ? this.articlesNT.find((article) => (article.barcode === text))
