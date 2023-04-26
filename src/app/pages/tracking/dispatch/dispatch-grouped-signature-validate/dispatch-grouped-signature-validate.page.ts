@@ -92,7 +92,7 @@ export class DispatchGroupedSignatureValidatePage implements ViewWillEnter, View
                     this.loadingElement = loader;
                 }),
                 mergeMap(() => zip(
-                    this.sqliteService.findBy('status', this.statusRequestParams)
+                    this.sqliteService.findBy('status', this.statusRequestParams, {displayOrder: 'ASC'})
                 )),
             )
             .subscribe(([statuses]: [Array<any>]) => {
