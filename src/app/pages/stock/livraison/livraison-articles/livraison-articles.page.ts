@@ -193,7 +193,6 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                     id: null,
                     label: article.label,
                     reference: article.reference,
-                    refArticleReference: article.refArticleReference,
                     quantity: Number(quantity),
                     is_ref: article.is_ref,
                     id_livraison: article.id_livraison,
@@ -343,11 +342,10 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
 
         const logisticUnit = logisticUnits(this.articlesNT).find((logisticUnit: string) => logisticUnit === text);
 
-        const article = this.displayReferenceCodeAndScan && fromText
-            ? this.articlesNT.find((article) => (article.refArticleReference === text))
-            : (fromText
-                ? this.articlesNT.find((article) => (article.barcode === text))
-                : text);
+        const articleField = this.displayReferenceCodeAndScan ? 'reference' : 'barcode';
+        const article: ArticleLivraison = fromText
+            ? this.articlesNT.find((article) => (article[articleField] === text))
+            : text;
 
         if (article && article.currentLogisticUnitId) {
             this.toastService.presentToast(`Cet article est présent dans l'unité logistique <strong>${article.currentLogisticUnitCode}</strong>, vous ne pouvez pas le livrer seul.`);
@@ -510,23 +508,16 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
         };
     }
 
-    private createArticleInfo({label, barcode, location, quantity, targetLocationPicking, reference, refArticleReference}: ArticleLivraison): { [name: string]: { label: string; value: string; } } {
-        console.log(refArticleReference);
+    private createArticleInfo({label, barcode, location, quantity, targetLocationPicking, reference}: ArticleLivraison): { [name: string]: { label: string; value: string; } } {
         return {
             label: {
-                label: 'Label',
+                label: 'Libellé',
                 value: label
             },
-            ...(
-                barcode && refArticleReference
-                    ? {
-                        barCode: {
-                            label: this.displayReferenceCodeAndScan ? 'Code reférence' : 'Code barre',
-                            value: this.displayReferenceCodeAndScan ? refArticleReference : barcode
-                        }
-                    }
-                    : {}
-            ),
+            barCode: {
+                label: this.displayReferenceCodeAndScan ? 'Code reférence' : 'Code barre',
+                value: this.displayReferenceCodeAndScan ? reference : barcode
+            },
             ...(
                 location && location !== 'null'
                     ? {
