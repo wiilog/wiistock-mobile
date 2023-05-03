@@ -111,7 +111,7 @@ export class SqliteService {
      */
     public ensureDatabaseOpened(): Observable<boolean> {
         return from(this.sqlite.isDBOpen({database: SqliteService.DB_NAME})).pipe(
-            catchError(() => of(this.sqlite.createConnection({database: SqliteService.DB_NAME})).pipe(
+            catchError(() => from(this.sqlite.createConnection({database: SqliteService.DB_NAME})).pipe(
                 map(() => ({result: false}))
             )),
             mergeMap(({result}) => !result
