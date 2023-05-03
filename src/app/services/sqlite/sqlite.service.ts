@@ -653,7 +653,7 @@ export class SqliteService {
                         !existingDeliveryOrderArticle.some((existing) => (
                             (Number(existing.is_ref) === Number(toInsert.is_ref))
                             && (Number(existing.id_livraison) === Number(toInsert.id_livraison))
-                            && (existing.reference === toInsert.reference)
+                            && (existing.barcode === toInsert.barcode)
                         ))
                     ));
 
