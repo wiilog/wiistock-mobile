@@ -1,5 +1,5 @@
 import {Component, ElementRef, EventEmitter, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
-import {Observable, Subscription} from 'rxjs';
+import {Observable, Subscription, zip} from 'rxjs';
 import {filter, mergeMap, map, take, tap} from 'rxjs/operators';
 import {TitleConfig} from './title-config';
 import {MainHeaderService} from '@app/services/main-header.service';
@@ -87,6 +87,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     private lastRouteNavigated: string;
 
     public titleLabelTranslations: Translations = {};
+    public demandeTranslations: Translations;
+    public ordreTranslations: Translations;
 
     public constructor(private storageService: StorageService,
                        private sqliteService: SqliteService,
@@ -115,6 +117,13 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                 this.titleLabelTranslations = result;
             });
 
+        //var livraisonTrad = TranslationService.Translate(this.translationService.get(null, `Ordre`, `Livraison`).subscribe((result: Translations) => result), `Livraison`);
+
+        this.titlesConfig = [];
+    }
+
+    public initTitlesConfig() {
+        console.log(this.demandeTranslations);
         this.titlesConfig = [
             {pagePath: NavPathEnum.TRACKING_MENU, label: 'Traçabilité'},
             {pagePath: NavPathEnum.DISPATCH_MENU, label: 'Acheminements'},
@@ -147,7 +156,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             },
             {pagePath: NavPathEnum.STOCK_MOVEMENT_MENU, label: 'Transfert manuel'},
             {pagePath: NavPathEnum.PREPARATION_MENU, label: 'Préparation'},
-            {pagePath: NavPathEnum.LIVRAISON_MENU, label: 'Livraison'},
+            {
+                pagePath: NavPathEnum.LIVRAISON_MENU,
+                label: TranslationService.Translate(this.ordreTranslations, 'Livraison')
+            },
             {pagePath: NavPathEnum.MANUAL_DELIVERY, label: 'Livraison manuelle'},
             {pagePath: NavPathEnum.MANUAL_DELIVERY_LOCATION, label: 'Emplacement'},
             {pagePath: NavPathEnum.COLLECTE_MENU, label: 'Collecte'},
@@ -155,7 +167,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.INVENTORY_LOCATIONS_ANOMALIES, label: 'Anomalies'},
             {pagePath: NavPathEnum.DEMANDE_MENU, label: 'Demande'},
             {pagePath: NavPathEnum.HANDLING_MENU, label: 'Service'},
-            {pagePath: NavPathEnum.DEMANDE_LIVRAISON_MENU, label: 'Livraison'},
+            {pagePath: NavPathEnum.DEMANDE_LIVRAISON_MENU, label: TranslationService.Translate(this.demandeTranslations, `Livraison`)},
             {pagePath: NavPathEnum.DISPATCH_WAYBILL, label: 'Lettre de voiture'},
             {pagePath: NavPathEnum.DISPATCH_REQUEST_MENU, label: 'Acheminement'},
             {pagePath: NavPathEnum.DISPATCH_NEW, label: 'Création'},
@@ -178,7 +190,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             },
             {
                 pagePath: NavPathEnum.TRANSPORT_SHOW,
-                label: 'Livraison',
+                label: TranslationService.Translate(this.demandeTranslations, `Livraison`),
                 filter: (params) => (
                     params.transport?.kind === 'delivery'
                 )
@@ -203,6 +215,16 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
     public ngOnInit(): void {
         this.clearSubTitle();
+
+        zip(
+            this.translationService.get(null, `Demande`, `Livraison`),
+            this.translationService.get(null, 'Ordre', 'Livraison')
+        ).subscribe(([demandeTranslations, ordreTranslations]) => {
+            console.log(demandeTranslations);
+            this.demandeTranslations = demandeTranslations;
+            this.ordreTranslations = ordreTranslations;
+            this.initTitlesConfig();
+        });
 
         this.routeStartChangeSubscription = (this.router.events
             .pipe(

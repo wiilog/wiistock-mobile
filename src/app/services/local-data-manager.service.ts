@@ -16,6 +16,7 @@ import {TransferOrder} from '@entities/transfer-order';
 import {AlertService} from '@app/services/alert.service';
 import {TranslationService} from '@app/services/translations.service';
 import {DispatchPack} from '@entities/dispatch-pack';
+import {Translations} from "@entities/translation";
 
 
 type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies' | 'dispatch' | 'transfer' | 'empty_round';
@@ -46,12 +47,19 @@ export class LocalDataManagerService {
 
     private readonly apiProccessConfigs: {[type in Process]: ApiProccessConfig};
 
+    public demandeTranslations: Translations;
+
     public constructor(private sqliteService: SqliteService,
                        private apiService: ApiService,
                        private fileService: FileService,
                        private storageService: StorageService,
                        private alertService: AlertService,
                        private translationService: TranslationService) {
+        this.translationService.get(null, `Demande`, `Livraison`).subscribe((demandeTranslations) => {
+            console.log(demandeTranslations);
+            this.demandeTranslations = demandeTranslations;
+        });
+
         this.apiProccessConfigs = {
             preparation: {
                 service: ApiService.FINISH_PREPA,
@@ -125,7 +133,7 @@ export class LocalDataManagerService {
                             }))
                         )
                 ),
-                titleErrorAlert: `Des livraisons n'ont pas pu être synchronisées`,
+                titleErrorAlert: `Des ` + this.translationService.get(null, `Ordre`, `Livraison`).subscribe((result: Translations) => TranslationService.Translate(result, `Livraison`)) + `s n'ont pas pu être synchronisées`,
                 numeroProccessFailed: 'numero_livraison',
                 deleteSucceed: (resSuccess) => {
                     const idsToDelete = resSuccess.map(({id_livraison}: any) => id_livraison);
@@ -354,7 +362,7 @@ export class LocalDataManagerService {
                     return this.sendFinishedProcess('preparation').pipe(map(Boolean));
                 }),
                 mergeMap((needAnotherSynchronise) => {
-                    synchronise$.next({finished: false, message: 'Envoi des livraisons non synchronisées'});
+                    synchronise$.next({finished: false, message: 'Envoi des ' + TranslationService.Translate(this.demandeTranslations, `Livraison`).toLowerCase() + 's non synchronisées'});
                     return this.sendFinishedProcess('livraison').pipe(map((needAnotherSynchroniseLivraison) => needAnotherSynchronise || Boolean(needAnotherSynchroniseLivraison)));
                 }),
                 mergeMap((needAnotherSynchronise) => {

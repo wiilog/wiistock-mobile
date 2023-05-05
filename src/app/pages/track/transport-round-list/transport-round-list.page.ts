@@ -13,6 +13,8 @@ import {TransportRoundLine} from '@entities/transport-round-line';
 import {AlertService} from '@app/services/alert.service';
 import {MainHeaderService} from '@app/services/main-header.service';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
+import {TranslationService} from "../../../services/translations.service";
+import {Translations} from "../../../../entities/translation";
 
 @Component({
     selector: 'wii-transport-round-list',
@@ -27,6 +29,8 @@ export class TransportRoundListPage implements ViewWillEnter {
 
     public loading: boolean;
 
+    private demandeTranslations: Translations;
+
     public constructor(private navService: NavService,
                        private mainHeaderService: MainHeaderService,
                        private apiService: ApiService,
@@ -34,11 +38,17 @@ export class TransportRoundListPage implements ViewWillEnter {
                        private loadingService: LoadingService,
                        private toastService: ToastService,
                        private networkService: NetworkService,
-                       private alertService: AlertService) {
+                       private alertService: AlertService,
+                       private translationService: TranslationService) {
     }
 
     public ionViewWillEnter(): void {
         moment.locale('fr');
+
+        this.translationService.get(null, `Demande`, `Livraison`).subscribe((demandeTranslations) => {
+            this.demandeTranslations = demandeTranslations;
+        });
+
         this.synchronise();
     }
 
@@ -296,7 +306,7 @@ export class TransportRoundListPage implements ViewWillEnter {
             this.alertService.show({
                 header: `Attention`,
                 cssClass: `warning`,
-                message: `Des livraisons ne sont pas encore préparées. Elles seront exclues de cette tournée si vous confirmez son début.`,
+                message: `Des ` + TranslationService.Translate(this.demandeTranslations, `Livraison`).toLowerCase() + `s ne sont pas encore préparées. Elles seront exclues de cette tournée si vous confirmez son début.`,
                 buttons: [
                     {
                         text: 'Annuler',

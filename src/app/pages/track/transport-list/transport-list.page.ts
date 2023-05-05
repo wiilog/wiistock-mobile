@@ -11,6 +11,8 @@ import {TransportRoundLine} from '@entities/transport-round-line';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {AlertService} from '@app/services/alert.service';
 import {TransportService} from '@app/services/transport.service';
+import {TranslationService} from "../../../services/translations.service";
+import {Translations} from "../../../../entities/translation";
 
 @Component({
     selector: 'wii-transport-list',
@@ -34,15 +36,22 @@ export class TransportListPage implements ViewWillEnter {
 
     private warningShown: boolean = false;
 
+    private demandeTranslations: Translations;
+
     public constructor(private navService: NavService,
                        private alertService: AlertService,
                        private transportService: TransportService,
-                       private formatService: FormatService) {
+                       private formatService: FormatService,
+                       private translationService: TranslationService) {
     }
 
     public ionViewWillEnter(): void {
         this.mode = this.navService.param('mode');
         this.round = this.navService.param('round');
+
+        this.translationService.get(null, `Demande`, `Livraison`).subscribe((demandeTranslations) => {
+            this.demandeTranslations = demandeTranslations;
+        });
 
         const cancelledTransport = this.navService.param('cancelledTransport');
         if(cancelledTransport && !this.warningShown) {
@@ -52,7 +61,7 @@ export class TransportListPage implements ViewWillEnter {
                 header: `Attention`,
                 cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
                 message: `Le prochain point de passage a été annulé. Veuillez ne pas vous y rendre. ` +
-                    `Pensez à retourner les colis à la fin de la tournée s'il s'agit d'une livraison.`,
+                    `Pensez à retourner les colis à la fin de la tournée s'il s'agit d'une ` + TranslationService.Translate(this.demandeTranslations, `Livraison`).toLowerCase() + `.`,
                 buttons: [{
                     text: 'OK',
                     cssClass: 'alert-success',
