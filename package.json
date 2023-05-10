@@ -26,7 +26,7 @@
         "@angular/router": "^15.0.0",
         "@capacitor-community/date-picker": "^0.2.3",
         "@capacitor-community/fcm": "^3.0.2",
-        "@capacitor-community/sqlite": "^4.6.1-2",
+        "@capacitor-community/sqlite": "^4.8.0-0",
         "@capacitor/android": "4.6.2",
         "@capacitor/app": "4.1.1",
         "@capacitor/browser": "^4.1.1",
