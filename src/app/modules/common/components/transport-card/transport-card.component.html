@@ -7,7 +7,7 @@
             <div class="transport-kind">
                 <div *ngIf="transport.kind === 'delivery'">
                     <wii-icon class="button-icon" name="delivery-truck.svg" color="black"></wii-icon>
-                    <span>Livraison</span>
+                    <span>{{ livraisonTrad }}</span>
                 </div>
                 <div *ngIf="transport.kind === 'collect' || transport.collect">
                     <wii-icon class="button-icon" name="collect-hand.svg" color="black"></wii-icon>

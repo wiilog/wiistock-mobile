@@ -31,6 +31,8 @@ export class TransportRoundListPage implements ViewWillEnter {
 
     private demandeTranslations: Translations;
 
+    public livraisonTrad: string;
+
     public constructor(private navService: NavService,
                        private mainHeaderService: MainHeaderService,
                        private apiService: ApiService,
@@ -47,6 +49,7 @@ export class TransportRoundListPage implements ViewWillEnter {
 
         this.translationService.get(null, `Demande`, `Livraison`).subscribe((demandeTranslations) => {
             this.demandeTranslations = demandeTranslations;
+            this.livraisonTrad = TranslationService.Translate(demandeTranslations, 'Livraison');
         });
 
         this.synchronise();

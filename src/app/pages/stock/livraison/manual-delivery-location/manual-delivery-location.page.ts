@@ -15,6 +15,7 @@ import {NetworkService} from '@app/services/network.service';
 import {ApiService} from "@app/services/api.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
+import {TranslationService} from "@app/services/translations.service";
 
 @Component({
     selector: 'wii-livraison-emplacement',
@@ -51,6 +52,8 @@ export class ManualDeliveryLocationPage implements ViewWillEnter, ViewWillLeave 
 
     public skipValidation: boolean = false;
 
+    public livraisonTrad: string;
+
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
                        private api: ApiService,
@@ -58,9 +61,15 @@ export class ManualDeliveryLocationPage implements ViewWillEnter, ViewWillLeave 
                        private localDataManager: LocalDataManagerService,
                        private loadingService: LoadingService,
                        private storageService: StorageService,
-                       private navService: NavService) {
+                       private navService: NavService,
+                       private translationService: TranslationService) {
         this.validateIsLoading = false;
         this.resetEmitter$ = new EventEmitter();
+
+        this.translationService.get(null, `Demande`, `Livraison`).subscribe((result) => {
+            console.log(result);
+            this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
+        });
     }
 
     public ionViewWillEnter(): void {
@@ -99,7 +108,7 @@ export class ManualDeliveryLocationPage implements ViewWillEnter, ViewWillLeave 
                 if (this.location && this.location.label) {
                     this.loadingService.presentLoadingWhile(
                         {
-                            message: 'Envoi de la livraison en cours...',
+                            message: 'Envoi de la ' + this.livraisonTrad.toLowerCase() + ' en cours...',
                             event: () => {
                                 this.validateIsLoading = true;
                                 return this.api
@@ -133,7 +142,7 @@ export class ManualDeliveryLocationPage implements ViewWillEnter, ViewWillLeave 
     }
 
     private handleLivraisonSuccess(): void {
-        this.toastService.presentToast('Livraison directe enregistrée avec succès');
+        this.toastService.presentToast(this.livraisonTrad + ' directe enregistrée avec succès');
         this.closeScreen();
     }
 

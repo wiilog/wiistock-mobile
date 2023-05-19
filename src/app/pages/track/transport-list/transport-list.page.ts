@@ -38,6 +38,8 @@ export class TransportListPage implements ViewWillEnter {
 
     private demandeTranslations: Translations;
 
+    public livraisonTrad: string;
+
     public constructor(private navService: NavService,
                        private alertService: AlertService,
                        private transportService: TransportService,
@@ -51,6 +53,7 @@ export class TransportListPage implements ViewWillEnter {
 
         this.translationService.get(null, `Demande`, `Livraison`).subscribe((demandeTranslations) => {
             this.demandeTranslations = demandeTranslations;
+            this.livraisonTrad = TranslationService.Translate(demandeTranslations, 'Livraison');
         });
 
         const cancelledTransport = this.navService.param('cancelledTransport');
@@ -61,7 +64,7 @@ export class TransportListPage implements ViewWillEnter {
                 header: `Attention`,
                 cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
                 message: `Le prochain point de passage a été annulé. Veuillez ne pas vous y rendre. ` +
-                    `Pensez à retourner les colis à la fin de la tournée s'il s'agit d'une ` + TranslationService.Translate(this.demandeTranslations, `Livraison`).toLowerCase() + `.`,
+                    `Pensez à retourner les colis à la fin de la tournée s'il s'agit d'une ` + this.livraisonTrad.toLowerCase() + `.`,
                 buttons: [{
                     text: 'OK',
                     cssClass: 'alert-success',

@@ -23,6 +23,7 @@ import {AlertService} from "@app/services/alert.service";
 import {Nature} from "@entities/nature";
 import {LoadingService} from "@app/services/loading.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {TranslationService} from "@app/services/translations.service";
 
 
 @Component({
@@ -62,6 +63,8 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
     public displayTargetLocationPicking: boolean = false;
     public displayReferenceCodeAndScan: boolean;
 
+    public livraisonTrad: string;
+
     public constructor(private toastService: ToastService,
                        private sqliteService: SqliteService,
                        private networkService: NetworkService,
@@ -69,16 +72,21 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                        private storageService: StorageService,
                        private alertService: AlertService,
                        private navService: NavService,
-                       private loadingService: LoadingService) {
+                       private loadingService: LoadingService,
+                       private translationService: TranslationService) {
         this.loadingStartLivraison = false;
     }
 
     public ionViewWillEnter(): void {
         this.livraison = this.navService.param('livraison');
+        this.translationService.get(null, `Demande`, `Livraison`).subscribe((result) => {
+            console.warn(result);
+            this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
+        });
 
         this.livraisonsHeaderConfig = {
             leftIcon: {name: 'delivery.svg'},
-            title: `Livraison ${this.livraison.number}`,
+            title: `${this.livraisonTrad} ${this.livraison.number}`,
             subtitle: [
                 `Destination : ${this.livraison.location}`,
                 ...(this.livraison.comment ? [`Commentaire : ${this.livraison.comment}`] : [])
@@ -146,7 +154,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                                     ).pipe(
                                         mergeMap(() => this.sqliteService.findBy('article_livraison', [`id_livraison = ${this.livraison.id}`])),
                                         tap((articles) => this.updateList(articles)),
-                                        map(() => `Livraison commencée.`))
+                                        map(() => this.livraisonTrad + ` commencée.`))
                                 } else {
                                     this.isValid = false;
                                     this.loadingStartLivraison = false;
@@ -159,7 +167,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
             });
         } else {
             if (!this.networkService.hasNetwork()) {
-                this.toastService.presentToast('Livraison commencée en mode hors ligne.');
+                this.toastService.presentToast(this.livraisonTrad + ' commencée en mode hors ligne.');
             }
 
             this.loadingService.presentLoadingWhile({
@@ -175,7 +183,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public refreshOver(): void {
-        this.toastService.presentToast('Livraison prête à être finalisée.').subscribe(() => {
+        this.toastService.presentToast(this.livraisonTrad + ' prête à être finalisée.').subscribe(() => {
             if (this.skipValidation) {
                 this.validate();
             }
@@ -398,7 +406,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                 if (resp.success) {
                     this.started = true;
                     this.isValid = true;
-                    this.toastService.presentToast('Livraison commencée.');
+                    this.toastService.presentToast(this.livraisonTrad + ' commencée.');
                     this.selectArticle(this.articlesNT);
                 } else {
                     this.isValid = false;

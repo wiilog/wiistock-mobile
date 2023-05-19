@@ -48,6 +48,7 @@ export class LocalDataManagerService {
     private readonly apiProccessConfigs: {[type in Process]: ApiProccessConfig};
 
     public demandeTranslations: Translations;
+    public ordreTranslations: Translations;
 
     public constructor(private sqliteService: SqliteService,
                        private apiService: ApiService,
@@ -55,9 +56,13 @@ export class LocalDataManagerService {
                        private storageService: StorageService,
                        private alertService: AlertService,
                        private translationService: TranslationService) {
-        this.translationService.get(null, `Demande`, `Livraison`).subscribe((demandeTranslations) => {
+        zip(
+            this.translationService.get(null, `Demande`, `Livraison`),
+            this.translationService.get(null, `Ordre`, `Livraison`)
+        ).subscribe(([demandeTranslations, ordreTranslations]) => {
             console.log(demandeTranslations);
             this.demandeTranslations = demandeTranslations;
+            this.ordreTranslations = ordreTranslations;
         });
 
         this.apiProccessConfigs = {
@@ -133,7 +138,7 @@ export class LocalDataManagerService {
                             }))
                         )
                 ),
-                titleErrorAlert: `Des ` + this.translationService.get(null, `Ordre`, `Livraison`).subscribe((result: Translations) => TranslationService.Translate(result, `Livraison`)) + `s n'ont pas pu être synchronisées`,
+                titleErrorAlert: `Des ` + TranslationService.Translate(this.ordreTranslations, `Livraison`) + `s n'ont pas pu être synchronisées`,
                 numeroProccessFailed: 'numero_livraison',
                 deleteSucceed: (resSuccess) => {
                     const idsToDelete = resSuccess.map(({id_livraison}: any) => id_livraison);
@@ -590,7 +595,7 @@ export class LocalDataManagerService {
             // send all demande to API
             mergeMap((data: Array<{apiData: DemandeForApi, demande: DemandeLivraison}>) => {
                 if (!data || data.length === 0) {
-                    throw {success: false, message: 'Aucune demande de livraison à synchroniser'};
+                    throw {success: false, message: 'Aucune ' + TranslationService.Translate(this.demandeTranslations, `Demande de livraison`).toLowerCase() + ' à synchroniser'};
                 }
                 return this.requestApiForDeliveryRequests(data);
             }),

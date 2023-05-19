@@ -14,6 +14,7 @@ import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {map} from 'rxjs/operators';
 import {NetworkService} from '@app/services/network.service';
 import {LoadingService} from "@app/services/loading.service";
+import {TranslationService} from "@app/services/translations.service";
 
 @Component({
     selector: 'wii-stock-menu',
@@ -34,6 +35,8 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
     private navigationSubscription?: Subscription;
     private deposeAlreadyNavigate: boolean;
 
+    public livraisonTrad: string;
+
     public constructor(private platform: Platform,
                        private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
@@ -42,7 +45,13 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                        private storageService: StorageService,
                        private loadingService: LoadingService,
                        private sqliteService: SqliteService,
-                       private navService: NavService) {
+                       private navService: NavService,
+                       private translationService: TranslationService) {
+        this.translationService.get(null, `Demande`, `Livraison`).subscribe((result) => {
+            console.log(result);
+            this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
+        });
+
         this.avoidSync = true;
         const self = this;
         this.loadingService.presentLoadingWhile({
@@ -60,14 +69,14 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                 },
                 {
                     icon: 'delivery.svg',
-                    label: 'Livraison',
+                    label: this.livraisonTrad,
                     action: () => {
                         self.navService.push(NavPathEnum.LIVRAISON_MENU);
                     }
                 },
                 {
                     icon: 'manual-delivery.svg',
-                    label: 'Livraison<br/>manuelle',
+                    label: this.livraisonTrad + '<br/>manuelle',
                     action: () => {
                         self.navService.push(NavPathEnum.MANUAL_DELIVERY);
                     }
@@ -259,7 +268,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                 {label: `Transfert${sToTreat.transfers} à traiter`, counter: transfers.toTreat},
                 {label: `Préparation${sToTreat.preparations} à traiter`, counter: preparations.toTreat},
                 {label: `Collecte${sToTreat.collects} à traiter`, counter: collects.toTreat},
-                {label: `Livraison${sToTreat.deliveries} à traiter`, counter: deliveries.toTreat},
+                {label: this.livraisonTrad + `${sToTreat.deliveries} à traiter`, counter: deliveries.toTreat},
             ],
             [
                 {
@@ -275,7 +284,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                     counter: collects.treated
                 },
                 {
-                    label: `Livraison${sTreated.deliveries} traitée${sTreated.deliveries}`,
+                    label: this.livraisonTrad + `${sTreated.deliveries} traitée${sTreated.deliveries}`,
                     counter: deliveries.treated
                 },
             ],

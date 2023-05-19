@@ -8,7 +8,7 @@
     <wii-leaflet-map *ngIf="mapVisible" [markers]="markers"></wii-leaflet-map>
 
     <span *ngIf="round.status === 'En attente livreur'" class="transports-count">
-        {{ round.ready_deliveries }}/{{ round.total_ready_deliveries }} livraison{{ round.ready_deliveries > 1 ? 's' : '' }} prête{{ round.ready_deliveries > 1 ? 's' : '' }}
+        {{ round.ready_deliveries }}/{{ round.total_ready_deliveries }} {{ livraisonTrad.toLowerCase() }}{{ round.ready_deliveries > 1 ? 's' : '' }} prête{{ round.ready_deliveries > 1 ? 's' : '' }}
     </span>
 
     <span *ngIf="round.status === 'En cours'" class="transports-count">

@@ -2,6 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {SimpleCardTitle} from '@common/components/simple-card/simple-card.component';
 import {Platform} from '@ionic/angular';
+import {TranslationService} from "@app/services/translations.service";
 
 export enum TransportCardMode {
     VIEW,
@@ -27,10 +28,18 @@ export class TransportCardComponent implements OnInit {
 
     public notRejectedPacks: number;
 
-    public constructor(private platform: Platform) {}
+    public livraisonTrad: string;
+
+    public constructor(private platform: Platform,
+                       private translationService: TranslationService) {}
 
     public ngOnInit(): void {
         this.notRejectedPacks = this.transport.packs.filter(pack => !pack.rejected).length;
+
+        this.translationService.get(null, `Demande`, `Livraison`).subscribe((result) => {
+            console.log(result);
+            this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
+        });
 
         this.titles.push({
             title: `${this.transport.priority}. ${this.transport.contact.name}`,

@@ -12,6 +12,7 @@ import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {StorageService} from '@app/services/storage/storage.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {NetworkService} from '@app/services/network.service';
+import {TranslationService} from "@app/services/translations.service";
 
 
 @Component({
@@ -31,6 +32,8 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
     private synchronisationSubscription?: Subscription;
     private navigationSubscription?: Subscription;
 
+    public livraisonTrad: string;
+
     public constructor(private platform: Platform,
                        private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
@@ -38,9 +41,15 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
                        private toastService: ToastService,
                        private storageService: StorageService,
                        private sqliteService: SqliteService,
-                       private navService: NavService) {
+                       private navService: NavService,
+                       private translationService: TranslationService) {
         this.avoidSync = true;
         const self = this;
+
+        this.translationService.get(null, `Demande`, `Livraison`).subscribe((demandeTranslations) => {
+            this.livraisonTrad = TranslationService.Translate(demandeTranslations, 'Livraison');
+        });
+
         this.menuConfig = [
             {
                 icon: 'people.svg',
@@ -52,7 +61,7 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
             {
                 icon: 'demande.svg',
                 iconColor: 'list-yellow',
-                label: 'Livraison',
+                label: this.livraisonTrad,
                 action: () => {
                     self.navService.push(NavPathEnum.DEMANDE_LIVRAISON_MENU);
                 }

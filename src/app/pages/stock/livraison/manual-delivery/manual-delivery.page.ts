@@ -32,6 +32,7 @@ import {
     FormPanelCalendarMode
 } from "@common/components/panel/form-panel/form-panel-calendar/form-panel-calendar-mode";
 import {mergeMap} from "rxjs/operators";
+import {TranslationService} from "@app/services/translations.service";
 
 
 @Component({
@@ -83,6 +84,8 @@ export class ManualDeliveryPage implements ViewWillLeave {
         needsExpectedAt: false
     };
 
+    public livraisonTrad: string;
+
     public constructor(private toastService: ToastService,
                        private sqliteService: SqliteService,
                        private networkService: NetworkService,
@@ -91,7 +94,12 @@ export class ManualDeliveryPage implements ViewWillLeave {
                        private localDataManagerService: LocalDataManagerService,
                        private loadingService: LoadingService,
                        private alertService: AlertService,
-                       private navService: NavService) {
+                       private navService: NavService,
+                       private translationService: TranslationService) {
+        this.translationService.get(null, `Demande`, `Livraison`).subscribe((result) => {
+            console.log(result);
+            this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
+        });
     }
 
     public ngOnInit() {
@@ -272,7 +280,7 @@ export class ManualDeliveryPage implements ViewWillLeave {
                     this.toastService.presentToast(`Vous ne pouvez pas ajouter de référence`);
                 }
             } else {
-                this.toastService.presentToast(`L'article n'existe pas ou n'est pas disponible pour être mis dans une livraison`);
+                this.toastService.presentToast(`L'article n'existe pas ou n'est pas disponible pour être mis dans une ` + this.livraisonTrad.toLowerCase());
             }
         });
     }

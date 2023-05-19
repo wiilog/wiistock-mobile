@@ -17,6 +17,7 @@ import {StorageService} from '@app/services/storage/storage.service';
 import {LoadingService} from "@app/services/loading.service";
 import {NetworkService} from '@app/services/network.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {TranslationService} from "@app/services/translations.service";
 
 @Component({
     selector: 'wii-livraison-emplacement',
@@ -49,15 +50,22 @@ export class LivraisonEmplacementPage implements ViewWillEnter, ViewWillLeave{
 
     public skipValidation: boolean = false;
 
+    public livraisonTrad: string;
+
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
                        private networkService: NetworkService,
                        private localDataManager: LocalDataManagerService,
                        private loadingService: LoadingService,
                        private storageService: StorageService,
-                       private navService: NavService) {
+                       private navService: NavService,
+                       private translationService: TranslationService) {
         this.validateIsLoading = false;
         this.resetEmitter$ = new EventEmitter<void>();
+
+        this.translationService.get(null, `Demande`, `Livraison`).subscribe((demandeTranslations) => {
+            this.livraisonTrad = TranslationService.Translate(demandeTranslations, 'Livraison');
+        });
     }
 
     public ionViewWillEnter(): void {
@@ -105,7 +113,7 @@ export class LivraisonEmplacementPage implements ViewWillEnter, ViewWillLeave{
             if (this.location && this.location.label) {
                 this.loadingService.presentLoadingWhile(
                     {
-                        message: 'Envoi de la livraison en cours...',
+                        message: 'Envoi de la ' + this.livraisonTrad + ' en cours...',
                         event: () => {
                             this.validateIsLoading = true;
                             return this.sqliteService
@@ -145,7 +153,7 @@ export class LivraisonEmplacementPage implements ViewWillEnter, ViewWillLeave{
                 ).subscribe(
                     ({offline, success}: any) => {
                         if (offline) {
-                            this.toastService.presentToast('Livraison sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+                            this.toastService.presentToast(this.livraisonTrad + ' sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
                             this.closeScreen();
                         } else {
                             this.handleLivraisonSuccess(success.length);
@@ -168,8 +176,8 @@ export class LivraisonEmplacementPage implements ViewWillEnter, ViewWillLeave{
         if (nbLivraisonsSucceed > 0) {
             this.toastService.presentToast(
                 (nbLivraisonsSucceed === 1
-                    ? 'Votre livraison a bien été enregistrée'
-                    : `Votre livraison et ${nbLivraisonsSucceed - 1} livraison${nbLivraisonsSucceed - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
+                    ? 'Votre ' + this.livraisonTrad.toLowerCase() + ' a bien été enregistrée'
+                    : `Votre ` + this.livraisonTrad.toLowerCase() + ` et ${nbLivraisonsSucceed - 1} ` + this.livraisonTrad.toLowerCase() + `${nbLivraisonsSucceed - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
             );
         }
         this.closeScreen();

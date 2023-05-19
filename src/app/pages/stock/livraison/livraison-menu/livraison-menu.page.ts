@@ -14,6 +14,7 @@ import {LoadingService} from '@app/services/loading.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import * as moment from "moment";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {TranslationService} from "@app/services/translations.service";
 
 
 @Component({
@@ -44,13 +45,21 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
 
     private loadingSubscription?: Subscription;
 
+    public livraisonTrad: string;
+
     public constructor(private mainHeaderService: MainHeaderService,
                        private sqliteService: SqliteService,
                        private loadingService: LoadingService,
-                       private navService: NavService) {
+                       private navService: NavService,
+                       private translationService: TranslationService) {
         this.resetEmitter$ = new EventEmitter();
         this.locationFilterRequestParams = [];
         this.firstLaunch = true;
+
+        this.translationService.get(null, `Demande`, `Livraison`).subscribe((result) => {
+            console.warn(result);
+            this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
+        });
     }
 
     public ionViewWillEnter(): void {
@@ -106,7 +115,7 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
 
     public refreshSubTitle(deliveryOrders: Array<Livraison>): void {
         const deliveryOrdersLength = deliveryOrders.length;
-        this.mainHeaderService.emitSubTitle(`${deliveryOrdersLength === 0 ? 'Aucune' : deliveryOrdersLength} livraison${deliveryOrdersLength > 1 ? 's' : ''}`)
+        this.mainHeaderService.emitSubTitle(`${deliveryOrdersLength === 0 ? 'Aucune' : deliveryOrdersLength} ${this.livraisonTrad.toLowerCase()}${deliveryOrdersLength > 1 ? 's' : ''}`)
     }
 
     public ionViewWillLeave(): void {

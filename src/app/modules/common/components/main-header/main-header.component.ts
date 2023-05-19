@@ -114,10 +114,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                 mergeMap(() => this.translationService.get())
             )
             .subscribe((result: Translations) => {
+                console.warn(result);
+                //throw Error();
                 this.titleLabelTranslations = result;
             });
-
-        //var livraisonTrad = TranslationService.Translate(this.translationService.get(null, `Ordre`, `Livraison`).subscribe((result: Translations) => result), `Livraison`);
 
         this.titlesConfig = [];
     }
@@ -220,7 +220,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             this.translationService.get(null, `Demande`, `Livraison`),
             this.translationService.get(null, 'Ordre', 'Livraison')
         ).subscribe(([demandeTranslations, ordreTranslations]) => {
-            console.log(demandeTranslations);
+            console.warn(demandeTranslations, ordreTranslations);
             this.demandeTranslations = demandeTranslations;
             this.ordreTranslations = ordreTranslations;
             this.initTitlesConfig();

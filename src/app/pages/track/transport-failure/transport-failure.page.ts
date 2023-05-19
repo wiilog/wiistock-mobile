@@ -22,6 +22,7 @@ import {mergeMap, map} from 'rxjs/operators';
 import {TransportService} from '@app/services/transport.service';
 import {TransportRound} from "@entities/transport-round";
 import {ViewWillEnter} from "@ionic/angular";
+import {TranslationService} from "../../../services/translations.service";
 
 @Component({
     selector: 'wii-transport-failure',
@@ -44,12 +45,18 @@ export class TransportFailurePage implements ViewWillEnter {
 
     public edit: boolean = false;
 
+    public livraisonTrad: string;
+
     constructor(private apiService: ApiService,
                 private loadingService: LoadingService,
                 private toastService: ToastService,
                 private fileService: FileService,
                 private transportService: TransportService,
-                private navService: NavService) {
+                private navService: NavService,
+                private translationService: TranslationService) {
+        this.translationService.get(null, `Demande`, `Livraison`).subscribe((demandeTranslations) => {
+            this.livraisonTrad = TranslationService.Translate(demandeTranslations, 'Livraison');
+        });
     }
 
     public ionViewWillEnter(): void {
@@ -67,7 +74,7 @@ export class TransportFailurePage implements ViewWillEnter {
                 ? this.collectRejectMotives
                 : this.deliveryRejectMotives;
 
-            const kind = this.transport.kind === 'collect' ? 'Collecte' : 'Livraison'
+            const kind = this.transport.kind === 'collect' ? 'Collecte' : this.livraisonTrad
             this.headerConfig = {
                 title: `${kind} impossible`,
                 leftIcon: {

@@ -20,7 +20,7 @@
                                     <img src="assets/icons/delivery-truck.svg" width="15">
                                     <span>
                                     <strong>{{ round.ready_deliveries }}/{{ round.total_ready_deliveries }}</strong>
-                                    livraison(s) prête(s)
+                                        {{ livraisonTrad.toLowerCase() }}(s) prête(s)
                                 </span>
                                 </div>
                             </div>
@@ -73,7 +73,7 @@
                                 <img src="assets/icons/cancelled-delivery.svg" width="15">
                                 <span>
                                     <strong>
-                                        {{ round.not_delivered }} livraison{{ round.not_delivered > 1 ? 's' : '' }} non livrée{{ round.not_delivered > 1 ? 's' : '' }}
+                                        {{ round.not_delivered }} {{ livraisonTrad.toLowerCase() }}{{ round.not_delivered > 1 ? 's' : '' }} non livrée{{ round.not_delivered > 1 ? 's' : '' }}
                                     </strong>
                                     {{ round.returned_packs }}/{{ round.packs_to_return }} colis retourné{{ round.packs_to_return > 1 ? 's' : '' }}
                                 </span>
