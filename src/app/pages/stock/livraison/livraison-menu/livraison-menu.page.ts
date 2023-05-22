@@ -56,8 +56,7 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
         this.locationFilterRequestParams = [];
         this.firstLaunch = true;
 
-        this.translationService.get(null, `Demande`, `Livraison`).subscribe((result) => {
-            console.warn(result);
+        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((result) => {
             this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
         });
     }

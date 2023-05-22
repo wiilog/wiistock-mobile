@@ -32,8 +32,6 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
     private synchronisationSubscription?: Subscription;
     private navigationSubscription?: Subscription;
 
-    public livraisonTrad: string;
-
     public constructor(private platform: Platform,
                        private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
@@ -46,10 +44,6 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
         this.avoidSync = true;
         const self = this;
 
-        this.translationService.get(null, `Demande`, `Livraison`).subscribe((demandeTranslations) => {
-            this.livraisonTrad = TranslationService.Translate(demandeTranslations, 'Livraison');
-        });
-
         this.menuConfig = [
             {
                 icon: 'people.svg',
@@ -61,7 +55,7 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
             {
                 icon: 'demande.svg',
                 iconColor: 'list-yellow',
-                label: this.livraisonTrad,
+                label: 'Livraison',
                 action: () => {
                     self.navService.push(NavPathEnum.DEMANDE_LIVRAISON_MENU);
                 }
@@ -75,6 +69,10 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
                 }
             }
         ];
+
+        this.translationService.get(null, `Demande`, `Livraison`).subscribe((demandeTranslations) => {
+            this.menuConfig[1].label = TranslationService.Translate(demandeTranslations, 'Livraison');
+        });
     }
 
     public ionViewWillEnter(): void {

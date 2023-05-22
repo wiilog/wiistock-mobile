@@ -14,7 +14,6 @@ import {AlertService} from '@app/services/alert.service';
 import {MainHeaderService} from '@app/services/main-header.service';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {TranslationService} from "../../../services/translations.service";
-import {Translations} from "../../../../entities/translation";
 
 @Component({
     selector: 'wii-transport-round-list',
@@ -28,8 +27,6 @@ export class TransportRoundListPage implements ViewWillEnter {
     } | null;
 
     public loading: boolean;
-
-    private demandeTranslations: Translations;
 
     public livraisonTrad: string;
 
@@ -48,7 +45,6 @@ export class TransportRoundListPage implements ViewWillEnter {
         moment.locale('fr');
 
         this.translationService.get(null, `Demande`, `Livraison`).subscribe((demandeTranslations) => {
-            this.demandeTranslations = demandeTranslations;
             this.livraisonTrad = TranslationService.Translate(demandeTranslations, 'Livraison');
         });
 
@@ -309,7 +305,7 @@ export class TransportRoundListPage implements ViewWillEnter {
             this.alertService.show({
                 header: `Attention`,
                 cssClass: `warning`,
-                message: `Des ` + TranslationService.Translate(this.demandeTranslations, `Livraison`).toLowerCase() + `s ne sont pas encore préparées. Elles seront exclues de cette tournée si vous confirmez son début.`,
+                message: `Des ` + this.livraisonTrad.toLowerCase() + `s ne sont pas encore préparées. Elles seront exclues de cette tournée si vous confirmez son début.`,
                 buttons: [
                     {
                         text: 'Annuler',

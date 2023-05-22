@@ -37,7 +37,6 @@ export class TransportCardComponent implements OnInit {
         this.notRejectedPacks = this.transport.packs.filter(pack => !pack.rejected).length;
 
         this.translationService.get(null, `Demande`, `Livraison`).subscribe((result) => {
-            console.log(result);
             this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
         });
 

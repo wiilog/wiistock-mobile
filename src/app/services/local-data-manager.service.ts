@@ -138,7 +138,8 @@ export class LocalDataManagerService {
                             }))
                         )
                 ),
-                titleErrorAlert: `Des ` + TranslationService.Translate(this.ordreTranslations, `Livraison`) + `s n'ont pas pu être synchronisées`,
+                //titleErrorAlert: `Des ` + TranslationService.Translate(this.ordreTranslations, `Livraison`).toLowerCase() + `s n'ont pas pu être synchronisées`,
+                titleErrorAlert: `Des livraisons n'ont pas pu être synchronisées`,
                 numeroProccessFailed: 'numero_livraison',
                 deleteSucceed: (resSuccess) => {
                     const idsToDelete = resSuccess.map(({id_livraison}: any) => id_livraison);
@@ -367,7 +368,8 @@ export class LocalDataManagerService {
                     return this.sendFinishedProcess('preparation').pipe(map(Boolean));
                 }),
                 mergeMap((needAnotherSynchronise) => {
-                    synchronise$.next({finished: false, message: 'Envoi des ' + TranslationService.Translate(this.demandeTranslations, `Livraison`).toLowerCase() + 's non synchronisées'});
+                    //synchronise$.next({finished: false, message: 'Envoi des ' + TranslationService.Translate(this.demandeTranslations, `Livraison`).toLowerCase() + 's non synchronisées'});
+                    synchronise$.next({finished: false, message: 'Envoi des livraisons non synchronisées'});
                     return this.sendFinishedProcess('livraison').pipe(map((needAnotherSynchroniseLivraison) => needAnotherSynchronise || Boolean(needAnotherSynchroniseLivraison)));
                 }),
                 mergeMap((needAnotherSynchronise) => {
