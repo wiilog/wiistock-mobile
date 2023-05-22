@@ -96,7 +96,7 @@ export class ManualDeliveryPage implements ViewWillLeave {
                        private alertService: AlertService,
                        private navService: NavService,
                        private translationService: TranslationService) {
-        this.translationService.get(null, `Demande`, `Livraison`).subscribe((result) => {
+        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((result) => {
             console.log(result);
             this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
         });

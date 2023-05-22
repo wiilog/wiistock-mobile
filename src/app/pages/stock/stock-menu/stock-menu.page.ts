@@ -47,8 +47,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                        private sqliteService: SqliteService,
                        private navService: NavService,
                        private translationService: TranslationService) {
-        this.translationService.get(null, `Demande`, `Livraison`).subscribe((result) => {
-            console.log(result);
+        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((result) => {
             this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
         });
 

@@ -79,19 +79,18 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
 
     public ionViewWillEnter(): void {
         this.livraison = this.navService.param('livraison');
-        this.translationService.get(null, `Demande`, `Livraison`).subscribe((result) => {
-            console.warn(result);
-            this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
-        });
 
-        this.livraisonsHeaderConfig = {
-            leftIcon: {name: 'delivery.svg'},
-            title: `${this.livraisonTrad} ${this.livraison.number}`,
-            subtitle: [
-                `Destination : ${this.livraison.location}`,
-                ...(this.livraison.comment ? [`Commentaire : ${this.livraison.comment}`] : [])
-            ]
-        };
+        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((result) => {
+            this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
+            this.livraisonsHeaderConfig = {
+                leftIcon: {name: 'delivery.svg'},
+                title: `${this.livraisonTrad} ${this.livraison.number}`,
+                subtitle: [
+                    `Destination : ${this.livraison.location}`,
+                    ...(this.livraison.comment ? [`Commentaire : ${this.livraison.comment}`] : [])
+                ]
+            };
+        });
 
         this.listBoldValues = ['label', 'barCode', 'location', 'quantity', 'targetLocationPicking', 'logisticUnit', 'articlesCount', 'nature'];
 

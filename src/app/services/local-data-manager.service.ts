@@ -60,7 +60,6 @@ export class LocalDataManagerService {
             this.translationService.get(null, `Demande`, `Livraison`),
             this.translationService.get(null, `Ordre`, `Livraison`)
         ).subscribe(([demandeTranslations, ordreTranslations]) => {
-            console.log(demandeTranslations);
             this.demandeTranslations = demandeTranslations;
             this.ordreTranslations = ordreTranslations;
         });
