@@ -24,7 +24,7 @@
                     size="large"
                     expand="full"
                     (click)="onFormSubmit()">
-                <ng-container *ngIf="!edit">Terminer la {{ transport.kind === 'delivery' ? livraisonTrad.toLowerCase() : 'collecte' }}</ng-container>
+                <ng-container *ngIf="!edit">Terminer la {{ transport.kind === 'delivery' ? (livraisonTrad | lowercase) : 'collecte' }}</ng-container>
                 <ng-container *ngIf="edit">Valider</ng-container>
             <wii-icon class="button-icon"
                       name="check.svg"

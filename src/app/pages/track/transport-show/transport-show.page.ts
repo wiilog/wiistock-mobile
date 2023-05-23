@@ -5,7 +5,7 @@ import {TransportRoundLine} from '@entities/transport-round-line';
 import {TransportCardMode} from '@common/components/transport-card/transport-card.component';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {TransportRound} from "@entities/transport-round";
-import {TranslationService} from "../../../services/translations.service";
+import {TranslationService} from "@app/services/translations.service";
 
 @Component({
     selector: 'wii-transport-show',
@@ -36,9 +36,8 @@ export class TransportShowPage implements ViewWillEnter {
 
         this.shouldDisplayFreeFields = this.transport.free_fields.filter(freeField => freeField.value !== '').length > 0;
 
-        this.translationService.get(null, `Demande`, `Livraison`).subscribe((result) => {
-            console.log(result);
-            this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
+        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((ordreTranslations) => {
+            this.livraisonTrad = TranslationService.Translate(ordreTranslations, 'Livraison');
         });
     }
 

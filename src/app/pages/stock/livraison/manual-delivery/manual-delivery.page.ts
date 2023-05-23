@@ -97,7 +97,6 @@ export class ManualDeliveryPage implements ViewWillLeave {
                        private navService: NavService,
                        private translationService: TranslationService) {
         this.translationService.get(null, `Ordre`, `Livraison`).subscribe((result) => {
-            console.log(result);
             this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
         });
     }
@@ -235,7 +234,7 @@ export class ManualDeliveryPage implements ViewWillLeave {
             event: () => this.apiService.requestApi(ApiService.GET_ARTICLES, {params}).pipe(
                 mergeMap((response: any) => zip(
                         of(response),
-                        this.sqliteService.findOneBy(`project`, {code: response.article.project})
+                    this.sqliteService.findOneBy(`project`, {code: response.article?.project || null})
                     )
                 )
             )

@@ -66,8 +66,7 @@ export class ManualDeliveryLocationPage implements ViewWillEnter, ViewWillLeave 
         this.validateIsLoading = false;
         this.resetEmitter$ = new EventEmitter();
 
-        this.translationService.get(null, `Demande`, `Livraison`).subscribe((result) => {
-            console.log(result);
+        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((result) => {
             this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
         });
     }

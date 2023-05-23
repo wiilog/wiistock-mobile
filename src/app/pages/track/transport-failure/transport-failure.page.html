@@ -12,7 +12,7 @@
                 size="large"
                 expand="full"
                 (click)="onFormSubmit()">
-        Terminer la {{ transport.kind === 'delivery' ? livraisonTrad.toLowerCase() : 'collecte' }}
+        Terminer la {{ transport.kind === 'delivery' ? (livraisonTrad | lowercase) : 'collecte' }}
         <wii-icon class="button-icon"
                   name="check.svg"
                   color="white">

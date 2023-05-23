@@ -30,7 +30,7 @@ export class TransportRoundPackLoadPage implements ViewWillEnter, ViewWillLeave 
     public readonly listBoldValues = ['code', 'nature', 'temperature_range'];
     public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.INVISIBLE;
 
-    private demandeTranslations: Translations;
+    public livraisonTrad: string;
     private natureTranslations: Translations;
     private round: TransportRound;
     private packs: Array<{
@@ -84,12 +84,12 @@ export class TransportRoundPackLoadPage implements ViewWillEnter, ViewWillLeave 
                 this.loadingService.presentLoading('Récupération des données en cours'),
                 this.apiService.requestApi(ApiService.GET_REJECT_MOTIVES),
                 this.translationService.get(null, `Traçabilité`, `Général`),
-                this.translationService.get(null, `Demande`, `Livraison`)
+                this.translationService.get(null, `Ordre`, `Livraison`)
             )
-                .subscribe(([loading, {pack}, natureTranslations, demandeTranslations]: [HTMLIonLoadingElement, any, Translations, Translations]) => {
+                .subscribe(([loading, {pack}, natureTranslations, ordreTranslations]: [HTMLIonLoadingElement, any, Translations, Translations]) => {
                     this.packRejectMotives = pack;
                     this.natureTranslations = natureTranslations;
-                    this.demandeTranslations = demandeTranslations;
+                    this.livraisonTrad = TranslationService.Translate(ordreTranslations, 'Livraison');
                     loading.dismiss();
 
                     this.refreshListLoadedConfig();
@@ -366,7 +366,7 @@ export class TransportRoundPackLoadPage implements ViewWillEnter, ViewWillLeave 
                                                 this.toastService.presentToast(`Le colis <strong>${pack.code}</strong> a bien été écarté`);
 
                                                 if (response.rejectedRound) {
-                                                    this.toastService.presentToast(`La ` + TranslationService.Translate(this.demandeTranslations, `Livraison`).toLowerCase() + ` a été rejetée`);
+                                                    this.toastService.presentToast(`La ` + this.livraisonTrad.toLowerCase() + ` a été rejetée`);
                                                     this.navService.pop();
                                                 }
                                             }

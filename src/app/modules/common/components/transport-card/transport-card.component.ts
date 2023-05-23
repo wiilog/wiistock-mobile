@@ -36,8 +36,8 @@ export class TransportCardComponent implements OnInit {
     public ngOnInit(): void {
         this.notRejectedPacks = this.transport.packs.filter(pack => !pack.rejected).length;
 
-        this.translationService.get(null, `Demande`, `Livraison`).subscribe((result) => {
-            this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
+        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((ordreTranslations) => {
+            this.livraisonTrad = TranslationService.Translate(ordreTranslations, 'Livraison');
         });
 
         this.titles.push({

@@ -596,6 +596,7 @@ export class LocalDataManagerService {
             // send all demande to API
             mergeMap((data: Array<{apiData: DemandeForApi, demande: DemandeLivraison}>) => {
                 if (!data || data.length === 0) {
+                    //throw {success: false, message: 'Aucune ' + TranslationService.Translate(this.demandeTranslations, `Demande de livraison`).toLowerCase() + ' à synchroniser'};
                     throw {success: false, message: 'Aucune ' + TranslationService.Translate(this.demandeTranslations, `Demande de livraison`).toLowerCase() + ' à synchroniser'};
                 }
                 return this.requestApiForDeliveryRequests(data);

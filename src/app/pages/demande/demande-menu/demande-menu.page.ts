@@ -43,7 +43,6 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
                        private translationService: TranslationService) {
         this.avoidSync = true;
         const self = this;
-
         this.menuConfig = [
             {
                 icon: 'people.svg',

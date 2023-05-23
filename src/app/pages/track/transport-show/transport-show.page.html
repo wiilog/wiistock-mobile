@@ -22,7 +22,7 @@
                 Collecte à prévoir
             </span>
 
-            <b>Date et heure de {{ transport.kind === 'delivery' ? livraisonTrad.toLowerCase() + ' attendue' : 'collecte prévue' }}</b>
+            <b>Date et heure de {{ transport.kind === 'delivery' ? (livraisonTrad | lowercase) + ' attendue' : 'collecte prévue' }}</b>
             <span class="date">
                 {{ transport.expected_at }}
                 <span *ngIf="transport.emergency" class="emergency">

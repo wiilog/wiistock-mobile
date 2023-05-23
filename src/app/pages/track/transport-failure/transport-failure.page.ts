@@ -22,7 +22,7 @@ import {mergeMap, map} from 'rxjs/operators';
 import {TransportService} from '@app/services/transport.service';
 import {TransportRound} from "@entities/transport-round";
 import {ViewWillEnter} from "@ionic/angular";
-import {TranslationService} from "../../../services/translations.service";
+import {TranslationService} from "@app/services/translations.service";
 
 @Component({
     selector: 'wii-transport-failure',
@@ -54,13 +54,14 @@ export class TransportFailurePage implements ViewWillEnter {
                 private transportService: TransportService,
                 private navService: NavService,
                 private translationService: TranslationService) {
-        this.translationService.get(null, `Demande`, `Livraison`).subscribe((demandeTranslations) => {
-            this.livraisonTrad = TranslationService.Translate(demandeTranslations, 'Livraison');
-        });
     }
 
     public ionViewWillEnter(): void {
         this.edit = this.navService.param('edit');
+
+        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((ordreTranslations) => {
+            this.livraisonTrad = TranslationService.Translate(ordreTranslations, 'Livraison');
+        });
 
         this.loadingService.presentLoadingWhile({
             event: () => this.apiService.requestApi(ApiService.GET_REJECT_MOTIVES)

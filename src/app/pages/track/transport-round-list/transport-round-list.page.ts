@@ -13,7 +13,7 @@ import {TransportRoundLine} from '@entities/transport-round-line';
 import {AlertService} from '@app/services/alert.service';
 import {MainHeaderService} from '@app/services/main-header.service';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
-import {TranslationService} from "../../../services/translations.service";
+import {TranslationService} from "@app/services/translations.service";
 
 @Component({
     selector: 'wii-transport-round-list',
@@ -44,8 +44,8 @@ export class TransportRoundListPage implements ViewWillEnter {
     public ionViewWillEnter(): void {
         moment.locale('fr');
 
-        this.translationService.get(null, `Demande`, `Livraison`).subscribe((demandeTranslations) => {
-            this.livraisonTrad = TranslationService.Translate(demandeTranslations, 'Livraison');
+        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((ordreTranslations) => {
+            this.livraisonTrad = TranslationService.Translate(ordreTranslations, 'Livraison');
         });
 
         this.synchronise();
@@ -162,7 +162,6 @@ export class TransportRoundListPage implements ViewWillEnter {
                             this.toastService.presentToast(`Aucun emplacement de retour des colis non livrés n'a été paramétré, vous ne pouvez pas continuer.`)
                         }
                     });
-
                 }
             } else {
                 this.toastService.presentToast(`Aucun emplacement de fin de tournée n'a été paramétré, vous ne pouvez pas continuer.`)

@@ -122,7 +122,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             this.translationService.get(null, `Demande`, `Livraison`),
             this.translationService.get(null, `Ordre`, `Livraison`)
         ).subscribe(([demandeTranslations, ordreTanslations]) => {
-            console.warn(demandeTranslations, ordreTanslations);
             this.demandeLivraisonTrad = TranslationService.Translate(demandeTranslations, 'Livraison');
             this.ordreLivraisonTrad = TranslationService.Translate(ordreTanslations, 'Livraison');
             this.initTitlesConfig(this.demandeLivraisonTrad, this.ordreLivraisonTrad);
@@ -130,7 +129,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     }
 
     public initTitlesConfig(demandeLivraisonTrad: string, ordreLivraisonTrad: string) {
-        console.warn(ordreLivraisonTrad);
         this.titlesConfig = [
             {pagePath: NavPathEnum.TRACKING_MENU, label: 'Traçabilité'},
             {pagePath: NavPathEnum.DISPATCH_MENU, label: 'Acheminements'},
