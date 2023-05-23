@@ -116,16 +116,16 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             )
             .subscribe((result: Translations) => {
                 this.titleLabelTranslations = result;
-            });
 
-        zip(
-            this.translationService.get(null, `Demande`, `Livraison`),
-            this.translationService.get(null, `Ordre`, `Livraison`)
-        ).subscribe(([demandeTranslations, ordreTanslations]) => {
-            this.demandeLivraisonTrad = TranslationService.Translate(demandeTranslations, 'Livraison');
-            this.ordreLivraisonTrad = TranslationService.Translate(ordreTanslations, 'Livraison');
-            this.initTitlesConfig(this.demandeLivraisonTrad, this.ordreLivraisonTrad);
-        });
+                zip(
+                    this.translationService.get(null, `Demande`, `Livraison`),
+                    this.translationService.get(null, `Ordre`, `Livraison`)
+                ).subscribe(([demandeTranslations, ordreTanslations]) => {
+                    this.demandeLivraisonTrad = TranslationService.Translate(demandeTranslations, 'Livraison');
+                    this.ordreLivraisonTrad = TranslationService.Translate(ordreTanslations, 'Livraison');
+                    this.initTitlesConfig(this.demandeLivraisonTrad, this.ordreLivraisonTrad);
+                });
+            });
     }
 
     public initTitlesConfig(demandeLivraisonTrad: string, ordreLivraisonTrad: string) {

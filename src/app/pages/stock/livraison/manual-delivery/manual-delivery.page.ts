@@ -85,6 +85,7 @@ export class ManualDeliveryPage implements ViewWillLeave {
     };
 
     public livraisonTrad: string;
+    public projetTrad: string;
 
     public constructor(private toastService: ToastService,
                        private sqliteService: SqliteService,
@@ -96,8 +97,12 @@ export class ManualDeliveryPage implements ViewWillLeave {
                        private alertService: AlertService,
                        private navService: NavService,
                        private translationService: TranslationService) {
-        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((result) => {
-            this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
+        zip(
+            this.translationService.get(null, `Ordre`, `Livraison`),
+            this.translationService.get(null, `Référentiel`, `Projet`)
+        ).subscribe(([ordreTranslations, projetTranslations]) => {
+            this.livraisonTrad = TranslationService.Translate(ordreTranslations, 'Livraison');
+            this.projetTrad = TranslationService.Translate(projetTranslations, 'Projet');
         });
     }
 
@@ -112,8 +117,8 @@ export class ManualDeliveryPage implements ViewWillLeave {
         this.listConfig = this.createBodyConfig();
 
         zip(
-            this.storageService.getNumber('demande.project.displayedCreate'),
-            this.storageService.getNumber('demande.project.requiredCreate'),
+            this.storageService.getNumber('demande.deliveryRequestProject.displayedCreate'),
+            this.storageService.getNumber('demande.deliveryRequestProject.requiredCreate'),
             this.storageService.getNumber('demande.expectedAt.displayedCreate'),
             this.storageService.getNumber('demande.expectedAt.requiredCreate'),
         ).subscribe((fieldParams) => {
@@ -176,7 +181,7 @@ export class ManualDeliveryPage implements ViewWillLeave {
             this.formConfig.push({
                 item: FormPanelSelectComponent,
                 config: {
-                    label: 'Projet',
+                    label: this.projetTrad,
                     name: 'project',
                     value: Number(logisticUnitProject) || project,
                     inputConfig: {
@@ -188,7 +193,7 @@ export class ManualDeliveryPage implements ViewWillLeave {
                     ...(this.fieldParams.needsProject
                         ? ({
                             errors: {
-                                required: 'Vous devez sélectionner un projet'
+                                required: 'Vous devez sélectionner un ' + this.projetTrad.toLowerCase()
                             }
                         })
                         : {})
@@ -258,7 +263,7 @@ export class ManualDeliveryPage implements ViewWillLeave {
 
                         const values = this.formPanelComponent.values;
                         if (response.article.is_lu && project && values.project && values.project != project.id) {
-                            this.toastService.presentToast(`Vous ne pouvez pas scanner une unité logistique avec un projet différent de celui sélectionné.`);
+                            this.toastService.presentToast(`Vous ne pouvez pas scanner une unité logistique avec un ` + this.projetTrad.toLowerCase() + ` différent de celui sélectionné.`);
                         } else if (response.article.currentLogisticUnitId) {
                             this.alertService.show({
                                 message: `L'article ${response.article.barCode} sera enlevé de l'unité logistique ${response.article.currentLogisticUnitCode}`,

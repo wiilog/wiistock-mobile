@@ -30,7 +30,7 @@ export class TranslationService {
         const [topMenu, menu, subMenu] = args || [];
         return this.sqliteService
             .findBy('translations', args.length > 0
-                ? [`topMenu ${topMenu ? 'LIKE ' + topMenu : `IS NULL`} AND menu LIKE '${menu || ``}' AND subMenu LIKE '${subMenu || ``}'`]
+                ? [`topMenu ${topMenu ? `LIKE '${topMenu}'` : `IS NULL`} AND menu LIKE '${menu || ``}' AND subMenu LIKE '${subMenu || ``}'`]
                 : [])
             .pipe(
                 map((translations: Array<Translation>) => TranslationService.CreateTranslationDictionaryFromArray(translations))

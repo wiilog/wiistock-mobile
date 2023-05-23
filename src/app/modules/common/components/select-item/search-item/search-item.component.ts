@@ -6,6 +6,7 @@ import {map, take, tap} from 'rxjs/operators';
 import {ArticleInventaire} from '@entities/article-inventaire';
 import {Observable, of, ReplaySubject, Subscription} from 'rxjs';
 import {TableName} from '@app/services/sqlite/table-definition';
+import {TranslationService} from "@app/services/translations.service";
 
 
 @Component({
@@ -186,12 +187,17 @@ export class SearchItemComponent implements OnInit, OnDestroy {
     }
 
     public constructor(private sqliteService: SqliteService,
-                       private changeDetector: ChangeDetectorRef) {
+                       private changeDetector: ChangeDetectorRef,
+                       private translationService: TranslationService) {
         this.itemChange = new EventEmitter<any>();
         this.itemsLoaded = new EventEmitter<void>();
         this.dbItemsForList = [];
         this.dbItems = [];
         this.lastSearch = '';
+
+        this.translationService.get(null, `Référentiel`, `Projet`).subscribe((projetTranslations) => {
+            this.config[SelectItemTypeEnum.PROJECT].placeholder = 'Sélectionnez un ' + TranslationService.Translate(projetTranslations, 'Projet').toLowerCase();
+        });
     }
 
     private static MakeMapForInventoryLocations(anomalyMode: boolean): {[conf: string]: any; databaseTable: TableName} {

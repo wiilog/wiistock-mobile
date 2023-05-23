@@ -59,6 +59,8 @@ export class AssociationPage implements ViewWillEnter, ViewWillLeave {
     };
     private livraisonToRedirect: Livraison;
 
+    public projetTrad: string;
+
     public constructor(private networkService: NetworkService,
                        private apiService: ApiService,
                        private sqliteService: SqliteService,
@@ -72,6 +74,9 @@ export class AssociationPage implements ViewWillEnter, ViewWillLeave {
                        private storageService: StorageService,
                        private translationService: TranslationService,
                        private navService: NavService) {
+        this.translationService.get(null, `Référentiel`, `Projet`).subscribe((projetTranslations) => {
+            this.projetTrad = TranslationService.Translate(projetTranslations, 'Projet');
+        });
     }
 
     public ionViewWillEnter(): void {
@@ -288,7 +293,7 @@ export class AssociationPage implements ViewWillEnter, ViewWillLeave {
             ...(
                 articleOrPack.is_lu && articleOrPack.project
                     ? [{
-                        label: 'Projet',
+                        label: this.projetTrad,
                         value: articleOrPack.project
                     }]
                     : (!articleOrPack.is_lu ? [{

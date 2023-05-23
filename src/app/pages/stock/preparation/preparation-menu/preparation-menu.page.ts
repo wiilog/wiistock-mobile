@@ -8,6 +8,7 @@ import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import * as moment from "moment";
 import {ViewWillEnter} from "@ionic/angular";
+import {TranslationService} from "@app/services/translations.service";
 
 @Component({
     selector: 'wii-preparation-menu',
@@ -24,10 +25,17 @@ export class PreparationMenuPage implements ViewWillEnter {
     public hasLoaded: boolean;
     public firstLaunch: boolean;
 
+    public projetTrad: string;
+
     public constructor(private mainHeaderService: MainHeaderService,
                        private sqlLiteProvider: SqliteService,
-                       private navService: NavService) {
+                       private navService: NavService,
+                       private translationService: TranslationService) {
         this.firstLaunch = true;
+
+        this.translationService.get(null, `Référentiel`, `Projet`).subscribe((projetTranslations) => {
+            this.projetTrad = TranslationService.Translate(projetTranslations, 'Projet');
+        });
     }
 
     public ionViewWillEnter(): void {
@@ -82,7 +90,7 @@ export class PreparationMenuPage implements ViewWillEnter {
                         ...(
                             preparation.project
                                 ? [{
-                                    label: 'Projet',
+                                    label: this.projetTrad,
                                     value: preparation.project
                                 }]
                                 : []

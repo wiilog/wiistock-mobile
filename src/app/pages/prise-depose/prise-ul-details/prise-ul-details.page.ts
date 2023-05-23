@@ -19,6 +19,7 @@ import {ListPanelItemConfig} from '@common/components/panel/model/list-panel/lis
 import {ApiService} from "@app/services/api.service";
 import {LoadingService} from "@app/services/loading.service";
 import {ViewWillEnter} from "@ionic/angular";
+import {TranslationService} from "@app/services/translations.service";
 
 enum Page {
     MOVEMENT,
@@ -48,15 +49,22 @@ export class PriseUlDetails implements ViewWillEnter {
     private validate: (values: {comment: string; signature: string; photo: string; natureId: number; projectId?: number}) => void;
     public natureIdToNature: { [natureId: string]: Nature };
 
+    public projetTrad: string;
+
     public constructor(private activatedRoute: ActivatedRoute,
                        private toastService: ToastService,
                        private sqliteService: SqliteService,
                        private formPanelService: FormPanelService,
                        private apiService: ApiService,
                        private navService: NavService,
-                       private loadingService: LoadingService) {
+                       private loadingService: LoadingService,
+                       private translationService: TranslationService) {
         this.savedNatureId = undefined;
         this.logisticUnitContentConfig = [];
+
+        this.translationService.get(null, `Référentiel`, `Projet`).subscribe((projetTranslations) => {
+            this.projetTrad = TranslationService.Translate(projetTranslations, 'Projet');
+        });
     }
 
     public ionViewWillEnter(): void {
@@ -149,7 +157,7 @@ export class PriseUlDetails implements ViewWillEnter {
                         {
                             item: FormPanelSelectComponent,
                             config: {
-                                label: 'Projet',
+                                label: this.projetTrad,
                                 name: 'projectId',
                                 value: projectId,
                                 inputConfig: {

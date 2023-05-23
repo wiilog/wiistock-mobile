@@ -46,6 +46,7 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
     private loadingSubscription?: Subscription;
 
     public livraisonTrad: string;
+    public projetTrad: string;
 
     public constructor(private mainHeaderService: MainHeaderService,
                        private sqliteService: SqliteService,
@@ -56,8 +57,12 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
         this.locationFilterRequestParams = [];
         this.firstLaunch = true;
 
-        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((result) => {
-            this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
+        zip(
+            this.translationService.get(null, `Ordre`, `Livraison`),
+            this.translationService.get(null, `Référentiel`, `Projet`)
+        ).subscribe(([ordreTranslations, projetTranslations]) => {
+            this.livraisonTrad = TranslationService.Translate(ordreTranslations, 'Livraison');
+            this.projetTrad = TranslationService.Translate(projetTranslations, 'Projet');
         });
     }
 
@@ -175,7 +180,7 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
                     ...(
                         livraison.project
                             ? [{
-                                label: 'Projet',
+                                label: this.projetTrad,
                                 value: livraison.project
                             }]
                             : []
