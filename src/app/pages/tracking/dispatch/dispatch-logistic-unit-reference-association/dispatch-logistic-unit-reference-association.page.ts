@@ -10,9 +10,7 @@ import {FormPanelParam} from "@common/directives/form-panel/form-panel-param";
 import {
     FormPanelSelectComponent
 } from "@common/components/panel/form-panel/form-panel-select/form-panel-select.component";
-import {
-    FormPanelInputComponent
-} from "@common/components/panel/form-panel/form-panel-input/form-panel-input.component";
+import {FormPanelInputComponent} from "@common/components/panel/form-panel/form-panel-input/form-panel-input.component";
 import {
     FormPanelToggleComponent
 } from "@common/components/panel/form-panel/form-panel-toggle/form-panel-toggle.component";
@@ -32,6 +30,7 @@ import {Reference} from "@entities/reference";
 import {Dispatch} from "@entities/dispatch";
 import {of, zip} from "rxjs";
 import {ViewWillEnter} from "@ionic/angular";
+import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 
 @Component({
     selector: 'wii-dispatch-logistic-unit-reference-association',
@@ -447,7 +446,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
         const {reference} = this.formPanelComponent.values;
         if (reference) {
             this.loadingService.presentLoadingWhile({
-                event: () => this.apiService.requestApi(ApiService.GET_REFERENCE, {params: {reference}}),
+                event: () => this.getReferenceEvent(reference),
                 message: `Récupération des informations de la référence en cours...`
             }).subscribe(({reference}) => {
                 this.disableValidate = false;
@@ -456,6 +455,41 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
             });
         } else {
             this.toastService.presentToast(`Veuillez renseigner une référence valide.`);
+        }
+    }
+
+    private getReferenceEvent(reference: string) {
+        if (StorageKeyEnum.DISPATCH_OFFLINE_MODE) {
+            let localRef: any = this.sqliteService.findOneBy('reference_article', ['reference = ' + reference]);
+            let serializedReference;
+            console.warn(localRef);
+            if (localRef) {
+                localRef =  <Reference> localRef;
+                serializedReference = {
+                    reference: localRef.reference,
+                    outFormatEquipment: localRef.outFormatEquipment ?? '',
+                    manufacturerCode: localRef.manufacturerCode ?? '',
+                    width: localRef.width ?? '',
+                    height: localRef.height ?? '',
+                    length: localRef.length ?? '',
+                    volume: localRef.volume ?? '',
+                    weight: localRef.weight ?? '',
+                    associatedDocumentTypes: localRef.associatedDocumentTypes ?? '',
+                    exists: true,
+                }
+            } else {
+                serializedReference = {
+                    reference: reference,
+                    exists: false,
+                }
+            }
+
+            return {
+                success: true,
+                reference: serializedReference,
+            };
+        } else {
+            return this.apiService.requestApi(ApiService.GET_REFERENCE, {params: {reference}});
         }
     }
 
