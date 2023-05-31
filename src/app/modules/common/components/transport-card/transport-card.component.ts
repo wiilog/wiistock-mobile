@@ -28,17 +28,10 @@ export class TransportCardComponent implements OnInit {
 
     public notRejectedPacks: number;
 
-    public livraisonTrad: string;
-
-    public constructor(private platform: Platform,
-                       private translationService: TranslationService) {}
+    public constructor(private platform: Platform) {}
 
     public ngOnInit(): void {
         this.notRejectedPacks = this.transport.packs.filter(pack => !pack.rejected).length;
-
-        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((ordreTranslations) => {
-            this.livraisonTrad = TranslationService.Translate(ordreTranslations, 'Livraison');
-        });
 
         this.titles.push({
             title: `${this.transport.priority}. ${this.transport.contact.name}`,

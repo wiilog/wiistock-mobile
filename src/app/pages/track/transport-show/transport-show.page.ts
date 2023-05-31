@@ -23,10 +23,7 @@ export class TransportShowPage implements ViewWillEnter {
 
     public mode: TransportCardMode;
 
-    public livraisonTrad: string;
-
-    public constructor(private navService: NavService,
-                       private translationService: TranslationService) {
+    public constructor(private navService: NavService) {
     }
 
     public ionViewWillEnter(): void {
@@ -35,10 +32,6 @@ export class TransportShowPage implements ViewWillEnter {
         this.round = this.navService.param('round');
 
         this.shouldDisplayFreeFields = this.transport.free_fields.filter(freeField => freeField.value !== '').length > 0;
-
-        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((ordreTranslations) => {
-            this.livraisonTrad = TranslationService.Translate(ordreTranslations, 'Livraison');
-        });
     }
 
     public fail(): void {

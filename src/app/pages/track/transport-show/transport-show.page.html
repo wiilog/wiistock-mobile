@@ -5,7 +5,7 @@
                 <div class="transport-infos">
                     <wii-icon [name]="transport.kind === 'delivery' ? 'truck.svg' : 'collect-hand.svg'" color="purple"></wii-icon>
                     <div>
-                        <b>{{ transport.kind === 'delivery' ? livraisonTrad : 'Collecte' }}</b><br>
+                        <b>{{ transport.kind === 'delivery' ? 'Livraison' : 'Collecte' }}</b><br>
                         <i>OTR{{ transport.number }}</i>
                     </div>
                 </div>
@@ -22,7 +22,7 @@
                 Collecte à prévoir
             </span>
 
-            <b>Date et heure de {{ transport.kind === 'delivery' ? (livraisonTrad | lowercase) + ' attendue' : 'collecte prévue' }}</b>
+            <b>Date et heure de {{ transport.kind === 'delivery' ? 'livraison attendue' : 'collecte prévue' }}</b>
             <span class="date">
                 {{ transport.expected_at }}
                 <span *ngIf="transport.emergency" class="emergency">

@@ -28,8 +28,6 @@ export class TransportRoundListPage implements ViewWillEnter {
 
     public loading: boolean;
 
-    public livraisonTrad: string;
-
     public constructor(private navService: NavService,
                        private mainHeaderService: MainHeaderService,
                        private apiService: ApiService,
@@ -43,10 +41,6 @@ export class TransportRoundListPage implements ViewWillEnter {
 
     public ionViewWillEnter(): void {
         moment.locale('fr');
-
-        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((ordreTranslations) => {
-            this.livraisonTrad = TranslationService.Translate(ordreTranslations, 'Livraison');
-        });
 
         this.synchronise();
     }
@@ -304,7 +298,7 @@ export class TransportRoundListPage implements ViewWillEnter {
             this.alertService.show({
                 header: `Attention`,
                 cssClass: `warning`,
-                message: `Des ` + this.livraisonTrad.toLowerCase() + `s ne sont pas encore préparées. Elles seront exclues de cette tournée si vous confirmez son début.`,
+                message: `Des livraisons ne sont pas encore préparées. Elles seront exclues de cette tournée si vous confirmez son début.`,
                 buttons: [
                     {
                         text: 'Annuler',

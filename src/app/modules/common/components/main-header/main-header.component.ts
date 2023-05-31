@@ -112,19 +112,25 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
         this.translationService.changedTranslations$
             .pipe(
-                mergeMap(() => this.translationService.get())
+                mergeMap(() => (
+                    zip(
+                        this.translationService.get(),
+                        this.translationService.get(null, `Demande`, `Livraison`),
+                        this.translationService.get(null, `Ordre`, `Livraison`))
+                    ).pipe(
+                        map(([result, demandeTranslations, ordreTanslations]) => ({
+                            result,
+                            demandeTranslations,
+                            ordreTanslations
+                        }))
+                    )
+                )
             )
-            .subscribe((result: Translations) => {
+            .subscribe(({result, demandeTranslations, ordreTanslations}) => {
                 this.titleLabelTranslations = result;
-
-                zip(
-                    this.translationService.get(null, `Demande`, `Livraison`),
-                    this.translationService.get(null, `Ordre`, `Livraison`)
-                ).subscribe(([demandeTranslations, ordreTanslations]) => {
-                    this.demandeLivraisonTrad = TranslationService.Translate(demandeTranslations, 'Livraison');
-                    this.ordreLivraisonTrad = TranslationService.Translate(ordreTanslations, 'Livraison');
-                    this.initTitlesConfig(this.demandeLivraisonTrad, this.ordreLivraisonTrad);
-                });
+                this.demandeLivraisonTrad = TranslationService.Translate(demandeTranslations, 'Livraison');
+                this.ordreLivraisonTrad = TranslationService.Translate(ordreTanslations, 'Livraison');
+                this.initTitlesConfig(this.demandeLivraisonTrad, this.ordreLivraisonTrad);
             });
     }
 
@@ -165,7 +171,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                 pagePath: NavPathEnum.LIVRAISON_MENU,
                 label: ordreLivraisonTrad,
             },
-            {pagePath: NavPathEnum.MANUAL_DELIVERY, label: ordreLivraisonTrad + ' manuelle'},
+            {pagePath: NavPathEnum.MANUAL_DELIVERY, label: 'Livraison manuelle'},
             {pagePath: NavPathEnum.MANUAL_DELIVERY_LOCATION, label: 'Emplacement'},
             {pagePath: NavPathEnum.COLLECTE_MENU, label: 'Collecte'},
             {pagePath: NavPathEnum.INVENTORY_LOCATIONS, label: 'Inventaire'},

@@ -16,7 +16,6 @@ import {TransferOrder} from '@entities/transfer-order';
 import {AlertService} from '@app/services/alert.service';
 import {TranslationService} from '@app/services/translations.service';
 import {DispatchPack} from '@entities/dispatch-pack';
-import {Translations} from "@entities/translation";
 
 
 type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies' | 'dispatch' | 'transfer' | 'empty_round';
@@ -47,22 +46,12 @@ export class LocalDataManagerService {
 
     private readonly apiProccessConfigs: {[type in Process]: ApiProccessConfig};
 
-    public demandeTranslations: Translations;
-    public ordreTranslations: Translations;
-
     public constructor(private sqliteService: SqliteService,
                        private apiService: ApiService,
                        private fileService: FileService,
                        private storageService: StorageService,
                        private alertService: AlertService,
                        private translationService: TranslationService) {
-        zip(
-            this.translationService.get(null, `Demande`, `Livraison`),
-            this.translationService.get(null, `Ordre`, `Livraison`)
-        ).subscribe(([demandeTranslations, ordreTranslations]) => {
-            this.demandeTranslations = demandeTranslations;
-            this.ordreTranslations = ordreTranslations;
-        });
 
         this.apiProccessConfigs = {
             preparation: {
@@ -137,7 +126,6 @@ export class LocalDataManagerService {
                             }))
                         )
                 ),
-                //titleErrorAlert: `Des ` + TranslationService.Translate(this.ordreTranslations, `Livraison`).toLowerCase() + `s n'ont pas pu être synchronisées`,
                 titleErrorAlert: `Des livraisons n'ont pas pu être synchronisées`,
                 numeroProccessFailed: 'numero_livraison',
                 deleteSucceed: (resSuccess) => {
@@ -367,7 +355,6 @@ export class LocalDataManagerService {
                     return this.sendFinishedProcess('preparation').pipe(map(Boolean));
                 }),
                 mergeMap((needAnotherSynchronise) => {
-                    //synchronise$.next({finished: false, message: 'Envoi des ' + TranslationService.Translate(this.demandeTranslations, `Livraison`).toLowerCase() + 's non synchronisées'});
                     synchronise$.next({finished: false, message: 'Envoi des livraisons non synchronisées'});
                     return this.sendFinishedProcess('livraison').pipe(map((needAnotherSynchroniseLivraison) => needAnotherSynchronise || Boolean(needAnotherSynchroniseLivraison)));
                 }),
@@ -596,8 +583,7 @@ export class LocalDataManagerService {
             // send all demande to API
             mergeMap((data: Array<{apiData: DemandeForApi, demande: DemandeLivraison}>) => {
                 if (!data || data.length === 0) {
-                    //throw {success: false, message: 'Aucune ' + TranslationService.Translate(this.demandeTranslations, `Demande de livraison`).toLowerCase() + ' à synchroniser'};
-                    throw {success: false, message: 'Aucune ' + TranslationService.Translate(this.demandeTranslations, `Demande de livraison`).toLowerCase() + ' à synchroniser'};
+                    throw {success: false, message: 'Aucune demande de livraison à synchroniser'};
                 }
                 return this.requestApiForDeliveryRequests(data);
             }),

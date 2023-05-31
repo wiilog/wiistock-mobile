@@ -35,38 +35,31 @@ export class TransportListPage implements ViewWillEnter {
 
     private warningShown: boolean = false;
 
-    public livraisonTrad: string;
-
     public constructor(private navService: NavService,
                        private alertService: AlertService,
                        private transportService: TransportService,
-                       private formatService: FormatService,
-                       private translationService: TranslationService) {
+                       private formatService: FormatService) {
     }
 
     public ionViewWillEnter(): void {
         this.mode = this.navService.param('mode');
         this.round = this.navService.param('round');
 
-        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((ordreTranslations) => {
-            this.livraisonTrad = TranslationService.Translate(ordreTranslations, 'Livraison');
+        const cancelledTransport = this.navService.param('cancelledTransport');
+        if(cancelledTransport && !this.warningShown) {
+            this.warningShown = true;
 
-            const cancelledTransport = this.navService.param('cancelledTransport');
-            if(cancelledTransport && !this.warningShown) {
-                this.warningShown = true;
-
-                this.alertService.show({
-                    header: `Attention`,
-                    cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
-                    message: `Le prochain point de passage a été annulé. Veuillez ne pas vous y rendre. ` +
-                        `Pensez à retourner les colis à la fin de la tournée s'il s'agit d'une ` + this.livraisonTrad.toLowerCase() + `.`,
-                    buttons: [{
-                        text: 'OK',
-                        cssClass: 'alert-success',
-                    }]
-                });
-            }
-        });
+            this.alertService.show({
+                header: `Attention`,
+                cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+                message: `Le prochain point de passage a été annulé. Veuillez ne pas vous y rendre. ` +
+                    `Pensez à retourner les colis à la fin de la tournée s'il s'agit d'une livraison.`,
+                buttons: [{
+                    text: 'OK',
+                    cssClass: 'alert-success',
+                }]
+            });
+        }
 
         for(const transport of this.round.lines) {
             if(this.mode === TransportCardMode.STARTABLE

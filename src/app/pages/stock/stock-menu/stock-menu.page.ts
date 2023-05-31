@@ -75,7 +75,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                 },
                 {
                     icon: 'manual-delivery.svg',
-                    label: this.livraisonTrad + '<br/>manuelle',
+                    label: 'livarison manuelle',
                     action: () => {
                         self.navService.push(NavPathEnum.MANUAL_DELIVERY);
                     }
