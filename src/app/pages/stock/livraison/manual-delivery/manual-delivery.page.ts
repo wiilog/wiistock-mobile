@@ -175,7 +175,6 @@ export class ManualDeliveryPage implements ViewWillLeave {
                     inputConfig: {
                         required: this.fieldParams.needsProject,
                         searchType: SelectItemTypeEnum.PROJECT,
-                        label: `code`,
                         disabled: !!logisticUnitProject
                     },
                     ...(this.fieldParams.needsProject
