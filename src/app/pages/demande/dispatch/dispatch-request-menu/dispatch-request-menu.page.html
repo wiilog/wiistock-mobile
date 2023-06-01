@@ -10,7 +10,7 @@
     </wii-card-list>
 </div>
 
-<ion-fab *ngIf="hasLoaded"
+<ion-fab *ngIf="hasLoaded  && !offlineMode"
          vertical="end"
          horizontal="bottom"
          slot="fixed">
@@ -18,4 +18,29 @@
                     (click)="onAddClick()">
         <ion-icon class="big-icon" name="add-outline"></ion-icon>
     </ion-fab-button>
+</ion-fab>
+
+
+<ion-fab *ngIf="hasLoaded && offlineMode"
+         vertical="end"
+         horizontal="bottom"
+         slot="fixed">
+    <ion-fab-button (click)="onMenuClick()">
+        <ion-icon class="big-icon"  name="menu-outline"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="top"
+                  [activated]="fabListActivated">
+        <ion-fab-button color="light"
+                        (click)="onRefreshClick()">
+            <ion-icon name="refresh"></ion-icon>
+        </ion-fab-button>
+        <ion-fab-button color="light"
+                        (click)="onGroupedSignatureClick()">
+            <wii-icon name="signature.svg" width="15px"></wii-icon>
+        </ion-fab-button>
+        <ion-fab-button color="light"
+                        (click)="onAddClick()">
+            <ion-icon name="add-outline"></ion-icon>
+        </ion-fab-button>
+    </ion-fab-list>
 </ion-fab>

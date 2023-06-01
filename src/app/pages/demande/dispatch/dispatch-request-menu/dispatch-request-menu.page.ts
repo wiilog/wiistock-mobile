@@ -15,8 +15,11 @@ import {NetworkService} from '@app/services/network.service';
 import {Dispatch} from "@entities/dispatch";
 import {TranslationService} from "@app/services/translations.service";
 import {Translations} from "@entities/translation";
-import {zip} from "rxjs";
+import {mergeMap, zip} from "rxjs";
 import {ViewWillEnter} from "@ionic/angular";
+import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
+import {FormatService} from "@app/services/format.service";
+import * as moment from "moment";
 
 
 @Component({
@@ -34,6 +37,7 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
     public dispatches: Array<Dispatch>;
 
     public fabListActivated: boolean;
+    public offlineMode: boolean;
 
     private apiSending: boolean;
     private dispatchTranslations: Translations;
@@ -45,17 +49,31 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                        private localDataManager: LocalDataManagerService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
+                       private formatService: FormatService,
                        private storageService: StorageService,
                        private translationService: TranslationService,
                        private navService: NavService) {
         this.hasLoaded = false;
         this.fabListActivated = false
         this.apiSending = false;
+        this.offlineMode = false;
     }
 
     public ionViewWillEnter(): void {
         this.loadingService.presentLoadingWhile({
-            event: () => this.sqliteService.findBy(`dispatch`, [`draft = 1`])
+            event: () => {
+                return zip(
+                    this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
+                    this.storageService.getString(StorageKeyEnum.OPERATOR),
+                ).pipe(
+                    mergeMap(([dispatchOfflineMode, operator]) => {
+                        this.offlineMode = dispatchOfflineMode;
+                        return this.sqliteService.findBy(`dispatch`, dispatchOfflineMode
+                            ? [`createdBy = '${operator}'`]
+                            : [`draft = 1`]);
+                    })
+                )
+            }
         }).subscribe((dispatches) => {
             this.dispatches = dispatches;
             this.fabListActivated = false
@@ -80,6 +98,14 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
         this.navService.push(NavPathEnum.DISPATCH_NEW);
     }
 
+    public onRefreshClick(): void{
+
+    }
+
+    public onGroupedSignatureClick(): void{
+        this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE);
+    }
+
     private refreshPageList(dispatches: Array<Dispatch>) {
         zip(
             this.translationService.getRaw(`Demande`, `Acheminements`, `Champs fixes`),
@@ -92,7 +118,11 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
 
             this.dispatchListConfig = this.dispatches.map((dispatch: Dispatch): CardListConfig => {
                 return {
-                    title: {
+                    customColor: dispatch.groupedSignatureStatusColor || dispatch.color,
+                    title: this.offlineMode ? {
+                        label: 'Statut',
+                        value: dispatch.statusLabel
+                    } : {
                         label: 'Numéro',
                         value: dispatch.number
                     },
@@ -103,6 +133,21 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                         });
                     },
                     content: [
+                        ...(this.offlineMode && dispatch.number ? [{
+                            label: 'Numéro',
+                            value: dispatch.number
+                        }] : [{}]),
+                        ...(this.offlineMode
+                            ? (dispatch.syncAt
+                                ? [{
+                                    label: 'Dernière synchronisation',
+                                    value: moment(dispatch.syncAt, moment.defaultFormat).format('DD/MM/YYYY HH:mm')
+                                }]
+                                : [{
+                                    label: 'Synchronisé',
+                                    value: 'Non'
+                                }])
+                            : [{}]),
                         {label: TranslationService.Translate(this.dispatchTranslations, 'N° tracking transporteur'), value: dispatch.carrierTrackingNumber || ''},
                         {label: 'Type', value: dispatch.typeLabel || ''},
                         {
@@ -118,6 +163,17 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                             ? {label: 'Urgence', value: dispatch.emergency || ''}
                             : undefined)
                     ].filter((item) => item && item.value) as Array<{label: string; value: string;}>,
+                    ...(this.offlineMode && !dispatch.syncAt
+                        ? {
+                            rightIcon: {
+                                name: 'trash.svg',
+                                color: 'danger',
+                                action: () => {
+                                    this.deleteDispatch(dispatch)
+                                }
+                            }
+                        }
+                        : {}),
                     ...(dispatch.emergency
                         ? {
                             rightIcon: {
@@ -132,5 +188,12 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
             this.refreshSubTitle();
             this.hasLoaded = true;
         })
+    }
+
+    private deleteDispatch(dispatch: Dispatch){
+        this.sqliteService.deleteBy(`dispatch`, [`id = '${dispatch.id}'`]);
+        const selectedLinesToDelete = this.dispatches.findIndex((line) => line.id === dispatch.id);
+        this.dispatches.splice(selectedLinesToDelete, 1);
+        this.refreshPageList(this.dispatches);
     }
 }

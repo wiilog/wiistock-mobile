@@ -25,4 +25,6 @@ export interface Dispatch {
     packs: string;
     draft?: boolean;
     groupedSignatureStatusColor?: string;
+    createdBy: string;
+    syncAt?: string
 }
