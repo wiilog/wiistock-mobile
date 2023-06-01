@@ -502,7 +502,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
         name: 'reference_article',
         schema: [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
-            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'reference', value: 'VARCHAR(255)'},
             {column: 'outFormatEquipment', value: 'VARCHAR(255)'},
             {column: 'manufacturerCode', value: 'VARCHAR(255)'},
             {column: 'length', value: 'REAL'},
