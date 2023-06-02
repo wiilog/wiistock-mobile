@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Preferences} from '@capacitor/preferences';
 import {catchError, from, Observable, of, zip} from 'rxjs';
-import {mergeMap, map} from 'rxjs/operators';
+import {map, mergeMap} from 'rxjs/operators';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 
 
@@ -20,7 +20,8 @@ export class StorageService {
                        rights: { [name: string]: boolean },
                        notificationChannels: [string],
                        parameters: { [name: string]: boolean },
-                       fieldParams: { [entity: string]: any }): Observable<any> {
+                       fieldParams: { [entity: string]: any },
+                       dispatchDefaultWaybill: { [name: string]: any }): Observable<any> {
         return this.getString(StorageKeyEnum.URL_SERVER)
             .pipe(
                 mergeMap((serverUrl) => from(Preferences.clear()).pipe(map(() => serverUrl))),
@@ -30,6 +31,7 @@ export class StorageService {
                     this.setItem(StorageKeyEnum.OPERATOR, operator),
                     this.setItem(StorageKeyEnum.OPERATOR_ID, operatorId),
                     this.setItem(StorageKeyEnum.NOTIFICATION_CHANNELS, JSON.stringify(notificationChannels)),
+                    this.setItem(StorageKeyEnum.DISPATCH_DEFAULT_WAYBILL, JSON.stringify(dispatchDefaultWaybill)),
                     this.resetCounters(),
                     this.updateRights(rights),
                     this.updateParameters(parameters),

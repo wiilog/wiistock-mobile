@@ -598,4 +598,23 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'recurrent', value: 'INTEGER'},
         ]
     },
+    {
+        name: 'dispatch_waybill',
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'carrier', value: 'VARCHAR(255)'},
+            {column: 'consignor', value: 'VARCHAR(255)'},
+            {column: 'consignorEmail', value: 'VARCHAR(255)'},
+            {column: 'consignorUsername', value: 'VARCHAR(255)'},
+            {column: 'dispatchDate', value: 'VARCHAR(255)'},
+            {column: 'locationFrom', value: 'VARCHAR(255)'},
+            {column: 'locationTo', value: 'VARCHAR(255)'},
+            {column: 'notes', value: 'VARCHAR(255)'},
+            {column: 'receiver', value: 'VARCHAR(255)'},
+            {column: 'receiverEmail', value: 'VARCHAR(255)'},
+            {column: 'receiverUsername', value: 'VARCHAR(255)'},
+            {column: 'dispatch_id', value: 'INTEGER'},
+            {column: 'fromNomade', value: 'INTEGER'},
+        ]
+    },
 ];

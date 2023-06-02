@@ -223,6 +223,7 @@ export class DispatchWaybillPage implements ViewWillEnter {
         } else {
             const values = this.formPanelComponent.values;
             values.fromNomade = true;
+            values.dispatch_id = this.dispatchId;
             this.navService.pop().subscribe(() => {
                 this.afterValidate(values);
                 this.toastService.presentToast(`La lettre de voiture est prête à être générée. Validez la demande pour procéder au téléchargement.`)

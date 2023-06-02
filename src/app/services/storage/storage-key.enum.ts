@@ -51,4 +51,5 @@ export enum StorageKeyEnum {
     COUNTERS_DELIVERIES_TREATED = 'counters_deliveries_treated',
     ARTICLE_CREATION_DEFAULT_VALUES = 'article_creation_default_values',
 
+    DISPATCH_DEFAULT_WAYBILL = 'dispatch_default_waybill',
 }

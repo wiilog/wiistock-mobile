@@ -288,11 +288,11 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
             .pipe(
                 mergeMap(({data, success}) => {
                     if(success) {
-                        const {apiKey, rights, userId, username, notificationChannels, parameters, fieldsParam} = data;
+                        const {apiKey, rights, userId, username, notificationChannels, parameters, fieldsParam, dispatchDefaultWaybill} = data;
 
                         return this.sqliteService.resetDataBase()
                             .pipe(
-                                mergeMap(() => this.storageService.initStorage(apiKey, username, userId, rights, notificationChannels, parameters, fieldsParam)),
+                                mergeMap(() => this.storageService.initStorage(apiKey, username, userId, rights, notificationChannels, parameters, fieldsParam, dispatchDefaultWaybill)),
                                 tap(() => {
                                     this.loginKey = '';
                                 }),

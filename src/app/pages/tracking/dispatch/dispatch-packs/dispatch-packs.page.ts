@@ -104,6 +104,10 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
         needsReceiver: false,
     };
 
+    public offlineMode: boolean = false;
+
+    private waybillDefaultData: string;
+
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
                        private mainHeaderService: MainHeaderService,
@@ -153,6 +157,9 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
 
                                 this.storageService.getNumber('acheminements.receiver.displayedCreate'),
                                 this.storageService.getNumber('acheminements.receiver.requiredCreate'),
+
+                                this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
+                                this.storageService.getString(StorageKeyEnum.DISPATCH_DEFAULT_WAYBILL),
                             ),
                         ).pipe(
                             mergeMap((data) => this.sqliteService
@@ -179,6 +186,8 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                         needsEmergency,
                         displayReceiver,
                         needsReceiver,
+                        dispatchOfflineMode,
+                        waybillDefaultData
                     ] = fieldParams;
                     this.fieldParams = {
                         displayCarrierTrackingNumber: Boolean(displayCarrierTrackingNumber),
@@ -194,6 +203,8 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                         displayReceiver: Boolean(displayReceiver),
                         needsReceiver: Boolean(needsReceiver),
                     };
+                    this.offlineMode = dispatchOfflineMode;
+                    this.waybillDefaultData = waybillDefaultData;
 
                     this.typeHasNoPartialStatuses = partialStatuses.length === 0;
                     this.natureIdsToColors = natures.reduce((acc, {id, color}) => ({
@@ -532,10 +543,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                                     return zip(
                                         this.sqliteService.deleteBy(`reference`),
                                         this.hasWayBillData
-                                            ? this.apiService.requestApi(ApiService.DISPATCH_WAYBILL, {
-                                                pathParams: {dispatch: this.dispatch.id},
-                                                params: this.wayBillData
-                                            })
+                                            ? this.handleWaybill()
                                             : of(null),
                                         this.storage.getString(StorageKeyEnum.URL_SERVER)
                                     )
@@ -545,7 +553,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                                 mergeMap((res) => this.navService.pop({path: NavPathEnum.MAIN_MENU}).pipe(map(() => res)))
                             )
                             .subscribe(([ignoredQueryResponse, waybillResponse, url]) => {
-                                if (this.hasWayBillData && waybillResponse.filePath) {
+                                if (this.hasWayBillData && waybillResponse.filePath && !this.offlineMode) {
                                     Browser.open({url: url + waybillResponse.filePath})
                                 }
                             });
@@ -571,6 +579,25 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
         }
     }
 
+    private handleWaybill(): Observable<any> {
+        if (this.offlineMode) {
+            return this.sqliteService.insert('dispatch_waybill', this.wayBillData)
+                .pipe(
+                    mergeMap(() => {
+                        return of({
+                            success: true,
+                            data: this.wayBillData
+                        });
+                    })
+                );
+        } else {
+            return this.apiService.requestApi(ApiService.DISPATCH_WAYBILL, {
+                pathParams: {dispatch: this.dispatch.id},
+                params: this.wayBillData
+            });
+        }
+    }
+
     private confirmPack({id: packIdToConfirm, natureId, quantity, photo1, photo2}: DispatchPack): void {
         const packIndexToConfirm = this.dispatchPacks.findIndex(({id}) => (id === packIdToConfirm));
         if (packIndexToConfirm > -1) {
@@ -591,14 +618,10 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
     }
 
     public goToWayBill() {
-        if(!this.hasWayBillData) {
+        if (!this.hasWayBillData) {
             this.loadingService.presentLoadingWhile({
                 event: () => {
-                    return this.apiService.requestApi(ApiService.GET_WAYBILL_DATA, {
-                        pathParams: {
-                            dispatch: this.dispatch.id
-                        }
-                    })
+                    return this.wayBillDataEvent();
                 }
             }).subscribe((apiWayBill) => {
                 const fusedData = {
@@ -617,6 +640,42 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
             })
         } else {
             this.hasWayBillData = false;
+        }
+    }
+
+    private wayBillDataEvent(): Observable<any> {
+        if (this.offlineMode) {
+            let data;
+            if (this.waybillDefaultData) {
+                let waybillDataArray = JSON.parse(this.waybillDefaultData);
+
+                data = {
+                    carrier: waybillDataArray.carrier,
+                    consignor: waybillDataArray.consignor,
+                    consignorEmail: waybillDataArray.consignorEmail,
+                    consignorUsername: waybillDataArray.consignorUsername,
+                    dispatchDate: waybillDataArray.dispatchDate,
+                    locationFrom: waybillDataArray.locationFrom,
+                    locationTo: waybillDataArray.locationTo,
+                    notes: waybillDataArray.notes,
+                    receiver: waybillDataArray.receiver,
+                    receiverEmail: waybillDataArray.receiverEmail,
+                    receiverUsername: waybillDataArray.receiverUsername,
+                };
+            } else {
+                data = {};
+            }
+
+            return of({
+                    success: true,
+                    data: data,
+            });
+        } else {
+            return this.apiService.requestApi(ApiService.GET_WAYBILL_DATA, {
+                pathParams: {
+                    dispatch: this.dispatch.id
+                }
+            })
         }
     }
 }
