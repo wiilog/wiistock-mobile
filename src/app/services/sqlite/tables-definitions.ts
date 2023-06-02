@@ -16,6 +16,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
             {column: 'label', value: 'VARCHAR(255)'},
             {column: 'temperature_ranges', value: 'VARCHAR(255)'},
+            {column: 'signatories', value: 'VARCHAR(255)'},
         ]
     },
     {
@@ -519,6 +520,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
         schema: [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
             {column: 'username', value: 'VARCHAR(255)'},
+            {column: 'signatoryPassword', value: 'VARCHAR(255)'},
         ]
     },
     {
@@ -590,6 +592,20 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'minTrackingNumberLength', value: 'INTEGER'},
             {column: 'maxTrackingNumberLength', value: 'INTEGER'},
             {column: 'recurrent', value: 'INTEGER'},
+        ]
+    },
+    {
+        name: 'grouped_signature_history',
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'groupedSignatureType', value: 'VARCHAR(255)'},
+            {column: 'location', value: 'TEXT'},
+            {column: 'signatory', value: 'INTEGER'},
+            {column: 'operateur', value: 'VARCHAR(255)'},
+            {column: 'statutFrom', value: 'INTEGER'},
+            {column: 'statutTo', value: 'INTEGER'},
+            {column: 'signatureDate', value: 'VARCHAR(255)'},
+            {column: 'dispatchToSignIds', value: 'VARCHAR(255)'},
         ]
     },
 ];

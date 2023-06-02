@@ -50,4 +50,5 @@ export type TableName =   'emplacement'
                         | 'inventory_mission'
                         | 'inventory_location_zone'
                         | 'driver'
-                        | 'carrier';
+                        | 'carrier'
+                        | 'grouped_signature_history';
