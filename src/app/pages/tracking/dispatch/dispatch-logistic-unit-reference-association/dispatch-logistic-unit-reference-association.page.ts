@@ -10,9 +10,7 @@ import {FormPanelParam} from "@common/directives/form-panel/form-panel-param";
 import {
     FormPanelSelectComponent
 } from "@common/components/panel/form-panel/form-panel-select/form-panel-select.component";
-import {
-    FormPanelInputComponent
-} from "@common/components/panel/form-panel/form-panel-input/form-panel-input.component";
+import {FormPanelInputComponent} from "@common/components/panel/form-panel/form-panel-input/form-panel-input.component";
 import {
     FormPanelToggleComponent
 } from "@common/components/panel/form-panel/form-panel-toggle/form-panel-toggle.component";
@@ -30,8 +28,11 @@ import {
 } from "@common/components/panel/form-panel/form-panel-buttons/form-panel-buttons.component";
 import {Reference} from "@entities/reference";
 import {Dispatch} from "@entities/dispatch";
-import {of, zip} from "rxjs";
+import {Observable, of, zip} from "rxjs";
 import {ViewWillEnter} from "@ionic/angular";
+import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
+import {mergeMap} from "rxjs/operators";
+import {StorageService} from "@app/services/storage/storage.service";
 
 @Component({
     selector: 'wii-dispatch-logistic-unit-reference-association',
@@ -56,8 +57,10 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
 
     public edit: boolean = false;
     public viewMode: boolean = false;
+    public offlineMode: boolean = false;
 
-    public constructor(private sqliteService: SqliteService,
+    public constructor(private storageService: StorageService,
+                       private sqliteService: SqliteService,
                        private loadingService: LoadingService,
                        private mainHeaderService: MainHeaderService,
                        private toastService: ToastService,
@@ -68,9 +71,15 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
 
     public ionViewWillEnter(): void {
         this.loadingService.presentLoadingWhile({
-            event: () => this.apiService.requestApi(ApiService.GET_ASSOCIATED_DOCUMENT_TYPE_ELEMENTS)
-        }).subscribe((values) => {
-            this.associatedDocumentTypeElements = values;
+            event: () => {
+                return zip(
+                    this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
+                    this.apiService.requestApi(ApiService.GET_ASSOCIATED_DOCUMENT_TYPE_ELEMENTS),
+                )
+            }
+        }).subscribe(([dispatchOfflineMode, documentTypeElements]) => {
+            this.offlineMode = dispatchOfflineMode;
+            this.associatedDocumentTypeElements = documentTypeElements;
             this.reference = this.navService.param(`reference`) || {};
             this.edit = this.navService.param(`edit`) || false;
             this.viewMode = this.navService.param(`viewMode`) || false;
@@ -447,7 +456,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
         const {reference} = this.formPanelComponent.values;
         if (reference) {
             this.loadingService.presentLoadingWhile({
-                event: () => this.apiService.requestApi(ApiService.GET_REFERENCE, {params: {reference}}),
+                event: () => this.getReferenceEvent(reference),
                 message: `Récupération des informations de la référence en cours...`
             }).subscribe(({reference}) => {
                 this.disableValidate = false;
@@ -456,6 +465,45 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
             });
         } else {
             this.toastService.presentToast(`Veuillez renseigner une référence valide.`);
+        }
+    }
+
+    private getReferenceEvent(reference: string): Observable<any> {
+        if (this.offlineMode) {
+            return this.sqliteService.findOneBy('reference_article', {reference: reference})
+                .pipe(
+                    mergeMap((localRef) => {
+                        let serializedReference;
+                        if (localRef) {
+                            localRef =  <Reference> localRef;
+                            serializedReference = {
+                                reference: localRef.reference,
+                                outFormatEquipment: localRef.outFormatEquipment ?? '',
+                                manufacturerCode: localRef.manufacturerCode ?? '',
+                                width: localRef.width ?? '',
+                                height: localRef.height ?? '',
+                                length: localRef.length ?? '',
+                                volume: localRef.volume ?? '',
+                                weight: localRef.weight ?? '',
+                                associatedDocumentTypes: localRef.associatedDocumentTypes ?? '',
+                                exists: true,
+                            }
+
+
+                        } else {
+                            serializedReference = {
+                                reference: reference,
+                                exists: false,
+                            }
+                        }
+                        return of({
+                            success: true,
+                            reference: serializedReference,
+                        });
+                    })
+                );
+        } else {
+            return this.apiService.requestApi(ApiService.GET_REFERENCE, {params: {reference}});
         }
     }
 
