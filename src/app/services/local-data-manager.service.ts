@@ -7,7 +7,7 @@ import {Collecte} from '@entities/collecte';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {FileService} from "@app/services/file.service";
 import {StorageService} from "@app/services/storage/storage.service";
-import {Observable, of, ReplaySubject, Subject, zip} from 'rxjs';
+import {merge, Observable, of, ReplaySubject, Subject, zip} from 'rxjs';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {catchError, mergeMap, map} from 'rxjs/operators';
 import {DemandeLivraison} from '@entities/demande-livraison';
@@ -378,6 +378,11 @@ export class LocalDataManagerService {
                     return this.sendFinishedProcess('dispatch').pipe(map(() => needAnotherSynchronise));
                 }),
                 mergeMap((needAnotherSynchronise) => {
+                    synchronise$.next({finished: false, message: 'Envoi des acheminements hors ligne'});
+                    console.log('BAROT');
+                    return this.sendOfflineDispatchs().pipe(map(() => needAnotherSynchronise));
+                }),
+                mergeMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des transferts'});
                     return this.sendFinishedProcess('transfer').pipe(map(() => needAnotherSynchronise));
                 }),
@@ -428,6 +433,22 @@ export class LocalDataManagerService {
                         .pipe(map(() => ({data})))
                 )),
                 mergeMap(({data}) => this.sqliteService.importData(data))
+            );
+    }
+
+    private sendOfflineDispatchs() {
+        return this.sqliteService.findBy('dispatch')
+            .pipe(
+                mergeMap((dispatchs) => (
+                    dispatchs.length > 0
+                        ? this.apiService.requestApi(ApiService.NEW_OFFLINE_DISPATCHS, {
+                                params: {
+                                    dispatchs
+                                }
+                            },
+                        )
+                        : of(undefined)
+                ))
             );
     }
 

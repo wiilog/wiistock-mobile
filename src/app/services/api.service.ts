@@ -89,6 +89,7 @@ export class ApiService {
     public static readonly GET_CARRIERS = {method: GET, service: '/get-carriers-data'};
     public static readonly GET_TRUCK_ARRIVALS_DEFAULT_UNLOADING_LOCATION = {method: GET, service: '/get-truck-arrival-default-unloading-location'};
     public static readonly GET_TRUCK_ARRIVALS_LINES_NUMBER = {method: GET, service: '/get-truck-arrival-lines-number'};
+    public static readonly NEW_OFFLINE_DISPATCHS = {method: POST, service: '/new-offline-dispatches'};
 
 
     private static readonly DEFAULT_HEADERS = {
