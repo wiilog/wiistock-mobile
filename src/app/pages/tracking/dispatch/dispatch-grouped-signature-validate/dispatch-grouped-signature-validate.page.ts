@@ -74,17 +74,24 @@ export class DispatchGroupedSignatureValidatePage implements ViewWillEnter, View
         this.type = this.navService.param('type');
         this.status = this.navService.param('status');
 
-        // this.sqliteService.findOneById('status', this.navService.param('status'))
-        //     .subscribe((status?: Status) => {
-        //
-        // });
+        let groupedSignatureType = '';
+
+        if(this.from && this.to){
+            groupedSignatureType = '!= \'\'';
+        } else if (this.from){
+            groupedSignatureType = "= 'Enlèvement'";
+        } else if (this.to){
+            groupedSignatureType = "= 'Livraison '";
+        } else {
+            this.toastService.presentToast("Une erreur s'est produite lors de la sélection des demandes.");
+        }
 
         this.statusRequestParams = [
             `state = 'treated' OR state = 'partial'`,
             `category = 'acheminement'`,
             `typeId = ${this.type}`,
             `id != ${this.status}`,
-            'groupedSignatureType != \'\''
+            `groupedSignatureType ${groupedSignatureType}`
         ];
         this.loadingSubscription = this.loadingService.presentLoading()
             .pipe(

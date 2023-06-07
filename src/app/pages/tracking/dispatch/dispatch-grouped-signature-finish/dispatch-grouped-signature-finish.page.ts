@@ -1,5 +1,5 @@
 import {Component, EventEmitter, ViewChild} from '@angular/core';
-import {Subscription} from 'rxjs';
+import {of, Subscription, zip} from 'rxjs';
 import {NavService} from '@app/services/nav/nav.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {LoadingService} from '@app/services/loading.service';
@@ -17,11 +17,12 @@ import {StorageService} from "@app/services/storage/storage.service";
 import {FormPanelParam} from "@common/directives/form-panel/form-panel-param";
 import {FormPanelComponent} from "@common/components/panel/form-panel/form-panel.component";
 import {Status} from "@entities/status";
-import {
-    FormPanelInputComponent
-} from "@common/components/panel/form-panel/form-panel-input/form-panel-input.component";
+import {FormPanelInputComponent} from "@common/components/panel/form-panel/form-panel-input/form-panel-input.component";
 import {ApiService} from "@app/services/api.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
+import * as bcrypt from 'bcryptjs';
+import * as moment from "moment";
 
 @Component({
     selector: 'wii-dispatch-grouped-signature-finish',
@@ -41,6 +42,7 @@ export class DispatchGroupedSignatureFinishPage implements ViewWillEnter, ViewWi
 
     public resetEmitter$: EventEmitter<void>;
 
+    public offlineMode?: boolean;
     public labelFrom?: string;
     public labelTo?: string;
     public selectedStatus: Status;
@@ -147,6 +149,11 @@ export class DispatchGroupedSignatureFinishPage implements ViewWillEnter, ViewWi
                 },
             ];
         });
+
+        this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE)
+            .subscribe((offlineMode: boolean) => {
+                this.offlineMode = offlineMode;
+        });
     }
 
     public ionViewWillLeave(): void {
@@ -179,23 +186,69 @@ export class DispatchGroupedSignatureFinishPage implements ViewWillEnter, ViewWi
                             where: [`id IN (${this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.id).join(',')})`],
                         }]
                     ).pipe(
-                        mergeMap(() => this.apiService.requestApi(ApiService.FINISH_GROUPED_SIGNATURE, {
-                            params: {
-                                from: this.from ? this.from.id : null,
-                                to: this.to ? this.to.id : null,
-                                status: this.selectedStatus.id,
-                                signatoryTrigram,
-                                signatoryPassword,
-                                comment,
-                                dispatchesToSign: this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.id).join(','),
+                        mergeMap(() => {
+                            if (this.offlineMode) {
+                                return zip(
+                                    this.sqliteService.findOneBy('user', {username: signatoryTrigram}),
+                                    this.storageService.getString(StorageKeyEnum.OPERATOR_ID)
+                                ).pipe(
+                                    mergeMap((signatory, operator) => {
+                                        let user = signatory[0];
+                                        if(user){
+                                            const success = bcrypt.compareSync(signatoryPassword, user.signatoryPassword);
+                                            if(success){
+                                                const location = this.from && this.to || this.to
+                                                    ? this.to.id
+                                                    : this.from?.id;
+                                                this.sqliteService.insert('grouped_signature_history', {
+                                                    groupedSignatureType: this.selectedStatus.groupedSignatureType,
+                                                    location,
+                                                    signatory: user.id,
+                                                    operateur: operator,
+                                                    statutFrom: this.dispatchesToSign[0].statusId,
+                                                    statutTo: this.selectedStatus.id,
+                                                    signatureDate: moment().format(),
+                                                    dispatchToSignIds: this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.id).join(','),
+                                                });
+                                            }
+                                            return of({
+                                                success,
+                                                msg: success ? 'Signature groupée effectuée' : 'Le code signataire est invalide',
+                                            });
+                                        } else {
+                                            return of({
+                                                success: false,
+                                                msg: 'Le trigramme signataire est invalide.',
+                                            });
+                                        }
+
+                                }));
+                            } else {
+                                return this.apiService.requestApi(ApiService.FINISH_GROUPED_SIGNATURE, {
+                                    params: {
+                                        from: this.from ? this.from.id : null,
+                                        to: this.to ? this.to.id : null,
+                                        status: this.selectedStatus.id,
+                                        signatoryTrigram,
+                                        signatoryPassword,
+                                        comment,
+                                        dispatchesToSign: this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.id).join(','),
+                                    }
+                                })
                             }
-                        }))
+                        })
                     )
                 }
             }).subscribe((response) => {
                 this.toastService.presentToast(response.msg).subscribe(() => {
                     if(response.success){
-                        this.navService.setRoot(NavPathEnum.MAIN_MENU);
+                        if(this.offlineMode) {
+                            this.navService.pop({
+                                path: NavPathEnum.DISPATCH_REQUEST_MENU
+                            })
+                        } else {
+                            this.navService.setRoot(NavPathEnum.MAIN_MENU);
+                        }
                     }
                 });
             });
