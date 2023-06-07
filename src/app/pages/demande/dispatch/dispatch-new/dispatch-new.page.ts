@@ -281,24 +281,35 @@ export class DispatchNewPage implements ViewWillEnter {
             this.loadingService.presentLoadingWhile({
                 event: () => of(undefined).pipe(
                     mergeMap(() => this.trySavingDispatch(values)),
-                    mergeMap(({success, msg, dispatch}) => success ? (this.sqliteService.insert(`dispatch`, dispatch) as Observable<number>) : of({success, msg})),
-                    mergeMap((result: number | {success: boolean; msg?: string}) => {
+                    mergeMap(({success, msg, dispatch}) => (
+                        success && dispatch
+                            ? (this.sqliteService.insert(`dispatch`, dispatch) as Observable<number>)
+                            : of({success, msg, dispatch})
+                    )),
+                    mergeMap((result: number | {success: boolean; msg?: string, dispatch?: Dispatch}) => {
                         if (typeof result === `number`) {
-                            return this.navService.pop().pipe(mergeMap(() => {
-                                return this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-                                    localDispatchId: result,
-                                    fromCreate: true,
-                                });
-                            }));
-                        } else {
-                            return of(result.msg);
+                            return this.navService.pop()
+                                .pipe(
+                                    mergeMap(() => {
+                                        return this.navService.push(NavPathEnum.DISPATCH_PACKS, {
+                                            localDispatchId: result,
+                                            fromCreate: true,
+                                        });
+                                    }),
+                                    map(() => ({redirect: true}))
+                                );
+                        } else if (result.success && !result.dispatch) {
+                            return this.navService.pop().pipe(map(() => result));
+                        }
+                        else {
+                            return of(result);
                         }
                     })
                 ),
                 message: `Création de l'acheminement en cours...`,
-            }).subscribe((result?: boolean | string) => {
-                if (typeof result === 'string') {
-                    this.toastService.presentToast(result);
+            }).subscribe((result: {success?: boolean; msg?: string; redirect?: boolean}) => {
+                if (result.msg) {
+                    this.toastService.presentToast(result.msg);
                 }
             });
         }
