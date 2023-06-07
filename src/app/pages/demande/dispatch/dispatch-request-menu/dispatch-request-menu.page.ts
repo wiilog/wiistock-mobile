@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {ChangeDetectorRef, Component} from '@angular/core';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {CardListConfig} from '@common/components/card-list/card-list-config';
@@ -56,6 +56,7 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                        private formatService: FormatService,
                        private storageService: StorageService,
                        private translationService: TranslationService,
+                       private changeDetectorRef: ChangeDetectorRef,
                        private navService: NavService) {
         this.hasLoaded = false;
         this.loading = false;
@@ -205,8 +206,9 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
         this.networkService.hasNetwork().then((hasNetwork) => {
             if (hasNetwork) {
                 this.loading = true;
-
-                this.localDataManager.synchroniseDispatchsData()
+                this.hasLoaded = false;
+                this.changeDetectorRef.detectChanges();
+                this.localDataManager.synchroniseDispatchesData()
                     .subscribe({
                         next: ({finished, message}) => {
                             this.messageLoading = message;
@@ -215,21 +217,23 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                                     .findBy(`dispatch`, this.offlineMode
                                         ? [`createdBy = '${this.operator}'`]
                                         : [`draft = 1`])
-                                    .subscribe(([dispatches]) => {
+                                    .subscribe((dispatches) => {
                                         this.dispatches = dispatches;
                                         this.refreshPageList(this.dispatches);
                                 });
 
                                 this.loading = false;
-
+                                this.hasLoaded = true;
                                 $res.next();
                                 $res.complete();
                             } else {
                                 this.loading = true;
+                                this.hasLoaded = false;
                             }
                         },
                         error: (error) => {
                             this.loading = false;
+                            this.hasLoaded = true;
                             const {api, message} = error;
                             if (api && message) {
                                 this.toastService.presentToast(message);
@@ -241,6 +245,7 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
             }
             else {
                 this.loading = false;
+                this.hasLoaded = true;
                 this.toastService.presentToast('Veuillez vous connecter à internet afin de synchroniser vos données');
                 $res.complete();
             }

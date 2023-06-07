@@ -622,7 +622,8 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                 mergeMap(([notTreatedStatus]: Array<Status>) => this.sqliteService.update(`dispatch`, [{
                     values: {
                         draft: 0,
-                        status: notTreatedStatus?.id || this.dispatch.statusId
+                        statusId: notTreatedStatus?.id || this.dispatch.statusId,
+                        statusLabel: notTreatedStatus?.label || this.dispatch.statusLabel
                     },
                     where: [`localId = ${this.dispatch.localId}`]
                 }]))

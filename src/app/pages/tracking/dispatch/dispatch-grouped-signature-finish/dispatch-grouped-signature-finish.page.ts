@@ -3,7 +3,7 @@ import {of, Subscription, zip} from 'rxjs';
 import {NavService} from '@app/services/nav/nav.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {LoadingService} from '@app/services/loading.service';
-import {mergeMap} from 'rxjs/operators';
+import {map, mergeMap} from 'rxjs/operators';
 import {Dispatch} from '@entities/dispatch';
 import {CardListConfig} from '@common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
@@ -23,6 +23,8 @@ import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import * as bcrypt from 'bcryptjs';
 import * as moment from "moment";
+import {User} from "@entities/user";
+import {Emplacement} from "@entities/emplacement";
 
 @Component({
     selector: 'wii-dispatch-grouped-signature-finish',
@@ -153,7 +155,7 @@ export class DispatchGroupedSignatureFinishPage implements ViewWillEnter, ViewWi
         this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE)
             .subscribe((offlineMode: boolean) => {
                 this.offlineMode = offlineMode;
-        });
+            });
     }
 
     public ionViewWillLeave(): void {
@@ -170,79 +172,117 @@ export class DispatchGroupedSignatureFinishPage implements ViewWillEnter, ViewWi
         }
     }
 
-    public finishGroupedSignature(){
+    public checkSignatureAndUpdateStatuses(signatoryPassword: string, signatory?: User) {
+        const success = signatory && signatory.signatoryPassword && bcrypt.compareSync(signatoryPassword, signatory.signatoryPassword);
+        return (this.offlineMode && success || !this.offlineMode)
+            ? this.sqliteService.update(
+                'dispatch',
+                [{
+                    values: {
+                        statusId: this.selectedStatus.id,
+                        statusLabel: this.selectedStatus.label,
+                        partial: this.selectedStatus.state === 'partial' ? 1 : 0
+                    },
+                    where: [`id IN (${this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.id).join(',')})`],
+                }])
+            : of(undefined)
+    }
+
+    public checkSignatureAndInsertProcesses(signatoryPassword: string, operator: string | null, signatory?: User, comment?: string) {
+        if (signatory) {
+            let location;
+            if(this.from && this.selectedStatus.groupedSignatureType === 'Enlèvement'){
+                location = this.from.id;
+            } else if (this.to && this.selectedStatus.groupedSignatureType === 'Livraison'){
+                location = this.to.id;
+            }
+
+            return location
+                ? this.sqliteService.findOneById('emplacement', location)
+                    .pipe(
+                        mergeMap((location?: Emplacement) => {
+                            const signatoriesIds = location?.signatories
+                                ? location.signatories.split(';').filter((element) => element)
+                                : [];
+
+                            const success = signatory
+                                && signatory.signatoryPassword
+                                && location
+                                && signatoriesIds.includes(`${signatory.id}`)
+                                && bcrypt.compareSync(signatoryPassword, signatory.signatoryPassword);
+                            if (success) {
+                                return this.sqliteService.insert('grouped_signature_history', this.dispatchesToSign.map((dispatch: Dispatch) => ({
+                                    groupedSignatureType: this.selectedStatus.groupedSignatureType,
+                                    location,
+                                    signatory: signatory.id,
+                                    operateur: operator,
+                                    statutFrom: this.dispatchesToSign[0].statusId,
+                                    statutTo: this.selectedStatus.id,
+                                    signatureDate: moment().format(),
+                                    dispatchId: dispatch.id,
+                                    localId: dispatch.localId,
+                                    comment
+                                }))).pipe(map(() => ({
+                                    success: true,
+                                    msg: 'Signature groupée effectuée',
+                                })));
+                            }
+                            return of({
+                                success: false,
+                                msg: 'Informations invalides',
+                            });
+                        }))
+                : of({
+                    success: false,
+                    msg: 'Informations invalides',
+                });
+        } else {
+            return of({
+                success: false,
+                msg: 'Informations invalides',
+            });
+        }
+    }
+
+    public finishGroupedSignature() {
         const {signatoryTrigram, signatoryPassword, comment} = this.formPanelComponent.values;
-        if(signatoryTrigram && signatoryPassword && (!Boolean(this.selectedStatus.commentNeeded) || comment)){
+        if (signatoryTrigram && signatoryPassword && (!Boolean(this.selectedStatus.commentNeeded) || comment)) {
             this.loadingService.presentLoadingWhile({
                 event: () => {
-                    return this.sqliteService.update(
-                        'dispatch',
-                        [{
-                            values: {
-                                statusId: this.selectedStatus.id,
-                                statusLabel: this.selectedStatus.label,
-                                partial: this.selectedStatus.state === 'partial' ? 1 : 0
-                            },
-                            where: [`id IN (${this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.id).join(',')})`],
-                        }]
-                    ).pipe(
-                        mergeMap(() => {
-                            if (this.offlineMode) {
-                                return zip(
-                                    this.sqliteService.findOneBy('user', {username: signatoryTrigram}),
-                                    this.storageService.getString(StorageKeyEnum.OPERATOR_ID)
-                                ).pipe(
-                                    mergeMap((signatory, operator) => {
-                                        let user = signatory[0];
-                                        if(user){
-                                            const success = bcrypt.compareSync(signatoryPassword, user.signatoryPassword);
-                                            if(success){
-                                                const location = this.from && this.to || this.to
-                                                    ? this.to.id
-                                                    : this.from?.id;
-                                                this.sqliteService.insert('grouped_signature_history', {
-                                                    groupedSignatureType: this.selectedStatus.groupedSignatureType,
-                                                    location,
-                                                    signatory: user.id,
-                                                    operateur: operator,
-                                                    statutFrom: this.dispatchesToSign[0].statusId,
-                                                    statutTo: this.selectedStatus.id,
-                                                    signatureDate: moment().format(),
-                                                    dispatchToSignIds: this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.id).join(','),
-                                                });
-                                            }
-                                            return of({
-                                                success,
-                                                msg: success ? 'Signature groupée effectuée' : 'Le code signataire est invalide',
-                                            });
-                                        } else {
-                                            return of({
-                                                success: false,
-                                                msg: 'Le trigramme signataire est invalide.',
-                                            });
+                    return this.sqliteService.findOneBy('user', {username: signatoryTrigram})
+                        .pipe(
+                            mergeMap((signatory) => {
+                                return this.checkSignatureAndUpdateStatuses(signatoryPassword, signatory);
+                            }),
+                            mergeMap(() => {
+                                if (this.offlineMode) {
+                                    return zip(
+                                        this.sqliteService.findOneBy('user', {username: signatoryTrigram}),
+                                        this.storageService.getString(StorageKeyEnum.OPERATOR_ID)
+                                    ).pipe(
+                                        mergeMap(([signatory, operator]) => {
+                                            return this.checkSignatureAndInsertProcesses(signatoryPassword, operator, signatory, comment);
+                                        }));
+                                } else {
+                                    return this.apiService.requestApi(ApiService.FINISH_GROUPED_SIGNATURE, {
+                                        params: {
+                                            from: this.from ? this.from.id : null,
+                                            to: this.to ? this.to.id : null,
+                                            status: this.selectedStatus.id,
+                                            signatoryTrigram,
+                                            signatoryPassword,
+                                            comment,
+                                            dispatchesToSign: this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.id).join(','),
                                         }
-
-                                }));
-                            } else {
-                                return this.apiService.requestApi(ApiService.FINISH_GROUPED_SIGNATURE, {
-                                    params: {
-                                        from: this.from ? this.from.id : null,
-                                        to: this.to ? this.to.id : null,
-                                        status: this.selectedStatus.id,
-                                        signatoryTrigram,
-                                        signatoryPassword,
-                                        comment,
-                                        dispatchesToSign: this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.id).join(','),
-                                    }
-                                })
-                            }
-                        })
-                    )
+                                    })
+                                }
+                            })
+                        )
                 }
             }).subscribe((response) => {
                 this.toastService.presentToast(response.msg).subscribe(() => {
-                    if(response.success){
-                        if(this.offlineMode) {
+                    if (response.success) {
+                        if (this.offlineMode) {
                             this.navService.pop({
                                 path: NavPathEnum.DISPATCH_REQUEST_MENU
                             })

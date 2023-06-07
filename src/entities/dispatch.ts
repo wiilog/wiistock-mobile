@@ -1,7 +1,7 @@
 export interface Dispatch {
     localId: number;// local sqlite id
     id?: number; // id on the server, undefined if dispatch created on device
-    createdAt: number;
+    createdAt: string;
     requester: string;
     number?: string;
     carrierTrackingNumber: string;

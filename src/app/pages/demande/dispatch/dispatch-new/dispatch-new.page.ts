@@ -27,6 +27,7 @@ import {Translations} from "@entities/translation";
 import {ViewWillEnter} from "@ionic/angular";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {Dispatch} from "@entities/dispatch";
+import * as moment from "moment";
 
 
 @Component({
@@ -346,6 +347,8 @@ export class DispatchNewPage implements ViewWillEnter {
                 statusId: statuses[0]?.id,
                 statusLabel: statuses[0]?.label,
                 groupedSignatureStatusColor: statuses[0]?.groupedSignatureStatusColor,
+                createdAt: moment().format(),
+                createdBy: requester,
             } as Dispatch))
         )
     }

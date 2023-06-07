@@ -440,7 +440,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                     event: () => zip(
                         this.sqliteService.deleteBy(`dispatch_pack`, [
                             `code = '${this.logisticUnit}'`,
-                            `dispatchId = ${this.dispatch.id || ''} OR localDispatchId = ${this.dispatch.localId || ''}`
+                            this.dispatch.id ? `dispatchId = ${this.dispatch.id || ''}` : `localDispatchId = ${this.dispatch.localId || ''}`
                         ]),
                         this.sqliteService.insert(`dispatch_pack`, {
                             code: this.logisticUnit,

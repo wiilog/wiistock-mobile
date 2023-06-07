@@ -7,7 +7,7 @@ import {Collecte} from '@entities/collecte';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {FileService} from "@app/services/file.service";
 import {StorageService} from "@app/services/storage/storage.service";
-import {merge, Observable, of, ReplaySubject, Subject, zip} from 'rxjs';
+import {merge, Observable, of, ReplaySubject, Subject, tap, zip} from 'rxjs';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {catchError, mergeMap, map} from 'rxjs/operators';
 import {DemandeLivraison} from '@entities/demande-livraison';
@@ -16,6 +16,7 @@ import {TransferOrder} from '@entities/transfer-order';
 import {AlertService} from '@app/services/alert.service';
 import {TranslationService} from '@app/services/translations.service';
 import {DispatchPack} from '@entities/dispatch-pack';
+import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 
 
 type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies' | 'dispatch' | 'transfer' | 'empty_round';
@@ -45,6 +46,8 @@ type DemandeForApi = {
 export class LocalDataManagerService {
 
     private readonly apiProccessConfigs: {[type in Process]: ApiProccessConfig};
+
+    private dispatchOfflineMode: boolean = false;
 
     public constructor(private sqliteService: SqliteService,
                        private apiService: ApiService,
@@ -350,6 +353,12 @@ export class LocalDataManagerService {
         this.importData()
             .pipe(
                 mergeMap(() => {
+                    return this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE);
+                }),
+                tap((dispatchOfflineMode) => {
+                    this.dispatchOfflineMode = dispatchOfflineMode;
+                }),
+                mergeMap(() => {
                     synchronise$.next({finished: false, message: 'Envoi des préparations non synchronisées'});
                     return this.sendFinishedProcess('preparation').pipe(map(Boolean));
                 }),
@@ -375,11 +384,9 @@ export class LocalDataManagerService {
                 }),
                 mergeMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des acheminements'});
-                    return this.sendFinishedProcess('dispatch').pipe(map(() => needAnotherSynchronise));
-                }),
-                mergeMap((needAnotherSynchronise) => {
-                    synchronise$.next({finished: false, message: 'Envoi des acheminements hors ligne'});
-                    return this.sendOfflineDispatchs().pipe(map(() => needAnotherSynchronise));
+                    return this.dispatchOfflineMode
+                        ? this.sendOfflineDispatches().pipe(map(() => needAnotherSynchronise))
+                        : this.sendFinishedProcess('dispatch').pipe(map(() => needAnotherSynchronise));
                 }),
                 mergeMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des transferts'});
@@ -412,22 +419,14 @@ export class LocalDataManagerService {
         return synchronise$;
     }
 
-    public synchroniseDispatchsData(){
+    public synchroniseDispatchesData(){
         const synchronise$ = new ReplaySubject<{finished: boolean, message?: string}>(1);
 
         LocalDataManagerService.ShowSyncMessage(synchronise$);
-        this.importData()
+        this.sendOfflineDispatches()
             .pipe(
-                mergeMap((needAnotherSynchronise) => {
-                    synchronise$.next({finished: false, message: 'Envoi des acheminements hors ligne'});
-                    return this.sendOfflineDispatchs().pipe(map(() => needAnotherSynchronise));
-                }),
-                // we reload data from API if we have save data in previous requests
-                mergeMap((needAnotherSynchronise) => {
-                    if (needAnotherSynchronise) {
-                        LocalDataManagerService.ShowSyncMessage(synchronise$);
-                    }
-                    return needAnotherSynchronise ? this.importData() : of(false);
+                mergeMap(() => {
+                    return this.importData();
                 })
             )
             .subscribe({
@@ -468,11 +467,11 @@ export class LocalDataManagerService {
             );
     }
 
-    private sendOfflineDispatchs() {
+    private sendOfflineDispatches() {
         return zip(
             this.sqliteService.findBy('dispatch'),
             this.sqliteService.findBy('dispatch_pack'),
-            this.sqliteService.findBy('reference'),//TODO merge modif d'adrien
+            this.sqliteService.findBy('dispatch_reference'),
             this.sqliteService.findBy('grouped_signature_history'),
         )
             .pipe(

@@ -2,7 +2,7 @@
                  [message]="messageLoading"></wii-main-loader>
 
 
-<div *ngIf="hasLoaded"
+<div *ngIf="hasLoaded || !loading"
      scroll-y="true"
      class="page-content">
     <wii-card-list *ngIf="(hasLoaded || !loading) && dispatches && dispatches.length > 0"

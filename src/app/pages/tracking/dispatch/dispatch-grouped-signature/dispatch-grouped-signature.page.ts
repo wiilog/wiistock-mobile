@@ -130,6 +130,7 @@ export class DispatchGroupedSignaturePage implements ViewWillEnter, ViewWillLeav
                     mergeMap(() => zip(
                         this.sqliteService.findBy('dispatch',
                             [
+                                'draft = 0',
                                 'treatedStatusId IS NULL OR partial = 1',
                                 ...filtersSQL
                             ]
