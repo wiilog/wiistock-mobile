@@ -28,7 +28,7 @@ export enum StorageKeyEnum {
     PARAMETER_DISPLAY_TARGET_LOCATION_PICKING = 'displayTargetLocationPicking',
     PARAMETER_DISPLAY_REFERENCE_CODE_AND_SCAN = 'displayReferenceCodeAndScan',
     PARAMETER_RFID_PREFIX = 'rfidPrefix',
-    DISPATCH_OFFLINE_MODE = 'offlineMode',
+    DISPATCH_OFFLINE_MODE = 'dispatchOfflineMode',
 
     API_KEY = 'api-key',
     OPERATOR = 'operator',

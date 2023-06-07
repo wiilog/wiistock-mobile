@@ -128,7 +128,7 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                     },
                     action: () => {
                         this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-                            dispatchId: dispatch.id,
+                            localDispatchId: dispatch.localId,
                             fromCreate: true,
                         });
                     },

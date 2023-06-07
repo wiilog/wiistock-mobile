@@ -156,7 +156,6 @@ export class PriseUlDetails implements ViewWillEnter {
                                     required: false,
                                     barcodeScanner: false,
                                     searchType: SelectItemTypeEnum.PROJECT,
-                                    label: 'code'
                                 },
                             }
                         },

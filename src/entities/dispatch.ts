@@ -1,10 +1,12 @@
 export interface Dispatch {
-    id: number;
+    localId: number;// local sqlite id
+    id?: number; // id on the server, undefined if dispatch created on device
+    createdAt: number;
     requester: string;
-    number: string;
+    number?: string;
     carrierTrackingNumber: string;
-    startDate: string;
-    endDate: string;
+    startDate?: string;
+    endDate?: string;
     emergency: string;
     locationFromLabel: string;
     locationFromId: number;
@@ -18,11 +20,11 @@ export interface Dispatch {
     statusLabel: string;
     statusId: number;
     color: string;
-    destination: string;
+    destination?: string;
     comment: string;
-    packReferences: string;
-    quantities: string;
-    packs: string;
+    packReferences?: string;
+    quantities?: string;
+    packs?: string;
     draft?: boolean;
     groupedSignatureStatusColor?: string;
     createdBy: string;
