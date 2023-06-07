@@ -296,7 +296,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
             const fullTranslations = fieldsTranslations.concat(generalTranslations);
             const dispatchTranslations = TranslationService.CreateTranslationDictionaryFromArray(fullTranslations);
             this.dispatchHeaderConfig = {
-                title: `Demande N°${this.dispatch.number}`,
+                title: this.dispatch.number ? `Demande N°${this.dispatch.number}` : `Type ${this.dispatch.typeLabel}`,
                 subtitle: [
                     this.fromCreate && this.fieldParams.displayCarrierTrackingNumber
                         ? TranslationService.Translate(dispatchTranslations, 'N° tracking transporteur') + ` : ${this.dispatch.carrierTrackingNumber || ''}`
@@ -315,7 +315,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                             : null,
                     this.dispatch.destination ? `Destination : ${this.dispatch.destination || ''}` : null
                 ].filter((item) => item) as Array<string>,
-                info: `Type ${this.dispatch.typeLabel}`,
+                info: this.dispatch.number ? `Type ${this.dispatch.typeLabel}` : undefined,
                 transparent: true,
                 leftIcon: {
                     color: CardListColorEnum.GREEN,

@@ -138,10 +138,10 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                             value: dispatch.number
                         }] : [{}]),
                         ...(this.offlineMode
-                            ? (dispatch.syncAt
+                            ? (dispatch.updatedAt
                                 ? [{
                                     label: 'Dernière synchronisation',
-                                    value: moment(dispatch.syncAt, moment.defaultFormat).format('DD/MM/YYYY HH:mm')
+                                    value: moment(dispatch.updatedAt, moment.defaultFormat).format('DD/MM/YYYY HH:mm')
                                 }]
                                 : [{
                                     label: 'Synchronisé',
@@ -163,7 +163,7 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                             ? {label: 'Urgence', value: dispatch.emergency || ''}
                             : undefined)
                     ].filter((item) => item && item.value) as Array<{label: string; value: string;}>,
-                    ...(this.offlineMode && !dispatch.syncAt
+                    ...(this.offlineMode && !dispatch.id
                         ? {
                             rightIcon: {
                                 name: 'trash.svg',
