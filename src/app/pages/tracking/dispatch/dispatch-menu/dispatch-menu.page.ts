@@ -131,16 +131,16 @@ export class DispatchMenuPage implements ViewWillEnter, ViewWillLeave {
 
     public onScanningDispatch(dispatch?: Dispatch) {
         if (dispatch) {
-            this.redirectToDispatch(dispatch.id);
+            this.redirectToDispatch(dispatch.localId);
         }
         else {
             this.toastService.presentToast('Aucun acheminement correspondant');
         }
     }
 
-    private redirectToDispatch(id: number) {
+    private redirectToDispatch(localId: number) {
         this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-            dispatchId: id
+            localDispatchId: localId
         });
     }
 

@@ -5,6 +5,7 @@ export interface DispatchPack {
     natureId?: number;
     quantity: number;
     dispatchId: number;
+    localDispatchId: number;
     lastLocation?: string;
     treated?: number;
     already_treated?: number;

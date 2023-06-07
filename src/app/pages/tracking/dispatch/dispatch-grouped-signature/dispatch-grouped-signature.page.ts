@@ -180,21 +180,6 @@ export class DispatchGroupedSignaturePage implements ViewWillEnter, ViewWillLeav
         this.mainHeaderService.emitSubTitle(`${dispatchesLength === 0 ? 'Aucune' : dispatchesLength} demande${dispatchesLength > 1 ? 's' : ''}`)
     }
 
-    public onScanningDispatch(dispatch?: Dispatch) {
-        if (dispatch) {
-            this.redirectToDispatch(dispatch.id);
-        }
-        else {
-            this.toastService.presentToast('Aucun acheminement correspondant');
-        }
-    }
-
-    private redirectToDispatch(id: number) {
-        this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-            dispatchId: id
-        });
-    }
-
     private refreshHeaders() {
         this.headerFilteredDispatchs = {
             title: `Demandes filtrées`,
@@ -294,7 +279,7 @@ export class DispatchGroupedSignaturePage implements ViewWillEnter, ViewWillLeav
                     },
                     action: () => {
                         this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-                            dispatchId: dispatch.id,
+                            localDispatchId: dispatch.localId,
                             fromCreate: true,
                             viewMode: true
                         });
