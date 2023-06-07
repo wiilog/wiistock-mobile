@@ -390,11 +390,13 @@ export const TablesDefinitions: Array<TableDefinition> = [
     {
         name: 'dispatch',
         schema: [
-            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'localId', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'id', value: 'INTEGER'},
             {column: 'requester', value: 'VARCHAR(255)'},
             {column: 'number', value: 'VARCHAR(255)'},
             {column: 'statusId', value: 'INTEGER'},
             {column: 'startDate', value: 'VARCHAR(255)'},
+            {column: 'createdAt', value: 'VARCHAR(255)'},
             {column: 'endDate', value: 'VARCHAR(255)'},
             {column: 'carrierTrackingNumber', value: 'VARCHAR(255)'},
             {column: 'emergency', value: 'VARCHAR(255)'},
@@ -425,6 +427,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'natureId', value: 'INTEGER'},
             {column: 'quantity', value: 'INTEGER'},
             {column: 'dispatchId', value: 'INTEGER'},
+            {column: 'localDispatchId', value: 'INTEGER'},
             {column: 'lastLocation', value: 'VARCHAR(255)'},
             {column: 'treated', value: 'INTEGER'},
             {column: 'already_treated', value: 'INTEGER'},
@@ -528,7 +531,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
         ]
     },
     {
-        name: 'reference',
+        name: 'dispatch_reference',
         schema: [
             {column: 'reference', value: 'VARCHAR(255)'},
             {column: 'quantity', value: 'INTEGER'},

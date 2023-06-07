@@ -1,4 +1,4 @@
-export interface Reference {
+export interface DispatchReference {
     reference: string;
     quantity: number;
     outFormatEquipment?: boolean;

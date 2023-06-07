@@ -95,7 +95,7 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
     }
 
     private valueToText(value: any) {
-        const labelItem = this.searchComponent.config[this.searchComponent.smartType]?.label || 'label';
+        const labelItem = SearchItemComponent.SEARCH_CONFIGS[this.searchComponent?.smartType]?.label || 'label';
 
         return Array.isArray(value)
             ? value.map(v => v[labelItem]).join(FormPanelSelectComponent.MULTIPLE_SEPARATOR)

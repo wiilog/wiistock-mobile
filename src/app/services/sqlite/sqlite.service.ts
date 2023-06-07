@@ -17,6 +17,8 @@ import {DemandeLivraisonArticle} from '@entities/demande-livraison-article';
 import {CapacitorSQLite, CapacitorSQLitePlugin} from '@capacitor-community/sqlite';
 import {Carrier} from '@entities/carrier';
 import {Driver} from "@entities/driver";
+import {Dispatch} from "@entities/dispatch";
+import {DispatchPack} from "@entities/dispatch-pack";
 
 @Injectable({
     providedIn: 'root'
@@ -30,50 +32,6 @@ export class SqliteService {
     public constructor(private storageService: StorageService) {
         this.sqlite = CapacitorSQLite;
     }
-
-    // private retrieveDBConnection(): Observable<void> {
-    //     if (this.db) {
-    //         return of(undefined);
-    //     }
-    //     else {
-    //         return from(this.sqlite.checkConnectionsConsistency())
-    //             .pipe(
-    //                 mergeMap(() => from(this.sqlite.isConnection(SqliteService.DB_NAME, false))),
-    //                 mergeMap(({result}) => (
-    //                     result
-    //                         ? from(this.sqlite.retrieveConnection(SqliteService.DB_NAME, false))
-    //                         : from(this.sqlite.createConnection(SqliteService.DB_NAME, false, 'no-encryption', 1, false))
-    //                 )),
-    //                 tap((db: SQLiteDBConnection) => {
-    //                     if (!db) {
-    //                         throw new Error(`Database returned is null`);
-    //                     }
-    //                     // save database connexion for next queries
-    //                     this.db = db;
-    //                 }),
-    //                 map(() => undefined)
-    //             );
-    //     }
-    // }
-
-   /* private ensureDBIsOpened(): Observable<void> {
-        if (this.db) {
-            return from(this.db.isDBOpen()).pipe(
-                mergeMap(({result}) => {
-                    if (!this.db) {
-                        throw new Error('You had to retrieve connection before');
-                    }
-                    return !result
-                            ? from(this.db.open())
-                            : of(undefined)
-                })
-            );
-        }
-        else {
-            throw new Error('You had to retrieve connection before');
-        }
-    }*/
-
 
     public resetDataBase(force: boolean = false): Observable<void> {
         return this.clearDatabase(force)
@@ -292,9 +250,21 @@ export class SqliteService {
                         ? this.insert('dispatch', dispatches)
                         : of(undefined)
                 )),
-                mergeMap(() => (
+                mergeMap(() => this.findAll('dispatch')),
+
+                map((dispatches: Array<Dispatch>) => (
+                    dispatches.reduce((acc, {id, localId}) => ({
+                        ...acc,
+                        [id as number]: localId,
+                    }), {})
+                )),
+                mergeMap((dispatches: { [id: number]: number }) => (
                     dispatchPacks.length > 0
-                        ? this.insert('dispatch_pack', dispatchPacks)
+                        ? this.insert('dispatch_pack', dispatchPacks.map(({dispatchId, ...dispatchPack}: DispatchPack) => ({
+                            dispatchId,
+                            ...dispatchPack,
+                            localDispatchId: dispatches[dispatchId],
+                        })))
                         : of(undefined)
                 ))
             );
