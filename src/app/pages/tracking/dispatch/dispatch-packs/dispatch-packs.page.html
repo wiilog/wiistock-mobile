@@ -11,7 +11,8 @@
                       [leftIcon]="dispatchHeaderConfig.leftIcon"
                       [rightIcons]="dispatchHeaderConfig.rightIcon">
     </wii-panel-header>
-    <ion-item *ngIf="fromCreate && ableToCreateWaybill">
+<!--    TODO WIIS-9780 -->
+    <ion-item *ngIf="fromCreate && ableToCreateWaybill && false">
         <ion-label>Lettre de voiture</ion-label>
         <ion-toggle slot="end"
                     [checked]="this.hasWayBillData"
