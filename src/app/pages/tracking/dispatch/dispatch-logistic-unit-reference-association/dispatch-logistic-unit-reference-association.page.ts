@@ -437,21 +437,20 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
             } else {
                 reference.logisticUnit = this.logisticUnit;
                 this.loadingService.presentLoadingWhile({
-                    event: () => zip(
-                        this.sqliteService.deleteBy(`dispatch_pack`, [
-                            `code = '${this.logisticUnit}'`,
-                            `dispatchId = ${this.dispatch.id || ''} OR localDispatchId = ${this.dispatch.localId || ''}`
-                        ]),
-                        this.sqliteService.insert(`dispatch_pack`, {
+                    event: () => this.sqliteService.deleteBy(`dispatch_pack`, [
+                        `code = '${this.logisticUnit}'`,
+                        this.dispatch.id ? `dispatchId = ${this.dispatch.id || ''}` : `localDispatchId = ${this.dispatch.localId || ''}`
+                    ]).pipe(
+                        mergeMap(() => this.sqliteService.insert(`dispatch_pack`, {
                             code: this.logisticUnit,
                             quantity: reference.quantity,
                             dispatchId: this.dispatch.id,
                             localDispatchId: this.dispatch.localId,
                             treated: 1,
                             reference: reference.reference
-                        }),
-                        this.sqliteService.deleteBy('dispatch_reference', [`reference = '${reference.reference}'`, `logisticUnit = '${reference.logisticUnit}'`]),
-                        this.sqliteService.insert(`dispatch_reference`, reference)
+                        })),
+                        mergeMap(() => this.sqliteService.deleteBy('dispatch_reference', [`reference = '${reference.reference}'`, `logisticUnit = '${reference.logisticUnit}'`])),
+                        mergeMap(() => this.sqliteService.insert(`dispatch_reference`, reference)),
                     )
                 }).subscribe(() => {
                     this.navService.pop();

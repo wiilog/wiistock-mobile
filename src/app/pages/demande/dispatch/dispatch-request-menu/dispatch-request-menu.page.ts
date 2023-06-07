@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {ChangeDetectorRef, Component} from '@angular/core';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {CardListConfig} from '@common/components/card-list/card-list-config';
@@ -15,12 +15,11 @@ import {NetworkService} from '@app/services/network.service';
 import {Dispatch} from "@entities/dispatch";
 import {TranslationService} from "@app/services/translations.service";
 import {Translations} from "@entities/translation";
-import {mergeMap, zip} from "rxjs";
+import {mergeMap, Observable, Subject, zip} from "rxjs";
 import {ViewWillEnter} from "@ionic/angular";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {FormatService} from "@app/services/format.service";
 import * as moment from "moment";
-
 
 @Component({
     selector: 'wii-dispatch-request-menu',
@@ -38,6 +37,11 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
 
     public fabListActivated: boolean;
     public offlineMode: boolean;
+    public loading: boolean;
+
+    public operator?: string | any;
+
+    public messageLoading?: string;
 
     private apiSending: boolean;
     private dispatchTranslations: Translations;
@@ -52,8 +56,10 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                        private formatService: FormatService,
                        private storageService: StorageService,
                        private translationService: TranslationService,
+                       private changeDetectorRef: ChangeDetectorRef,
                        private navService: NavService) {
         this.hasLoaded = false;
+        this.loading = false;
         this.fabListActivated = false
         this.apiSending = false;
         this.offlineMode = false;
@@ -68,6 +74,7 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                 ).pipe(
                     mergeMap(([dispatchOfflineMode, operator]) => {
                         this.offlineMode = dispatchOfflineMode;
+                        this.operator = operator;
                         return this.sqliteService.findBy(`dispatch`, dispatchOfflineMode
                             ? [`createdBy = '${operator}'`]
                             : [`draft = 1`]);
@@ -96,10 +103,6 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
 
     public onAddClick(): void {
         this.navService.push(NavPathEnum.DISPATCH_NEW);
-    }
-
-    public onRefreshClick(): void{
-
     }
 
     public onGroupedSignatureClick(): void{
@@ -163,7 +166,7 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                             ? {label: 'Urgence', value: dispatch.emergency || ''}
                             : undefined)
                     ].filter((item) => item && item.value) as Array<{label: string; value: string;}>,
-                    ...(this.offlineMode && !dispatch.id
+                    ...(this.offlineMode && !dispatch.id && dispatch.draft
                         ? {
                             rightIcon: {
                                 name: 'trash.svg',
@@ -191,9 +194,63 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
     }
 
     private deleteDispatch(dispatch: Dispatch){
-        this.sqliteService.deleteBy(`dispatch`, [`id = '${dispatch.id}'`]);
-        const selectedLinesToDelete = this.dispatches.findIndex((line) => line.id === dispatch.id);
+        this.sqliteService.deleteBy(`dispatch`, [`id = '${dispatch.localId}'`]);
+        const selectedLinesToDelete = this.dispatches.findIndex((line) => line.localId === dispatch.localId);
         this.dispatches.splice(selectedLinesToDelete, 1);
         this.refreshPageList(this.dispatches);
+    }
+
+    public synchronise(): Observable<void> {
+        const $res = new Subject<void>();
+
+        this.networkService.hasNetwork().then((hasNetwork) => {
+            if (hasNetwork) {
+                this.loading = true;
+                this.hasLoaded = false;
+                this.changeDetectorRef.detectChanges();
+                this.localDataManager.synchroniseDispatchesData()
+                    .subscribe({
+                        next: ({finished, message}) => {
+                            this.messageLoading = message;
+                            if (finished) {
+                                this.sqliteService
+                                    .findBy(`dispatch`, this.offlineMode
+                                        ? [`createdBy = '${this.operator}'`]
+                                        : [`draft = 1`])
+                                    .subscribe((dispatches) => {
+                                        this.dispatches = dispatches;
+                                        this.refreshPageList(this.dispatches);
+                                });
+
+                                this.loading = false;
+                                this.hasLoaded = true;
+                                $res.next();
+                                $res.complete();
+                            } else {
+                                this.loading = true;
+                                this.hasLoaded = false;
+                            }
+                        },
+                        error: (error) => {
+                            this.loading = false;
+                            this.hasLoaded = true;
+                            const {api, message} = error;
+                            if (api && message) {
+                                this.toastService.presentToast(message);
+                            }
+                            $res.complete();
+                            throw error;
+                        }
+                    });
+            }
+            else {
+                this.loading = false;
+                this.hasLoaded = true;
+                this.toastService.presentToast('Veuillez vous connecter à internet afin de synchroniser vos données');
+                $res.complete();
+            }
+        });
+
+        return $res;
     }
 }

@@ -420,6 +420,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'groupedSignatureStatusColor', value: 'VARCHAR(255)'},
             {column: 'createdBy', value: 'VARCHAR(255)'},
             {column: 'updatedAt', value: 'VARCHAR(255)'},
+            {column: 'validatedAt', value: 'VARCHAR(255)'},
         ]
     },
     {
@@ -616,7 +617,9 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'statutFrom', value: 'INTEGER'},
             {column: 'statutTo', value: 'INTEGER'},
             {column: 'signatureDate', value: 'VARCHAR(255)'},
-            {column: 'dispatchToSignIds', value: 'VARCHAR(255)'},
+            {column: 'comment', value: 'TEXT'},
+            {column: 'localId', value: 'INTEGER'},
+            {column: 'dispatchId', value: 'INTEGER'},
         ]
     },
 ];
