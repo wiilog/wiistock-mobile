@@ -148,7 +148,7 @@ export class DispatchGroupedSignaturePage implements ViewWillEnter, ViewWillLeav
                         this.dispatches = dispatches;
                     } else {
                         this.dispatches = dispatches
-                            .filter((dispatch) => this.dispatchesToSign && !this.dispatchesToSign.some((dispatchToSign) => dispatchToSign.id === dispatch.id));
+                            .filter((dispatch) => this.dispatchesToSign && !this.dispatchesToSign.some((dispatchToSign) => dispatchToSign.localId === dispatch.localId));
                     }
                     this.refreshDispatchesListConfig(translations);
                     this.refreshSubTitle();
@@ -336,7 +336,7 @@ export class DispatchGroupedSignaturePage implements ViewWillEnter, ViewWillLeav
     public signingDispatch(dispatch: Dispatch, selected: boolean): void {
         const arrayToSpliceFrom = (selected ? this.dispatchesToSign : this.dispatches) || [];
         const arrayToPushIn = (selected ? this.dispatches : this.dispatchesToSign) || [];
-        arrayToSpliceFrom.splice(this.dispatches.findIndex((dispatchIndex) => dispatchIndex.id === dispatch.id), 1);
+        arrayToSpliceFrom.splice(this.dispatches.findIndex((dispatchIndex) => dispatchIndex.localId === dispatch.localId), 1);
         arrayToPushIn.push(dispatch);
 
         this.dispatches = selected ? arrayToPushIn : arrayToSpliceFrom;

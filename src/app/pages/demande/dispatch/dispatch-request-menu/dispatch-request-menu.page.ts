@@ -166,7 +166,7 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                             ? {label: 'Urgence', value: dispatch.emergency || ''}
                             : undefined)
                     ].filter((item) => item && item.value) as Array<{label: string; value: string;}>,
-                    ...(this.offlineMode && !dispatch.id
+                    ...(this.offlineMode && !dispatch.id && dispatch.draft
                         ? {
                             rightIcon: {
                                 name: 'trash.svg',
@@ -194,8 +194,8 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
     }
 
     private deleteDispatch(dispatch: Dispatch){
-        this.sqliteService.deleteBy(`dispatch`, [`id = '${dispatch.id}'`]);
-        const selectedLinesToDelete = this.dispatches.findIndex((line) => line.id === dispatch.id);
+        this.sqliteService.deleteBy(`dispatch`, [`id = '${dispatch.localId}'`]);
+        const selectedLinesToDelete = this.dispatches.findIndex((line) => line.localId === dispatch.localId);
         this.dispatches.splice(selectedLinesToDelete, 1);
         this.refreshPageList(this.dispatches);
     }

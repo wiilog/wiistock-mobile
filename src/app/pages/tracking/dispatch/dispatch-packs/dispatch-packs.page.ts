@@ -26,6 +26,7 @@ import {StorageService} from "@app/services/storage/storage.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {Browser} from '@capacitor/browser';
 import {Status} from "@entities/status";
+import * as moment from "moment";
 
 @Component({
     selector: 'wii-dispatch-packs',
@@ -501,7 +502,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                             mergeMap(() => this.updateCurrentDispatchStatus()),
                             mergeMap(() => this.tryValidateDispatch()),
                             mergeMap(({local, success, msg}) => (
-                                local && !success
+                                local || !success
                                     ? of({local, success, msg})
                                     : this.treatApiSuccess().pipe(map(() => ({local, success, msg})))
                             )),
@@ -623,7 +624,8 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                     values: {
                         draft: 0,
                         statusId: notTreatedStatus?.id || this.dispatch.statusId,
-                        statusLabel: notTreatedStatus?.label || this.dispatch.statusLabel
+                        statusLabel: notTreatedStatus?.label || this.dispatch.statusLabel,
+                        validatedAt: moment().format(),
                     },
                     where: [`localId = ${this.dispatch.localId}`]
                 }]))

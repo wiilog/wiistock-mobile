@@ -385,7 +385,7 @@ export class LocalDataManagerService {
                 mergeMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des acheminements'});
                     return this.dispatchOfflineMode
-                        ? this.sendOfflineDispatches().pipe(map(() => needAnotherSynchronise))
+                        ? of(needAnotherSynchronise)
                         : this.sendFinishedProcess('dispatch').pipe(map(() => needAnotherSynchronise));
                 }),
                 mergeMap((needAnotherSynchronise) => {
@@ -475,9 +475,9 @@ export class LocalDataManagerService {
             this.sqliteService.findBy('grouped_signature_history'),
         )
             .pipe(
-                map(([dispatchs, dispatchPacks, dispatchReferences, groupedSignatureHistory]) => {
+                map(([dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory]) => {
                     dispatchReferences = dispatchReferences.map(({reference, ...remaining}) => {
-                        const dispatchPack = dispatchPacks.find(({reference: packReference}) => packReference === reference);
+                        const dispatchPack = dispatchPacks.find(({reference: packReference}) => packReference && reference && packReference === reference);
                         return {
                             reference,
                             ...remaining,
@@ -485,13 +485,13 @@ export class LocalDataManagerService {
                             localDispatchId: dispatchPack.localDispatchId,
                         };
                     });
-                    return [dispatchs, dispatchPacks, dispatchReferences, groupedSignatureHistory];
+                    return [dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory];
                 }),
-                mergeMap(([dispatchs, dispatchPacks, dispatchReferences, groupedSignatureHistory]) => (
-                    dispatchs.length > 0
+                mergeMap(([dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory]) => (
+                    dispatches.length > 0
                         ? this.apiService.requestApi(ApiService.NEW_OFFLINE_DISPATCHS, {
                                 params: {
-                                    dispatchs,
+                                    dispatchs: dispatches,
                                     dispatchPacks,
                                     dispatchReferences,
                                     groupedSignatureHistory,

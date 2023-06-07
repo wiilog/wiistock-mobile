@@ -29,4 +29,5 @@ export interface Dispatch {
     groupedSignatureStatusColor?: string;
     createdBy: string;
     updatedAt?: string;
+    validatedAt?: string;
 }

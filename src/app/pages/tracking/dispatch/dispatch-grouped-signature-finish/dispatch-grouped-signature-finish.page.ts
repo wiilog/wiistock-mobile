@@ -25,6 +25,7 @@ import * as bcrypt from 'bcryptjs';
 import * as moment from "moment";
 import {User} from "@entities/user";
 import {Emplacement} from "@entities/emplacement";
+import {DispatchPack} from "@entities/dispatch-pack";
 
 @Component({
     selector: 'wii-dispatch-grouped-signature-finish',
@@ -183,65 +184,79 @@ export class DispatchGroupedSignatureFinishPage implements ViewWillEnter, ViewWi
                         statusLabel: this.selectedStatus.label,
                         partial: this.selectedStatus.state === 'partial' ? 1 : 0
                     },
-                    where: [`id IN (${this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.id).join(',')})`],
+                    where: [`localId IN (${this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.localId).join(',')})`],
                 }])
             : of(undefined)
     }
 
     public checkSignatureAndInsertProcesses(signatoryPassword: string, operator: string | null, signatory?: User, comment?: string) {
-        if (signatory) {
-            let location;
-            if(this.from && this.selectedStatus.groupedSignatureType === 'Enlèvement'){
-                location = this.from.id;
-            } else if (this.to && this.selectedStatus.groupedSignatureType === 'Livraison'){
-                location = this.to.id;
-            }
+        return this.sqliteService.findBy('dispatch_pack', [`localDispatchId IN (${this.dispatchesToSign.map((dispatch) => dispatch.localId).join(',')})`])
+            .pipe(
+                mergeMap((dispatchPacks) => {
+                    const allDispatchCanBeSigned = this.dispatchesToSign.every((dispatch) => (
+                        dispatchPacks.filter(({localDispatchId, reference}: DispatchPack) => (
+                            reference
+                            && dispatch.localId === localDispatchId)
+                        ).length > 0));
+                    if (!allDispatchCanBeSigned) {
+                        return of({
+                            success: false,
+                            msg: 'Erreur : tous les acheminements doivent contenir au moins une référence',
+                        })
+                    } else if (signatory) {
+                        let location;
+                        if (this.from && this.selectedStatus.groupedSignatureType === 'Enlèvement') {
+                            location = this.from.id;
+                        } else if (this.to && this.selectedStatus.groupedSignatureType === 'Livraison') {
+                            location = this.to.id;
+                        }
 
-            return location
-                ? this.sqliteService.findOneById('emplacement', location)
-                    .pipe(
-                        mergeMap((location?: Emplacement) => {
-                            const signatoriesIds = location?.signatories
-                                ? location.signatories.split(';').filter((element) => element)
-                                : [];
+                        return location
+                            ? this.sqliteService.findOneById('emplacement', location)
+                                .pipe(
+                                    mergeMap((location?: Emplacement) => {
+                                        const signatoriesIds = location?.signatories
+                                            ? location.signatories.split(';').filter((element) => element)
+                                            : [];
 
-                            const success = signatory
-                                && signatory.signatoryPassword
-                                && location
-                                && signatoriesIds.includes(`${signatory.id}`)
-                                && bcrypt.compareSync(signatoryPassword, signatory.signatoryPassword);
-                            if (success) {
-                                return this.sqliteService.insert('grouped_signature_history', this.dispatchesToSign.map((dispatch: Dispatch) => ({
-                                    groupedSignatureType: this.selectedStatus.groupedSignatureType,
-                                    location,
-                                    signatory: signatory.id,
-                                    operateur: operator,
-                                    statutFrom: this.dispatchesToSign[0].statusId,
-                                    statutTo: this.selectedStatus.id,
-                                    signatureDate: moment().format(),
-                                    dispatchId: dispatch.id,
-                                    localId: dispatch.localId,
-                                    comment
-                                }))).pipe(map(() => ({
-                                    success: true,
-                                    msg: 'Signature groupée effectuée',
-                                })));
-                            }
-                            return of({
+                                        const success = signatory
+                                            && signatory.signatoryPassword
+                                            && location
+                                            && signatoriesIds.includes(`${signatory.id}`)
+                                            && bcrypt.compareSync(signatoryPassword, signatory.signatoryPassword);
+                                        if (success) {
+                                            return this.sqliteService.insert('grouped_signature_history', this.dispatchesToSign.map((dispatch: Dispatch) => ({
+                                                groupedSignatureType: this.selectedStatus.groupedSignatureType,
+                                                location,
+                                                signatory: signatory.id,
+                                                operateur: operator,
+                                                statutFrom: this.dispatchesToSign[0].statusId,
+                                                statutTo: this.selectedStatus.id,
+                                                signatureDate: moment().format(),
+                                                dispatchId: dispatch.id,
+                                                localId: dispatch.localId,
+                                                comment
+                                            }))).pipe(map(() => ({
+                                                success: true,
+                                                msg: 'Signature groupée effectuée',
+                                            })));
+                                        }
+                                        return of({
+                                            success: false,
+                                            msg: 'Informations invalides',
+                                        });
+                                    }))
+                            : of({
                                 success: false,
                                 msg: 'Informations invalides',
                             });
-                        }))
-                : of({
-                    success: false,
-                    msg: 'Informations invalides',
-                });
-        } else {
-            return of({
-                success: false,
-                msg: 'Informations invalides',
-            });
-        }
+                    } else {
+                        return of({
+                            success: false,
+                            msg: 'Informations invalides',
+                        });
+                    }
+                }));
     }
 
     public finishGroupedSignature() {
