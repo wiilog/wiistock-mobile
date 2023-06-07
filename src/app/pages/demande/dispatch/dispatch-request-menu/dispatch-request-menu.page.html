@@ -1,16 +1,18 @@
-<wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
+<wii-main-loader [loading]="!hasLoaded || loading"
+                 [message]="messageLoading"></wii-main-loader>
+
 
 <div *ngIf="hasLoaded"
      scroll-y="true"
      class="page-content">
-    <wii-card-list *ngIf="hasLoaded && dispatches && dispatches.length > 0"
+    <wii-card-list *ngIf="(hasLoaded || !loading) && dispatches && dispatches.length > 0"
                    [listIconName]="dispatchIconName"
                    [color]="dispatchListColor"
                    [config]="dispatchListConfig">
     </wii-card-list>
 </div>
 
-<ion-fab *ngIf="hasLoaded  && !offlineMode"
+<ion-fab *ngIf="(hasLoaded || !loading)  && !offlineMode"
          vertical="end"
          horizontal="bottom"
          slot="fixed">
@@ -21,7 +23,7 @@
 </ion-fab>
 
 
-<ion-fab *ngIf="hasLoaded && offlineMode"
+<ion-fab *ngIf="(hasLoaded || !loading) && offlineMode"
          vertical="end"
          horizontal="bottom"
          slot="fixed">
@@ -31,7 +33,7 @@
     <ion-fab-list side="top"
                   [activated]="fabListActivated">
         <ion-fab-button color="light"
-                        (click)="onRefreshClick()">
+                        (click)="synchronise()">
             <ion-icon name="refresh"></ion-icon>
         </ion-fab-button>
         <ion-fab-button color="light"

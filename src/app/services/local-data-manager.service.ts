@@ -379,7 +379,6 @@ export class LocalDataManagerService {
                 }),
                 mergeMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des acheminements hors ligne'});
-                    console.log('BAROT');
                     return this.sendOfflineDispatchs().pipe(map(() => needAnotherSynchronise));
                 }),
                 mergeMap((needAnotherSynchronise) => {
@@ -389,6 +388,39 @@ export class LocalDataManagerService {
                 mergeMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des mouvements de passage à vide non synchronisés'});
                     return this.sendFinishedProcess('empty_round').pipe(map(() => needAnotherSynchronise));
+                }),
+                // we reload data from API if we have save data in previous requests
+                mergeMap((needAnotherSynchronise) => {
+                    if (needAnotherSynchronise) {
+                        LocalDataManagerService.ShowSyncMessage(synchronise$);
+                    }
+                    return needAnotherSynchronise ? this.importData() : of(false);
+                })
+            )
+            .subscribe({
+                next: () => {
+                    this.translationService.changedTranslations$.next();
+                    synchronise$.next({finished: true});
+                    synchronise$.complete();
+                },
+                error: (error) => {
+                    synchronise$.error(error);
+                    synchronise$.complete();
+                }
+            });
+
+        return synchronise$;
+    }
+
+    public synchroniseDispatchsData(){
+        const synchronise$ = new ReplaySubject<{finished: boolean, message?: string}>(1);
+
+        LocalDataManagerService.ShowSyncMessage(synchronise$);
+        this.importData()
+            .pipe(
+                mergeMap((needAnotherSynchronise) => {
+                    synchronise$.next({finished: false, message: 'Envoi des acheminements hors ligne'});
+                    return this.sendOfflineDispatchs().pipe(map(() => needAnotherSynchronise));
                 }),
                 // we reload data from API if we have save data in previous requests
                 mergeMap((needAnotherSynchronise) => {
@@ -437,13 +469,33 @@ export class LocalDataManagerService {
     }
 
     private sendOfflineDispatchs() {
-        return this.sqliteService.findBy('dispatch')
+        return zip(
+            this.sqliteService.findBy('dispatch'),
+            this.sqliteService.findBy('dispatch_pack'),
+            this.sqliteService.findBy('reference'),//TODO merge modif d'adrien
+            this.sqliteService.findBy('grouped_signature_history'),
+        )
             .pipe(
-                mergeMap((dispatchs) => (
+                map(([dispatchs, dispatchPacks, dispatchReferences, groupedSignatureHistory]) => {
+                    dispatchReferences = dispatchReferences.map(({reference, ...remaining}) => {
+                        const dispatchPack = dispatchPacks.find(({reference: packReference}) => packReference === reference);
+                        return {
+                            reference,
+                            ...remaining,
+                            dispatchId: dispatchPack.dispatchId,
+                            localDispatchId: dispatchPack.localDispatchId,
+                        };
+                    });
+                    return [dispatchs, dispatchPacks, dispatchReferences, groupedSignatureHistory];
+                }),
+                mergeMap(([dispatchs, dispatchPacks, dispatchReferences, groupedSignatureHistory]) => (
                     dispatchs.length > 0
                         ? this.apiService.requestApi(ApiService.NEW_OFFLINE_DISPATCHS, {
                                 params: {
-                                    dispatchs
+                                    dispatchs,
+                                    dispatchPacks,
+                                    dispatchReferences,
+                                    groupedSignatureHistory,
                                 }
                             },
                         )
