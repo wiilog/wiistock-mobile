@@ -249,7 +249,6 @@ export class DispatchNewPage implements ViewWillEnter {
                     inputConfig: {
                         required: Boolean(this.fieldParams.needsReceiver),
                         searchType: SelectItemTypeEnum.USER,
-                        label: `username`,
                     },
                     errors: {
                         required: 'Vous devez sélectionner un destinataire.'

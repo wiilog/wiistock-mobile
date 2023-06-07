@@ -111,7 +111,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             placeholder: 'Sélectionnez un fournisseur'
         },
         [SelectItemTypeEnum.REFERENCE_ARTICLE]: {
-            label: 'label',
+            label: 'reference',
             valueField: 'id',
             templateIndex: 'default',
             databaseTable: 'reference_article',
