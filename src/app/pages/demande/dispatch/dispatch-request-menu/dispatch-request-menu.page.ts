@@ -124,7 +124,7 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                     customColor: dispatch.groupedSignatureStatusColor || dispatch.color,
                     title: this.offlineMode ? {
                         label: 'Statut',
-                        value: dispatch.statusLabel
+                        value: dispatch.statusLabel || 'Brouillon'
                     } : {
                         label: 'Numéro',
                         value: dispatch.number
@@ -177,7 +177,7 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                             }
                         }
                         : {}),
-                    ...(dispatch.emergency
+                    ...(dispatch.emergency && dispatch.id
                         ? {
                             rightIcon: {
                                 name: 'exclamation-triangle.svg',
