@@ -33,6 +33,7 @@ import {ViewWillEnter} from "@ionic/angular";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {mergeMap} from "rxjs/operators";
 import {StorageService} from "@app/services/storage/storage.service";
+import {AssociatedDocumentType} from "@entities/associated-document-type";
 
 @Component({
     selector: 'wii-dispatch-logistic-unit-reference-association',
@@ -53,7 +54,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
     public volume?: number = undefined;
     public disableValidate: boolean = true;
     public disabledAddReference: boolean = true;
-    public associatedDocumentTypeElements: string;
+    public associatedDocumentTypeElements: Array<AssociatedDocumentType>;
 
     public edit: boolean = false;
     public viewMode: boolean = false;
@@ -74,7 +75,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
             event: () => {
                 return zip(
                     this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
-                    this.apiService.requestApi(ApiService.GET_ASSOCIATED_DOCUMENT_TYPE_ELEMENTS),
+                    this.sqliteService.findAll('associated_document_type'),
                 )
             }
         }).subscribe(([dispatchOfflineMode, documentTypeElements]) => {
@@ -358,15 +359,16 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                             label: 'Types de documents associés',
                             name: 'associatedDocumentTypes',
                             value: associatedDocumentTypes
-                                ? (Array.isArray(associatedDocumentTypes) ? associatedDocumentTypes : associatedDocumentTypes.split(`,`))
-                                    .map((label: any) => ({
-                                        id: label,
-                                        label
-                                    }))
-                                : null,
+                                ? (
+                                    Array.isArray(associatedDocumentTypes)
+                                        ? associatedDocumentTypes
+                                        : this.associatedDocumentTypeElements.map(({label}) => ({
+                                            id: label,
+                                            label
+                            }))) : null,
                             inputConfig: {
                                 required: true,
-                                elements: this.associatedDocumentTypeElements.split(`,`).map((label) => ({
+                                elements: this.associatedDocumentTypeElements.map(({label}) => ({
                                     id: label,
                                     label
                                 })),

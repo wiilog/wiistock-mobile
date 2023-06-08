@@ -51,4 +51,6 @@ export type TableName =   'emplacement'
                         | 'inventory_location_zone'
                         | 'driver'
                         | 'carrier'
-                        | 'grouped_signature_history';
+                        | 'grouped_signature_history'
+                        | 'dispatch_emergency'
+                        | 'associated_document_type';

@@ -881,6 +881,8 @@ export class SqliteService {
             mergeMap(() => this.importRefs(data).pipe(tap(() => {console.log('--- > importRefs')}))),
             mergeMap(() => this.importUsers(data).pipe(tap(() => {console.log('--- > importUsersData')}))),
             mergeMap(() => this.importProjects(data).pipe(tap(() => {console.log('--- > importProjects')}))),
+            mergeMap(() => this.importDispatchEmergencies(data).pipe(tap(() => {console.log('--- > importDispatchEmergencies')}))),
+            mergeMap(() => this.importAssociatedDocumentTypes(data).pipe(tap(() => {console.log('--- > importAssociatedDocumentTypes')}))),
             mergeMap(() => (
                 this.storageService.getRight(StorageKeyEnum.RIGHT_INVENTORY_MANAGER).pipe(
                     mergeMap((res) => (res
@@ -1177,6 +1179,35 @@ export class SqliteService {
             map(() => undefined)
         );
     }
+
+    public importDispatchEmergencies(data: any): Observable<void> {
+        const emergencies = data['dispatchEmergencies'] || [];
+        return this.deleteBy('dispatch_emergency').pipe(
+            mergeMap(() => (
+                emergencies.length > 0
+                    ? this.insert('dispatch_emergency', emergencies.map((label: string) => ({
+                        label
+                    })))
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
+    public importAssociatedDocumentTypes(data: any): Observable<void> {
+        const associatedDocumentTypes = data['associatedDocumentTypes'] || [];
+        return this.deleteBy('associated_document_type').pipe(
+            mergeMap(() => (
+                associatedDocumentTypes.length > 0
+                    ? this.insert('associated_document_type', associatedDocumentTypes.map((label: string) => ({
+                        label
+                    })))
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
     public importInventoryMission(data: any): Observable<any> {
         const inventoryMission = data['inventoryMission'];
         return this.deleteBy('inventory_mission')

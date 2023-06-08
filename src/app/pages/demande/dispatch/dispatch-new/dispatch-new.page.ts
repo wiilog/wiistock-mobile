@@ -28,6 +28,7 @@ import {ViewWillEnter} from "@ionic/angular";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {Dispatch} from "@entities/dispatch";
 import * as moment from "moment";
+import {DispatchEmergency} from "@entities/dispatch-emergency";
 
 
 @Component({
@@ -42,7 +43,7 @@ export class DispatchNewPage implements ViewWillEnter {
 
     public formConfig: Array<FormPanelParam>|any;
 
-    private emergencies: Array<{id: number; label: string}> = [];
+    private emergencies: Array<DispatchEmergency> = [];
     private dispatchOfflineMode: boolean;
     private dispatchTranslations: Translations;
 
@@ -91,7 +92,7 @@ export class DispatchNewPage implements ViewWillEnter {
         this.loadingService.presentLoadingWhile({
             event: () => {
                 return zip(
-                    this.apiService.requestApi(ApiService.GET_DISPATCH_EMERGENCIES), // TODO WIIS-9779
+                    this.sqliteService.findAll('dispatch_emergency'),
 
                     this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
 

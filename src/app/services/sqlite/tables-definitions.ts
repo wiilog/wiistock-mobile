@@ -622,4 +622,18 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'dispatchId', value: 'INTEGER'},
         ]
     },
+    {
+        name: 'dispatch_emergency',
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'label', value: 'VARCHAR(255)'},
+        ]
+    },
+    {
+        name: 'associated_document_type',
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'label', value: 'VARCHAR(255)'},
+        ]
+    },
 ];
