@@ -180,7 +180,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                                             ...data,
                                             dispatchReferences
                                         ])))
-                                    : [...data, []]
+                                    : of([...data, []])
                             ))
                         )
                     ),
