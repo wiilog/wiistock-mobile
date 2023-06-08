@@ -265,7 +265,7 @@ export class DispatchNewPage implements ViewWillEnter {
                     }
                 }
             }] : []),
-            {
+            ...(this.fieldParams.needsEmergency ? [{
                 item: FormPanelInputComponent,
                 config: {
                     label: 'Email(s)',
@@ -274,7 +274,7 @@ export class DispatchNewPage implements ViewWillEnter {
                         type: 'text',
                     }
                 }
-            },
+            }] : []),
         ];
     }
 
