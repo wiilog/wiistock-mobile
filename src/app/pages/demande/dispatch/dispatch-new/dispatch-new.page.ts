@@ -292,6 +292,7 @@ export class DispatchNewPage implements ViewWillEnter {
                             : of({success, msg, dispatch})
                     )),
                     mergeMap((result: number | {success: boolean; msg?: string, dispatch?: Dispatch}) => {
+                        // if number -> dispatch is inserted
                         if (typeof result === `number`) {
                             return this.navService.pop()
                                 .pipe(

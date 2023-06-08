@@ -661,7 +661,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
             this.storage.getString(StorageKeyEnum.URL_SERVER)
         )
             .pipe(
-                mergeMap((res) => this.navService.pop({path: NavPathEnum.MAIN_MENU}).pipe(map(() => res))),
+                mergeMap((res) => this.navService.pop({path: NavPathEnum.DISPATCH_REQUEST_MENU}).pipe(map(() => res))),
                 tap(([ignoredQueryResponse, waybillResponse, url]) => {
                     if (this.hasWayBillData && waybillResponse.filePath) {
                         Browser.open({url: url + waybillResponse.filePath})
