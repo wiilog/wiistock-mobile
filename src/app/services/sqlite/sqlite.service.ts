@@ -242,7 +242,8 @@ export class SqliteService {
 
         return zip(
             this.deleteBy('dispatch'),
-            this.deleteBy('dispatch_pack')
+            this.deleteBy('dispatch_pack'),
+            this.deleteBy('dispatch_reference'),
         )
             .pipe(
                 mergeMap(() => (
@@ -252,18 +253,35 @@ export class SqliteService {
                 )),
                 mergeMap(() => this.findAll('dispatch')),
 
-                map((dispatches: Array<Dispatch>) => (
-                    dispatches.reduce((acc, {id, localId}) => ({
+                map((localDispatches: Array<Dispatch>) => (
+                    localDispatches.reduce((acc, {id, localId}) => ({
                         ...acc,
                         [id as number]: localId,
                     }), {})
                 )),
-                mergeMap((dispatches: { [id: number]: number }) => (
+                mergeMap((localDispatches: { [id: number]: number }) => (
                     dispatchPacks.length > 0
                         ? this.insert('dispatch_pack', dispatchPacks.map(({dispatchId, ...dispatchPack}: DispatchPack) => ({
                             dispatchId,
                             ...dispatchPack,
-                            localDispatchId: dispatches[dispatchId],
+                            localDispatchId: localDispatches[dispatchId],
+                        })))
+                        : of(undefined)
+                )),
+
+                mergeMap(() => this.findAll('dispatch_pack')),
+
+                map((localDispatchPacks: Array<DispatchPack>) => (
+                    localDispatchPacks.reduce((acc, {id, localId}) => ({
+                        ...acc,
+                        [id as number]: localId,
+                    }), {})
+                )),
+                mergeMap((localDispatchPacks: { [id: number]: number }) => (
+                    dispatchPacks.length > 0
+                        ? this.insert('dispatch_pack', dispatchPacks.map(({dispatchPackId, ...dispatchPack}: DispatchPack&{dispatchPackId: number}) => ({
+                            ...dispatchPack,
+                            localDispatchId: localDispatchPacks[dispatchPackId],
                         })))
                         : of(undefined)
                 ))

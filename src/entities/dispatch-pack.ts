@@ -1,6 +1,7 @@
 
 export interface DispatchPack {
     id?: number;
+    localId?: number;
     code: string;
     natureId?: number;
     quantity: number;
@@ -12,5 +13,4 @@ export interface DispatchPack {
     comment?: string;
     photo1?: string;
     photo2?: string;
-    reference?: string;
 }

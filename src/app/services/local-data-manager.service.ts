@@ -17,6 +17,7 @@ import {AlertService} from '@app/services/alert.service';
 import {TranslationService} from '@app/services/translations.service';
 import {DispatchPack} from '@entities/dispatch-pack';
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
+import {Dispatch} from "@entities/dispatch";
 
 
 type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies' | 'dispatch' | 'transfer' | 'empty_round';
@@ -476,28 +477,24 @@ export class LocalDataManagerService {
         )
             .pipe(
                 map(([dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory]) => {
-                    dispatchReferences = dispatchReferences.map(({reference, ...remaining}) => {
-                        const associatedDispatchPack = dispatchPacks.some((dispatchPack: DispatchPack) => dispatchPack.code === remaining.logisticUnit);
-                        if (associatedDispatchPack) {
-                            const dispatchPack = dispatchPacks.find(({reference: packReference}) => {
-                                return packReference && reference && packReference === reference;
-                            });
+                    dispatchReferences = dispatchReferences
+                        .map(({localDispatchPackId, ...remaining}) => {
+                            const dispatchPack = dispatchPacks.find(({localId}) => localDispatchPackId === localId);
                             return {
-                                reference,
                                 ...remaining,
-                                dispatchId: dispatchPack.dispatchId,
-                                localDispatchId: dispatchPack.localDispatchId,
+                                dispatchId: dispatchPack?.dispatchId,
+                                localDispatchId: dispatchPack?.localDispatchId,
+                                logisticUnit: dispatchPack?.code,
                             };
-                        }
-                        return null;
-                    }).filter((elem) => elem);
+                        })
+                        .filter(({localDispatchId}) => dispatches.findIndex(({localId}: Dispatch) => localId === localDispatchId));
                     return [dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory];
                 }),
                 mergeMap(([dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory]) => (
                     dispatches.length > 0
-                        ? this.apiService.requestApi(ApiService.NEW_OFFLINE_DISPATCHS, {
+                        ? this.apiService.requestApi(ApiService.NEW_OFFLINE_DISPATCHES, {
                                 params: {
-                                    dispatchs: dispatches,
+                                    dispatches,
                                     dispatchPacks,
                                     dispatchReferences,
                                     groupedSignatureHistory,
@@ -505,7 +502,8 @@ export class LocalDataManagerService {
                             },
                         )
                         : of(undefined)
-                ))
+                )),
+                mergeMap(() => this.sqliteService.deleteBy('grouped_signature_history'))
             );
     }
 

@@ -26,6 +26,7 @@ import * as moment from "moment";
 import {User} from "@entities/user";
 import {Emplacement} from "@entities/emplacement";
 import {DispatchPack} from "@entities/dispatch-pack";
+import {DispatchReference} from "@entities/dispatch-reference";
 
 @Component({
     selector: 'wii-dispatch-grouped-signature-finish',
@@ -194,11 +195,26 @@ export class DispatchGroupedSignatureFinishPage implements ViewWillEnter, ViewWi
         return this.sqliteService.findBy('dispatch_pack', [`localDispatchId IN (${this.dispatchesToSign.map((dispatch) => dispatch.localId).join(',')})`])
             .pipe(
                 mergeMap((dispatchPacks) => {
+                    return dispatchPacks.length > 0
+                        ? this.sqliteService
+                            .findBy('dispatch_reference', [`localDispatchPackId IN (${dispatchPacks.map(({localId}) => localId).join(',')})`])
+                            .pipe(map((dispatchReferences) => {
+                                return dispatchReferences.map(({localDispatchPackId, ...remaining}: DispatchReference) => {
+                                    const dispatchPack = dispatchPacks.find(({localId}: DispatchPack) => localDispatchPackId === localId);
+                                    return {
+                                        ...remaining,
+                                        localDispatchId: dispatchPack.localDispatchId,
+                                    };
+                                });
+                            }))
+                        : of([])
+                }),
+                mergeMap((dispatchReferences) => {
                     const allDispatchCanBeSigned = this.dispatchesToSign.every((dispatch) => (
-                        dispatchPacks.filter(({localDispatchId, reference}: DispatchPack) => (
-                            reference
-                            && dispatch.localId === localDispatchId)
-                        ).length > 0));
+                        dispatchReferences
+                            .filter(({localDispatchId}) => dispatch.localId === localDispatchId)
+                            .length > 0
+                    ));
                     if (!allDispatchCanBeSigned) {
                         return of({
                             success: false,

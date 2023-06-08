@@ -1,4 +1,5 @@
 export interface DispatchReference {
+    localDispatchPackId: number;
     reference: string;
     quantity: number;
     outFormatEquipment?: boolean;
@@ -15,5 +16,4 @@ export interface DispatchReference {
     associatedDocumentTypes: string;
     comment?: string;
     photos?: Array<string>;
-    logisticUnit?: string;
 }

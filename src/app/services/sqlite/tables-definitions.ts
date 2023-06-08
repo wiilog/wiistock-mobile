@@ -426,7 +426,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
     {
         name: 'dispatch_pack',
         schema: [
-            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'localId', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'id', value: 'INTEGER'},
             {column: 'code', value: 'VARCHAR(255)'},
             {column: 'natureId', value: 'INTEGER'},
             {column: 'quantity', value: 'INTEGER'},
@@ -438,7 +439,6 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'comment', value: 'VARCHAR(255)'},
             {column: 'photo1', value: 'TEXT'},
             {column: 'photo2', value: 'TEXT'},
-            {column: 'reference', value: 'TEXT'},
         ]
     },
     {
@@ -539,6 +539,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
         name: 'dispatch_reference',
         schema: [
             {column: 'reference', value: 'VARCHAR(255)'},
+            {column: 'localDispatchPackId', value: 'INTEGER'},
             {column: 'quantity', value: 'INTEGER'},
             {column: 'outFormatEquipment', value: 'VARCHAR(255)'},
             {column: 'manufacturerCode', value: 'VARCHAR(255)'},
@@ -554,7 +555,6 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'associatedDocumentTypes', value: 'TEXT'},
             {column: 'comment', value: 'TEXT'},
             {column: 'photos', value: 'TEXT'},
-            {column: 'logisticUnit', value: 'VARCHAR(255)'},
         ]
     },
     {

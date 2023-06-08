@@ -27,6 +27,7 @@ import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {Browser} from '@capacitor/browser';
 import {Status} from "@entities/status";
 import * as moment from "moment";
+import {DispatchReference} from "@entities/dispatch-reference";
 
 @Component({
     selector: 'wii-dispatch-packs',
@@ -69,6 +70,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
     public viewMode: boolean = false;
     public ableToCreateWaybill: boolean = false;
     private dispatchPacks: Array<DispatchPack>;
+    private dispatchReferences: Array<DispatchReference>;
 
     private typeHasNoPartialStatuses: boolean;
 
@@ -169,12 +171,22 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                                 .pipe(map((partialStatuses) => ([
                                     ...data,
                                     partialStatuses
-                                ]))))
+                                ])))),
+                            mergeMap((data) => (
+                                data[1].length > 0
+                                    ? this.sqliteService
+                                        .findBy('dispatch_reference', [`localDispatchPackId IN (${data[1].map(({localId}: DispatchPack) => localId).join(',')})`])
+                                        .pipe(map((dispatchReferences) => ([
+                                            ...data,
+                                            dispatchReferences
+                                        ])))
+                                    : [...data, []]
+                            ))
                         )
                     ),
                     filter(([dispatch]) => Boolean(dispatch))
-                ) as Observable<[Dispatch, Array<DispatchPack>, Array<Nature>, Translations, boolean, Array<any>, Array<any>]>)
-                .subscribe(([dispatch, packs, natures, natureTranslations, dispatchOfflineMode, fieldParams, partialStatuses]) => {
+                ) as Observable<[Dispatch, Array<DispatchPack>, Array<Nature>, Translations, boolean, Array<any>, Array<any>, Array<DispatchReference>]>)
+                .subscribe(([dispatch, packs, natures, natureTranslations, dispatchOfflineMode, fieldParams, partialStatuses, dispatchReferences]) => {
                     const [
                         displayCarrierTrackingNumber,
                         needsCarrierTrackingNumber,
@@ -412,7 +424,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                             ? {
                                 pressAction: () => {
                                     this.loadingService.presentLoadingWhile({
-                                        event: () => this.sqliteService.findOneBy(`dispatch_reference`, {reference: pack.reference})
+                                        event: () => this.sqliteService.findOneBy(`dispatch_reference`, {localDispatchPackId: pack.localId})
                                     }).subscribe((reference) => {
                                         this.navService.push(NavPathEnum.DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION, {
                                             logisticUnit: pack.code,
@@ -430,7 +442,9 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
         };
     }
 
-    private packToListItemConfig({code, quantity, natureId, lastLocation, already_treated, reference}: DispatchPack, natureTranslation: string) {
+    private packToListItemConfig({code, quantity, natureId, lastLocation, already_treated, localId}: DispatchPack, natureTranslation: string) {
+        const {reference} = this.dispatchReferences.find(({localDispatchPackId}) => localDispatchPackId === localId) || {};
+
         return {
             infos: {
                 code: {
@@ -473,8 +487,8 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
             if (this.fromCreate) {
                 this.loadingService.presentLoadingWhile({
                     event: () => zip(
-                        this.sqliteService.deleteBy(`dispatch_pack`, [`id = ${dispatchPack.id}`]),
-                        this.sqliteService.deleteBy(`dispatch_reference`, [`reference = '${dispatchPack.reference}'`]),
+                        this.sqliteService.deleteBy(`dispatch_pack`, [`localId = ${dispatchPack.localId}`]),
+                        this.sqliteService.deleteBy(`dispatch_reference`, [`localDispatchPackId = ${dispatchPack.localId}`]),
                     )
                 }).subscribe(() => {
                     this.dispatchPacks.splice(selectedIndex, 1);
@@ -541,6 +555,15 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
             this.dispatchPacks[packIndexToConfirm].quantity = Number(quantity);
             this.dispatchPacks[packIndexToConfirm].photo1 = photo1;
             this.dispatchPacks[packIndexToConfirm].photo2 = photo2;
+            this.sqliteService.update('dispatch_pack', [{
+                values: {
+                    natureId: this.dispatchPacks[packIndexToConfirm].natureId,
+                    quantity: this.dispatchPacks[packIndexToConfirm].quantity,
+                    photo1: this.dispatchPacks[packIndexToConfirm].photo1,
+                    photo2: this.dispatchPacks[packIndexToConfirm].photo2,
+                },
+                where: [`localId = ${this.dispatchPacks[packIndexToConfirm].localId}`]
+            }])
             this.refreshListTreatedConfig();
         }
     }
@@ -586,10 +609,10 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
     private makeApiReferencesParam(): Observable<any> {
         return this.sqliteService
             .findBy(`dispatch_reference`, [
-                `reference IN (${this.dispatchPacks.map((dispatchPack: DispatchPack) => `'${dispatchPack.reference}'`).join(',')})`
+                `localDispatchPackId IN (${this.dispatchPacks.map(({localId}: DispatchPack) => localId).join(',')})`
             ])
             .pipe(
-                mergeMap((references) => of(references.map((reference) => {
+                map((references) => references.map((reference) => {
                     const photos = JSON.parse(reference.photos);
                     const volume = `${reference.volume}`;
                     delete reference.photos;
@@ -608,7 +631,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                                 : {}
                         )
                     };
-                })))
+                }))
             );
     }
 

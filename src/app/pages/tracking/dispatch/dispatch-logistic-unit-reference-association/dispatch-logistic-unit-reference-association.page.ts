@@ -31,7 +31,7 @@ import {Dispatch} from "@entities/dispatch";
 import {Observable, of, zip} from "rxjs";
 import {ViewWillEnter} from "@ionic/angular";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
-import {mergeMap} from "rxjs/operators";
+import {mergeMap, tap} from "rxjs/operators";
 import {StorageService} from "@app/services/storage/storage.service";
 import {AssociatedDocumentType} from "@entities/associated-document-type";
 
@@ -437,21 +437,30 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
             if (!this.reference.exists && !reference.volume) {
                 this.toastService.presentToast(`Le calcul du volume est nécessaire pour valider l'ajout de la référence.`)
             } else {
-                reference.logisticUnit = this.logisticUnit;
                 this.loadingService.presentLoadingWhile({
-                    event: () => this.sqliteService.deleteBy(`dispatch_pack`, [
+                    event: () => this.sqliteService.findBy(`dispatch_pack`, [
                         `code = '${this.logisticUnit}'`,
                         this.dispatch.id ? `dispatchId = ${this.dispatch.id || ''}` : `localDispatchId = ${this.dispatch.localId || ''}`
                     ]).pipe(
+                        mergeMap((dispatchPacks) => {
+                            const deletedIds = dispatchPacks.map(({localId}) => localId);
+                            return deletedIds.length > 0
+                                ? zip(
+                                    this.sqliteService.deleteBy(`dispatch_pack`, [`localId IN (${deletedIds.join(',')})`,]),
+                                    this.sqliteService.deleteBy(`dispatch_reference`, [`localDispatchPackId IN (${deletedIds.join(',')})`,]),
+                                )
+                                : of(undefined);
+                        }),
                         mergeMap(() => this.sqliteService.insert(`dispatch_pack`, {
                             code: this.logisticUnit,
                             quantity: reference.quantity,
                             dispatchId: this.dispatch.id,
                             localDispatchId: this.dispatch.localId,
                             treated: 1,
-                            reference: reference.reference
                         })),
-                        mergeMap(() => this.sqliteService.deleteBy('dispatch_reference', [`reference = '${reference.reference}'`, `logisticUnit = '${reference.logisticUnit}'`])),
+                        tap((dispatchPackId) => {
+                            reference.localDispatchPackId = dispatchPackId as number;
+                        }),
                         mergeMap(() => this.sqliteService.insert(`dispatch_reference`, reference)),
                     )
                 }).subscribe(() => {
