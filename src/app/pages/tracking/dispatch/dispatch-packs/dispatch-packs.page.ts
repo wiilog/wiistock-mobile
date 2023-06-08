@@ -227,6 +227,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                         [Number(id)]: label
                     }), {});
                     this.natureTranslations = natureTranslations;
+                    this.dispatchReferences = dispatchReferences;
                     this.dispatchPacks = packs.map((pack) => ({
                         ...pack,
                         treated: !this.fromCreate ? 0 : 1,
@@ -612,13 +613,16 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                 `localDispatchPackId IN (${this.dispatchPacks.map(({localId}: DispatchPack) => localId).join(',')})`
             ])
             .pipe(
-                map((references) => references.map((reference) => {
+                map((references) => references.map(({localDispatchPackId, ...reference}) => {
+                    const {code: logisticUnit} = this.dispatchPacks.find(({localId}) => localId === localDispatchPackId) as DispatchPack;
+
                     const photos = JSON.parse(reference.photos);
                     const volume = `${reference.volume}`;
                     delete reference.photos;
                     return {
                         ...reference,
-                        ...{volume},
+                        volume,
+                        logisticUnit,
                         ...(
                             photos && photos.length > 0
                                 ? photos.reduce((acc: { [name: string]: File}, photoBase64: string, index: number) => {
