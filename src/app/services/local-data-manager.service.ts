@@ -477,14 +477,20 @@ export class LocalDataManagerService {
             .pipe(
                 map(([dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory]) => {
                     dispatchReferences = dispatchReferences.map(({reference, ...remaining}) => {
-                        const dispatchPack = dispatchPacks.find(({reference: packReference}) => packReference && reference && packReference === reference);
-                        return {
-                            reference,
-                            ...remaining,
-                            dispatchId: dispatchPack.dispatchId,
-                            localDispatchId: dispatchPack.localDispatchId,
-                        };
-                    });
+                        const associatedDispatchPack = dispatchPacks.some((dispatchPack: DispatchPack) => dispatchPack.code === remaining.logisticUnit);
+                        if (associatedDispatchPack) {
+                            const dispatchPack = dispatchPacks.find(({reference: packReference}) => {
+                                return packReference && reference && packReference === reference;
+                            });
+                            return {
+                                reference,
+                                ...remaining,
+                                dispatchId: dispatchPack.dispatchId,
+                                localDispatchId: dispatchPack.localDispatchId,
+                            };
+                        }
+                        return null;
+                    }).filter((elem) => elem);
                     return [dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory];
                 }),
                 mergeMap(([dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory]) => (

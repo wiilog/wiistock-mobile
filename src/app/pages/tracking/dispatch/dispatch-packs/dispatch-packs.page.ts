@@ -612,7 +612,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
             );
     }
 
-    private updateCurrentDispatchStatus(): Observable<void> {
+    private updateCurrentDispatchStatus(): Observable<any> {
         return this.sqliteService
             .findBy('status', [
                 `state = 'notTreated'`,
@@ -620,15 +620,17 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                 `typeId = ${this.dispatch.typeId}`
             ], {displayOrder: 'ASC'})
             .pipe(
-                mergeMap(([notTreatedStatus]: Array<Status>) => this.sqliteService.update(`dispatch`, [{
-                    values: {
-                        draft: 0,
-                        statusId: notTreatedStatus?.id || this.dispatch.statusId,
-                        statusLabel: notTreatedStatus?.label || this.dispatch.statusLabel,
-                        validatedAt: moment().format(),
-                    },
-                    where: [`localId = ${this.dispatch.localId}`]
-                }]))
+                mergeMap(([notTreatedStatus]: Array<Status>) => {
+                    return this.sqliteService.update(`dispatch`, [{
+                        values: {
+                            draft: 0,
+                            statusId: notTreatedStatus?.id || this.dispatch.statusId,
+                            statusLabel: notTreatedStatus?.label || this.dispatch.statusLabel,
+                            validatedAt: moment().format(),
+                        },
+                        where: [`localId = ${this.dispatch.localId}`]
+                    }])
+                }),
             );
     }
 

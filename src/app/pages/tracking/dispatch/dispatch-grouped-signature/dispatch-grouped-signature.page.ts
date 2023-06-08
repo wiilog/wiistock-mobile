@@ -123,7 +123,6 @@ export class DispatchGroupedSignaturePage implements ViewWillEnter, ViewWillLeav
             if (this.filters.type) {
                 filtersSQL.push(`typeId = ${this.filters.type.id}`)
             }
-
             this.loadingSubscription = this.loadingService.presentLoading()
                 .pipe(
                     tap(loader => loaderElement = loader),

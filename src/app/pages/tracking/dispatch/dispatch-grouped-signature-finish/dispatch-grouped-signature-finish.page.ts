@@ -182,7 +182,8 @@ export class DispatchGroupedSignatureFinishPage implements ViewWillEnter, ViewWi
                     values: {
                         statusId: this.selectedStatus.id,
                         statusLabel: this.selectedStatus.label,
-                        partial: this.selectedStatus.state === 'partial' ? 1 : 0
+                        partial: this.selectedStatus.state === 'partial' ? 1 : 0,
+                        treatedStatusId: this.selectedStatus.state === 'treated' ? this.selectedStatus.id : null,
                     },
                     where: [`localId IN (${this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.localId).join(',')})`],
                 }])
@@ -218,7 +219,6 @@ export class DispatchGroupedSignatureFinishPage implements ViewWillEnter, ViewWi
                                         const signatoriesIds = location?.signatories
                                             ? location.signatories.split(';').filter((element) => element)
                                             : [];
-
                                         const success = signatory
                                             && signatory.signatoryPassword
                                             && location
