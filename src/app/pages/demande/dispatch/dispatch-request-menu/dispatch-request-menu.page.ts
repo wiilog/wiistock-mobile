@@ -161,7 +161,14 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                             label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de dépose'),
                             value: dispatch.locationToLabel || ''
                         },
-                        {label: 'Commentaire', value: dispatch.comment || ''},
+                        {
+                            label: 'Commentaire',
+                            value: dispatch.comment || '',
+                        },
+                        {
+                            label: 'Références (quantité)',
+                            value: dispatch.quantities || ''
+                        },
                         (dispatch.emergency
                             ? {label: 'Urgence', value: dispatch.emergency || ''}
                             : undefined)
