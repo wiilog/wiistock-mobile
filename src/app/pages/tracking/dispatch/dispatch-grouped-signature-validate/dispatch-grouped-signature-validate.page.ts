@@ -81,7 +81,7 @@ export class DispatchGroupedSignatureValidatePage implements ViewWillEnter, View
         } else if (this.from){
             groupedSignatureType = "= 'Enlèvement'";
         } else if (this.to){
-            groupedSignatureType = "= 'Livraison '";
+            groupedSignatureType = "= 'Livraison'";
         } else {
             this.toastService.presentToast("Une erreur s'est produite lors de la sélection des demandes.");
         }
