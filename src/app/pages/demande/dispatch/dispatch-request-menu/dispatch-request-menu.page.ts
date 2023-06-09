@@ -124,7 +124,7 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                     customColor: dispatch.groupedSignatureStatusColor || dispatch.color,
                     title: this.offlineMode ? {
                         label: 'Statut',
-                        value: dispatch.statusLabel || 'Brouillon'
+                        value: dispatch.draft ? dispatch.statusLabel || 'Brouillon' : dispatch.statusLabel
                     } : {
                         label: 'Numéro',
                         value: dispatch.number

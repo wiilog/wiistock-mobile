@@ -503,6 +503,18 @@ export class LocalDataManagerService {
                         )
                         : of(undefined)
                 )),
+                map(({success, errors}) => {
+                    return !success && errors.length > 0
+                        ? this.alertService.show({
+                            header: 'Erreur',
+                            message: errors.map((errorMessage: string) => errorMessage).join(','),
+                            buttons: [{
+                                text: 'OK',
+                                role: 'cancel'
+                            }]
+                        })
+                        : of(undefined)
+                }),
                 mergeMap(() => this.sqliteService.deleteBy('grouped_signature_history'))
             );
     }

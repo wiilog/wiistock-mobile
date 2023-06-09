@@ -618,7 +618,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'statutTo', value: 'INTEGER'},
             {column: 'signatureDate', value: 'VARCHAR(255)'},
             {column: 'comment', value: 'TEXT'},
-            {column: 'localId', value: 'INTEGER'},
+            {column: 'localDispatchId', value: 'INTEGER'},
             {column: 'dispatchId', value: 'INTEGER'},
         ]
     },

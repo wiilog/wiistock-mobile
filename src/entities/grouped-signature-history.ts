@@ -4,7 +4,7 @@ export interface GroupedSignatureHistory {
     location?: string;
     signatureDate?: string;
     operateur?: string;
-    localId?: string;
+    localDispatchId?: string;
     dispatchId?: string;
     statutFrom?: number;
     statutTo?: number;

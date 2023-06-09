@@ -250,7 +250,7 @@ export class DispatchGroupedSignatureFinishPage implements ViewWillEnter, ViewWi
                                                 statutTo: this.selectedStatus.id,
                                                 signatureDate: moment().format(),
                                                 dispatchId: dispatch.id,
-                                                localId: dispatch.localId,
+                                                localDispatchId: dispatch.localId,
                                                 comment
                                             }))).pipe(map(() => ({
                                                 success: true,

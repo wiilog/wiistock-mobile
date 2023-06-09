@@ -239,6 +239,7 @@ export class SqliteService {
     private importDispatchesData(data: any): Observable<any> {
         const dispatches = data['dispatches'] || [];
         const dispatchPacks = data['dispatchPacks'] || [];
+        const dispatchReferences = data['dispatchReferences'] || [];
 
         return zip(
             this.deleteBy('dispatch'),
@@ -278,10 +279,10 @@ export class SqliteService {
                     }), {})
                 )),
                 mergeMap((localDispatchPacks: { [id: number]: number }) => (
-                    dispatchPacks.length > 0
-                        ? this.insert('dispatch_pack', dispatchPacks.map(({dispatchPackId, ...dispatchPack}: DispatchPack&{dispatchPackId: number}) => ({
+                    dispatchReferences.length > 0
+                        ? this.insert('dispatch_reference', dispatchReferences.map(({dispatchPackId, ...dispatchPack}: DispatchPack&{dispatchPackId: number}) => ({
                             ...dispatchPack,
-                            localDispatchId: localDispatchPacks[dispatchPackId],
+                            localDispatchPackId: localDispatchPacks[dispatchPackId],
                         })))
                         : of(undefined)
                 ))
