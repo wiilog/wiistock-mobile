@@ -50,7 +50,7 @@ export class RfidManagerService {
 
     public launchEventListeners(): void {
         if (this.eventsLaunched) {
-            throw new Error("Event listeners already launched");
+            return;
         }
         this._tagsRead$ = new Subject();
         this.rfidManagerPlugin
@@ -83,21 +83,34 @@ export class RfidManagerService {
     }
 
     public removeEventListeners(): void {
+        if (!this.eventsLaunched) {
+            return;
+        }
+
         this.listeners.forEach((listener) => {
             listener.remove();
         });
         this.listeners = [];
 
-        this._tagsRead$?.complete();
-        this._tagsRead$?.unsubscribe();
+        // this._tagRead$ defined and not closed
+        if (this._tagsRead$?.closed === false) {
+            this._tagsRead$?.complete();
+            this._tagsRead$?.unsubscribe();
+        }
         this._tagsRead$ = undefined;
 
-        this._scanStarted$?.complete();
-        this._scanStarted$?.unsubscribe();
+        // this._scanStarted$ defined and not closed
+        if (this._scanStarted$?.closed === false) {
+            this._scanStarted$?.complete();
+            this._scanStarted$?.unsubscribe();
+        }
         this._scanStarted$ = undefined;
 
-        this._scanStopped$?.complete();
-        this._scanStopped$?.unsubscribe();
+        // this._scanStopped$ defined and not closed
+        if (this._scanStopped$?.closed === false) {
+            this._scanStopped$?.complete();
+            this._scanStopped$?.unsubscribe();
+        }
         this._scanStopped$ = undefined;
 
         this.eventsLaunched = false;

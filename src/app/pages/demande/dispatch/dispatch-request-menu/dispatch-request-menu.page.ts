@@ -15,18 +15,20 @@ import {NetworkService} from '@app/services/network.service';
 import {Dispatch} from "@entities/dispatch";
 import {TranslationService} from "@app/services/translations.service";
 import {Translations} from "@entities/translation";
-import {mergeMap, Observable, Subject, zip} from "rxjs";
-import {ViewWillEnter} from "@ionic/angular";
+import {merge, mergeMap, Observable, Subject, Subscription, tap, zip} from "rxjs";
+import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {FormatService} from "@app/services/format.service";
 import * as moment from "moment";
+import {BatteryManagerService} from "@plugins/battery-manager/battery-manager.service";
+import {filter} from "rxjs/operators";
 
 @Component({
     selector: 'wii-dispatch-request-menu',
     templateUrl: './dispatch-request-menu.page.html',
     styleUrls: ['./dispatch-request-menu.page.scss'],
 })
-export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
+export class DispatchRequestMenuPage implements ViewWillEnter, ViewWillLeave, CanLeave {
     public hasLoaded: boolean;
 
     public readonly dispatchListColor = CardListColorEnum.BLUE;
@@ -46,6 +48,10 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
     private apiSending: boolean;
     private dispatchTranslations: Translations;
 
+    private batteryInfoSubscription?: Subscription;
+
+    private lastBatteryStateChangePlugged: boolean;
+
     public constructor(private sqliteService: SqliteService,
                        private networkService: NetworkService,
                        private alertService: AlertService,
@@ -57,6 +63,7 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
                        private storageService: StorageService,
                        private translationService: TranslationService,
                        private changeDetectorRef: ChangeDetectorRef,
+                       private batteryManager: BatteryManagerService,
                        private navService: NavService) {
         this.hasLoaded = false;
         this.loading = false;
@@ -85,11 +92,35 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
             this.dispatches = dispatches;
             this.fabListActivated = false
             this.refreshPageList(this.dispatches);
+
+            this.batteryManager.launchEventListeners();
+            this.batteryInfoSubscription = merge(
+                this.batteryManager.batteryInfo(),
+                this.batteryManager.stateChanged$
+            )
+                .pipe(
+                    filter(({plugged}) => this.lastBatteryStateChangePlugged !== plugged && !this.loading),
+                    tap(({plugged}) => {
+                        this.lastBatteryStateChangePlugged = plugged;
+                    }),
+                    filter(({plugged}) => plugged)
+                )
+                .subscribe(() => {
+                    this.synchronise();
+                });
         });
     }
 
     public wiiCanLeave(): boolean {
         return !this.apiSending;
+    }
+
+    public ionViewWillLeave(): void {
+        this.batteryManager.removeEventListeners();
+        if (this.batteryInfoSubscription?.closed === false) {
+            this.batteryInfoSubscription.unsubscribe();
+            this.batteryInfoSubscription = undefined;
+        }
     }
 
     public refreshSubTitle(): void {
@@ -224,16 +255,19 @@ export class DispatchRequestMenuPage implements ViewWillEnter, CanLeave {
 
                                 this.loading = false;
                                 this.hasLoaded = true;
+                                this.changeDetectorRef.detectChanges();
                                 $res.next();
                                 $res.complete();
                             } else {
                                 this.loading = true;
                                 this.hasLoaded = false;
+                                this.changeDetectorRef.detectChanges();
                             }
                         },
                         error: (error) => {
                             this.loading = false;
                             this.hasLoaded = true;
+                            this.changeDetectorRef.detectChanges();
                             const {api, message} = error;
                             if (api && message) {
                                 this.toastService.presentToast(message);
