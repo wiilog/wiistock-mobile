@@ -452,6 +452,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'displayOrder', value: 'INTEGER'},
             {column: 'commentNeeded', value: 'INTEGER'},
             {column: 'groupedSignatureType', value: 'VARCHAR(255)'},
+            {column: 'groupedSignatureColor', value: 'VARCHAR(255)'},
         ]
     },
     {

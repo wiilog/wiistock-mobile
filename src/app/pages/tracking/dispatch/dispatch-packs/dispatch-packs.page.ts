@@ -653,6 +653,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                             draft: 0,
                             statusId: notTreatedStatus?.id || this.dispatch.statusId,
                             statusLabel: notTreatedStatus?.label || this.dispatch.statusLabel,
+                            groupedSignatureStatusColor: notTreatedStatus?.groupedSignatureColor || this.dispatch.groupedSignatureStatusColor,
                             validatedAt: moment().format(),
                         },
                         where: [`localId = ${this.dispatch.localId}`]

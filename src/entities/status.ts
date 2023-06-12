@@ -7,4 +7,5 @@ export interface Status {
     page: string;
     commentNeeded: number;
     groupedSignatureType?: string;
+    groupedSignatureColor?: string;
 }
