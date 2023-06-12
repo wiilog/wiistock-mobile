@@ -443,8 +443,8 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
         };
     }
 
-    private packToListItemConfig({code, quantity, natureId, lastLocation, already_treated, localId}: DispatchPack, natureTranslation: string) {
-        const {reference} = this.dispatchReferences.find(({localDispatchPackId}) => localDispatchPackId === localId) || {};
+    private packToListItemConfig({code, natureId, lastLocation, already_treated, localId}: DispatchPack, natureTranslation: string) {
+        const {reference, quantity} = this.dispatchReferences.find(({localDispatchPackId}) => localDispatchPackId === localId) || {};
 
         return {
             infos: {
