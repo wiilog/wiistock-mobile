@@ -462,6 +462,14 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                             reference.localDispatchPackId = dispatchPackId as number;
                         }),
                         mergeMap(() => this.sqliteService.insert(`dispatch_reference`, reference)),
+                        mergeMap(() => this.sqliteService.update(`dispatch`, [{
+                            values: {
+                                packs: `${this.dispatch.packs || ''}${this.dispatch.packs?.length ? ',' : ''}${this.logisticUnit}`,
+                                packReferences: `${this.dispatch.packReferences || ''}${this.dispatch.packReferences?.length ? ',' : ''}${reference.reference}`,
+                                quantities: `${this.dispatch.quantities || ''}${this.dispatch.quantities?.length ? ',' : ''}${reference.reference} (${reference.quantity || 0})`,
+                            },
+                            where: [`localId = ${this.dispatch.localId}`]
+                        }])),
                     )
                 }).subscribe(() => {
                     this.navService.pop();
