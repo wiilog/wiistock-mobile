@@ -78,8 +78,11 @@ export class DispatchRequestMenuPage implements ViewWillEnter, ViewWillLeave, Ca
                 return zip(
                     this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
                     this.storageService.getString(StorageKeyEnum.OPERATOR),
+                    this.translationService.getRaw(`Demande`, `Acheminements`, `Champs fixes`),
+                    this.translationService.getRaw(`Demande`, `Acheminements`, `Général`),
                 ).pipe(
-                    mergeMap(([dispatchOfflineMode, operator]) => {
+                    mergeMap(([dispatchOfflineMode, operator, fieldsTranslations, generalTranslations]) => {
+                        this.dispatchTranslations = TranslationService.CreateTranslationDictionaryFromArray(fieldsTranslations.concat(generalTranslations));
                         this.offlineMode = dispatchOfflineMode;
                         this.operator = operator;
                         return this.sqliteService.findBy(`dispatch`, dispatchOfflineMode
@@ -141,99 +144,93 @@ export class DispatchRequestMenuPage implements ViewWillEnter, ViewWillLeave, Ca
     }
 
     private refreshPageList(dispatches: Array<Dispatch>) {
-        zip(
-            this.translationService.getRaw(`Demande`, `Acheminements`, `Champs fixes`),
-            this.translationService.getRaw(`Demande`, `Acheminements`, `Général`)
-        ).subscribe(([fieldsTranslations, generalTranslations]) => {
+        this.dispatches = dispatches;
 
-            const fullTranslations = fieldsTranslations.concat(generalTranslations);
-            this.dispatchTranslations = TranslationService.CreateTranslationDictionaryFromArray(fullTranslations);
-            this.dispatches = dispatches;
-
-            this.dispatchListConfig = this.dispatches.map((dispatch: Dispatch): CardListConfig => {
-                return {
-                    customColor: dispatch.groupedSignatureStatusColor || dispatch.color,
-                    title: this.offlineMode ? {
+        this.dispatchListConfig = this.dispatches.map((dispatch: Dispatch): CardListConfig => {
+            return {
+                customColor: dispatch.groupedSignatureStatusColor || dispatch.color,
+                title: this.offlineMode
+                    ? {
                         label: 'Statut',
                         value: dispatch.draft ? dispatch.statusLabel || 'Brouillon' : dispatch.statusLabel
-                    } : {
+                    }
+                    : {
                         label: 'Numéro',
                         value: dispatch.number
                     },
-                    action: () => {
-                        this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-                            localDispatchId: dispatch.localId,
-                            fromCreate: true,
-                            viewMode: !dispatch.draft,
-                        });
+                action: () => {
+                    this.navService.push(NavPathEnum.DISPATCH_PACKS, {
+                        localDispatchId: dispatch.localId,
+                        fromCreate: true,
+                        viewMode: !dispatch.draft,
+                    });
+                },
+                content: [
+                    ...(this.offlineMode && dispatch.number ? [{
+                        label: 'Numéro',
+                        value: dispatch.number
+                    }] : [{}]),
+                    ...(this.offlineMode
+                        ? (dispatch.updatedAt
+                            ? [{
+                                label: 'Dernière synchronisation',
+                                value: moment(dispatch.updatedAt, moment.defaultFormat).format('DD/MM/YYYY HH:mm')
+                            }]
+                            : [{
+                                label: 'Synchronisé',
+                                value: 'Non'
+                            }])
+                        : [{}]),
+                    {label: TranslationService.Translate(this.dispatchTranslations, 'N° tracking transporteur'), value: dispatch.carrierTrackingNumber || ''},
+                    {label: 'Type', value: dispatch.typeLabel || ''},
+                    {
+                        label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de prise'),
+                        value: dispatch.locationFromLabel || ''
                     },
-                    content: [
-                        ...(this.offlineMode && dispatch.number ? [{
-                            label: 'Numéro',
-                            value: dispatch.number
-                        }] : [{}]),
-                        ...(this.offlineMode
-                            ? (dispatch.updatedAt
-                                ? [{
-                                    label: 'Dernière synchronisation',
-                                    value: moment(dispatch.updatedAt, moment.defaultFormat).format('DD/MM/YYYY HH:mm')
-                                }]
-                                : [{
-                                    label: 'Synchronisé',
-                                    value: 'Non'
-                                }])
-                            : [{}]),
-                        {label: TranslationService.Translate(this.dispatchTranslations, 'N° tracking transporteur'), value: dispatch.carrierTrackingNumber || ''},
-                        {label: 'Type', value: dispatch.typeLabel || ''},
-                        {
-                            label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de prise'),
-                            value: dispatch.locationFromLabel || ''
-                        },
-                        {
-                            label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de dépose'),
-                            value: dispatch.locationToLabel || ''
-                        },
-                        {
-                            label: 'Commentaire',
-                            value: dispatch.comment || '',
-                        },
-                        {
-                            label: 'Références (quantité)',
-                            value: dispatch.quantities || ''
-                        },
-                        (dispatch.emergency
-                            ? {label: 'Urgence', value: dispatch.emergency || ''}
-                            : undefined)
-                    ].filter((item) => item && item.value) as Array<{label: string; value: string;}>,
-                    ...(this.offlineMode && !dispatch.id && dispatch.draft
-                        ? {
-                            rightIcon: {
-                                name: 'trash.svg',
-                                color: 'danger',
-                                action: () => {
-                                    this.deleteDispatch(dispatch)
-                                }
+                    {
+                        label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de dépose'),
+                        value: dispatch.locationToLabel || ''
+                    },
+                    {
+                        label: 'Commentaire',
+                        value: dispatch.comment || '',
+                    },
+                    {
+                        label: 'Références (quantité)',
+                        value: dispatch.quantities || ''
+                    },
+                    (dispatch.emergency
+                        ? {label: 'Urgence', value: dispatch.emergency || ''}
+                        : undefined)
+                ].filter((item) => item && item.value) as Array<{label: string; value: string;}>,
+                ...(this.offlineMode && !dispatch.id && dispatch.draft
+                    ? {
+                        rightIcon: {
+                            name: 'trash.svg',
+                            color: 'danger',
+                            action: () => {
+                                this.deleteDispatch(dispatch)
                             }
                         }
-                        : {}),
-                    ...(dispatch.emergency && dispatch.id
-                        ? {
-                            rightIcon: {
-                                name: 'exclamation-triangle.svg',
-                                color: 'danger'
-                            }
+                    }
+                    : {}),
+                ...(dispatch.emergency && dispatch.id
+                    ? {
+                        rightIcon: {
+                            name: 'exclamation-triangle.svg',
+                            color: 'danger'
                         }
-                        : {}),
-                };
-            });
+                    }
+                    : {}),
+            };
+        });
 
-            this.refreshSubTitle();
-            this.hasLoaded = true;
-        })
+        this.refreshSubTitle();
+        this.hasLoaded = true;
     }
 
     private deleteDispatch(dispatch: Dispatch){
-        this.sqliteService.deleteBy(`dispatch`, [`id = '${dispatch.localId}'`]);
+        this.sqliteService.deleteBy(`dispatch`, [`localId = '${dispatch.localId}'`]);
         const selectedLinesToDelete = this.dispatches.findIndex((line) => line.localId === dispatch.localId);
         this.dispatches.splice(selectedLinesToDelete, 1);
         this.refreshPageList(this.dispatches);
