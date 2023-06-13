@@ -448,6 +448,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'label', value: 'VARCHAR(255)'},
             {column: 'typeId', value: 'INTEGER'},
             {column: 'state', value: 'VARCHAR(255)'},
+            {column: 'stateNumber', value: 'INTEGER'},
             {column: 'category', value: 'VARCHAR(255)'},
             {column: 'displayOrder', value: 'INTEGER'},
             {column: 'commentNeeded', value: 'INTEGER'},

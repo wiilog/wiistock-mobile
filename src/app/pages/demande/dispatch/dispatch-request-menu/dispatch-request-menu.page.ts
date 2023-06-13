@@ -21,7 +21,8 @@ import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {FormatService} from "@app/services/format.service";
 import * as moment from "moment";
 import {BatteryManagerService} from "@plugins/battery-manager/battery-manager.service";
-import {filter} from "rxjs/operators";
+import {filter, map} from "rxjs/operators";
+import {Status} from "@entities/status";
 
 @Component({
     selector: 'wii-dispatch-request-menu',
@@ -74,23 +75,7 @@ export class DispatchRequestMenuPage implements ViewWillEnter, ViewWillLeave, Ca
 
     public ionViewWillEnter(): void {
         this.loadingService.presentLoadingWhile({
-            event: () => {
-                return zip(
-                    this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
-                    this.storageService.getString(StorageKeyEnum.OPERATOR),
-                    this.translationService.getRaw(`Demande`, `Acheminements`, `Champs fixes`),
-                    this.translationService.getRaw(`Demande`, `Acheminements`, `Général`),
-                ).pipe(
-                    mergeMap(([dispatchOfflineMode, operator, fieldsTranslations, generalTranslations]) => {
-                        this.dispatchTranslations = TranslationService.CreateTranslationDictionaryFromArray(fieldsTranslations.concat(generalTranslations));
-                        this.offlineMode = dispatchOfflineMode;
-                        this.operator = operator;
-                        return this.sqliteService.findBy(`dispatch`, dispatchOfflineMode
-                            ? [`createdBy = '${operator}'`]
-                            : [`draft = 1`]);
-                    })
-                )
-            }
+            event: () => this.initializeDispatchesList()
         }).subscribe((dispatches) => {
             this.dispatches = dispatches;
             this.fabListActivated = false
@@ -249,14 +234,11 @@ export class DispatchRequestMenuPage implements ViewWillEnter, ViewWillLeave, Ca
                         next: ({finished, message}) => {
                             this.messageLoading = message;
                             if (finished) {
-                                this.sqliteService
-                                    .findBy(`dispatch`, this.offlineMode
-                                        ? [`createdBy = '${this.operator}'`]
-                                        : [`draft = 1`])
+                                this.initializeDispatchesList()
                                     .subscribe((dispatches) => {
                                         this.dispatches = dispatches;
                                         this.refreshPageList(this.dispatches);
-                                });
+                                    });
 
                                 this.loading = false;
                                 this.hasLoaded = true;
@@ -291,5 +273,63 @@ export class DispatchRequestMenuPage implements ViewWillEnter, ViewWillLeave, Ca
         });
 
         return $res;
+    }
+
+    public initializeDispatchesList(): Observable<Array<Dispatch>>{
+        return zip(
+            this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
+            this.storageService.getString(StorageKeyEnum.OPERATOR),
+            this.translationService.getRaw(`Demande`, `Acheminements`, `Champs fixes`),
+            this.translationService.getRaw(`Demande`, `Acheminements`, `Général`),
+        ).pipe(
+            mergeMap(([dispatchOfflineMode, operator, fieldsTranslations, generalTranslations]) => {
+                this.dispatchTranslations = TranslationService.CreateTranslationDictionaryFromArray(fieldsTranslations.concat(generalTranslations));
+                this.offlineMode = dispatchOfflineMode;
+                this.operator = operator;
+                return this.sqliteService.findBy('status', [
+                    `category = 'acheminement'`,
+                ]);
+            }),
+            mergeMap(() => this.sqliteService.findBy('status', [
+                `category = 'acheminement'`,
+            ])),
+            mergeMap((statuses) => {
+                return this.sqliteService.findBy(`dispatch`, this.offlineMode
+                    ? [`createdBy = '${this.operator}'`]
+                    : [`draft = 1`])
+                    .pipe(
+                        map((dispatches) => {
+
+                            return dispatches
+                                .map((dispatch) => {
+                                    const dispatchStatus = statuses.find((status) => status.id === dispatch.statusId);
+                                    return {...dispatch, status: dispatchStatus};
+                                })
+                                .sort((prevDispatch: Dispatch & { status?: Status }, nextDispatch: Dispatch & { status?: Status }) => {
+                                    return prevDispatch.typeId === nextDispatch.typeId
+                                        ? 0
+                                        : (prevDispatch.typeId > nextDispatch.typeId ? 1 : -1);
+                                })
+                                .sort((prevDispatch: Dispatch & { status?: Status }, nextDispatch: Dispatch & { status?: Status }) => {
+                                    const prevStatus = prevDispatch.status;
+                                    const nextStatus = nextDispatch.status;
+
+                                    return prevStatus && nextStatus && prevStatus.stateNumber === nextStatus.stateNumber
+                                        ? 0
+                                        :(prevStatus && nextStatus && prevStatus.stateNumber > nextStatus.stateNumber ? 1 : -1);
+                                })
+                                .sort((prevDispatch: Dispatch & { status?: Status }, nextDispatch: Dispatch & { status?: Status }) => {
+                                    const prevStatus = prevDispatch.status;
+                                    const nextStatus = nextDispatch.status;
+                                    const prevDisplayOrder = prevStatus?.displayOrder || -1;
+                                    const nextDisplayOrder = nextStatus?.displayOrder || -1;
+                                    return prevDisplayOrder === nextDisplayOrder
+                                        ? 0
+                                        : (prevDisplayOrder > nextDisplayOrder ? 1 : -1);
+                                });
+                        })
+                    )
+            }),
+        );
     }
 }
