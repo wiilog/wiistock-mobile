@@ -185,6 +185,7 @@ export class DispatchGroupedSignatureFinishPage implements ViewWillEnter, ViewWi
                         statusLabel: this.selectedStatus.label,
                         partial: this.selectedStatus.state === 'partial' ? 1 : 0,
                         treatedStatusId: this.selectedStatus.state === 'treated' ? this.selectedStatus.id : null,
+                        groupedSignatureStatusColor: this.selectedStatus.groupedSignatureColor,
                     },
                     where: [`localId IN (${this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.localId).join(',')})`],
                 }])
