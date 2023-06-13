@@ -487,7 +487,7 @@ export class LocalDataManagerService {
                                 logisticUnit: dispatchPack?.code,
                             };
                         })
-                        .filter(({localDispatchId}) => dispatches.findIndex(({localId}: Dispatch) => localId === localDispatchId));
+                        .filter(({localDispatchId}) => dispatches.findIndex(({localId}: Dispatch) => localId === localDispatchId) > -1);
                     return [dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory];
                 }),
                 mergeMap(([dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory]) => (
