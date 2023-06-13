@@ -1,8 +1,19 @@
-import {Component, EventEmitter, HostBinding, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component, ElementRef,
+    EventEmitter,
+    HostBinding,
+    Input,
+    NgZone,
+    OnDestroy,
+    OnInit,
+    Output, ViewChild
+} from '@angular/core';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
 import {Observable, Subscription} from 'rxjs';
 import {BarcodeScannerModeEnum} from './barcode-scanner-mode.enum';
+import {IonInput} from "@ionic/angular";
 
 interface DisplayConfig {
     search: boolean;
@@ -18,6 +29,9 @@ interface DisplayConfig {
     styleUrls: ['./barcode-scanner.component.scss']
 })
 export class BarcodeScannerComponent implements OnInit, OnDestroy {
+
+    @ViewChild('inputElement')
+    public inputElement: IonInput;
 
     private static readonly AllDisplayConfigs: { [mode: number]: DisplayConfig } = {
         [BarcodeScannerModeEnum.ONLY_MANUAL]: {
@@ -110,6 +124,7 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
     private zebraScanSubscription?: Subscription;
 
     public constructor(private barcodeScannerManager: BarcodeScannerManagerService,
+                       private ngZone: NgZone,
                        private toastService: ToastService) {
         this.scanAdd = new EventEmitter<string>();
         this.manualAdd = new EventEmitter<string>();
@@ -136,7 +151,6 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
     public addManually() {
         if (this.input) {
             this.triggerAdd(this.manualAdd, this.input);
-            this.clearInput();
         }
         else {
             this.toastService.presentToast('Aucune donnée saisie');
@@ -169,14 +183,19 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
         this.createForm.emit();
     }
 
-    private clearInput(): void {
-        this.input = '';
+    private  clearInput() {
+        this.ngZone.run(async() => {
+            this.input = '';
+            const element: HTMLInputElement = await this.inputElement.getInputElement();
+            element.blur();
+        });
     }
 
     private triggerAdd(emitter: EventEmitter<string>, barcode: string): void {
         if (!this.hidden) {
             const smartBarcode = (barcode || '').trim();
             emitter.emit(smartBarcode);
+            this.clearInput();
         }
     }
 
