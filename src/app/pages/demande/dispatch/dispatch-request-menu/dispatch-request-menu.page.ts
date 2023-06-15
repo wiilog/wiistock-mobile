@@ -300,15 +300,25 @@ export class DispatchRequestMenuPage implements ViewWillEnter, ViewWillLeave, Ca
                     .pipe(
                         map((dispatches) => {
 
+                            // Sort priority : emergency > stateNumber > displayOrder > typeId
                             return dispatches
                                 .map((dispatch) => {
                                     const dispatchStatus = statuses.find((status) => status.id === dispatch.statusId);
-                                    return {...dispatch, status: dispatchStatus};
+                                    return {...dispatch, status: dispatchStatus || {stateNumber: -1, displayOrder: -1}};
                                 })
                                 .sort((prevDispatch: Dispatch & { status?: Status }, nextDispatch: Dispatch & { status?: Status }) => {
                                     return prevDispatch.typeId === nextDispatch.typeId
                                         ? 0
                                         : (prevDispatch.typeId > nextDispatch.typeId ? 1 : -1);
+                                })
+                                .sort((prevDispatch: Dispatch & { status?: Status }, nextDispatch: Dispatch & { status?: Status }) => {
+                                    const prevStatus = prevDispatch.status;
+                                    const nextStatus = nextDispatch.status;
+                                    const prevDisplayOrder = prevStatus?.displayOrder || -1;
+                                    const nextDisplayOrder = nextStatus?.displayOrder || -1;
+                                    return prevDisplayOrder === nextDisplayOrder
+                                        ? 0
+                                        : (prevDisplayOrder > nextDisplayOrder ? 1 : -1);
                                 })
                                 .sort((prevDispatch: Dispatch & { status?: Status }, nextDispatch: Dispatch & { status?: Status }) => {
                                     const prevStatus = prevDispatch.status;
@@ -319,13 +329,9 @@ export class DispatchRequestMenuPage implements ViewWillEnter, ViewWillLeave, Ca
                                         :(prevStatus && nextStatus && prevStatus.stateNumber > nextStatus.stateNumber ? 1 : -1);
                                 })
                                 .sort((prevDispatch: Dispatch & { status?: Status }, nextDispatch: Dispatch & { status?: Status }) => {
-                                    const prevStatus = prevDispatch.status;
-                                    const nextStatus = nextDispatch.status;
-                                    const prevDisplayOrder = prevStatus?.displayOrder || -1;
-                                    const nextDisplayOrder = nextStatus?.displayOrder || -1;
-                                    return prevDisplayOrder === nextDisplayOrder
+                                    return prevDispatch.emergency && nextDispatch.emergency
                                         ? 0
-                                        : (prevDisplayOrder > nextDisplayOrder ? 1 : -1);
+                                        : (prevDispatch.emergency ? -1 : 1);
                                 });
                         })
                     )
