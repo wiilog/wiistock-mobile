@@ -106,14 +106,15 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                             dispatch: this.dispatch.id as number
                         }
                     })
-                    : this.sqliteService.findOneBy('dispatch_pack', {
-                        code: this.logisticUnit,
-                        localDispatchId: this.dispatch.localId
-                    })
-                        .pipe(
-                            mergeMap((dispatchPack: DispatchPack) => this.sqliteService.findOneBy('dispatch_reference', {localDispatchPackId: dispatchPack.localId})),
-                            mergeMap((dispatchReference: DispatchReference) => of({...dispatchReference}))
-                        )
+                    : this.viewMode ? (this.sqliteService.findOneBy('dispatch_pack', {
+                            code: this.logisticUnit,
+                            localDispatchId: this.dispatch.localId
+                        })
+                            .pipe(
+                                mergeMap((dispatchPack: DispatchPack) => this.sqliteService.findOneBy('dispatch_reference', {localDispatchPackId: dispatchPack.localId})),
+                                mergeMap((dispatchReference: DispatchReference) => of({...dispatchReference}))
+                            ))
+                        : of([])
             }
         }).subscribe((response) => {
             let data = Object.keys(values).length > 0 ? values : this.reference;
@@ -473,14 +474,17 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                             reference.localDispatchPackId = dispatchPackId as number;
                         }),
                         mergeMap(() => this.sqliteService.insert(`dispatch_reference`, reference)),
-                        mergeMap(() => this.sqliteService.update(`dispatch`, [{
-                            values: {
-                                packs: `${this.dispatch.packs || ''}${this.dispatch.packs?.length ? ',' : ''}${this.logisticUnit}`,
-                                packReferences: `${this.dispatch.packReferences || ''}${this.dispatch.packReferences?.length ? ',' : ''}${reference.reference}`,
-                                quantities: `${this.dispatch.quantities || ''}${this.dispatch.quantities?.length ? ',' : ''}${reference.reference} (${reference.quantity || 0})`,
-                            },
-                            where: [`localId = ${this.dispatch.localId}`]
-                        }])),
+                        mergeMap(() => {
+                            const isEdit = this.dispatch.packReferences ? this.dispatch.packReferences.split(',').includes(reference.reference) : false;
+                            return this.sqliteService.update(`dispatch`, [{
+                                values: {
+                                    packs: !isEdit ? `${this.dispatch.packs || ''}${this.dispatch.packs?.length ? ',' : ''}${this.logisticUnit}` : `${this.dispatch.packs}`,
+                                    packReferences: !isEdit ? `${this.dispatch.packReferences || ''}${this.dispatch.packReferences?.length ? ',' : ''}${reference.reference}` : `${this.dispatch.packReferences}`,
+                                    quantities: !isEdit ? `${this.dispatch.quantities || ''}${this.dispatch.quantities?.length ? ',' : ''}${reference.reference} (${reference.quantity || 0})` : `${this.dispatch.quantities}`,
+                                },
+                                where: [`localId = ${this.dispatch.localId}`]
+                            }])
+                        }),
                     )
                 }).subscribe(() => {
                     this.navService.pop();

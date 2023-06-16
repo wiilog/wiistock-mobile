@@ -432,7 +432,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                                             dispatch: this.dispatch,
                                             reference,
                                             edit: true,
-                                            viewMode: this.viewMode
+                                            viewMode: !Boolean(this.dispatch.draft),
                                         });
                                     });
                                 }
