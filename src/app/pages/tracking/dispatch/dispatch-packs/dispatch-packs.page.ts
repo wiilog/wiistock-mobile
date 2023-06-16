@@ -476,7 +476,6 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                 } : {}),
             },
             color: this.natureIdsToColors[Number(natureId)],
-            disabled: Boolean(already_treated)
         }
     }
 
