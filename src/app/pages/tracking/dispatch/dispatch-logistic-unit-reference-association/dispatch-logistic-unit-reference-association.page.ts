@@ -474,23 +474,43 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                             reference.localDispatchPackId = dispatchPackId as number;
                         }),
                         mergeMap(() => this.sqliteService.insert(`dispatch_reference`, reference)),
-                        mergeMap(() => {
-                            const isEdit = this.dispatch.packReferences ? this.dispatch.packReferences.split(',').includes(reference.reference) : false;
-                            return this.sqliteService.update(`dispatch`, [{
-                                values: {
-                                    packs: !isEdit ? `${this.dispatch.packs || ''}${this.dispatch.packs?.length ? ',' : ''}${this.logisticUnit}` : `${this.dispatch.packs}`,
-                                    packReferences: !isEdit ? `${this.dispatch.packReferences || ''}${this.dispatch.packReferences?.length ? ',' : ''}${reference.reference}` : `${this.dispatch.packReferences}`,
-                                    quantities: !isEdit ? `${this.dispatch.quantities || ''}${this.dispatch.quantities?.length ? ',' : ''}${reference.reference} (${reference.quantity || 0})` : `${this.dispatch.quantities}`,
-                                },
-                                where: [`localId = ${this.dispatch.localId}`]
-                            }])
-                        }),
+                        mergeMap(() => this.updateDispatch()),
                     )
                 }).subscribe(() => {
                     this.navService.pop();
                 });
             }
         }
+    }
+
+    public updateDispatch() {
+        return this.sqliteService.findBy('dispatch_pack', [`localDispatchId = ${this.dispatch.localId}`]).pipe(
+            mergeMap((dispatchPacks) => {
+                const dispatchPackLocalIds = dispatchPacks.map((dispatchPack: DispatchPack) => dispatchPack.localId);
+                const dispatchPackCodes = dispatchPacks.map((dispatchPack: DispatchPack) => dispatchPack.code);
+                return zip(
+                    this.sqliteService.update(`dispatch`, [{
+                        values: {
+                            packs: `${dispatchPackCodes.join(',')}`,
+                        },
+                        where: [`localId = ${this.dispatch.localId}`]
+                    }])
+                ).pipe(
+                    mergeMap(() => this.sqliteService.findBy('dispatch_reference', [`localDispatchPackId IN (${dispatchPackLocalIds.join(',')})`]))
+                )
+            }),
+            mergeMap((dispatchReferences) => {
+                const dispatchPackReferences = dispatchReferences.map((dispatchReference: DispatchReference) => dispatchReference.reference);
+                const dispatchReferenceQuantities = dispatchReferences.map((dispatchReference: DispatchReference) => `${dispatchReference.reference} (${dispatchReference.quantity})`);
+                return this.sqliteService.update(`dispatch`, [{
+                    values: {
+                        packReferences: `${dispatchPackReferences.join(',')}`,
+                        quantities: `${dispatchReferenceQuantities.join(',')}`,
+                    },
+                    where: [`localId = ${this.dispatch.localId}`]
+                }]);
+            })
+        );
     }
 
     public getReference() {
