@@ -34,6 +34,7 @@ import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {mergeMap, tap} from "rxjs/operators";
 import {StorageService} from "@app/services/storage/storage.service";
 import {AssociatedDocumentType} from "@entities/associated-document-type";
+import {DispatchPack} from "@entities/dispatch-pack";
 
 @Component({
     selector: 'wii-dispatch-logistic-unit-reference-association',
@@ -98,14 +99,21 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
         /* TODO adrien remove */
         this.loadingService.presentLoadingWhile({
             event: () => {
-                return this.viewMode
+                return this.viewMode && !this.offlineMode
                     ? this.apiService.requestApi(ApiService.GET_ASSOCIATED_REF, {
                         pathParams: {
                             pack: this.logisticUnit,
                             dispatch: this.dispatch.id as number
                         }
                     })
-                    : of([]);
+                    : this.sqliteService.findOneBy('dispatch_pack', {
+                        code: this.logisticUnit,
+                        localDispatchId: this.dispatch.localId
+                    })
+                        .pipe(
+                            mergeMap((dispatchPack: DispatchPack) => this.sqliteService.findOneBy('dispatch_reference', {localDispatchPackId: dispatchPack.localId})),
+                            mergeMap((dispatchReference: DispatchReference) => of({...dispatchReference}))
+                        )
             }
         }).subscribe((response) => {
             let data = Object.keys(values).length > 0 ? values : this.reference;
@@ -198,7 +206,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                         config: {
                             label: 'Matériel hors format',
                             name: 'outFormatEquipment',
-                            value: outFormatEquipment ? Boolean(outFormatEquipment) : null,
+                            value: Number.isInteger(outFormatEquipment) ? Boolean(outFormatEquipment) : null,
                             inputConfig: {
                                 disabled: this.viewMode
                             },
@@ -250,7 +258,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                         config: {
                             label: 'ADR',
                             name: 'adr',
-                            value: adr ? Boolean(adr) : null,
+                            value: Number.isInteger(adr) ? Boolean(adr) : null,
                             inputConfig: {
                                 disabled: this.viewMode
                             },
