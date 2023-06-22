@@ -437,6 +437,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'treated', value: 'INTEGER'},
             {column: 'already_treated', value: 'INTEGER'},
             {column: 'comment', value: 'VARCHAR(255)'},
+            {column: 'volume', value: 'REAL'},
+            {column: 'weight', value: 'REAL'},
             {column: 'photo1', value: 'TEXT'},
             {column: 'photo2', value: 'TEXT'},
         ]
