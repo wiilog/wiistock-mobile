@@ -92,7 +92,12 @@ export class DispatchRequestMenuPage implements ViewWillEnter, ViewWillLeave, Ca
                     tap(({plugged}) => {
                         this.lastBatteryStateChangePlugged = plugged;
                     }),
-                    filter(({plugged}) => plugged)
+                    filter(({plugged}) => plugged),
+                    mergeMap(() => this.loadingService.presentLoadingWhile({
+                        event: () => this.networkService.hasNetworkTry(),
+                        message: 'Vérification de la connexion...',
+                    })),
+                    mergeMap(() => this.batteryManager.batteryInfo()),
                 )
                 .subscribe(() => {
                     this.synchronise();
