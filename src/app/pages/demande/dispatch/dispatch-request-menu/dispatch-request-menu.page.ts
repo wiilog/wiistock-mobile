@@ -23,6 +23,7 @@ import * as moment from "moment";
 import {BatteryManagerService} from "@plugins/battery-manager/battery-manager.service";
 import {filter, map} from "rxjs/operators";
 import {Status} from "@entities/status";
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
     selector: 'wii-dispatch-request-menu',
@@ -255,9 +256,30 @@ export class DispatchRequestMenuPage implements ViewWillEnter, ViewWillLeave, Ca
                             this.loading = false;
                             this.hasLoaded = true;
                             this.changeDetectorRef.detectChanges();
-                            const {api, message} = error;
-                            if (api && message) {
-                                this.toastService.presentToast(message);
+
+                            if (error instanceof HttpErrorResponse) {
+                                if (error.status === 0) { // connection lost
+                                    // For testing => turn on plane mode during synchronisation
+                                    // not working in livereload build
+                                    this.alertService.show({
+                                        header: 'Attention',
+                                        message: `La connexion avec le serveur a été perdue, la récupération des données n'a pas pu se faire`,
+                                        buttons: [
+                                            {
+                                                text: 'Réessayer',
+                                                handler: () => {
+                                                    this.synchronise();
+                                                },
+                                            },
+                                        ]
+                                    })
+                                }
+                            }
+                            else {
+                                const {api, message} = error;
+                                if (api && message) {
+                                    this.toastService.presentToast(message);
+                                }
                             }
                             $res.complete();
                             throw error;

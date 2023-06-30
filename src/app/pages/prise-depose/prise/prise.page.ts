@@ -266,7 +266,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                             cssClass: 'alert-success',
                                             handler: () => this.processTackingBarCode(barCode, isManualAdd, quantity, article),
                                         }]
-                                    })
+                                    });
                                 } else {
                                     this.processTackingBarCode(barCode, isManualAdd, quantity, article);
                                 }
