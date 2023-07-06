@@ -157,7 +157,20 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.HANDLING_MENU, label: 'Service'},
             {pagePath: NavPathEnum.DEMANDE_LIVRAISON_MENU, label: 'Livraison'},
             {pagePath: NavPathEnum.DISPATCH_WAYBILL, label: 'Lettre de voiture'},
-            {pagePath: NavPathEnum.DISPATCH_REQUEST_MENU, label: 'Acheminement'},
+            {
+                pagePath: NavPathEnum.DISPATCH_REQUEST_MENU,
+                label: 'Acheminement',
+                filter: (params) => (
+                    (typeof params.dispatchOfflineMode === 'boolean') && !params.dispatchOfflineMode
+                )
+            },
+            {
+                pagePath: NavPathEnum.DISPATCH_REQUEST_MENU,
+                label: 'Acheminement | Hors ligne',
+                filter: (params) => (
+                    (typeof params.dispatchOfflineMode === 'boolean') && params.dispatchOfflineMode
+                )
+            },
             {pagePath: NavPathEnum.DISPATCH_NEW, label: 'Création'},
             {pagePath: NavPathEnum.HANDLING_VALIDATE, label: 'Création'},
             {pagePath: NavPathEnum.GROUP_SCAN_GROUP, label: 'Groupage'},
