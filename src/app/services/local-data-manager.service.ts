@@ -7,7 +7,7 @@ import {Collecte} from '@entities/collecte';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {FileService} from "@app/services/file.service";
 import {StorageService} from "@app/services/storage/storage.service";
-import {Observable, of, ReplaySubject, Subject, zip} from 'rxjs';
+import {merge, Observable, of, ReplaySubject, Subject, tap, zip} from 'rxjs';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {catchError, mergeMap, map} from 'rxjs/operators';
 import {DemandeLivraison} from '@entities/demande-livraison';
@@ -16,6 +16,8 @@ import {TransferOrder} from '@entities/transfer-order';
 import {AlertService} from '@app/services/alert.service';
 import {TranslationService} from '@app/services/translations.service';
 import {DispatchPack} from '@entities/dispatch-pack';
+import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
+import {Dispatch} from "@entities/dispatch";
 
 
 type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies' | 'dispatch' | 'transfer' | 'empty_round';
@@ -45,6 +47,8 @@ type DemandeForApi = {
 export class LocalDataManagerService {
 
     private readonly apiProccessConfigs: {[type in Process]: ApiProccessConfig};
+
+    private dispatchOfflineMode: boolean = false;
 
     public constructor(private sqliteService: SqliteService,
                        private apiService: ApiService,
@@ -350,6 +354,12 @@ export class LocalDataManagerService {
         this.importData()
             .pipe(
                 mergeMap(() => {
+                    return this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE);
+                }),
+                tap((dispatchOfflineMode) => {
+                    this.dispatchOfflineMode = dispatchOfflineMode;
+                }),
+                mergeMap(() => {
                     synchronise$.next({finished: false, message: 'Envoi des préparations non synchronisées'});
                     return this.sendFinishedProcess('preparation').pipe(map(Boolean));
                 }),
@@ -375,7 +385,9 @@ export class LocalDataManagerService {
                 }),
                 mergeMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des acheminements'});
-                    return this.sendFinishedProcess('dispatch').pipe(map(() => needAnotherSynchronise));
+                    return this.dispatchOfflineMode
+                        ? of(needAnotherSynchronise)
+                        : this.sendFinishedProcess('dispatch').pipe(map(() => needAnotherSynchronise));
                 }),
                 mergeMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des transferts'});
@@ -391,6 +403,31 @@ export class LocalDataManagerService {
                         LocalDataManagerService.ShowSyncMessage(synchronise$);
                     }
                     return needAnotherSynchronise ? this.importData() : of(false);
+                })
+            )
+            .subscribe({
+                next: () => {
+                    this.translationService.changedTranslations$.next();
+                    synchronise$.next({finished: true});
+                    synchronise$.complete();
+                },
+                error: (error) => {
+                    synchronise$.error(error);
+                    synchronise$.complete();
+                }
+            });
+
+        return synchronise$;
+    }
+
+    public synchroniseDispatchesData(){
+        const synchronise$ = new ReplaySubject<{finished: boolean, message?: string}>(1);
+
+        LocalDataManagerService.ShowSyncMessage(synchronise$);
+        this.sendOfflineDispatches()
+            .pipe(
+                mergeMap(() => {
+                    return this.importData();
                 })
             )
             .subscribe({
@@ -428,6 +465,57 @@ export class LocalDataManagerService {
                         .pipe(map(() => ({data})))
                 )),
                 mergeMap(({data}) => this.sqliteService.importData(data))
+            );
+    }
+
+    private sendOfflineDispatches() {
+        return zip(
+            this.sqliteService.findBy('dispatch'),
+            this.sqliteService.findBy('dispatch_pack'),
+            this.sqliteService.findBy('dispatch_reference'),
+            this.sqliteService.findBy('grouped_signature_history'),
+        )
+            .pipe(
+                map(([dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory]) => {
+                    dispatchReferences = dispatchReferences
+                        .map(({localDispatchPackId, ...remaining}) => {
+                            const dispatchPack = dispatchPacks.find(({localId}) => localDispatchPackId === localId);
+                            return {
+                                ...remaining,
+                                dispatchId: dispatchPack?.dispatchId,
+                                localDispatchId: dispatchPack?.localDispatchId,
+                                logisticUnit: dispatchPack?.code,
+                            };
+                        })
+                        .filter(({localDispatchId}) => dispatches.findIndex(({localId}: Dispatch) => localId === localDispatchId) > -1);
+                    return [dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory];
+                }),
+                mergeMap(([dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory]) => (
+                    dispatches.length > 0
+                        ? this.apiService.requestApi(ApiService.NEW_OFFLINE_DISPATCHES, {
+                                params: {
+                                    dispatches,
+                                    dispatchPacks,
+                                    dispatchReferences,
+                                    groupedSignatureHistory,
+                                }
+                            },
+                        )
+                        : of(undefined)
+                )),
+                map(({success, errors}) => {
+                    return !success && errors.length > 0
+                        ? this.alertService.show({
+                            header: 'Erreur',
+                            message: errors.map((errorMessage: string) => errorMessage).join(','),
+                            buttons: [{
+                                text: 'OK',
+                                role: 'cancel'
+                            }]
+                        })
+                        : of(undefined)
+                }),
+                mergeMap(() => this.sqliteService.deleteBy('grouped_signature_history'))
             );
     }
 

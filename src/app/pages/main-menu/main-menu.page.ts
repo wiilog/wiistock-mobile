@@ -292,7 +292,9 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                                 .push(NavPathEnum.TRACKING_MENU)
                                 .pipe(
                                     mergeMap(() => this.navService.push(NavPathEnum.DISPATCH_MENU, {withoutLoading: true})),
-                                    mergeMap(() => this.navService.push(NavPathEnum.DISPATCH_PACKS, {dispatchId}))
+                                    mergeMap(() => this.navService.push(NavPathEnum.DISPATCH_PACKS, {
+                                        dispatchId
+                                    }))
                                 )
                                 .subscribe(() => {
                                     this.pageIsRedirecting = false;

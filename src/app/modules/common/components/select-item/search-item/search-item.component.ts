@@ -411,7 +411,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             ? this.dbItems.filter((item) => (
                 (
                     !search
-                    || (item.label || item.username || '').toLowerCase().includes(search.toLowerCase())
+                    || (item[SearchItemComponent.SEARCH_CONFIGS[this.smartType].label] || '').toLowerCase().includes(search.toLowerCase())
                 )
                 && (
                     !this.filterItem

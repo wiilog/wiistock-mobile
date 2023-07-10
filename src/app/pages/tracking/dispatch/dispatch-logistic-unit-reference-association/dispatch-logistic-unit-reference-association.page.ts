@@ -26,13 +26,15 @@ import {ApiService} from "@app/services/api.service";
 import {
     FormPanelButtonsComponent
 } from "@common/components/panel/form-panel/form-panel-buttons/form-panel-buttons.component";
-import {Reference} from "@entities/reference";
+import {DispatchReference} from "@entities/dispatch-reference";
 import {Dispatch} from "@entities/dispatch";
 import {Observable, of, zip} from "rxjs";
 import {ViewWillEnter} from "@ionic/angular";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
-import {mergeMap} from "rxjs/operators";
+import {mergeMap, tap} from "rxjs/operators";
 import {StorageService} from "@app/services/storage/storage.service";
+import {AssociatedDocumentType} from "@entities/associated-document-type";
+import {DispatchPack} from "@entities/dispatch-pack";
 
 @Component({
     selector: 'wii-dispatch-logistic-unit-reference-association',
@@ -49,11 +51,11 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
 
     public logisticUnit: string;
     public dispatch: Dispatch;
-    public reference: Reference | any = {};
+    public reference: DispatchReference | any = {};
     public volume?: number = undefined;
     public disableValidate: boolean = true;
     public disabledAddReference: boolean = true;
-    public associatedDocumentTypeElements: string;
+    public associatedDocumentTypeElements: Array<AssociatedDocumentType>;
 
     public edit: boolean = false;
     public viewMode: boolean = false;
@@ -74,7 +76,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
             event: () => {
                 return zip(
                     this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
-                    this.apiService.requestApi(ApiService.GET_ASSOCIATED_DOCUMENT_TYPE_ELEMENTS),
+                    this.sqliteService.findAll('associated_document_type'),
                 )
             }
         }).subscribe(([dispatchOfflineMode, documentTypeElements]) => {
@@ -94,15 +96,25 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
     }
 
     private getFormConfig(values: any = {}) {
-        const loader = this.viewMode ? this.apiService.requestApi(ApiService.GET_ASSOCIATED_REF, {
-            pathParams: {
-                pack: this.logisticUnit,
-                dispatch: this.dispatch.id
-            }
-        }) : of([]);
+        /* TODO adrien remove */
         this.loadingService.presentLoadingWhile({
             event: () => {
-                return loader;
+                return this.viewMode && !this.offlineMode
+                    ? this.apiService.requestApi(ApiService.GET_ASSOCIATED_REF, {
+                        pathParams: {
+                            pack: this.logisticUnit,
+                            dispatch: this.dispatch.id as number
+                        }
+                    })
+                    : this.viewMode ? (this.sqliteService.findOneBy('dispatch_pack', {
+                            code: this.logisticUnit,
+                            localDispatchId: this.dispatch.localId
+                        })
+                            .pipe(
+                                mergeMap((dispatchPack: DispatchPack) => this.sqliteService.findOneBy('dispatch_reference', {localDispatchPackId: dispatchPack.localId})),
+                                mergeMap((dispatchReference: DispatchReference) => of({...dispatchReference}))
+                            ))
+                        : of([])
             }
         }).subscribe((response) => {
             let data = Object.keys(values).length > 0 ? values : this.reference;
@@ -156,19 +168,21 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                         },
                     },
                 },
-                ...(!this.edit ? [{
-                    item: FormPanelButtonsComponent,
-                    config: {
-                        inputConfig: {
-                            type: 'text',
-                            disabled: this.disabledAddReference,
-                            elements: [
-                                {id: `searchRef`, label: `Rechercher`}
-                            ],
-                            onChange: () => this.getReference(),
-                        },
-                    }
-                }] : [])
+                ...(!this.edit
+                    ? [{
+                        item: FormPanelButtonsComponent,
+                        config: {
+                            inputConfig: {
+                                type: 'text',
+                                disabled: this.disabledAddReference,
+                                elements: [
+                                    {id: `searchRef`, label: `Rechercher`}
+                                ],
+                                onChange: () => this.getReference(),
+                            },
+                        }
+                    }]
+                    : [])
             ];
             if (Object.keys(values).length > 0 || Object.keys(this.reference).length > 0 || this.viewMode) {
                 this.formConfig.push({
@@ -193,7 +207,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                         config: {
                             label: 'Matériel hors format',
                             name: 'outFormatEquipment',
-                            value: outFormatEquipment ? Boolean(outFormatEquipment) : null,
+                            value: Number.isInteger(outFormatEquipment) ? Boolean(outFormatEquipment) : null,
                             inputConfig: {
                                 disabled: this.viewMode
                             },
@@ -245,7 +259,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                         config: {
                             label: 'ADR',
                             name: 'adr',
-                            value: adr ? Boolean(adr) : null,
+                            value: Number.isInteger(adr) ? Boolean(adr) : null,
                             inputConfig: {
                                 disabled: this.viewMode
                             },
@@ -353,16 +367,20 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                         config: {
                             label: 'Types de documents associés',
                             name: 'associatedDocumentTypes',
-                            value: associatedDocumentTypes
-                                ? (Array.isArray(associatedDocumentTypes) ? associatedDocumentTypes : associatedDocumentTypes.split(`,`))
-                                    .map((label: any) => ({
-                                        id: label,
-                                        label
-                                    }))
-                                : null,
+                            value: associatedDocumentTypes || this.reference.associatedDocumentTypes
+                                ? (
+                                    Array.isArray(associatedDocumentTypes)
+                                        ? associatedDocumentTypes
+                                        : (this.reference.associatedDocumentTypes
+                                            ? this.reference.associatedDocumentTypes
+                                            : this.associatedDocumentTypeElements.map(({label}) => ({
+                                                id: label,
+                                                label
+                                            })))
+                                ) : null,
                             inputConfig: {
                                 required: true,
-                                elements: this.associatedDocumentTypeElements.split(`,`).map((label) => ({
+                                elements: this.associatedDocumentTypeElements.map(({label}) => ({
                                     id: label,
                                     label
                                 })),
@@ -419,7 +437,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
         if (this.formPanelComponent.firstError) {
             this.toastService.presentToast(this.formPanelComponent.firstError);
         } else {
-            const reference: Reference = Object.keys(this.formPanelComponent.values).reduce((acc: any, key) => {
+            const reference: DispatchReference = Object.keys(this.formPanelComponent.values).reduce((acc: any, key) => {
                 if (this.formPanelComponent.values[key] !== undefined && key !== 'undefined') {
                     acc[key] = (key === 'associatedDocumentTypes')
                         ? this.formPanelComponent.values[key].replace(/;/g, ',')
@@ -427,29 +445,72 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                 }
 
                 return acc;
-            }, {}) as Reference;
+            }, {}) as DispatchReference;
             if (!this.reference.exists && !reference.volume) {
                 this.toastService.presentToast(`Le calcul du volume est nécessaire pour valider l'ajout de la référence.`)
             } else {
-                reference.logisticUnit = this.logisticUnit;
                 this.loadingService.presentLoadingWhile({
-                    event: () => zip(
-                        this.sqliteService.deleteBy(`dispatch_pack`, [`code = '${this.logisticUnit}'`, `dispatchId = ${this.dispatch.id}`]),
-                        this.sqliteService.insert(`dispatch_pack`, {
+                    event: () => this.sqliteService.findBy(`dispatch_pack`, [
+                        `code = '${this.logisticUnit}'`,
+                        this.dispatch.id ? `dispatchId = ${this.dispatch.id || ''}` : `localDispatchId = ${this.dispatch.localId || ''}`
+                    ]).pipe(
+                        mergeMap((dispatchPacks) => {
+                            const deletedIds = dispatchPacks.map(({localId}) => localId);
+                            return deletedIds.length > 0
+                                ? zip(
+                                    this.sqliteService.deleteBy(`dispatch_pack`, [`localId IN (${deletedIds.join(',')})`,]),
+                                    this.sqliteService.deleteBy(`dispatch_reference`, [`localDispatchPackId IN (${deletedIds.join(',')})`,]),
+                                )
+                                : of(undefined);
+                        }),
+                        mergeMap(() => this.sqliteService.insert(`dispatch_pack`, {
                             code: this.logisticUnit,
                             quantity: reference.quantity,
                             dispatchId: this.dispatch.id,
+                            localDispatchId: this.dispatch.localId,
                             treated: 1,
-                            reference: reference.reference
+                        })),
+                        tap((dispatchPackId) => {
+                            reference.localDispatchPackId = dispatchPackId as number;
                         }),
-                        this.sqliteService.deleteBy('reference', [`reference = '${reference.reference}'`, `logisticUnit = '${reference.logisticUnit}'`]),
-                        this.sqliteService.insert(`reference`, reference)
+                        mergeMap(() => this.sqliteService.insert(`dispatch_reference`, reference)),
+                        mergeMap(() => this.updateDispatch()),
                     )
                 }).subscribe(() => {
                     this.navService.pop();
                 });
             }
         }
+    }
+
+    public updateDispatch() {
+        return this.sqliteService.findBy('dispatch_pack', [`localDispatchId = ${this.dispatch.localId}`]).pipe(
+            mergeMap((dispatchPacks) => {
+                const dispatchPackLocalIds = dispatchPacks.map((dispatchPack: DispatchPack) => dispatchPack.localId);
+                const dispatchPackCodes = dispatchPacks.map((dispatchPack: DispatchPack) => dispatchPack.code);
+                return zip(
+                    this.sqliteService.update(`dispatch`, [{
+                        values: {
+                            packs: `${dispatchPackCodes.join(',')}`,
+                        },
+                        where: [`localId = ${this.dispatch.localId}`]
+                    }])
+                ).pipe(
+                    mergeMap(() => this.sqliteService.findBy('dispatch_reference', [`localDispatchPackId IN (${dispatchPackLocalIds.join(',')})`]))
+                )
+            }),
+            mergeMap((dispatchReferences) => {
+                const dispatchPackReferences = dispatchReferences.map((dispatchReference: DispatchReference) => dispatchReference.reference);
+                const dispatchReferenceQuantities = dispatchReferences.map((dispatchReference: DispatchReference) => `${dispatchReference.reference} (${dispatchReference.quantity})`);
+                return this.sqliteService.update(`dispatch`, [{
+                    values: {
+                        packReferences: `${dispatchPackReferences.join(',')}`,
+                        quantities: `${dispatchReferenceQuantities.join(',')}`,
+                    },
+                    where: [`localId = ${this.dispatch.localId}`]
+                }]);
+            })
+        );
     }
 
     public getReference() {
@@ -470,12 +531,11 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
 
     private getReferenceEvent(reference: string): Observable<any> {
         if (this.offlineMode) {
-            return this.sqliteService.findOneBy('reference_article', {reference: reference})
+            return this.sqliteService.findOneBy('reference_article', {reference})
                 .pipe(
-                    mergeMap((localRef) => {
+                    mergeMap((localRef?: DispatchReference) => {
                         let serializedReference;
                         if (localRef) {
-                            localRef =  <Reference> localRef;
                             serializedReference = {
                                 reference: localRef.reference,
                                 outFormatEquipment: localRef.outFormatEquipment ?? '',
@@ -487,14 +547,12 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                                 weight: localRef.weight ?? '',
                                 associatedDocumentTypes: localRef.associatedDocumentTypes ?? '',
                                 exists: true,
-                            }
-
-
+                            };
                         } else {
                             serializedReference = {
                                 reference: reference,
                                 exists: false,
-                            }
+                            };
                         }
                         return of({
                             success: true,

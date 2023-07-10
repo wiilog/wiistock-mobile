@@ -13,9 +13,7 @@ import {
     FormPanelSelectComponent
 } from "@common/components/panel/form-panel/form-panel-select/form-panel-select.component";
 import {SelectItemTypeEnum} from "@common/components/select-item/select-item-type.enum";
-import {
-    FormPanelInputComponent
-} from "@common/components/panel/form-panel/form-panel-input/form-panel-input.component";
+import {FormPanelInputComponent} from "@common/components/panel/form-panel/form-panel-input/form-panel-input.component";
 import {FormPanelParam} from "@common/directives/form-panel/form-panel-param";
 import {
     FormPanelTextareaComponent
@@ -24,9 +22,13 @@ import {FormPanelComponent} from "@common/components/panel/form-panel/form-panel
 import {ApiService} from "@app/services/api.service";
 import {Observable, of, zip} from "rxjs";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
-import {mergeMap} from "rxjs/operators";
+import {map, mergeMap, tap} from "rxjs/operators";
 import {Translations} from "@entities/translation";
 import {ViewWillEnter} from "@ionic/angular";
+import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
+import {Dispatch} from "@entities/dispatch";
+import * as moment from "moment";
+import {DispatchEmergency} from "@entities/dispatch-emergency";
 
 
 @Component({
@@ -41,7 +43,8 @@ export class DispatchNewPage implements ViewWillEnter {
 
     public formConfig: Array<FormPanelParam>|any;
 
-    private emergencies: Array<{id: number; label: string}> = [];
+    private emergencies: Array<{id: string; label: string;}> = [];
+    private dispatchOfflineMode: boolean;
     private dispatchTranslations: Translations;
 
     private fieldParams: {
@@ -89,7 +92,10 @@ export class DispatchNewPage implements ViewWillEnter {
         this.loadingService.presentLoadingWhile({
             event: () => {
                 return zip(
-                    this.apiService.requestApi(ApiService.GET_DISPATCH_EMERGENCIES),
+                    this.sqliteService.findAll('dispatch_emergency'),
+
+                    this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
+
                     this.translationService.getRaw(`Demande`, `Acheminements`, `Champs fixes`),
                     this.translationService.getRaw(`Demande`, `Acheminements`, `Général`),
 
@@ -112,7 +118,7 @@ export class DispatchNewPage implements ViewWillEnter {
                     this.storageService.getNumber('acheminements.receiver.requiredCreate'),
                 )
             }
-        }).subscribe(([emergencies, fieldsTranslations, generalTranslations,  ...fieldsParam]) => {
+        }).subscribe(([emergencies, dispatchOfflineMode, fieldsTranslations, generalTranslations,  ...fieldsParam]) => {
             const [
                 displayCarrierTrackingNumber,
                 needsCarrierTrackingNumber,
@@ -143,7 +149,11 @@ export class DispatchNewPage implements ViewWillEnter {
             };
             const fullTranslations = fieldsTranslations.concat(generalTranslations);
             this.dispatchTranslations = TranslationService.CreateTranslationDictionaryFromArray(fullTranslations);
-            this.emergencies = emergencies;
+            this.emergencies = emergencies.map((displayEmergency: DispatchEmergency) => ({
+                id: displayEmergency.label,
+                label: displayEmergency.label,
+            }));
+            this.dispatchOfflineMode = dispatchOfflineMode;
             this.getFormConfig();
         });
     }
@@ -255,7 +265,7 @@ export class DispatchNewPage implements ViewWillEnter {
                     }
                 }
             }] : []),
-            {
+            ...(this.fieldParams.needsEmergency ? [{
                 item: FormPanelInputComponent,
                 config: {
                     label: 'Email(s)',
@@ -264,7 +274,7 @@ export class DispatchNewPage implements ViewWillEnter {
                         type: 'text',
                     }
                 }
-            },
+            }] : []),
         ];
     }
 
@@ -275,25 +285,87 @@ export class DispatchNewPage implements ViewWillEnter {
             const values = this.formPanelComponent.values;
             this.loadingService.presentLoadingWhile({
                 event: () => of(undefined).pipe(
-                    mergeMap(() => this.apiService.requestApi(ApiService.NEW_DISPATCH, {params: values})),
-                    mergeMap(({success, msg, dispatch}) => success ? (this.sqliteService.insert(`dispatch`, dispatch) as Observable<number>) : of({success, msg})),
-                    mergeMap((result: number | {success: boolean; msg: string}) => {
+                    mergeMap(() => this.trySavingDispatch(values)),
+                    mergeMap(({success, msg, dispatch}) => (
+                        success && dispatch
+                            ? (this.sqliteService.insert(`dispatch`, dispatch) as Observable<number>)
+                            : of({success, msg, dispatch})
+                    )),
+                    mergeMap((result: number | {success: boolean; msg?: string, dispatch?: Dispatch}) => {
+                        // if number -> dispatch is inserted
                         if (typeof result === `number`) {
-                            return this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-                                dispatchId: result,
-                                fromCreate: true,
-                            });
-                        } else {
-                            return of(result.msg);
+                            return this.navService.pop()
+                                .pipe(
+                                    mergeMap(() => {
+                                        return this.navService.push(NavPathEnum.DISPATCH_PACKS, {
+                                            localDispatchId: result,
+                                            fromCreate: true,
+                                        });
+                                    }),
+                                    map(() => ({redirect: true}))
+                                );
+                        } else if (result.success && !result.dispatch) {
+                            return this.navService.pop().pipe(map(() => result));
+                        }
+                        else {
+                            return of(result);
                         }
                     })
                 ),
                 message: `Création de l'acheminement en cours...`,
-            }).subscribe((result: boolean | string) => {
-                if (typeof result === 'string') {
-                    this.toastService.presentToast(result);
+            }).subscribe((result: {success?: boolean; msg?: string; redirect?: boolean}) => {
+                if (result.msg) {
+                    this.toastService.presentToast(result.msg);
                 }
             });
         }
+    }
+
+    private trySavingDispatch(values: any): Observable<{success: boolean, msg?: string, dispatch: Dispatch}> {
+        if (this.dispatchOfflineMode) {
+            return this.formValuesToDispatch(values).pipe(
+                map((dispatch) => ({
+                    success: true,
+                    dispatch,
+                }))
+            );
+        }
+        else {
+            return this.apiService.requestApi(ApiService.NEW_DISPATCH, {params: values});
+        }
+
+    }
+
+    private formValuesToDispatch(values: any): Observable<Dispatch> {
+        return zip(
+            values.type ? this.sqliteService.findOneBy('type', {id: values.type}) : of(undefined),
+            values.pickLocation ? this.sqliteService.findOneBy('emplacement', {id: values.pickLocation}) : of(undefined),
+            values.dropLocation ? this.sqliteService.findOneBy('emplacement', {id: values.dropLocation}) : of(undefined),
+            this.storageService.getString(StorageKeyEnum.OPERATOR),
+            this.sqliteService.findBy('status', [
+                `state = 'draft'`,
+                `category = 'acheminement'`,
+                `typeId = ${values.type}`
+            ], {displayOrder: 'ASC'})
+        ).pipe(
+            map(([type, pickLocation, dropLocation, requester, statuses]) => ({
+                typeId: type?.id,
+                typeLabel: type?.label,
+                locationFromId: pickLocation?.id,
+                locationFromLabel: pickLocation?.label,
+                locationToId: dropLocation?.id,
+                locationToLabel: dropLocation?.label,
+                requester,
+                draft: true,
+                comment: values.comment,
+                carrierTrackingNumber: values.carrierTrackingNumber,
+                emergency: values.emergency,
+                statusId: statuses[0]?.id,
+                statusLabel: statuses[0]?.label,
+                groupedSignatureStatusColor: statuses[0]?.groupedSignatureStatusColor,
+                createdAt: moment().format(),
+                createdBy: requester,
+            } as Dispatch))
+        )
     }
 }

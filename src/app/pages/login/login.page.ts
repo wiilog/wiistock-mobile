@@ -296,7 +296,7 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
                                 tap(() => {
                                     this.loginKey = '';
                                 }),
-                                mergeMap(() => this.notificationService.initialize()),
+                                // mergeMap(() => this.notificationService.initialize()),
                                 map(() => ({success: true}))
                             )
                     }

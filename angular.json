@@ -37,7 +37,9 @@
                         "scripts": [],
                         "allowedCommonJsDependencies": [
                             "moment",
-                            "leaflet"
+                            "leaflet",
+                            "crypto",
+                            "bcryptjs"
                         ]
                     },
                     "configurations": {

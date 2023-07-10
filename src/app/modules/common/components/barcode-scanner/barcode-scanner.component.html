@@ -34,7 +34,7 @@
 <div class="input-manual"
            *ngIf="displayConfig.input">
     <ion-item>
-        <ion-input type="text" placeholder="Entrée manuelle..." [(ngModel)]="input"></ion-input>
+        <ion-input #inputElement type="text" placeholder="Entrée manuelle..." [(ngModel)]="input"></ion-input>
         <wii-icon name="plus.svg"
                   color="success"
                   class="plus-icon"

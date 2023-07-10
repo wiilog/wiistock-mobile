@@ -29,7 +29,9 @@
             "@pages/*": ["app/pages/*"],
             "@app/*": ["app/*"],
             "@entities/*": ["entities/*"],
-            "@environments/*": ["environments/*"]
+            "@environments/*": ["environments/*"],
+            "crypto": ["../node_modules/crypto-browserify"],
+            "stream": ["../node_modules/stream-browserify"]
         },
         "useDefineForClassFields": false
     },
