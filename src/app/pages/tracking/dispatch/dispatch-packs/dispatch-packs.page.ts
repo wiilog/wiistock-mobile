@@ -441,7 +441,16 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                                             viewMode: !Boolean(this.dispatch.draft),
                                         });
                                     });
-                                }
+                                },
+                                ...(this.dispatch.draft
+                                    ? {
+                                        rightIcon: {
+                                            name: 'trash.svg',
+                                            color: 'danger',
+                                            action: () => this.deletePack(pack.code)
+                                        }
+                                    }
+                                    : {})
                             }
                             : {})
                 )
@@ -484,6 +493,32 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
     }
 
     private revertPack(barCode: string): void {
+        const selectedIndex = this.dispatchPacks.findIndex(({code}) => (code === barCode));
+        if (selectedIndex > -1
+            && this.dispatchPacks[selectedIndex].treated) {
+            const dispatchPack = this.dispatchPacks[selectedIndex];
+            if (this.fromCreate) {
+                this.loadingService.presentLoadingWhile({
+                    event: () => zip(
+                        this.sqliteService.deleteBy(`dispatch_pack`, [`localId = ${dispatchPack.localId}`]),
+                        this.sqliteService.deleteBy(`dispatch_reference`, [`localDispatchPackId = ${dispatchPack.localId}`]),
+                    )
+                }).subscribe(() => {
+                    this.dispatchPacks.splice(selectedIndex, 1);
+                    this.refreshListTreatedConfig();
+                    this.refreshHeaderPanelConfigFromDispatch();
+                });
+            } else {
+                dispatchPack.treated = 0;
+
+                this.refreshListToTreatConfig();
+                this.refreshListTreatedConfig();
+                this.refreshHeaderPanelConfigFromDispatch();
+            }
+        }
+    }
+
+    private deletePack(barCode: string): void {
         const selectedIndex = this.dispatchPacks.findIndex(({code}) => (code === barCode));
         if (selectedIndex > -1
             && this.dispatchPacks[selectedIndex].treated) {
