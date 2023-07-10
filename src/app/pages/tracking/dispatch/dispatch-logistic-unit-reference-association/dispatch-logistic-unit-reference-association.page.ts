@@ -31,10 +31,12 @@ import {Dispatch} from "@entities/dispatch";
 import {Observable, of, zip} from "rxjs";
 import {ViewWillEnter} from "@ionic/angular";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
-import {mergeMap, tap} from "rxjs/operators";
+import {map, mergeMap, tap} from "rxjs/operators";
 import {StorageService} from "@app/services/storage/storage.service";
 import {AssociatedDocumentType} from "@entities/associated-document-type";
 import {DispatchPack} from "@entities/dispatch-pack";
+import {SelectItemTypeEnum} from "@common/components/select-item/select-item-type.enum";
+import {Nature} from "@entities/nature";
 
 @Component({
     selector: 'wii-dispatch-logistic-unit-reference-association',
@@ -87,6 +89,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
             this.viewMode = this.navService.param(`viewMode`) || false;
             this.logisticUnit = this.navService.param(`logisticUnit`);
             this.dispatch = this.navService.param(`dispatch`);
+
             this.getFormConfig();
             this.createHeaderConfig();
             if (Object.keys(this.reference).length > 0) {
@@ -111,10 +114,23 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                             localDispatchId: this.dispatch.localId
                         })
                             .pipe(
-                                mergeMap((dispatchPack: DispatchPack) => this.sqliteService.findOneBy('dispatch_reference', {localDispatchPackId: dispatchPack.localId})),
-                                mergeMap((dispatchReference: DispatchReference) => of({...dispatchReference}))
+                                mergeMap((dispatchPack: DispatchPack) => {
+                                    return (
+                                            this.sqliteService.findOneBy('dispatch_reference', {localDispatchPackId: dispatchPack.localId})
+                                                .pipe(
+                                                    map((dispatchReference: DispatchReference) => of({
+                                                        packComment: dispatchPack?.comment,
+                                                        packWeight: dispatchPack?.weight,
+                                                        packVolume: dispatchPack?.volume,
+                                                        natureId: dispatchPack.natureId,
+                                                        ...dispatchReference,
+                                                    }))
+                                                )
+                                        )
+                                    }
+                                ),
                             ))
-                        : of([])
+                        : of({})
             }
         }).subscribe((response) => {
             let data = Object.keys(values).length > 0 ? values : this.reference;
@@ -140,6 +156,10 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                 comment,
                 photos,
                 exists,
+                natureId,
+                packComment,
+                packWeight,
+                packVolume,
             } = data;
 
             if (this.viewMode) {
@@ -151,6 +171,66 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
             }
 
             this.formConfig = [
+                {
+                    item: FormPanelSelectComponent,
+                    config: {
+                        label: 'Nature',
+                        name: 'natureId',
+                        value: natureId ?? null,
+                        inputConfig: {
+                            required: true,
+                            searchType: SelectItemTypeEnum.TRACKING_NATURES,
+                            filterItem: (nature: Nature) => (!nature.hide),
+                            disabled: this.viewMode,
+                        },
+                        errors: {
+                            required: 'Vous devez renseigner une nature.'
+                        },
+                    }
+                },
+                {
+                    item: FormPanelInputComponent,
+                    config: {
+                        label: 'Poids (kg)',
+                        name: 'packWeight',
+                        value: packWeight ? Number(packWeight) : null,
+                        inputConfig: {
+                            type: 'number',
+                            required: false,
+                            disabled: this.viewMode
+                        },
+                        errors: {
+                            required: 'Vous devez renseigner un poids.'
+                        }
+                    }
+                },
+                {
+                    item: FormPanelInputComponent,
+                    config: {
+                        label: 'Volume (m3)',
+                        name: 'packVolume',
+                        value: packVolume ? Number(packVolume) : null,
+                        inputConfig: {
+                            type: 'number',
+                            required: false,
+                            disabled: this.viewMode
+                        },
+                        errors: {
+                            required: 'Vous devez renseigner un poids.'
+                        }
+                    }
+                },
+                {
+                    item: FormPanelTextareaComponent,
+                    config: {
+                        label: 'Commentaire',
+                        name: 'packComment',
+                        value: packComment || null,
+                        inputConfig: {
+                            disabled: this.viewMode
+                        },
+                    }
+                },
                 {
                     item: FormPanelInputComponent,
                     config: {
@@ -207,7 +287,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                         config: {
                             label: 'Matériel hors format',
                             name: 'outFormatEquipment',
-                            value: Number.isInteger(outFormatEquipment) ? Boolean(outFormatEquipment) : null,
+                            value: outFormatEquipment ? Boolean(outFormatEquipment) : null,
                             inputConfig: {
                                 disabled: this.viewMode
                             },
@@ -259,7 +339,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                         config: {
                             label: 'ADR',
                             name: 'adr',
-                            value: Number.isInteger(adr) ? Boolean(adr) : null,
+                            value: adr ? Boolean(adr) : null,
                             inputConfig: {
                                 disabled: this.viewMode
                             },
@@ -437,7 +517,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
         if (this.formPanelComponent.firstError) {
             this.toastService.presentToast(this.formPanelComponent.firstError);
         } else {
-            const reference: DispatchReference = Object.keys(this.formPanelComponent.values).reduce((acc: any, key) => {
+            const reference = Object.keys(this.formPanelComponent.values).reduce((acc: any, key) => {
                 if (this.formPanelComponent.values[key] !== undefined && key !== 'undefined') {
                     acc[key] = (key === 'associatedDocumentTypes')
                         ? this.formPanelComponent.values[key].replace(/;/g, ',')
@@ -445,7 +525,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                 }
 
                 return acc;
-            }, {}) as DispatchReference;
+            }, {});
             if (!this.reference.exists && !reference.volume) {
                 this.toastService.presentToast(`Le calcul du volume est nécessaire pour valider l'ajout de la référence.`)
             } else {
@@ -469,9 +549,17 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                             dispatchId: this.dispatch.id,
                             localDispatchId: this.dispatch.localId,
                             treated: 1,
+                            natureId: reference.natureId,
+                            comment: reference.packComment,
+                            volume: reference.packVolume,
+                            weight: reference.packWeight,
                         })),
                         tap((dispatchPackId) => {
                             reference.localDispatchPackId = dispatchPackId as number;
+                            delete reference.natureId;
+                            delete reference.packComment;
+                            delete reference.packVolume;
+                            delete reference.packWeight;
                         }),
                         mergeMap(() => this.sqliteService.insert(`dispatch_reference`, reference)),
                         mergeMap(() => this.updateDispatch()),
@@ -514,18 +602,24 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
     }
 
     public getReference() {
-        const {reference} = this.formPanelComponent.values;
-        if (reference) {
+        const {reference, natureId} = this.formPanelComponent.values;
+        if (reference && natureId) {
             this.loadingService.presentLoadingWhile({
                 event: () => this.getReferenceEvent(reference),
                 message: `Récupération des informations de la référence en cours...`
             }).subscribe(({reference}) => {
+                const values = this.formPanelComponent.values;
                 this.disableValidate = false;
                 this.reference = reference;
-                this.getFormConfig();
+                this.getFormConfig(values);
             });
         } else {
-            this.toastService.presentToast(`Veuillez renseigner une référence valide.`);
+            this.toastService.presentToast(!natureId
+                ? `Veuillez renseigner une nature.`
+                : (!reference
+                    ? `Veuillez renseigner une référence valide.`
+                    : '')
+            );
         }
     }
 

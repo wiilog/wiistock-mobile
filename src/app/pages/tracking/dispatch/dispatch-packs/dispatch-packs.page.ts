@@ -63,7 +63,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
         body: Array<ListPanelItemConfig>;
     };
 
-    public readonly listBoldValues = ['code', 'reference', 'quantity'];
+    public readonly listBoldValues = ['code', 'reference', 'quantity', 'nature'];
 
     private dispatch: Dispatch;
     public fromCreate: boolean = false;
@@ -441,12 +441,27 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                                         this.navService.push(NavPathEnum.DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION, {
                                             logisticUnit: pack.code,
                                             dispatch: this.dispatch,
-                                            reference,
+                                            reference : {
+                                                packComment: pack?.comment,
+                                                packWeight: pack?.weight,
+                                                packVolume: pack?.volume,
+                                                natureId: pack.natureId,
+                                                ...reference
+                                            },
                                             edit: true,
                                             viewMode: !Boolean(this.dispatch.draft),
                                         });
                                     });
-                                }
+                                },
+                                ...(this.dispatch.draft
+                                    ? {
+                                        rightIcon: {
+                                            name: 'trash.svg',
+                                            color: 'danger',
+                                            action: () => this.deletePack(pack.code)
+                                        }
+                                    }
+                                    : {})
                             }
                             : {})
                 )
@@ -463,6 +478,10 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                     label: 'Unité logistique',
                     value: code
                 },
+                nature: {
+                    label: natureTranslation,
+                    value: this.natureIdsToLabels[Number(natureId)]
+                },
                 ...(reference ? {
                     reference: {
                         label: `Référence`,
@@ -473,12 +492,6 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                     label: 'Quantité',
                     value: `${quantity}`
                 },
-                ...(!reference ? {
-                    nature: {
-                        label: natureTranslation,
-                        value: this.natureIdsToLabels[Number(natureId)]
-                    },
-                } : {}),
                 ...(!reference ? {
                     lastLocation: {
                         label: 'Dernier emplacement',
@@ -491,6 +504,32 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
     }
 
     private revertPack(barCode: string): void {
+        const selectedIndex = this.dispatchPacks.findIndex(({code}) => (code === barCode));
+        if (selectedIndex > -1
+            && this.dispatchPacks[selectedIndex].treated) {
+            const dispatchPack = this.dispatchPacks[selectedIndex];
+            if (this.fromCreate) {
+                this.loadingService.presentLoadingWhile({
+                    event: () => zip(
+                        this.sqliteService.deleteBy(`dispatch_pack`, [`localId = ${dispatchPack.localId}`]),
+                        this.sqliteService.deleteBy(`dispatch_reference`, [`localDispatchPackId = ${dispatchPack.localId}`]),
+                    )
+                }).subscribe(() => {
+                    this.dispatchPacks.splice(selectedIndex, 1);
+                    this.refreshListTreatedConfig();
+                    this.refreshHeaderPanelConfigFromDispatch();
+                });
+            } else {
+                dispatchPack.treated = 0;
+
+                this.refreshListToTreatConfig();
+                this.refreshListTreatedConfig();
+                this.refreshHeaderPanelConfigFromDispatch();
+            }
+        }
+    }
+
+    private deletePack(barCode: string): void {
         const selectedIndex = this.dispatchPacks.findIndex(({code}) => (code === barCode));
         if (selectedIndex > -1
             && this.dispatchPacks[selectedIndex].treated) {
@@ -675,7 +714,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
             ])
             .pipe(
                 map((references) => references.map(({localDispatchPackId, ...reference}) => {
-                    const {code: logisticUnit} = this.dispatchPacks.find(({localId}) => localId === localDispatchPackId) as DispatchPack;
+                    const {code: logisticUnit, natureId, comment: packComment, weight: packWeight, volume: packVolume} = this.dispatchPacks.find(({localId}) => localId === localDispatchPackId) as DispatchPack;
 
                     const photos = JSON.parse(reference.photos);
                     const volume = `${reference.volume}`;
@@ -683,6 +722,10 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                     return {
                         ...reference,
                         volume,
+                        natureId,
+                        packComment,
+                        packWeight,
+                        packVolume,
                         logisticUnit,
                         ...(
                             photos && photos.length > 0

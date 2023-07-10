@@ -485,6 +485,10 @@ export class LocalDataManagerService {
                                 dispatchId: dispatchPack?.dispatchId,
                                 localDispatchId: dispatchPack?.localDispatchId,
                                 logisticUnit: dispatchPack?.code,
+                                natureId: dispatchPack?.natureId,
+                                packComment: dispatchPack?.comment,
+                                packVolume: dispatchPack?.volume,
+                                packWeight: dispatchPack?.weight,
                             };
                         })
                         .filter(({localDispatchId}) => dispatches.findIndex(({localId}: Dispatch) => localId === localDispatchId) > -1);
