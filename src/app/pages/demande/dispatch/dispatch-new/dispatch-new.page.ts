@@ -75,6 +75,8 @@ export class DispatchNewPage implements ViewWillEnter {
         needsReceiver: false,
     };
 
+    private savedInputData: any;
+
     public constructor(private sqliteService: SqliteService,
                        private networkService: NetworkService,
                        private alertService: AlertService,
@@ -158,7 +160,7 @@ export class DispatchNewPage implements ViewWillEnter {
         });
     }
 
-    private getFormConfig() {
+    private getFormConfig(type: any = undefined) {
 
         this.formConfig = [
             ...(this.fieldParams.displayCarrierTrackingNumber ? [{
@@ -166,6 +168,9 @@ export class DispatchNewPage implements ViewWillEnter {
                 config: {
                     label: TranslationService.Translate(this.dispatchTranslations, 'N° tracking transporteur'),
                     name: 'carrierTrackingNumber',
+                    ...type ? {
+                        value: this.savedInputData.carrierTrackingNumber,
+                    } : {},
                     inputConfig: {
                         required: Boolean(this.fieldParams.needsCarrierTrackingNumber),
                         type: 'text',
@@ -180,12 +185,23 @@ export class DispatchNewPage implements ViewWillEnter {
                 config: {
                     label: 'Type',
                     name: 'type',
+                    ...type ? {
+                        value: this.savedInputData.type,
+                    } : {},
                     inputConfig: {
                         required: true,
                         searchType: SelectItemTypeEnum.TYPE,
                         requestParams: [
                             `category = 'acheminements'`,
                         ],
+                        onChange: (typeId: any) => {
+                            this.loadingService.presentLoadingWhile({
+                                event: () => this.sqliteService.findOneBy(`type`, {id: typeId})
+                            }).subscribe((type) => {
+                                this.savedInputData = this.formPanelComponent.values;
+                                this.getFormConfig(type);
+                            });
+                        }
                     },
                     errors: {
                         required: 'Vous devez sélectionner un type.'
@@ -200,6 +216,11 @@ export class DispatchNewPage implements ViewWillEnter {
                     inputConfig: {
                         required: Boolean(this.fieldParams.needsPickLocation),
                         searchType: SelectItemTypeEnum.LOCATION,
+                        ...type && type.suggestedPickLocations !== '' ? {
+                            filterItem: (location: any) => type.suggestedPickLocations
+                                .split(`,`)
+                                .findIndex((suggestedPickLocation: string) => Number(suggestedPickLocation) === Number(location.id)) !== -1,
+                        } : {}
                     },
                     errors: {
                         required: 'Vous devez sélectionner un emplacement de prise.'
@@ -215,6 +236,11 @@ export class DispatchNewPage implements ViewWillEnter {
                         inputConfig: {
                             required: Boolean(this.fieldParams.needsDropLocation),
                             searchType: SelectItemTypeEnum.LOCATION,
+                            ...type && type.suggestedDropLocations !== '' ? {
+                                filterItem: (location: any) => type.suggestedDropLocations
+                                    .split(`,`)
+                                    .findIndex((suggestedDropLocation: string) => Number(suggestedDropLocation) === Number(location.id)) !== -1
+                            } : {}
                         },
                         errors: {
                             required: 'Vous devez sélectionner un emplacement de dépose.'
@@ -227,6 +253,9 @@ export class DispatchNewPage implements ViewWillEnter {
                 config: {
                     label: `Commentaire`,
                     name: 'comment',
+                    ...type ? {
+                        value: this.savedInputData.comment,
+                    } : {},
                     inputConfig: {
                         required: Boolean(this.fieldParams.needsComment),
                         maxLength: '512',
@@ -241,7 +270,9 @@ export class DispatchNewPage implements ViewWillEnter {
                 config: {
                     label: 'Urgence',
                     name: 'emergency',
-                    value: null,
+                    ...type ? {
+                        value: this.savedInputData.emergency,
+                    } : {},
                     inputConfig: {
                         required: Boolean(this.fieldParams.needsEmergency),
                         elements: this.emergencies
@@ -256,6 +287,9 @@ export class DispatchNewPage implements ViewWillEnter {
                 config: {
                     label: 'Destinataire',
                     name: 'receiver',
+                    ...type ? {
+                        value: this.savedInputData.receiver,
+                    } : {},
                     inputConfig: {
                         required: Boolean(this.fieldParams.needsReceiver),
                         searchType: SelectItemTypeEnum.USER,
@@ -270,6 +304,9 @@ export class DispatchNewPage implements ViewWillEnter {
                 config: {
                     label: 'Email(s)',
                     name: 'emails',
+                    ...type ? {
+                        value: this.savedInputData.emails,
+                    } : {},
                     inputConfig: {
                         type: 'text',
                     }

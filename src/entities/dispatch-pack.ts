@@ -11,6 +11,8 @@ export interface DispatchPack {
     treated?: number;
     already_treated?: number;
     comment?: string;
+    volume: number;
+    weight: number;
     photo1?: string;
     photo2?: string;
 }
