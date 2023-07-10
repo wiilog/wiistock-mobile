@@ -2,6 +2,7 @@ import {Component, Input} from '@angular/core';
 import {FormViewerAttachmentConfig} from '@common/components/panel/model/form-viewer/form-viewer-attachment-config';
 import {NavService} from "@app/services/nav/nav.service";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
+import {Browser} from "@capacitor/browser";
 
 
 @Component({
@@ -25,10 +26,24 @@ export class FormViewerAttachmentsComponent implements FormViewerAttachmentConfi
 
     public constructor(private navService: NavService) {}
 
-    public viewImage(url: string, label?: string) {
+    public proceedAction(url: string, label: string) {
+        const extension = label.split('.').pop();
+
+        if(extension === `pdf`) {
+            this.viewPDF(url);
+        } else {
+            this.viewImage(url, label);
+        }
+    }
+
+    private viewImage(url: string, label?: string) {
         this.navService.push(NavPathEnum.IMAGE_VIEWER, {
             url,
             label,
         });
+    }
+
+    private viewPDF(url: string) {
+        Browser.open({url});
     }
 }
