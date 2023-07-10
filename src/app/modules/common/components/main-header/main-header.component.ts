@@ -1,5 +1,5 @@
 import {Component, ElementRef, EventEmitter, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
-import {Observable, Subscription} from 'rxjs';
+import {Observable, Subscription, zip} from 'rxjs';
 import {filter, mergeMap, map, take, tap} from 'rxjs/operators';
 import {TitleConfig} from './title-config';
 import {MainHeaderService} from '@app/services/main-header.service';
@@ -322,7 +322,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             `fromStock = 0`,
         ];
 
-        this.sqliteService.findBy('mouvement_traca', where).subscribe(async result => {
+        zip(
+            this.sqliteService.findBy('mouvement_traca', where),
+            this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE)
+        ).subscribe(async ([result, isDispatchOfflineMode]: [any, boolean]) => {
             if(result.length) {
                 await this.alertService.show({
                     header: 'Déconnexion impossible',
@@ -333,9 +336,27 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                     }]
                 });
             } else {
-                this.userService.doLogout();
+                if(isDispatchOfflineMode) {
+                    await this.alertService.show({
+                        header: `Vous êtes en mode hors-ligne sur les acheminements. Vos données seront perdues si elles ne sont pas synchronisées.`,
+                        backdropDismiss: false,
+                        buttons: [
+                            {
+                                text: 'Annuler',
+                                role: 'cancel',
+                            },
+                            {
+                                text: 'Confirmer',
+                                handler: () => this.userService.doLogout(),
+                                cssClass: 'alert-success'
+                            }
+                        ]
+                    });
+                } else {
+                    this.userService.doLogout();
+                }
             }
-        })
+        });
     }
 
     private refreshTitles(navigationId: number, currentPagePath: NavPathEnum, paramsId: number): void {
