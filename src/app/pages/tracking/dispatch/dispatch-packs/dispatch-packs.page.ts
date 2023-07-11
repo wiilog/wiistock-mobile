@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {Observable, of, Subscription, zip} from 'rxjs';
 import {NavService} from '@app/services/nav/nav.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
@@ -65,7 +65,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
 
     public readonly listBoldValues = ['code', 'reference', 'quantity', 'nature'];
 
-    private dispatch: Dispatch;
+    public dispatch: Dispatch;
     public fromCreate: boolean = false;
     public viewMode: boolean = false;
     public ableToCreateWaybill: boolean = false;
@@ -111,7 +111,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
 
     public offlineMode: boolean = false;
 
-    private waybillDefaultData: string;
+    private waybillDefaultData?: { [field: string]: any };
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
@@ -120,6 +120,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                        private translationService: TranslationService,
                        private apiService: ApiService,
                        private fileService: FileService,
+                       private changeDetectorRef: ChangeDetectorRef,
                        private storage: StorageService,
                        private storageService: StorageService,
                        private navService: NavService) {
@@ -135,6 +136,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
             this.unsubscribeLoading();
             const localDispatchId = this.navService.param('localDispatchId');
             const dispatchId = this.navService.param('dispatchId');
+
             this.loadingSubscription = (this.loadingService.presentLoading()
                 .pipe(
                     tap((loader) => {
@@ -147,9 +149,13 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                             localDispatchId
                                 ? this.sqliteService.findBy('dispatch_pack', [`localDispatchId = ${localDispatchId}`])
                                 : this.sqliteService.findBy('dispatch_pack', [`dispatchId = ${dispatchId}`]),
+                            localDispatchId
+                                ? this.sqliteService.findOneBy('dispatch_waybill', {localId: localDispatchId})
+                                : of(null),
                             this.sqliteService.findAll('nature'),
                             this.translationService.get(null, `Traçabilité`, `Général`),
                             this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
+                            this.storageService.getString(StorageKeyEnum.DISPATCH_DEFAULT_WAYBILL),
                             zip(
                                 this.storageService.getNumber('acheminements.carrierTrackingNumber.displayedCreate'),
                                 this.storageService.getNumber('acheminements.carrierTrackingNumber.requiredCreate'),
@@ -168,9 +174,6 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
 
                                 this.storageService.getNumber('acheminements.receiver.displayedCreate'),
                                 this.storageService.getNumber('acheminements.receiver.requiredCreate'),
-
-                                this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
-                                this.storageService.getString(StorageKeyEnum.DISPATCH_DEFAULT_WAYBILL),
                             ),
                         ).pipe(
                             mergeMap((data) => this.sqliteService
@@ -192,8 +195,8 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                         )
                     ),
                     filter(([dispatch]) => Boolean(dispatch))
-                ) as Observable<[Dispatch, Array<DispatchPack>, Array<Nature>, Translations, boolean, Array<any>, Array<any>, Array<DispatchReference>]>)
-                .subscribe(([dispatch, packs, natures, natureTranslations, dispatchOfflineMode, fieldParams, partialStatuses, dispatchReferences]) => {
+                ) as Observable<[Dispatch, Array<DispatchPack>, any, Array<Nature>, Translations, boolean, string, Array<any>, Array<any>, Array<DispatchReference>]>)
+                .subscribe(([dispatch, packs, dispatchWaybill, natures, natureTranslations, dispatchOfflineMode, waybillDefaultData, fieldParams, partialStatuses, dispatchReferences]) => {
                     const [
                         displayCarrierTrackingNumber,
                         needsCarrierTrackingNumber,
@@ -207,8 +210,6 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                         needsEmergency,
                         displayReceiver,
                         needsReceiver,
-                        dispatchOfflineMode,
-                        waybillDefaultData
                     ] = fieldParams;
                     this.fieldParams = {
                         displayCarrierTrackingNumber: Boolean(displayCarrierTrackingNumber),
@@ -224,8 +225,10 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                         displayReceiver: Boolean(displayReceiver),
                         needsReceiver: Boolean(needsReceiver),
                     };
+
+                    this.hasWayBillData = Boolean(dispatchWaybill);
                     this.offlineMode = dispatchOfflineMode;
-                    this.waybillDefaultData = waybillDefaultData;
+                    this.waybillDefaultData = waybillDefaultData ? JSON.parse(waybillDefaultData) : {};
 
                     this.dispatchOfflineMode = dispatchOfflineMode;
                     this.typeHasNoPartialStatuses = partialStatuses.length === 0;
@@ -598,25 +601,6 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
         }
     }
 
-    private handleWaybill(): Observable<any> {
-        if (this.offlineMode) {
-            return this.sqliteService.insert('dispatch_waybill', this.wayBillData)
-                .pipe(
-                    mergeMap(() => {
-                        return of({
-                            success: true,
-                            data: this.wayBillData
-                        });
-                    })
-                );
-        } else {
-            return this.apiService.requestApi(ApiService.DISPATCH_WAYBILL, {
-                pathParams: {dispatch: this.dispatch.id},
-                params: this.wayBillData
-            });
-        }
-    }
-
     private confirmPack({id: packIdToConfirm, natureId, quantity, photo1, photo2}: DispatchPack): void {
         const packIndexToConfirm = this.dispatchPacks.findIndex(({id}) => (id === packIdToConfirm));
         if (packIndexToConfirm > -1) {
@@ -648,60 +632,61 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
     public goToWayBill() {
         if (!this.hasWayBillData) {
             this.loadingService.presentLoadingWhile({
-                event: () => {
-                    return this.wayBillDataEvent();
-                }
+                event: () => this.getDefaultDispatchWaybillData()
             }).subscribe((apiWayBill) => {
                 const fusedData = {
                     ...apiWayBill.data,
                     ...this.wayBillData
                 };
                 this.navService.push(NavPathEnum.DISPATCH_WAYBILL, {
-                    dispatchId: this.dispatch.id,
+                    dispatchLocalId: this.dispatch.localId,
                     dispatchPacks: this.dispatchPacks,
                     data: fusedData,
                     afterValidate: (data: any) => {
                         this.wayBillData = data;
                         this.hasWayBillData = true;
+                        this.changeDetectorRef.detectChanges();
                     }
                 });
-            })
+            });
         } else {
-            this.hasWayBillData = false;
+            this.loadingService.presentLoadingWhile({
+                event: () => this.sqliteService.deleteBy('dispatch_waybill', [`localId = ${this.dispatch.localId}`])
+            }).subscribe(() => {
+                this.hasWayBillData = false;
+            });
         }
     }
 
-    private wayBillDataEvent(): Observable<any> {
+    private getDefaultDispatchWaybillData(): Observable<{ [field: string]: any }> {
         if (this.offlineMode) {
             let data;
             if (this.waybillDefaultData) {
-                let waybillDataArray = JSON.parse(this.waybillDefaultData);
-
                 data = {
-                    carrier: waybillDataArray.carrier,
-                    consignor: waybillDataArray.consignor,
-                    consignorEmail: waybillDataArray.consignorEmail,
-                    consignorUsername: waybillDataArray.consignorUsername,
-                    dispatchDate: waybillDataArray.dispatchDate,
-                    locationFrom: waybillDataArray.locationFrom,
-                    locationTo: waybillDataArray.locationTo,
-                    notes: waybillDataArray.notes,
-                    receiver: waybillDataArray.receiver,
-                    receiverEmail: waybillDataArray.receiverEmail,
-                    receiverUsername: waybillDataArray.receiverUsername,
+                    carrier: this.waybillDefaultData.carrier,
+                    consignor: this.waybillDefaultData.consignor,
+                    consignorEmail: this.waybillDefaultData.consignorEmail,
+                    consignorUsername: this.waybillDefaultData.consignorUsername,
+                    dispatchDate: this.waybillDefaultData.dispatchDate,
+                    locationFrom: this.waybillDefaultData.locationFrom,
+                    locationTo: this.waybillDefaultData.locationTo,
+                    notes: this.waybillDefaultData.notes,
+                    receiver: this.waybillDefaultData.receiver,
+                    receiverEmail: this.waybillDefaultData.receiverEmail,
+                    receiverUsername: this.waybillDefaultData.receiverUsername,
                 };
             } else {
                 data = {};
             }
 
             return of({
-                    success: true,
-                    data: data,
+                success: true,
+                data,
             });
         } else {
             return this.apiService.requestApi(ApiService.GET_WAYBILL_DATA, {
                 pathParams: {
-                    dispatch: this.dispatch.id
+                    dispatch: this.dispatch.id as number
                 }
             })
         }
@@ -768,7 +753,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
 
     private tryValidateDispatch() {
         return this.dispatchOfflineMode
-            ? of({success: true, msg: `L'acheminement a bien été enregistrer sur le nomade`, local: true})
+            ? of({success: true, msg: `L'acheminement a bien été enregistré sur le nomade`, local: true})
             : this.makeApiReferencesParam().pipe(
                 mergeMap((references) => {
                     return this.apiService.requestApi(ApiService.DISPATCH_VALIDATE, {
@@ -782,6 +767,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
     }
 
     private treatApiSuccess() {
+        // only in online mode
         return zip(
             this.sqliteService.deleteBy(`dispatch_reference`),
             this.hasWayBillData

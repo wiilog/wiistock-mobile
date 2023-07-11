@@ -474,9 +474,10 @@ export class LocalDataManagerService {
             this.sqliteService.findBy('dispatch_pack'),
             this.sqliteService.findBy('dispatch_reference'),
             this.sqliteService.findBy('grouped_signature_history'),
+            this.sqliteService.findBy('dispatch_waybill'),
         )
             .pipe(
-                map(([dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory]) => {
+                map(([dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory, waybillData]) => {
                     dispatchReferences = dispatchReferences
                         .map(({localDispatchPackId, ...remaining}) => {
                             const dispatchPack = dispatchPacks.find(({localId}) => localDispatchPackId === localId);
@@ -492,19 +493,19 @@ export class LocalDataManagerService {
                             };
                         })
                         .filter(({localDispatchId}) => dispatches.findIndex(({localId}: Dispatch) => localId === localDispatchId) > -1);
-                    return [dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory];
+                    return [dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory, waybillData];
                 }),
-                mergeMap(([dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory]) => (
+                mergeMap(([dispatches, dispatchPacks, dispatchReferences, groupedSignatureHistory, waybillData]) => (
                     dispatches.length > 0
                         ? this.apiService.requestApi(ApiService.NEW_OFFLINE_DISPATCHES, {
-                                params: {
-                                    dispatches,
-                                    dispatchPacks,
-                                    dispatchReferences,
-                                    groupedSignatureHistory,
-                                }
-                            },
-                        )
+                            params: {
+                                dispatches,
+                                dispatchPacks,
+                                dispatchReferences,
+                                waybillData,
+                                groupedSignatureHistory,
+                            }
+                        })
                         : of(undefined)
                 )),
                 map(({success, errors}) => {
@@ -519,7 +520,8 @@ export class LocalDataManagerService {
                         })
                         : of(undefined)
                 }),
-                mergeMap(() => this.sqliteService.deleteBy('grouped_signature_history'))
+                mergeMap(() => this.sqliteService.deleteBy('grouped_signature_history')),
+                mergeMap(() => this.sqliteService.deleteBy('dispatch_waybill')),
             );
     }
 

@@ -11,13 +11,11 @@
                       [leftIcon]="dispatchHeaderConfig.leftIcon"
                       [rightIcons]="dispatchHeaderConfig.rightIcon">
     </wii-panel-header>
-<!--    TODO WIIS-9780 remove !loading && !dispatchOfflineMode-->
-    <ion-item *ngIf="fromCreate && ableToCreateWaybill && !loading && !dispatchOfflineMode">
+    <ion-item *ngIf="fromCreate && ableToCreateWaybill && !dispatch.number">
         <ion-label>Lettre de voiture</ion-label>
         <ion-toggle slot="end"
-                    [checked]="this.hasWayBillData"
+                    [checked]="hasWayBillData"
                     (click)="goToWayBill()">
-
         </ion-toggle>
     </ion-item>
 

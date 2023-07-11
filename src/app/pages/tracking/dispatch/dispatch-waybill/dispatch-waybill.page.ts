@@ -19,6 +19,10 @@ import {
     FormPanelTextareaComponent
 } from "@common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component";
 import {ViewWillEnter} from "@ionic/angular";
+import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
+import {SqliteService} from "@app/services/sqlite/sqlite.service";
+import {map, mergeMap} from "rxjs/operators";
+import {Observable, of} from "rxjs";
 
 @Component({
     selector: 'wii-dispatch-packs',
@@ -32,29 +36,59 @@ export class DispatchWaybillPage implements ViewWillEnter {
 
     public bodyConfig: Array<FormPanelParam>;
 
-    public dispatchId: number;
-
     public afterValidate: (data: any) => void;
     public data: any = {};
 
+    private offlineMode: boolean;
+    private dispatchLocalId: number;
+
     public constructor(private navService: NavService,
                        public apiService: ApiService,
-                       public loading: LoadingService,
+                       public loadingService: LoadingService,
+                       public sqliteService: SqliteService,
                        public storageService: StorageService,
                        private toastService: ToastService) {
     }
 
     public ionViewWillEnter(): void {
-        this.dispatchId = this.navService.param('dispatchId');
         this.afterValidate = this.navService.param('afterValidate');
         this.data = this.navService.param('data');
+        this.dispatchLocalId = this.navService.param('dispatchLocalId');
+
+        this.loadingService.presentLoadingWhile({
+            event: () => this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE)
+        }).subscribe((offlineMode) => {
+            this.offlineMode = offlineMode;
+            this.initializeForm();
+        })
+    }
+
+    public validate(): void {
+        if(this.formPanelComponent.firstError) {
+            this.toastService.presentToast(this.formPanelComponent.firstError);
+        } else {
+            const values = this.formPanelComponent.values;
+            this.loadingService
+                .presentLoadingWhile({
+                    event: () => this.saveWaybillData(values).pipe(
+                        mergeMap(() => this.navService.pop()),
+                        mergeMap(() => this.toastValidateMessage()),
+                    )
+                })
+                .subscribe(() => {
+                    this.afterValidate(values);
+                })
+        }
+    }
+
+    private initializeForm(): void {
         this.bodyConfig = [
             {
                 item: FormPanelTextareaComponent,
                 config: {
                     label: 'Transporteur',
                     name: 'carrier',
-                    value: this.data.carrier || null,
+                    value: this.data?.carrier || null,
                     inputConfig: {
                         type: 'text',
                         required: true,
@@ -68,7 +102,7 @@ export class DispatchWaybillPage implements ViewWillEnter {
                 item: FormPanelTextareaComponent,
                 config: {
                     label: 'Expéditeur',
-                    value: this.data.consignor || null,
+                    value: this.data?.consignor || null,
                     name: 'consignor',
                     inputConfig: {
                         type: 'text',
@@ -83,7 +117,7 @@ export class DispatchWaybillPage implements ViewWillEnter {
                 item: FormPanelTextareaComponent,
                 config: {
                     label: 'Destinataire',
-                    value: this.data.receiver || null,
+                    value: this.data?.receiver || null,
                     name: 'receiver',
                     inputConfig: {
                         type: 'text',
@@ -98,7 +132,7 @@ export class DispatchWaybillPage implements ViewWillEnter {
                 item: FormPanelCalendarComponent,
                 config: {
                     label: 'Date d\'acheminement',
-                    value: this.data.dispatchDate || null,
+                    value: this.data?.dispatchDate || null,
                     name: 'dispatchDate',
                     inputConfig: {
                         mode: FormPanelCalendarMode.DATETIME,
@@ -113,7 +147,7 @@ export class DispatchWaybillPage implements ViewWillEnter {
                 item: FormPanelInputComponent,
                 config: {
                     label: 'Expéditeur - Nom',
-                    value: this.data.consignorUsername || null,
+                    value: this.data?.consignorUsername || null,
                     name: 'consignorUsername',
                     inputConfig: {
                         type: 'text',
@@ -128,7 +162,7 @@ export class DispatchWaybillPage implements ViewWillEnter {
                 item: FormPanelInputComponent,
                 config: {
                     label: 'Expéditeur - Téléphone - Email',
-                    value: this.data.consignorEmail || null,
+                    value: this.data?.consignorEmail || null,
                     name: 'consignorEmail',
                     inputConfig: {
                         type: 'text',
@@ -143,7 +177,7 @@ export class DispatchWaybillPage implements ViewWillEnter {
                 item: FormPanelInputComponent,
                 config: {
                     label: 'Destinataire - Nom',
-                    value: this.data.receiverUsername || null,
+                    value: this.data?.receiverUsername || null,
                     name: 'receiverUsername',
                     inputConfig: {
                         type: 'text',
@@ -158,7 +192,7 @@ export class DispatchWaybillPage implements ViewWillEnter {
                 item: FormPanelInputComponent,
                 config: {
                     label: 'Destinataire - Téléphone - Email',
-                    value: this.data.receiverEmail || null,
+                    value: this.data?.receiverEmail || null,
                     name: 'receiverEmail',
                     inputConfig: {
                         type: 'text',
@@ -173,7 +207,7 @@ export class DispatchWaybillPage implements ViewWillEnter {
                 item: FormPanelInputComponent,
                 config: {
                     label: 'Lieu de chargement',
-                    value: this.data.locationFrom || null,
+                    value: this.data?.locationFrom || null,
                     name: 'locationFrom',
                     inputConfig: {
                         type: 'text',
@@ -188,7 +222,7 @@ export class DispatchWaybillPage implements ViewWillEnter {
                 item: FormPanelInputComponent,
                 config: {
                     label: 'Lieu de déchargement',
-                    value: this.data.locationTo || null,
+                    value: this.data?.locationTo || null,
                     name: 'locationTo',
                     inputConfig: {
                         type: 'text',
@@ -203,7 +237,7 @@ export class DispatchWaybillPage implements ViewWillEnter {
                 item: FormPanelInputComponent,
                 config: {
                     label: 'Note de bas de page',
-                    value: this.data.notes || null,
+                    value: this.data?.notes || null,
                     name: 'notes',
                     inputConfig: {
                         type: 'text',
@@ -214,20 +248,37 @@ export class DispatchWaybillPage implements ViewWillEnter {
                     }
                 }
             },
-        ]
+        ];
     }
 
-    public validate(): void {
-        if(this.formPanelComponent.firstError) {
-            this.toastService.presentToast(this.formPanelComponent.firstError);
-        } else {
-            const values = this.formPanelComponent.values;
-            values.fromNomade = true;
-            values.dispatch_id = this.dispatchId;
-            this.navService.pop().subscribe(() => {
-                this.afterValidate(values);
-                this.toastService.presentToast(`La lettre de voiture est prête à être générée. Validez la demande pour procéder au téléchargement.`)
-            });
+    private saveWaybillData(data: any): Observable<void> {
+        if (this.offlineMode) {
+            return this.sqliteService.findOneBy('dispatch_waybill', {localId: this.dispatchLocalId}).pipe(
+                mergeMap((dispatchWaybill) => (
+                    dispatchWaybill
+                        ? this.sqliteService.update('dispatch_waybill', [{
+                            values: data,
+                            where: [`localId = ${this.dispatchLocalId}`],
+                        }])
+                        : this.sqliteService.insert('dispatch_waybill', {
+                            localId: this.dispatchLocalId as number,
+                            ...data
+                        })
+                )),
+                map(() => undefined)
+            );
+        }
+        else {
+            return of(undefined);
+        }
+    }
+
+    private toastValidateMessage(): Observable<void> {
+        if (this.offlineMode) {
+            return this.toastService.presentToast(`La lettre de voiture a bien été enregistrée et sera générée au moment de la synchronisation`);
+        }
+        else {
+            return this.toastService.presentToast(`La lettre de voiture est prête à être générée. Validez la demande pour procéder au téléchargement.`);
         }
     }
 }
