@@ -16,7 +16,7 @@ export interface CardListConfig {
         values: Array<string>;
     };
     customColor?: string;
-    rightIcon?: IconConfig;
+    rightIcon?: IconConfig|Array<IconConfig>;
     action?: () => void;
     info?: string;
     error?: string;

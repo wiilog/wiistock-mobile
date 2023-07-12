@@ -266,17 +266,26 @@ export class DispatchGroupedSignaturePage implements ViewWillEnter, ViewWillLeav
                             ? {label: 'Urgence', value: dispatch.emergency || ''}
                             : {label: 'Urgence', value: 'Non'})
                     ].filter((item) => item && item.value),
-                    rightIcon: {
-                        color: 'grey' as IconColor,
-                        name: isSelected ? 'down.svg' : 'up.svg',
-                        action: () => {
-                            if (isSelected) {
-                                this.signingDispatch(dispatch, true);
-                            } else {
-                                this.testIfBarcodeEquals(dispatch);
+                    rightIcon: [
+                        {
+                            color: 'grey' as IconColor,
+                            name: isSelected ? 'down.svg' : 'up.svg',
+                            width: 40,
+                            height: 40,
+                            action: () => {
+                                if (isSelected) {
+                                    this.signingDispatch(dispatch, true);
+                                } else {
+                                    this.testIfBarcodeEquals(dispatch);
+                                }
                             }
-                        }
-                    },
+                        },
+                        ...(dispatch.emergency
+                            ? [{
+                                color: 'danger' as IconColor,
+                                name: 'exclamation-triangle.svg',
+                            }] : []),
+                    ],
                     action: () => {
                         this.navService.push(NavPathEnum.DISPATCH_PACKS, {
                             localDispatchId: dispatch.localId,
