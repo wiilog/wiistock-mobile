@@ -40,4 +40,12 @@ export class CardListComponent {
             return titleConfig;
         }
     }
+
+    public actionsArray(cardConfig: CardListConfig) {
+        return Array.isArray(cardConfig.rightIcon)
+            ? cardConfig.rightIcon
+            : (cardConfig.rightIcon
+                ? [cardConfig.rightIcon]
+                : []);
+    }
 }
