@@ -55,6 +55,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
     public dispatch: Dispatch;
     public reference: DispatchReference | any = {};
     public volume?: number = undefined;
+    public natureId?: number = undefined;
     public disableValidate: boolean = true;
     public disabledAddReference: boolean = true;
     public associatedDocumentTypeElements: Array<AssociatedDocumentType>;
@@ -156,7 +157,6 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                 comment,
                 photos,
                 exists,
-                natureId,
                 packComment,
                 packWeight,
                 packVolume,
@@ -176,7 +176,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                     config: {
                         label: 'Nature',
                         name: 'natureId',
-                        value: natureId ?? null,
+                        value: this.natureId ?? null,
                         inputConfig: {
                             required: true,
                             searchType: SelectItemTypeEnum.TRACKING_NATURES,
@@ -608,10 +608,10 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                 event: () => this.getReferenceEvent(reference),
                 message: `Récupération des informations de la référence en cours...`
             }).subscribe(({reference}) => {
-                const values = this.formPanelComponent.values;
                 this.disableValidate = false;
                 this.reference = reference;
-                this.getFormConfig(values);
+                this.natureId = natureId;
+                this.getFormConfig();
             });
         } else {
             this.toastService.presentToast(!natureId
