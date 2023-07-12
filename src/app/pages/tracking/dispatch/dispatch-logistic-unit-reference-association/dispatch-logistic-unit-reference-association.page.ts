@@ -287,7 +287,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                         config: {
                             label: 'Matériel hors format',
                             name: 'outFormatEquipment',
-                            value: outFormatEquipment ? Boolean(outFormatEquipment) : null,
+                            value: outFormatEquipment ? Number(outFormatEquipment) : null,
                             inputConfig: {
                                 disabled: this.viewMode
                             },

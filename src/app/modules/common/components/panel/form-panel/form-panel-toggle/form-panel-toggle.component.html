@@ -6,7 +6,8 @@
                     [name]="name"
                     [(ngModel)]="value"
                     (ngModelChange)="onValueChange($event)"
-                    [required]="inputConfig.required || false">
+                    [required]="inputConfig.required || false"
+                    [disabled]="inputConfig.disabled || false">
         </ion-toggle>
     </ng-container>
 </wii-form-field>
