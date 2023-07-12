@@ -47,7 +47,7 @@ export class StorageService {
             )
                 .pipe(
                     map((data) => {
-                        // we associated all keys to value
+                        // we associated all keys with value
                         return valuesToKeep.reduce((acc: any, currentKey, index) => {
                             acc[currentKey] = data[index];
                             return acc;
@@ -63,10 +63,10 @@ export class StorageService {
     public updateRights(rights: { [name: string]: boolean }): Observable<any> {
         const rightKeys = Object.keys(rights);
         return rightKeys.length > 0
-            ? zip(...(rightKeys.map((key) => from(Preferences.set({
+            ? zip(...(rightKeys.map((key) => this.setItem(
                 key,
-                value: `${Number(Boolean(rights[key]))}`
-            })))))
+                `${Number(Boolean(rights[key]))}`
+            ))))
             : of(undefined);
     }
 
@@ -78,10 +78,10 @@ export class StorageService {
                 Object.keys(fieldParams[entity][field]).forEach((condition) => {
                     if (StorageService.FIELD_TYPES_TO_KEEP.includes(condition)) {
                         const key = `${entity}.${field}.${condition}`;
-                        storageObservables.push(from(Preferences.set({
+                        storageObservables.push(this.setItem(
                             key,
-                            value: `${Number(Boolean(fieldParams[entity][field][condition]))}`
-                        })));
+                            `${Number(Boolean(fieldParams[entity][field][condition]))}`
+                        ));
                     }
                 })
             })
@@ -95,19 +95,19 @@ export class StorageService {
     public updateParameters(parameters: { [name: string]: boolean|string }): Observable<any> {
         const parameterKeys = Object.keys(parameters);
         return parameterKeys.length > 0
-            ? zip(...(parameterKeys.map((key) => from(Preferences.set({
+            ? zip(...(parameterKeys.map((key) => this.setItem(
                 key,
-                value: typeof parameters[key] === 'boolean'
+                typeof parameters[key] === 'boolean'
                     ? `${Number(parameters[key])}`
                     : `${parameters[key] || ''}`
-            })))))
+            ))))
             : of(undefined);
     }
 
-    public getString(key: StorageKeyEnum, maxLength?: number): Observable<string|null> {
-        return from(Preferences.get({key}))
+    public getString(key: StorageKeyEnum|string, maxLength?: number): Observable<string|null> {
+        return this.getItem(key)
             .pipe(
-                map(({value}) => (
+                map((value) => (
                     value !== null && maxLength
                         ? (value || '').substring(0, maxLength)
                         : value
@@ -115,9 +115,9 @@ export class StorageService {
             );
     }
 
-    public getNumber(key: StorageKeyEnum | string): Observable<number|null> {
-        return from(Preferences.get({key})).pipe(
-            map(({value}) => (
+    public getNumber(key: StorageKeyEnum|string): Observable<number|null> {
+        return this.getItem(key).pipe(
+            map((value) => (
                 value !== null
                     ? Number(value)
                     : value
@@ -125,16 +125,31 @@ export class StorageService {
         );
     }
 
-    public getRight(rightName: string): Observable<boolean> {
-        return from(Preferences.get({key: rightName})).pipe(
-            map(({value}) => value),
+    public getRight(rightName: StorageKeyEnum): Observable<boolean> {
+        return this.getItem(rightName).pipe(
             map(Number),
             map(Boolean)
         );
     }
 
-    public setItem(key: StorageKeyEnum, value: any): Observable<void> {
-        return from(Preferences.set({key, value}));
+    public setItem(key: StorageKeyEnum|string, value: any): Observable<void> {
+        return from(Preferences.set({
+            key,
+            value: JSON.stringify(value)
+        }));
+    }
+
+    public getItem(key: StorageKeyEnum|string): Observable<any> {
+        return from(Preferences.get({key})).pipe(
+            map(({value}) => {
+                try {
+                    return value !== null ? JSON.parse(value) : value;
+                }
+                catch (_) {
+                    return value;
+                }
+            }),
+        );
     }
 
     public resetCounters(): Observable<void> {

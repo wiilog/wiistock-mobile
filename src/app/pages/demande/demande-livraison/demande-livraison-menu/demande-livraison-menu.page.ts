@@ -69,11 +69,14 @@ export class DemandeLivraisonMenuPage implements ViewWillEnter, CanLeave {
     public ionViewWillEnter(): void {
         this.fabListActivated = false
         this.hasLoaded = false;
-        this.storageService.getNumber(StorageKeyEnum.OPERATOR_ID)
-            .pipe(
-                mergeMap((userId) => this.sqliteService.findBy('demande_livraison', [`user_id = ${userId}`])),
-                mergeMap((demandesLivraison: Array<DemandeLivraison>) => this.preloadData(demandesLivraison).pipe(map(() => demandesLivraison)))
-            )
+        this.loadingService
+            .presentLoadingWhile({
+                event: () => this.storageService.getNumber(StorageKeyEnum.OPERATOR_ID)
+                    .pipe(
+                        mergeMap((userId) => this.sqliteService.findBy('demande_livraison', [`user_id = ${userId}`])),
+                        mergeMap((demandesLivraison: Array<DemandeLivraison>) => this.preloadData(demandesLivraison).pipe(map(() => demandesLivraison)))
+                    )
+            })
             .subscribe((demandesLivraison: Array<DemandeLivraison>) => {
                 this.refreshPageList(demandesLivraison);
                 this.hasLoaded = true;
