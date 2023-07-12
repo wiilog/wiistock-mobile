@@ -367,7 +367,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
             {column: 'label', value: 'VARCHAR(255)'},
             {column: 'color', value: 'VARCHAR(255)'},
-            {column: 'hide', value: 'INTEGER'}
+            {column: 'hide', value: 'INTEGER'},
+            {column: 'defaultNature', value: 'INTEGER'},
         ]
     },
     {

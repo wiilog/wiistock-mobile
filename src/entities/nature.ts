@@ -3,4 +3,5 @@ export interface Nature {
     label: string;
     color?: string;
     hide: number;
+    default?: boolean;
 }

@@ -63,6 +63,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
     public edit: boolean = false;
     public viewMode: boolean = false;
     public offlineMode: boolean = false;
+    public defaultNature: Nature;
 
     public constructor(private storageService: StorageService,
                        private sqliteService: SqliteService,
@@ -80,10 +81,12 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                 return zip(
                     this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
                     this.sqliteService.findAll('associated_document_type'),
+                    this.sqliteService.findOneBy(`nature`, {defaultNature: `1`})
                 )
             }
-        }).subscribe(([dispatchOfflineMode, documentTypeElements]) => {
+        }).subscribe(([dispatchOfflineMode, documentTypeElements, defaultNature]) => {
             this.offlineMode = dispatchOfflineMode;
+            this.defaultNature = defaultNature;
             this.associatedDocumentTypeElements = documentTypeElements;
             this.reference = this.navService.param(`reference`) || {};
             this.edit = this.navService.param(`edit`) || false;
@@ -176,7 +179,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                     config: {
                         label: 'Nature',
                         name: 'natureId',
-                        value: this.natureId ?? null,
+                        value: this.natureId || this.defaultNature?.id || null,
                         inputConfig: {
                             required: true,
                             searchType: SelectItemTypeEnum.TRACKING_NATURES,
