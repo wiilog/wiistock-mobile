@@ -55,7 +55,12 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
     public dispatch: Dispatch;
     public reference: DispatchReference | any = {};
     public volume?: number = undefined;
-    public natureId?: number = undefined;
+    public packData?: {
+        natureId?: number;
+        weight?: number;
+        volume?: number;
+        comment?: string;
+    } = {};
     public disableValidate: boolean = true;
     public disabledAddReference: boolean = true;
     public associatedDocumentTypeElements: Array<AssociatedDocumentType>;
@@ -179,7 +184,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                     config: {
                         label: 'Nature',
                         name: 'natureId',
-                        value: this.natureId || this.defaultNature?.id || null,
+                        value: this.packData?.natureId || this.defaultNature?.id || null,
                         inputConfig: {
                             required: true,
                             searchType: SelectItemTypeEnum.TRACKING_NATURES,
@@ -196,7 +201,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                     config: {
                         label: 'Poids (kg)',
                         name: 'packWeight',
-                        value: packWeight ? Number(packWeight) : null,
+                        value: this.packData?.weight ?? (packWeight ? Number(packWeight) : null),
                         inputConfig: {
                             type: 'number',
                             required: false,
@@ -212,7 +217,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                     config: {
                         label: 'Volume (m3)',
                         name: 'packVolume',
-                        value: packVolume ? Number(packVolume) : null,
+                        value: this.packData?.volume ?? (packVolume ? Number(packVolume) : null),
                         inputConfig: {
                             type: 'number',
                             required: false,
@@ -228,7 +233,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                     config: {
                         label: 'Commentaire',
                         name: 'packComment',
-                        value: packComment || null,
+                        value: this.packData?.comment || packComment || null,
                         inputConfig: {
                             disabled: this.viewMode
                         },
@@ -605,7 +610,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
     }
 
     public getReference() {
-        const {reference, natureId} = this.formPanelComponent.values;
+        const {reference, natureId, packWeight, packVolume, packComment} = this.formPanelComponent.values;
         if (reference && natureId) {
             this.loadingService.presentLoadingWhile({
                 event: () => this.getReferenceEvent(reference),
@@ -613,7 +618,12 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
             }).subscribe(({reference}) => {
                 this.disableValidate = false;
                 this.reference = reference;
-                this.natureId = natureId;
+                this.packData = {
+                    natureId,
+                    weight: packWeight,
+                    volume: packVolume,
+                    comment: packComment,
+                };
                 this.getFormConfig();
             });
         } else {
