@@ -11,7 +11,7 @@
                       [leftIcon]="dispatchHeaderConfig.leftIcon"
                       [rightIcons]="dispatchHeaderConfig.rightIcon">
     </wii-panel-header>
-    <ion-item *ngIf="fromCreate && ableToCreateWaybill && !dispatch.number">
+    <ion-item *ngIf="fromCreate && ableToCreateWaybill && !loading && (!dispatchOfflineMode || !dispatch.number)">
         <ion-label>Lettre de voiture</ion-label>
         <ion-toggle slot="end"
                     [checked]="hasWayBillData"
