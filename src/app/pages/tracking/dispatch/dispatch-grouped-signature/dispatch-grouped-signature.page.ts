@@ -267,6 +267,12 @@ export class DispatchGroupedSignaturePage implements ViewWillEnter, ViewWillLeav
                             : {label: 'Urgence', value: 'Non'})
                     ].filter((item) => item && item.value),
                     rightIcon: [
+                        ...(dispatch.emergency
+                            ? [{
+                                color: 'danger' as IconColor,
+                                name: 'exclamation-triangle.svg',
+                            }]
+                            : []),
                         {
                             color: 'grey' as IconColor,
                             name: isSelected ? 'down.svg' : 'up.svg',
@@ -280,11 +286,7 @@ export class DispatchGroupedSignaturePage implements ViewWillEnter, ViewWillLeav
                                 }
                             }
                         },
-                        ...(dispatch.emergency
-                            ? [{
-                                color: 'danger' as IconColor,
-                                name: 'exclamation-triangle.svg',
-                            }] : []),
+
                     ],
                     action: () => {
                         this.navService.push(NavPathEnum.DISPATCH_PACKS, {

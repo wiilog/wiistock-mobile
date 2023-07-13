@@ -58,8 +58,12 @@ $card-padding: 4px 12px !important;
 
             .content-layout {
                 display: flex;
-                flex-direction: column;
+                flex-direction: row;
                 flex: 1;
+
+                .content-wrapper {
+                    flex: 1;
+                }
             }
 
             .badges-container {
@@ -95,15 +99,15 @@ $card-padding: 4px 12px !important;
 
         .actions {
             display: flex;
-            flex-direction: row-reverse;
+            flex-direction: row;
             align-items: center;
 
             wii-icon {
-                &:not(:first-child) {
+                &:first-child {
                     margin-right: 5px;
                 }
 
-                &:not(:last-child, :first-child) {
+                &:last-child, &:first-child {
                     margin-left: 5px;
                 }
             }
