@@ -184,7 +184,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                     config: {
                         label: 'Nature',
                         name: 'natureId',
-                        value: this.packData?.natureId || this.defaultNature?.id || null,
+                        value: this.reference?.natureId || this.packData?.natureId || this.defaultNature?.id || null,
                         inputConfig: {
                             required: true,
                             searchType: SelectItemTypeEnum.TRACKING_NATURES,
