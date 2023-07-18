@@ -45,11 +45,11 @@
         background-color: $white;
 
         .main-titles {
+            color: $primary !important;
             text-align: center;
             font-size: 13pt;
 
             :last-child {
-                color: $primary;
                 font-weight: bold;
             }
         }
