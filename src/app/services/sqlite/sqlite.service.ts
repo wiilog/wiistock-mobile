@@ -25,7 +25,10 @@ import {DispatchPack} from "@entities/dispatch-pack";
 })
 export class SqliteService {
 
-    private static readonly DB_NAME: string = 'wiistock_db';
+    private static readonly DB_PREFIX: string = 'wiistock_db';
+    private static readonly DB_VERSION: number = 20230718; // day of the last modification 2023-07-18
+
+    private static readonly DB_NAME: string = `${SqliteService.DB_PREFIX}_${SqliteService.DB_VERSION}`;
 
     private readonly sqlite: CapacitorSQLitePlugin;
 
@@ -68,7 +71,8 @@ export class SqliteService {
      * @return TRUE if the connection was opened or has been opened. FALSE if database does not exist
      */
     public ensureDatabaseOpened(): Observable<boolean> {
-        return from(this.sqlite.isDBOpen({database: SqliteService.DB_NAME})).pipe(
+        return this.removeOldDatabases().pipe(
+            mergeMap(() => this.sqlite.isDBOpen({database: SqliteService.DB_NAME})),
             catchError(() => from(this.sqlite.createConnection({database: SqliteService.DB_NAME})).pipe(
                 map(() => ({result: false}))
             )),
@@ -1337,6 +1341,27 @@ export class SqliteService {
                     : of(undefined)
             )),
             map(() => undefined)
+        );
+    }
+
+    private removeOldDatabases(): Observable<void> {
+        return from(this.sqlite.getDatabaseList()).pipe(
+            map((res) => (res?.values || [])
+                .map((database: string) => database.match(/(.*)SQLite.db$/))
+                .map((matchRes: RegExpMatchArray|null) => matchRes && matchRes[1])
+                .filter((databaseName) => databaseName && databaseName !== SqliteService.DB_NAME) as Array<string>
+            ),
+            mergeMap((oldDatabases: Array<string>) => (
+                oldDatabases.length > 0
+                    ? zip(...oldDatabases.map((database) => (
+                        from(this.sqlite.createConnection({database})).pipe(
+                            mergeMap(() => this.sqlite.open({database})),
+                            mergeMap(() => this.sqlite.deleteDatabase({database})),
+                            mergeMap(() => this.sqlite.close({database}))
+                        )
+                    ))).pipe(map(() => undefined))
+                    : of(undefined)
+            ))
         );
     }
 
