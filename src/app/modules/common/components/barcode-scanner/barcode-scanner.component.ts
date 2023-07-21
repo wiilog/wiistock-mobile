@@ -144,7 +144,9 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
 
     public scan(): void {
         this.barcodeScannerManager.scan().subscribe((barcode) => {
-            this.triggerAdd(this.cameraAdd, barcode);
+            this.ngZone.run(() => {
+                this.triggerAdd(this.cameraAdd, barcode);
+            });
         });
     }
 
@@ -183,11 +185,13 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
         this.createForm.emit();
     }
 
-    private  clearInput() {
+    private clearInput() {
         this.ngZone.run(async() => {
             this.input = '';
-            const element: HTMLInputElement = await this.inputElement.getInputElement();
-            element.blur();
+            if(this.inputElement) {
+                const element: HTMLInputElement = await this.inputElement.getInputElement();
+                element.blur();
+            }
         });
     }
 
