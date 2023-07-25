@@ -618,10 +618,6 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
 
     private createArticleInfo({reference, is_ref, reference_article_reference, label, barcode, emplacement, quantite, targetLocationPicking}: ArticlePrepa): { [name: string]: { label: string; value: string; } } {
         return {
-            reference: {
-                label: 'Référence',
-                value: reference
-            },
             ...(
                 !is_ref && reference_article_reference
                     ? {
@@ -630,7 +626,12 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
                             value: reference_article_reference
                         }
                     }
-                    : {}
+                    : {
+                        reference: {
+                            label: 'Référence',
+                            value: reference
+                        },
+                    }
             ),
             label: {
                 label: 'Libellé',
