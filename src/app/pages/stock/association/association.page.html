@@ -22,7 +22,9 @@
         <wii-barcode-scanner #footerScannerComponent
                              [hidden]="loading"
                              [mode]="scannerModeManual"
-                             (manualAdd)="scan($event)">
+                             (manualAdd)="scan($event)"
+                             (scanAdd)="scan($event)"
+                             (cameraAdd)="scan($event)">
         </wii-barcode-scanner>
 
         <ion-button class="submit-button larger"
