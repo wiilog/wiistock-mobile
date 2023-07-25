@@ -18,4 +18,5 @@ export enum SelectItemTypeEnum {
     PROJECT,
     CARRIER,
     DRIVER,
+    RESERVE_TYPE,
 }

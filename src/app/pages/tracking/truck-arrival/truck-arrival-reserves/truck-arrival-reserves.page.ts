@@ -56,6 +56,7 @@ export class TruckArrivalReservesPage implements ViewWillEnter {
         number?: string;
         reserve?: {
             type?: string;
+            numberReserveType?: number;
             comment?: string;
             photos?: Array<string>;
         }

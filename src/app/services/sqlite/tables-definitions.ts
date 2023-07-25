@@ -660,4 +660,12 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'label', value: 'VARCHAR(255)'},
         ]
     },
+    {
+        name: 'reserve_type',
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'defaultReserve', value: 'INTEGER'},
+        ]
+    },
 ];

@@ -183,6 +183,16 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             databaseTable: 'project',
             placeholder: 'Sélectionnez un projet',
         },
+        [SelectItemTypeEnum.RESERVE_TYPE]: {
+            label: 'label',
+            valueField: 'id',
+            templateIndex: 'default',
+            databaseTable: 'reserve_type',
+            placeholder: 'Sélectionnez une type de réserve',
+            requestOrder: {
+                'label': 'ASC'
+            }
+        },
     }
 
     public constructor(private sqliteService: SqliteService,
