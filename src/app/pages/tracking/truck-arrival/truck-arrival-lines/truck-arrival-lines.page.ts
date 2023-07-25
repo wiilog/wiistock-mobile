@@ -51,7 +51,7 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
         number: string;
         reserve?: {
             type?: string;
-            numberReserveType?: number;
+            defaultReserveType?: number;
             comment?: string;
             photos?: Array<string>;
         }
@@ -121,7 +121,7 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
                                         type: 'quality',
                                         photos: data.photos,
                                         comment: data.comment,
-                                        numberReserveType: data.numberReserveType,
+                                        defaultReserveType: data.defaultReserveType,
                                     };
                                 }
                                 this.refreshTruckArrivalLinesCards();

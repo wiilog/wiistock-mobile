@@ -665,7 +665,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
         schema: [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
             {column: 'label', value: 'VARCHAR(255)'},
-            {column: 'defaultReserve', value: 'INTEGER'},
+            {column: 'defaultReserveType', value: 'INTEGER'},
         ]
     },
 ];

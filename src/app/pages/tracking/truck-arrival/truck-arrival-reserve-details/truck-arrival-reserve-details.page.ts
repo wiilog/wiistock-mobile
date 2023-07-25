@@ -15,6 +15,8 @@ import {
 } from "@common/components/panel/form-panel/form-panel-select/form-panel-select.component";
 import {SelectItemTypeEnum} from "@common/components/select-item/select-item-type.enum";
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
+import {LoadingService} from "@app/services/loading.service";
+import {ReserveType} from "@entities/reserve-type";
 
 
 enum QuantityType {
@@ -56,7 +58,7 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
         number?: string;
         reserve?: {
             type?: string;
-            numberReserveType?: number;
+            defaultReserveType?: number;
             comment?: string;
             photos?: Array<string>;
         }
@@ -73,13 +75,15 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
     public afterValidate: (data: any) => void;
 
     public constructor(private navService: NavService,
+                       private loadingService: LoadingService,
                        private sqliteService: SqliteService) {
 
     }
 
     public ionViewWillEnter(): void {
-        this.sqliteService.findOneBy('reserve_type', {defaultReserve: true})
-            .subscribe((defaultReserveType) => {
+        this.loadingService.presentLoadingWhile({
+            event: () => this.sqliteService.findOneBy('reserve_type', {defaultReserveType: true})
+        }).subscribe((defaultReserveType: ReserveType) => {
                 this.defaultReserveTypeId = defaultReserveType.id ?? null;
                 this.loading = false;
                 this.truckArrivalLine = this.navService.param('truckArrivalLine') ?? [];
@@ -100,7 +104,7 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
                     config: {
                         label: 'Type de réserve',
                         name: 'reserveType',
-                        value: this.truckArrivalLine?.reserve?.numberReserveType || this.defaultReserveTypeId,
+                        value: this.truckArrivalLine?.reserve?.defaultReserveType || this.defaultReserveTypeId,
                         inputConfig: {
                             required: true,
                             searchType: SelectItemTypeEnum.RESERVE_TYPE,
@@ -188,7 +192,7 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
         if(this.reserveType === this.QUALITY){
             const {photos, qualityComment, reserveType} = this.formPanelComponent.values;
 
-            data = {photos, comment: qualityComment, numberReserveType: reserveType};
+            data = {photos, comment: qualityComment, defaultReserveType: reserveType};
         } else if(this.reserveType === this.QUANTITY) {
             const {quantityComment} = this.formPanelComponent.values;
 
