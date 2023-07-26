@@ -10,6 +10,13 @@ import {
 } from "@common/components/panel/form-panel/form-panel-camera/form-panel-camera.component";
 import {TabConfig} from "@common/components/tab/tab-config";
 import {ViewWillEnter} from "@ionic/angular";
+import {
+    FormPanelSelectComponent
+} from "@common/components/panel/form-panel/form-panel-select/form-panel-select.component";
+import {SelectItemTypeEnum} from "@common/components/select-item/select-item-type.enum";
+import {SqliteService} from "@app/services/sqlite/sqlite.service";
+import {LoadingService} from "@app/services/loading.service";
+import {ReserveType} from "@entities/reserve-type";
 
 
 enum QuantityType {
@@ -40,6 +47,8 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
 
     public reserveType?: string;
 
+    public defaultReserveTypeId?: number;
+
     public tabConfig: TabConfig[] = [
         { label: 'En moins', key: QuantityType.MINUS },
         { label: 'En plus', key: QuantityType.PLUS }
@@ -49,6 +58,7 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
         number?: string;
         reserve?: {
             type?: string;
+            reserveTypeId?: number;
             comment?: string;
             photos?: Array<string>;
         }
@@ -64,22 +74,43 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
 
     public afterValidate: (data: any) => void;
 
-    public constructor(private navService: NavService) {}
+    public constructor(private navService: NavService,
+                       private loadingService: LoadingService,
+                       private sqliteService: SqliteService) {
+
+    }
 
     public ionViewWillEnter(): void {
-        this.loading = false;
-        this.truckArrivalLine = this.navService.param('truckArrivalLine') ?? [];
-        this.newReserve = this.navService.param('newReserve') ?? true;
-        this.reserveType = this.navService.param('type');
-        this.afterValidate = this.navService.param('afterValidate');
+        this.loadingService.presentLoadingWhile({
+            event: () => this.sqliteService.findOneBy('reserve_type', {defaultReserveType: true})
+        }).subscribe((defaultReserveType: ReserveType) => {
+                this.defaultReserveTypeId = defaultReserveType.id ?? null;
+                this.loading = false;
+                this.truckArrivalLine = this.navService.param('truckArrivalLine') ?? [];
+                this.newReserve = this.navService.param('newReserve') ?? true;
+                this.reserveType = this.navService.param('type');
+                this.afterValidate = this.navService.param('afterValidate');
 
-        this.reserve = {};
-        this.generateReserveDetails();
+                this.reserve = {};
+                this.generateReserveDetails();
+            });
     }
 
     public generateReserveDetails(){
         if (this.reserveType === this.QUALITY){
             this.reserveDetailsListConfig = [
+                {
+                    item: FormPanelSelectComponent,
+                    config: {
+                        label: 'Type de réserve',
+                        name: 'reserveType',
+                        value: this.truckArrivalLine?.reserve?.reserveTypeId || this.defaultReserveTypeId,
+                        inputConfig: {
+                            required: true,
+                            searchType: SelectItemTypeEnum.RESERVE_TYPE,
+                        },
+                    }
+                },
                 {
                     item: FormPanelInputComponent,
                     config: {
@@ -159,9 +190,9 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
     public validate() {
         let data = {};
         if(this.reserveType === this.QUALITY){
-            const {photos, qualityComment} = this.formPanelComponent.values;
+            const {photos, qualityComment, reserveType} = this.formPanelComponent.values;
 
-            data = {photos, comment: qualityComment};
+            data = {photos, comment: qualityComment, reserveTypeId: reserveType};
         } else if(this.reserveType === this.QUANTITY) {
             const {quantityComment} = this.formPanelComponent.values;
 

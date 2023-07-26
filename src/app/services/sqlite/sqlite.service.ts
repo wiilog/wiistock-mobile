@@ -575,6 +575,18 @@ export class SqliteService {
         );
     }
 
+    public importReserveTypes(data: any): Observable<void> {
+        const reserveTypes = data['reserveTypes'] || [];
+        return this.deleteBy('reserve_type').pipe(
+            mergeMap(() => (
+                reserveTypes.length > 0
+                    ? this.insert('reserve_type', reserveTypes)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
     public importUsers(data: any): Observable<void> {
         const users = data['users'] || [];
         return this.deleteBy('user').pipe(
@@ -898,6 +910,7 @@ export class SqliteService {
             mergeMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),
             mergeMap(() => this.importTransportRoundData(data).pipe(tap(() => {console.log('--- > importTransportRoundData')}))),
             mergeMap(() => this.importDispatchTypes(data).pipe(tap(() => {console.log('--- > importDispatchTypesData')}))),
+            mergeMap(() => this.importReserveTypes(data).pipe(tap(() => {console.log('--- > importReserveTypesData')}))),
             mergeMap(() => this.importTransporteursData(data).pipe(tap(() => (console.log('--- > importTransporteursData'))))),
             mergeMap(() => this.importTypes(data).pipe(tap(() => {console.log('--- > importTypes')}))),
             mergeMap(() => this.importSuppliers(data).pipe(tap(() => {console.log('--- > importSuppliers')}))),

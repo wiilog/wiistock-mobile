@@ -54,4 +54,5 @@ export type TableName =   'emplacement'
                         | 'dispatch_waybill'
                         | 'grouped_signature_history'
                         | 'dispatch_emergency'
-                        | 'associated_document_type';
+                        | 'associated_document_type'
+                        | 'reserve_type';
