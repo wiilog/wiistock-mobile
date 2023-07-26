@@ -82,7 +82,7 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
 
     public ionViewWillEnter(): void {
         this.loadingService.presentLoadingWhile({
-            event: () => this.sqliteService.findOneBy('reserve_type', {defaultReserveType: true})
+            event: () => this.sqliteService.findOneBy('reserve_type', {defaultReserveType: '1'})
         }).subscribe((defaultReserveType: ReserveType) => {
                 this.defaultReserveTypeId = defaultReserveType.id ?? null;
                 this.loading = false;
