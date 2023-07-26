@@ -58,7 +58,7 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
         number?: string;
         reserve?: {
             type?: string;
-            defaultReserveType?: number;
+            reserveTypeId?: number;
             comment?: string;
             photos?: Array<string>;
         }
@@ -104,7 +104,7 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
                     config: {
                         label: 'Type de réserve',
                         name: 'reserveType',
-                        value: this.truckArrivalLine?.reserve?.defaultReserveType || this.defaultReserveTypeId,
+                        value: this.truckArrivalLine?.reserve?.reserveTypeId || this.defaultReserveTypeId,
                         inputConfig: {
                             required: true,
                             searchType: SelectItemTypeEnum.RESERVE_TYPE,
@@ -192,7 +192,7 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
         if(this.reserveType === this.QUALITY){
             const {photos, qualityComment, reserveType} = this.formPanelComponent.values;
 
-            data = {photos, comment: qualityComment, defaultReserveType: reserveType};
+            data = {photos, comment: qualityComment, reserveTypeId: reserveType};
         } else if(this.reserveType === this.QUANTITY) {
             const {quantityComment} = this.formPanelComponent.values;
 
