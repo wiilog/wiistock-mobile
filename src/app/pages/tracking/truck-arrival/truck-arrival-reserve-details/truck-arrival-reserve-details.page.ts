@@ -34,8 +34,8 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
     @ViewChild('formPanelComponent', {static: false})
     public formPanelComponent: FormPanelComponent;
 
-    public QUALITY = 'quality';
-    public QUANTITY = 'quantity';
+    public KIND_LINE = 'line';
+    public KIND_QUANTITY = 'quantity';
 
     public defaultQuantityType = QuantityType.MINUS;
 
@@ -45,7 +45,7 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
 
     public reserveDetailsListConfig: Array<FormPanelParam>;
 
-    public reserveType?: string;
+    public reserveKind?: string;
 
     public defaultReserveTypeId?: number;
 
@@ -57,7 +57,6 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
     public truckArrivalLine?: {
         number?: string;
         reserve?: {
-            type?: string;
             reserveTypeId?: number;
             comment?: string;
             photos?: Array<string>;
@@ -65,7 +64,6 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
     };
 
     public reserve: {
-        type?: string;
         quantity?: number;
         quantityType?: string
     };
@@ -88,7 +86,7 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
                 this.loading = false;
                 this.truckArrivalLine = this.navService.param('truckArrivalLine') ?? [];
                 this.newReserve = this.navService.param('newReserve') ?? true;
-                this.reserveType = this.navService.param('type');
+                this.reserveKind = this.navService.param('kind');
                 this.afterValidate = this.navService.param('afterValidate');
 
                 this.reserve = {};
@@ -97,7 +95,7 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
     }
 
     public generateReserveDetails(){
-        if (this.reserveType === this.QUALITY){
+        if (this.reserveKind === this.KIND_LINE){
             this.reserveDetailsListConfig = [
                 {
                     item: FormPanelSelectComponent,
@@ -150,7 +148,7 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
                     }
                 },
             ];
-        } else if (this.reserveType === this.QUANTITY) {
+        } else if (this.reserveKind === this.KIND_QUANTITY) {
             this.reserveDetailsListConfig = [
                 {
                     item: FormPanelInputComponent,
@@ -189,11 +187,11 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
 
     public validate() {
         let data = {};
-        if(this.reserveType === this.QUALITY){
+        if(this.reserveKind === this.KIND_LINE){
             const {photos, qualityComment, reserveType} = this.formPanelComponent.values;
 
             data = {photos, comment: qualityComment, reserveTypeId: reserveType};
-        } else if(this.reserveType === this.QUANTITY) {
+        } else if(this.reserveKind === this.KIND_QUANTITY) {
             const {quantityComment} = this.formPanelComponent.values;
 
             data = {

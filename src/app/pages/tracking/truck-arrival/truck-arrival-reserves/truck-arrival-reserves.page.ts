@@ -46,7 +46,7 @@ export class TruckArrivalReservesPage implements ViewWillEnter {
     public signatures?: Array<string>;
 
     public reserves?: Array<{
-       type: string;
+       kind: string;
        quantity?: number;
        quantityType?: string;
        comment?: string;
@@ -55,7 +55,6 @@ export class TruckArrivalReservesPage implements ViewWillEnter {
     public truckArrivalLines?: Array<{
         number?: string;
         reserve?: {
-            type?: string;
             reserveTypeId?: number;
             comment?: string;
             photos?: Array<string>;
@@ -140,11 +139,11 @@ export class TruckArrivalReservesPage implements ViewWillEnter {
                         onChange: (value: any) => {
                             if(value){
                                 this.navService.push(NavPathEnum.TRUCK_ARRIVAL_RESERVE_DETAILS, {
-                                    type: 'quantity',
+                                    kind: 'quantity',
                                     afterValidate: (data: any) => {
                                         if (this.reserves) {
                                             this.reserves.push({
-                                                type: 'quantity',
+                                                kind: 'quantity',
                                                 quantity: data.quantity || 1,
                                                 quantityType: data.quantityType || 'minus',
                                                 comment: data.comment || '',
@@ -203,7 +202,7 @@ export class TruckArrivalReservesPage implements ViewWillEnter {
             const {generalComment, signatures} = this.formPanelComponent.values;
             if (generalComment && this.reserves) {
                 this.reserves.push({
-                    type: 'general',
+                    kind: 'general',
                     comment: generalComment,
                 });
             }
