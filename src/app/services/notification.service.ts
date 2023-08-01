@@ -26,9 +26,34 @@ export class NotificationService {
 
     public initialize(): Observable<void> {
         return this.registerPushNotification().pipe(
+            tap(() => {
+                console.log('========== 1')
+            }),
             mergeMap(() => this.unsubscribe()),
+            tap(() => {
+                console.log('========== 2')
+            }),
             mergeMap(() => this.subscribeToTopics()),
-            mergeMap(() => this.handleEvents())
+            tap({
+                next: () => {
+                    console.log('========== 3')
+                    FCM.subscribeTo({topic: 'wiilog-dev-adrien-notifications'}).then((a) => {
+                        console.warn('aaaaaaaaaaaa', a)
+                    }).catch((a) => {
+                        console.warn('eeeeeeeeeeee', a)
+                    })
+                },
+                error: () => {
+                    console.log('========== 3 Error')
+                },
+                complete: () => {
+                    console.log('========== 3 Complete')
+                },
+            }),
+            mergeMap(() => this.handleEvents()),
+            tap(() => {
+                console.log('========== 4')
+            }),
         );
     }
 
@@ -44,11 +69,14 @@ export class NotificationService {
                         ? (JSON.parse(rawChannels) || [])
                         : []
                 )),
-                mergeMap((topics: Array<string>) => (
-                    topics.length > 0
-                        ? zip(...(topics.map((topic) => FCM.subscribeTo({topic}))))
-                        : of(undefined)
-                )),
+                mergeMap((topics: Array<string>) => {
+                    console.error(topics)
+                    return (
+                        topics.length > 0
+                            ? from(FCM.subscribeTo({topic: topics[0]}))
+                            : of(undefined)
+                    );
+                }),
                 map(() => undefined)
             );
     }
