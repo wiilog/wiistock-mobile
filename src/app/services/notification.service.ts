@@ -25,35 +25,10 @@ export class NotificationService {
     }
 
     public initialize(): Observable<void> {
-        return this.registerPushNotification().pipe(
-            tap(() => {
-                console.log('========== 1')
-            }),
-            mergeMap(() => this.unsubscribe()),
-            tap(() => {
-                console.log('========== 2')
-            }),
+        return this.unsubscribe().pipe(
+            mergeMap(() => this.registerPushNotification()),
             mergeMap(() => this.subscribeToTopics()),
-            tap({
-                next: () => {
-                    console.log('========== 3')
-                    FCM.subscribeTo({topic: 'wiilog-dev-adrien-notifications'}).then((a) => {
-                        console.warn('aaaaaaaaaaaa', a)
-                    }).catch((a) => {
-                        console.warn('eeeeeeeeeeee', a)
-                    })
-                },
-                error: () => {
-                    console.log('========== 3 Error')
-                },
-                complete: () => {
-                    console.log('========== 3 Complete')
-                },
-            }),
             mergeMap(() => this.handleEvents()),
-            tap(() => {
-                console.log('========== 4')
-            }),
         );
     }
 
@@ -70,10 +45,9 @@ export class NotificationService {
                         : []
                 )),
                 mergeMap((topics: Array<string>) => {
-                    console.error(topics)
                     return (
                         topics.length > 0
-                            ? from(FCM.subscribeTo({topic: topics[0]}))
+                            ? zip(...topics.map((topic) => FCM.subscribeTo({topic})))
                             : of(undefined)
                     );
                 }),
@@ -82,6 +56,7 @@ export class NotificationService {
     }
 
     public unsubscribe(): Observable<void> {
+        return of(undefined);
         return from(FCM.deleteInstance()).pipe(
             map(() => undefined)
         );
@@ -110,8 +85,10 @@ export class NotificationService {
     }
 
     private handleEvents(): Observable<void> {
+        console.warn('>> handleEvents')
         return from(PushNotifications.removeAllListeners()).pipe(
             mergeMap(() => {
+                console.warn('>> localNotificationActionPerformed')
                 // event on a tapped LocalNotification when app is in background
                 return LocalNotifications.addListener('localNotificationActionPerformed', ({notification}) => {
                     console.warn('localNotificationActionPerformed', notification)
@@ -119,6 +96,7 @@ export class NotificationService {
                 })
             }),
             mergeMap(() => {
+                console.warn('>> pushNotificationActionPerformed')
                 // event on a tapped PushNotification when app is in background
                 return PushNotifications.addListener('pushNotificationActionPerformed', async ({notification}) => {
                     await PushNotifications.removeAllDeliveredNotifications();
@@ -127,6 +105,8 @@ export class NotificationService {
                 });
             }),
             mergeMap(() => {
+
+                console.warn('>> pushNotificationReceived')
                 // event a PushNotification received when app is in background
                 // => we create a new LocalNotification
                 return PushNotifications.addListener('pushNotificationReceived', async (notification) => {
