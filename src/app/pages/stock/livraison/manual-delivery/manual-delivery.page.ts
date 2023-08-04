@@ -20,7 +20,7 @@ import {
 import {Emplacement} from '@entities/emplacement';
 import {FormPanelComponent} from '@common/components/panel/form-panel/form-panel.component';
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
-import {ViewWillLeave} from "@ionic/angular";
+import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {LocalDataManagerService} from "@app/services/local-data-manager.service";
 import {of, zip} from "rxjs";
 import {LoadingService} from "@app/services/loading.service";
@@ -39,7 +39,7 @@ import {mergeMap} from "rxjs/operators";
     templateUrl: './manual-delivery.page.html',
     styleUrls: ['./manual-delivery.page.scss'],
 })
-export class ManualDeliveryPage implements ViewWillLeave {
+export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
 
     @ViewChild('formPanelComponent', {static: false})
     public formPanelComponent: FormPanelComponent;
@@ -97,10 +97,6 @@ export class ManualDeliveryPage implements ViewWillLeave {
     public ngOnInit() {
         this.listBoldValues = ['reference', 'label', 'barCode', 'location', 'quantity', 'lastTrackingDate', 'nature'];
 
-        if (this.footerScannerComponent) {
-            this.footerScannerComponent.fireZebraScan();
-        }
-
         this.headerConfig = this.createHeaderConfig();
         this.listConfig = this.createBodyConfig();
 
@@ -125,6 +121,12 @@ export class ManualDeliveryPage implements ViewWillLeave {
 
             this.getFormConfig();
         });
+    }
+
+    public ionViewWillEnter() {
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.fireZebraScan();
+        }
     }
 
     public getFormConfig(logisticUnitProject: any = undefined): void {
@@ -359,7 +361,7 @@ export class ManualDeliveryPage implements ViewWillLeave {
                     : {}),
                 quantity: {
                     label: article.is_lu ? `Nombre d'articles` : `Quantité`,
-                    value: `${article.articlesCount || 0}`,
+                    value: article.is_lu ? `${article.articlesCount || 0}` : `${article.quantity}`,
                 },
                 ...(article.is_lu && article.natureCode ? {
                     nature: {
