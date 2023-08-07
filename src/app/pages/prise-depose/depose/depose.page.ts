@@ -26,6 +26,7 @@ import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {AlertService} from '@app/services/alert.service';
 import {NetworkService} from '@app/services/network.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
     selector: 'wii-depose',
@@ -152,8 +153,9 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                 return this.localDataManager
                                     .saveTrackingMovements(this.colisDepose, takingToFinish)
                                     .pipe(
-                                        mergeMap((): Observable<{ online: boolean; apiResponse?: { [x: string]: any } }> => (
-                                            online
+                                        mergeMap(async () => await this.networkService.hasNetwork()),
+                                        mergeMap((hasNetwork): Observable<{ hasNetwork: boolean; apiResponse?: { [x: string]: any } }> => (
+                                            hasNetwork
                                                 ? this.localDataManager
                                                     .sendMouvementTraca(this.fromStock, this.createTakeAndDrop)
                                                     .pipe(
@@ -162,11 +164,11 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                                                 ? this.postGroupingMovements(groupingMovements, apiResponse)
                                                                 : of(apiResponse)
                                                         )),
-                                                        map((apiResponse) => ({online, apiResponse}))
+                                                        map((apiResponse) => ({hasNetwork, apiResponse}))
                                                     )
-                                                : of({online})
+                                                : of({hasNetwork})
                                         )),
-                                        mergeMap((a) => this.treatApiResponse(a.online, a.apiResponse, multiDepose)),
+                                        mergeMap((a) => this.treatApiResponse(a.hasNetwork, a.apiResponse, multiDepose)),
                                     )
                             }
                         })
@@ -177,7 +179,12 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                             },
                             error: (error) => {
                                 this.unsubscribeSaveSubscription();
-                                throw error;
+                                if(error instanceof HttpErrorResponse && error.status == 0) {
+                                    this.toastService.presentToast(`Une erreur réseau est survenue.`)
+                                    this.redirectAfterTake();
+                                } else {
+                                    throw error;
+                                }
                             }
                         });
                 }
