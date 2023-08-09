@@ -45,7 +45,7 @@ export class CollecteArticlePickingPage implements ViewWillEnter, ViewWillLeave 
 
     public async ionViewWillEnter() {
         this.article = this.navService.param('article');
-        this.selectArticle = this.navService.param('selectArticle');
+        this.selectArticle = this.navService.param('selectArticle') || this.selectArticle;
         this.showArticlePicking = false;
 
         const hasNetwork = await this.networkService.hasNetwork();
@@ -91,7 +91,7 @@ export class CollecteArticlePickingPage implements ViewWillEnter, ViewWillLeave 
     }
 
     public ionViewWillLeave(): void {
-        this.selectItemComponent.unsubscribeZebraScan();
+        this.selectItemComponent?.unsubscribeZebraScan();
     }
 
     public onGenerateNewArticle(): void {

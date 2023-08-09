@@ -36,8 +36,8 @@ export class CollecteMenuPage implements ViewWillEnter {
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
-        this.goToDrop = this.navService.param('goToDrop');
-        this.avoidSync = this.navService.param('avoidSync');
+        this.goToDrop = this.navService.param('goToDrop') || this.goToDrop;
+        this.avoidSync = this.navService.param('avoidSync') || this.avoidSync;
 
         const withoutLoading = this.navService.param('withoutLoading');
         if (!this.firstLaunch || !withoutLoading) {
