@@ -17,6 +17,7 @@ import {ApiService} from '@app/services/api.service';
 import {PluginListenerHandle} from "@capacitor/core/types/definitions";
 import {NotificationService} from "@app/services/notification.service";
 import {LocalNotificationSchema} from "@capacitor/local-notifications";
+import {LoadingService} from "@app/services/loading.service";
 
 
 @Component({
@@ -55,7 +56,8 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                        private platform: Platform,
                        private ngZone: NgZone,
                        private notificationService: NotificationService,
-                       private navService: NavService) {
+                       private navService: NavService,
+                       private loadingService: LoadingService) {
         this.loading = true;
         this.displayNotifications = false;
         this.pageIsRedirecting = false;
@@ -203,7 +205,9 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                 {
                     text: 'Confirmer',
                     handler: () => {
-                        App.exitApp();
+                        this.loadingService.presentLoadingWhile({
+                            event: () => this.apiService.requestApi(ApiService.LOGOUT),
+                        }).subscribe(() => App.exitApp());
                     },
                     cssClass: 'alert-success'
                 }
