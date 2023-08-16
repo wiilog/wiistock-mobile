@@ -16,6 +16,8 @@ import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {AlertService} from '@app/services/alert.service';
 import {Translations} from '@entities/translation';
 import {TranslationService} from '@app/services/translations.service';
+import {ApiService} from "@app/services/api.service";
+import {LoadingService} from "@app/services/loading.service";
 
 @Component({
     selector: 'wii-main-header',
@@ -97,7 +99,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                        private userService: UserService,
                        public router: Router,
                        private alertService: AlertService,
-                       private translationService: TranslationService) {
+                       private translationService: TranslationService,
+                       private apiService: ApiService,
+                       private loadingService: LoadingService) {
         this.pagesInStack = 0;
         this.loading = true;
         this.withHeader = new EventEmitter<boolean>();
@@ -347,7 +351,11 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                             },
                             {
                                 text: 'Confirmer',
-                                handler: () => this.userService.doLogout(),
+                                handler: () => {
+                                    this.loadingService.presentLoadingWhile({
+                                        event: () => this.apiService.requestApi(ApiService.LOGOUT),
+                                    }).subscribe(() => this.userService.doLogout());
+                                },
                                 cssClass: 'alert-success'
                             }
                         ]
