@@ -237,15 +237,7 @@ export class InventoryLocationsPage implements ViewWillEnter, ViewWillLeave, Can
 
                                 const nbLogisticUnits = logisticUnits.length;
 
-                                const notUniqueReferences = inventoryArticles
-                                    .filter(({mission_id: missionIdArt, is_ref}) => missionIdArt === id && is_ref === 0)
-                                    .map(line => line.reference);
-
-                                const nbRefFromArtInMission = notUniqueReferences
-                                    .filter((reference, index, self) => self.indexOf(reference) === index)
-                                    .length;
-
-                                const nbRefInMission = nbRefFromArtInMission + inventoryArticles
+                                const nbRefInMission = inventoryArticles
                                     .filter(({mission_id: missionIdArt, is_ref}) => missionIdArt === id && is_ref === 1)
                                     .length;
 
