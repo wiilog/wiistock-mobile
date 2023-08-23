@@ -205,7 +205,7 @@ export class DispatchRequestMenuPage implements ViewWillEnter, ViewWillLeave, Ca
                         }
                     }
                     : {}),
-                ...(dispatch.emergency && dispatch.id
+                ...(dispatch.emergency
                     ? {
                         rightIcon: {
                             name: 'exclamation-triangle.svg',
