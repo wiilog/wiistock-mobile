@@ -24,6 +24,7 @@ import {BatteryManagerService} from "@plugins/battery-manager/battery-manager.se
 import {filter, map} from "rxjs/operators";
 import {Status} from "@entities/status";
 import {HttpErrorResponse} from "@angular/common/http";
+import {IconColor} from "@common/components/icon/icon-color";
 
 @Component({
     selector: 'wii-dispatch-request-menu',
@@ -194,25 +195,21 @@ export class DispatchRequestMenuPage implements ViewWillEnter, ViewWillLeave, Ca
                         ? {label: 'Urgence', value: dispatch.emergency || ''}
                         : undefined)
                 ].filter((item) => item && item.value) as Array<{label: string; value: string;}>,
-                ...(this.offlineMode && !dispatch.id && dispatch.draft
-                    ? {
-                        rightIcon: {
+                rightIcon: [
+                    ...(dispatch.emergency
+                        ? [{
+                            name: 'exclamation-triangle.svg',
+                            color: 'danger' as IconColor
+                        }] : []),
+                    ...(this.offlineMode && !dispatch.id && dispatch.draft
+                        ? [{
                             name: 'trash.svg',
-                            color: 'danger',
+                            color: 'danger' as IconColor,
                             action: () => {
                                 this.deleteDispatch(dispatch)
                             }
-                        }
-                    }
-                    : {}),
-                ...(dispatch.emergency
-                    ? {
-                        rightIcon: {
-                            name: 'exclamation-triangle.svg',
-                            color: 'danger'
-                        }
-                    }
-                    : {}),
+                        }] : []),
+                ]
             };
         });
 
