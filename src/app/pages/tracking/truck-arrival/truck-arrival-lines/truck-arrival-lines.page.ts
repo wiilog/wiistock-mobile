@@ -50,7 +50,7 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
     public truckArrivalLines?: Array<{
         number: string;
         reserve?: {
-            type?: string;
+            reserveTypeId?: number;
             comment?: string;
             photos?: Array<string>;
         }
@@ -111,15 +111,15 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
                         this.navService.push(NavPathEnum.TRUCK_ARRIVAL_RESERVE_DETAILS, {
                             truckArrivalLine: line,
                             newReserve: !Boolean(line.reserve),
-                            type: 'quality',
+                            kind: 'line',
                             afterValidate: (data: any) => {
                                 if(data.delete){
                                     line.reserve = undefined;
                                 } else {
                                     line.reserve = {
-                                        type: 'quality',
                                         photos: data.photos,
                                         comment: data.comment,
+                                        reserveTypeId: data.reserveTypeId,
                                     };
                                 }
                                 this.refreshTruckArrivalLinesCards();

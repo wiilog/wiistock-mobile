@@ -43,24 +43,30 @@ export class TrackingMenuPage implements ViewWillEnter {
             this.storageService.getRight(StorageKeyEnum.RIGHT_UNGROUP),
             this.storageService.getRight(StorageKeyEnum.TRUCK_ARRIVAL),
             this.storageService.getRight(StorageKeyEnum.FORCE_GROUPED_SIGNATURE),
+            this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
             this.storageService.getCounter(StorageKeyEnum.COUNTERS_DISPATCHES_TREATED),
             this.sqliteService.count('dispatch', ['treatedStatusId IS NULL OR partial = 1']),
 
             this.translationService.get(`Demande`, `Acheminements`, `Général`)
         ).subscribe(
-            ([group, ungroup, truckArrival,forceSignature, treatedDispatches, toTreatDispatches, translations]) => {
-                this.menuConfig.push(
-                    {
-                        icon: 'stock-transfer.svg',
-                        label: TranslationService.Translate(translations, 'Acheminements'),
-                        action: () => {
-                            if (forceSignature) {
-                                this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE);
-                            } else {
-                                this.navService.push(NavPathEnum.DISPATCH_MENU);
+            ([group, ungroup, truckArrival, forceSignature, dispatchOfflineMode, treatedDispatches, toTreatDispatches, translations]) => {
+                if (!dispatchOfflineMode) {
+                    this.menuConfig.push(
+                        {
+                            icon: 'stock-transfer.svg',
+                            label: TranslationService.Translate(translations, 'Acheminements'),
+                            action: () => {
+                                if (forceSignature) {
+                                    this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE);
+                                } else {
+                                    this.navService.push(NavPathEnum.DISPATCH_MENU);
+                                }
                             }
                         }
-                    },
+                    );
+                }
+
+                this.menuConfig.push(
                     {
                         icon: 'tracking.svg',
                         label: 'Mouvements',

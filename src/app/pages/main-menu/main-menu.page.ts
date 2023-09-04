@@ -17,6 +17,7 @@ import {ApiService} from '@app/services/api.service';
 import {PluginListenerHandle} from "@capacitor/core/types/definitions";
 import {NotificationService} from "@app/services/notification.service";
 import {LocalNotificationSchema} from "@capacitor/local-notifications";
+import {LoadingService} from "@app/services/loading.service";
 
 
 @Component({
@@ -41,6 +42,8 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
 
     private pageIsRedirecting: boolean;
     private lastNotificationRedirected: LocalNotificationSchema;
+    private isDispatchOfflineMode: boolean = false;
+    private dispatchOfflineModeToastAlreadyPresented: boolean = false
 
     public constructor(private alertService: AlertService,
                        private apiService: ApiService,
@@ -53,7 +56,8 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                        private platform: Platform,
                        private ngZone: NgZone,
                        private notificationService: NotificationService,
-                       private navService: NavService) {
+                       private navService: NavService,
+                       private loadingService: LoadingService) {
         this.loading = true;
         this.displayNotifications = false;
         this.pageIsRedirecting = false;
@@ -62,9 +66,18 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
     public ionViewWillEnter(): void {
         const notification = this.navService.param<LocalNotificationSchema>('notification');
 
-        this.synchronise().subscribe(() => {
+        zip(
+            this.synchronise(),
+            this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE)
+        ).subscribe(([synchronise, isDispatchOfflineMode]) => {
+            this.isDispatchOfflineMode = isDispatchOfflineMode;
             if (notification && this.lastNotificationRedirected !== notification) {
                 this.doNotificationRedirection(notification);
+            }
+
+            if(this.isDispatchOfflineMode && !this.dispatchOfflineModeToastAlreadyPresented) {
+                this.dispatchOfflineModeToastAlreadyPresented = true;
+                this.toastService.presentToast(`Vous êtes en mode hors-ligne sur les acheminements, veillez à bien synchroniser vos données.`);
             }
         });
 
@@ -152,27 +165,54 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
             this.exitAlert = undefined;
         }
         else {
-            this.exitAlert = await this.alertService.show({
-                header: `Êtes-vous sûr de vouloir quitter l'application ?`,
-                backdropDismiss: false,
-                buttons: [
-                    {
-                        text: 'Annuler',
-                        role: 'cancel',
-                        handler: () => {
-                            this.exitAlert = undefined;
-                        }
-                    },
-                    {
-                        text: 'Confirmer',
-                        handler: () => {
-                            App.exitApp();
+            if(this.isDispatchOfflineMode) {
+                await this.alertService.show({
+                    header: `Vous êtes en mode hors-ligne sur les acheminements. Vos données seront perdues si elles ne sont pas synchronisées.`,
+                    backdropDismiss: false,
+                    buttons: [
+                        {
+                            text: 'Annuler',
+                            role: 'cancel',
+                            handler: () => {
+                                this.exitAlert = undefined;
+                            }
                         },
-                        cssClass: 'alert-success'
-                    }
-                ]
-            });
+                        {
+                            text: 'Confirmer',
+                            handler: () => this.registerExitAlert(),
+                            cssClass: 'alert-success'
+                        }
+                    ]
+                });
+            } else {
+                await this.registerExitAlert();
+            }
         }
+    }
+
+    private async registerExitAlert() {
+        this.exitAlert = await this.alertService.show({
+            header: `Êtes-vous sûr de vouloir quitter l'application ?`,
+            backdropDismiss: false,
+            buttons: [
+                {
+                    text: 'Annuler',
+                    role: 'cancel',
+                    handler: () => {
+                        this.exitAlert = undefined;
+                    }
+                },
+                {
+                    text: 'Confirmer',
+                    handler: () => {
+                        this.loadingService.presentLoadingWhile({
+                            event: () => this.apiService.requestApi(ApiService.LOGOUT),
+                        }).subscribe(() => App.exitApp());
+                    },
+                    cssClass: 'alert-success'
+                }
+            ]
+        });
     }
 
     private resetMainMenuConfig(rights: {stock?: boolean, demande?: boolean, tracking?: boolean, track?: boolean}) {
@@ -292,7 +332,9 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                                 .push(NavPathEnum.TRACKING_MENU)
                                 .pipe(
                                     mergeMap(() => this.navService.push(NavPathEnum.DISPATCH_MENU, {withoutLoading: true})),
-                                    mergeMap(() => this.navService.push(NavPathEnum.DISPATCH_PACKS, {dispatchId}))
+                                    mergeMap(() => this.navService.push(NavPathEnum.DISPATCH_PACKS, {
+                                        dispatchId
+                                    }))
                                 )
                                 .subscribe(() => {
                                     this.pageIsRedirecting = false;

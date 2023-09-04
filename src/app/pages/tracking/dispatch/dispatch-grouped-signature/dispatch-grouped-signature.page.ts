@@ -123,13 +123,13 @@ export class DispatchGroupedSignaturePage implements ViewWillEnter, ViewWillLeav
             if (this.filters.type) {
                 filtersSQL.push(`typeId = ${this.filters.type.id}`)
             }
-
             this.loadingSubscription = this.loadingService.presentLoading()
                 .pipe(
                     tap(loader => loaderElement = loader),
                     mergeMap(() => zip(
                         this.sqliteService.findBy('dispatch',
                             [
+                                'draft = 0',
                                 'treatedStatusId IS NULL OR partial = 1',
                                 ...filtersSQL
                             ]
@@ -147,7 +147,7 @@ export class DispatchGroupedSignaturePage implements ViewWillEnter, ViewWillLeav
                         this.dispatches = dispatches;
                     } else {
                         this.dispatches = dispatches
-                            .filter((dispatch) => this.dispatchesToSign && !this.dispatchesToSign.some((dispatchToSign) => dispatchToSign.id === dispatch.id));
+                            .filter((dispatch) => this.dispatchesToSign && !this.dispatchesToSign.some((dispatchToSign) => dispatchToSign.localId === dispatch.localId));
                     }
                     this.refreshDispatchesListConfig(translations);
                     this.refreshSubTitle();
@@ -178,21 +178,6 @@ export class DispatchGroupedSignaturePage implements ViewWillEnter, ViewWillLeav
     public refreshSubTitle(): void {
         const dispatchesLength = this.dispatchesListConfig.length;
         this.mainHeaderService.emitSubTitle(`${dispatchesLength === 0 ? 'Aucune' : dispatchesLength} demande${dispatchesLength > 1 ? 's' : ''}`)
-    }
-
-    public onScanningDispatch(dispatch?: Dispatch) {
-        if (dispatch) {
-            this.redirectToDispatch(dispatch.id);
-        }
-        else {
-            this.toastService.presentToast('Aucun acheminement correspondant');
-        }
-    }
-
-    private redirectToDispatch(id: number) {
-        this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-            dispatchId: id
-        });
     }
 
     private refreshHeaders() {
@@ -281,20 +266,31 @@ export class DispatchGroupedSignaturePage implements ViewWillEnter, ViewWillLeav
                             ? {label: 'Urgence', value: dispatch.emergency || ''}
                             : {label: 'Urgence', value: 'Non'})
                     ].filter((item) => item && item.value),
-                    rightIcon: {
-                        color: 'grey' as IconColor,
-                        name: isSelected ? 'down.svg' : 'up.svg',
-                        action: () => {
-                            if (isSelected) {
-                                this.signingDispatch(dispatch, true);
-                            } else {
-                                this.testIfBarcodeEquals(dispatch);
+                    rightIcon: [
+                        ...(dispatch.emergency
+                            ? [{
+                                color: 'danger' as IconColor,
+                                name: 'exclamation-triangle.svg',
+                            }]
+                            : []),
+                        {
+                            color: 'grey' as IconColor,
+                            name: isSelected ? 'down.svg' : 'up.svg',
+                            width: 40,
+                            height: 40,
+                            action: () => {
+                                if (isSelected) {
+                                    this.signingDispatch(dispatch, true);
+                                } else {
+                                    this.testIfBarcodeEquals(dispatch);
+                                }
                             }
-                        }
-                    },
+                        },
+
+                    ],
                     action: () => {
                         this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-                            dispatchId: dispatch.id,
+                            localDispatchId: dispatch.localId,
                             fromCreate: true,
                             viewMode: true
                         });
@@ -350,7 +346,7 @@ export class DispatchGroupedSignaturePage implements ViewWillEnter, ViewWillLeav
     public signingDispatch(dispatch: Dispatch, selected: boolean): void {
         const arrayToSpliceFrom = (selected ? this.dispatchesToSign : this.dispatches) || [];
         const arrayToPushIn = (selected ? this.dispatches : this.dispatchesToSign) || [];
-        arrayToSpliceFrom.splice(this.dispatches.findIndex((dispatchIndex) => dispatchIndex.id === dispatch.id), 1);
+        arrayToSpliceFrom.splice(this.dispatches.findIndex((dispatchIndex) => dispatchIndex.localId === dispatch.localId), 1);
         arrayToPushIn.push(dispatch);
 
         this.dispatches = selected ? arrayToPushIn : arrayToSpliceFrom;

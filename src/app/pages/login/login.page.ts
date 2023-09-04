@@ -133,15 +133,16 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
                     event: () => this.callApiLogin()
                 })
                     .subscribe({
-                        next: ({success}) => {
+                        next: ({success, msg}) => {
                             this.loading = false;
                             if (success) {
                                 this.notificationService.userIsLogged = true;
                                 this.navService.setRoot(NavPathEnum.MAIN_MENU, {
                                     notification: this.tappedNotification
                                 });
-                            }
-                            else {
+                            } else if (!success && msg) {
+                                this.toastService.presentToast(msg);
+                            } else {
                                 this.toastService.presentToast('Identifiants incorrects.');
                             }
                         },
@@ -278,7 +279,7 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
             );
     }
 
-    private callApiLogin(): Observable<{ success: boolean }> {
+    private callApiLogin(): Observable<{ success: boolean, msg?: string }> {
         return this.apiService
             .requestApi(ApiService.POST_API_KEY, {
                 params: {loginKey: this.loginKey},
@@ -286,22 +287,22 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
                 timeout: true
             })
             .pipe(
-                mergeMap(({data, success}) => {
+                mergeMap(({data, success, msg}) => {
                     if(success) {
-                        const {apiKey, rights, userId, username, notificationChannels, parameters, fieldsParam} = data;
+                        const {apiKey, rights, userId, username, notificationChannels, parameters, fieldsParam, dispatchDefaultWaybill} = data;
 
                         return this.sqliteService.resetDataBase()
                             .pipe(
-                                mergeMap(() => this.storageService.initStorage(apiKey, username, userId, rights, notificationChannels, parameters, fieldsParam)),
+                                mergeMap(() => this.storageService.initStorage(apiKey, username, userId, rights, notificationChannels, parameters, fieldsParam, dispatchDefaultWaybill)),
                                 tap(() => {
                                     this.loginKey = '';
                                 }),
                                 mergeMap(() => this.notificationService.initialize()),
-                                map(() => ({success: true}))
+                                map(() => ({success: true, msg}))
                             )
                     }
                     else {
-                        return of({success: false})
+                        return of({success: false, msg})
                     }
                 })
             )

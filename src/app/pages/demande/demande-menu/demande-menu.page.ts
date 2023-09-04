@@ -27,6 +27,7 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
 
     public messageLoading?: string;
     public loading: boolean;
+    public dispatchOfflineMode: boolean;
 
     private avoidSync: boolean;
     private synchronisationSubscription?: Subscription;
@@ -64,7 +65,7 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
                 iconColor: 'success',
                 label: 'Acheminement',
                 action: () => {
-                    self.navService.push(NavPathEnum.DISPATCH_REQUEST_MENU);
+                    self.navService.push(NavPathEnum.DISPATCH_REQUEST_MENU, {dispatchOfflineMode: this.dispatchOfflineMode});
                 }
             }
         ];
@@ -92,10 +93,12 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
 
         zip(
             this.storageService.getCounter(StorageKeyEnum.COUNTERS_HANDLINGS_TREATED),
+            this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
             this.sqliteService.count('handling')
         ).subscribe(
-            ([treatedHandlings, toTreatDispatches]) => {
+            ([treatedHandlings, dispatchOfflineMode, toTreatDispatches]) => {
                 this.statsSlidersData = this.createStatsSlidersData(treatedHandlings, toTreatDispatches);
+                this.dispatchOfflineMode = dispatchOfflineMode;
             }
         )
     }

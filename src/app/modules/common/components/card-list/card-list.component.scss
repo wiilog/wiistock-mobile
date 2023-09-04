@@ -55,13 +55,17 @@ $card-padding: 4px 12px !important;
 
         .content {
             flex: 1;
-            display: flex;
-            align-items: center;
-            .list-element-body-wrapper {
+
+            .content-layout {
                 display: flex;
-                flex-direction: column;
+                flex-direction: row;
                 flex: 1;
+
+                .content-wrapper {
+                    flex: 1;
+                }
             }
+
             .badges-container {
                 display: flex;
                 justify-content: space-between;
@@ -95,15 +99,17 @@ $card-padding: 4px 12px !important;
 
         .actions {
             display: flex;
+            flex-direction: row;
+            align-items: center;
 
-            .right-icon {
-                width: 25px !important;
-                height: 25px !important;
-            }
+            wii-icon {
+                &:first-child {
+                    margin-right: 5px;
+                }
 
-            .arrow {
-                width: 15px !important;
-                height: 15px !important;
+                &:last-child, &:first-child {
+                    margin-left: 5px;
+                }
             }
         }
     }

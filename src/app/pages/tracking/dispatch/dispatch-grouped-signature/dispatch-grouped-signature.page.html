@@ -12,11 +12,13 @@
         <p class="filter" *ngIf="filters.status">Statut : {{filters.status.text}}</p>
         <p class="filter" *ngIf="filters.type">Type : {{filters.type.text}}</p>
     </div>
-    <wii-card-list  [color]="dispatchesListColor"
-                    [config]="dispatchesToSignListConfig"
-                    [header]="headerDispatchsToSign">
+    <wii-card-list *ngIf="headerDispatchsToSign"
+                   [color]="dispatchesListColor"
+                   [config]="dispatchesToSignListConfig"
+                   [header]="headerDispatchsToSign">
     </wii-card-list>
-    <wii-card-list [color]="dispatchesListColor"
+    <wii-card-list *ngIf="headerFilteredDispatchs"
+                   [color]="dispatchesListColor"
                    [config]="dispatchesListConfig"
                    [header]="headerFilteredDispatchs">
     </wii-card-list>

@@ -25,7 +25,7 @@ export class IconComponent {
 
     // color declared in variables.scss
     @Input()
-    public color?: IconColor;
+    public color?: IconColor|string;
 
     @Input()
     public customColor?: string;

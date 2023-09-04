@@ -25,10 +25,10 @@ export class NotificationService {
     }
 
     public initialize(): Observable<void> {
-        return this.registerPushNotification().pipe(
-            mergeMap(() => this.unsubscribe()),
+        return this.unsubscribe().pipe(
+            mergeMap(() => this.registerPushNotification()),
             mergeMap(() => this.subscribeToTopics()),
-            mergeMap(() => this.handleEvents())
+            mergeMap(() => this.handleEvents()),
         );
     }
 
@@ -44,16 +44,19 @@ export class NotificationService {
                         ? (JSON.parse(rawChannels) || [])
                         : []
                 )),
-                mergeMap((topics: Array<string>) => (
-                    topics.length > 0
-                        ? zip(...(topics.map((topic) => FCM.subscribeTo({topic}))))
-                        : of(undefined)
-                )),
+                mergeMap((topics: Array<string>) => {
+                    return (
+                        topics.length > 0
+                            ? zip(...topics.map((topic) => FCM.subscribeTo({topic})))
+                            : of(undefined)
+                    );
+                }),
                 map(() => undefined)
             );
     }
 
     public unsubscribe(): Observable<void> {
+        return of(undefined);
         return from(FCM.deleteInstance()).pipe(
             map(() => undefined)
         );
@@ -82,8 +85,10 @@ export class NotificationService {
     }
 
     private handleEvents(): Observable<void> {
+        console.warn('>> handleEvents')
         return from(PushNotifications.removeAllListeners()).pipe(
             mergeMap(() => {
+                console.warn('>> localNotificationActionPerformed')
                 // event on a tapped LocalNotification when app is in background
                 return LocalNotifications.addListener('localNotificationActionPerformed', ({notification}) => {
                     console.warn('localNotificationActionPerformed', notification)
@@ -91,6 +96,7 @@ export class NotificationService {
                 })
             }),
             mergeMap(() => {
+                console.warn('>> pushNotificationActionPerformed')
                 // event on a tapped PushNotification when app is in background
                 return PushNotifications.addListener('pushNotificationActionPerformed', async ({notification}) => {
                     await PushNotifications.removeAllDeliveredNotifications();
@@ -99,6 +105,8 @@ export class NotificationService {
                 });
             }),
             mergeMap(() => {
+
+                console.warn('>> pushNotificationReceived')
                 // event a PushNotification received when app is in background
                 // => we create a new LocalNotification
                 return PushNotifications.addListener('pushNotificationReceived', async (notification) => {

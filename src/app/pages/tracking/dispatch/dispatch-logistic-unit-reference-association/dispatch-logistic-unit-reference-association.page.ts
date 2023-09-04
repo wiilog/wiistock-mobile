@@ -10,9 +10,7 @@ import {FormPanelParam} from "@common/directives/form-panel/form-panel-param";
 import {
     FormPanelSelectComponent
 } from "@common/components/panel/form-panel/form-panel-select/form-panel-select.component";
-import {
-    FormPanelInputComponent
-} from "@common/components/panel/form-panel/form-panel-input/form-panel-input.component";
+import {FormPanelInputComponent} from "@common/components/panel/form-panel/form-panel-input/form-panel-input.component";
 import {
     FormPanelToggleComponent
 } from "@common/components/panel/form-panel/form-panel-toggle/form-panel-toggle.component";
@@ -28,10 +26,17 @@ import {ApiService} from "@app/services/api.service";
 import {
     FormPanelButtonsComponent
 } from "@common/components/panel/form-panel/form-panel-buttons/form-panel-buttons.component";
-import {Reference} from "@entities/reference";
+import {DispatchReference} from "@entities/dispatch-reference";
 import {Dispatch} from "@entities/dispatch";
-import {of, zip} from "rxjs";
+import {Observable, of, zip} from "rxjs";
 import {ViewWillEnter} from "@ionic/angular";
+import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
+import {map, mergeMap, tap} from "rxjs/operators";
+import {StorageService} from "@app/services/storage/storage.service";
+import {AssociatedDocumentType} from "@entities/associated-document-type";
+import {DispatchPack} from "@entities/dispatch-pack";
+import {SelectItemTypeEnum} from "@common/components/select-item/select-item-type.enum";
+import {Nature} from "@entities/nature";
 
 @Component({
     selector: 'wii-dispatch-logistic-unit-reference-association',
@@ -48,16 +53,25 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
 
     public logisticUnit: string;
     public dispatch: Dispatch;
-    public reference: Reference | any = {};
+    public reference: DispatchReference | any = {};
     public volume?: number = undefined;
+    public packData?: {
+        natureId?: number;
+        weight?: number;
+        volume?: number;
+        comment?: string;
+    } = {};
     public disableValidate: boolean = true;
     public disabledAddReference: boolean = true;
-    public associatedDocumentTypeElements: string;
+    public associatedDocumentTypeElements: Array<AssociatedDocumentType>;
 
     public edit: boolean = false;
     public viewMode: boolean = false;
+    public offlineMode: boolean = false;
+    public defaultNature: Nature;
 
-    public constructor(private sqliteService: SqliteService,
+    public constructor(private storageService: StorageService,
+                       private sqliteService: SqliteService,
                        private loadingService: LoadingService,
                        private mainHeaderService: MainHeaderService,
                        private toastService: ToastService,
@@ -68,14 +82,23 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
 
     public ionViewWillEnter(): void {
         this.loadingService.presentLoadingWhile({
-            event: () => this.apiService.requestApi(ApiService.GET_ASSOCIATED_DOCUMENT_TYPE_ELEMENTS)
-        }).subscribe((values) => {
-            this.associatedDocumentTypeElements = values;
+            event: () => {
+                return zip(
+                    this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
+                    this.sqliteService.findAll('associated_document_type'),
+                    this.sqliteService.findOneBy(`nature`, {defaultNature: `1`})
+                )
+            }
+        }).subscribe(([dispatchOfflineMode, documentTypeElements, defaultNature]) => {
+            this.offlineMode = dispatchOfflineMode;
+            this.defaultNature = defaultNature;
+            this.associatedDocumentTypeElements = documentTypeElements;
             this.reference = this.navService.param(`reference`) || {};
             this.edit = this.navService.param(`edit`) || false;
             this.viewMode = this.navService.param(`viewMode`) || false;
             this.logisticUnit = this.navService.param(`logisticUnit`);
             this.dispatch = this.navService.param(`dispatch`);
+
             this.getFormConfig();
             this.createHeaderConfig();
             if (Object.keys(this.reference).length > 0) {
@@ -85,15 +108,38 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
     }
 
     private getFormConfig(values: any = {}) {
-        const loader = this.viewMode ? this.apiService.requestApi(ApiService.GET_ASSOCIATED_REF, {
-            pathParams: {
-                pack: this.logisticUnit,
-                dispatch: this.dispatch.id
-            }
-        }) : of([]);
+        /* TODO adrien remove */
         this.loadingService.presentLoadingWhile({
             event: () => {
-                return loader;
+                return this.viewMode && !this.offlineMode
+                    ? this.apiService.requestApi(ApiService.GET_ASSOCIATED_REF, {
+                        pathParams: {
+                            pack: this.logisticUnit,
+                            dispatch: this.dispatch.id as number
+                        }
+                    })
+                    : this.viewMode ? (this.sqliteService.findOneBy('dispatch_pack', {
+                            code: this.logisticUnit,
+                            localDispatchId: this.dispatch.localId
+                        })
+                            .pipe(
+                                mergeMap((dispatchPack: DispatchPack) => {
+                                    return (
+                                            this.sqliteService.findOneBy('dispatch_reference', {localDispatchPackId: dispatchPack.localId})
+                                                .pipe(
+                                                    map((dispatchReference: DispatchReference) => of({
+                                                        packComment: dispatchPack?.comment,
+                                                        packWeight: dispatchPack?.weight,
+                                                        packVolume: dispatchPack?.volume,
+                                                        natureId: dispatchPack.natureId,
+                                                        ...dispatchReference,
+                                                    }))
+                                                )
+                                        )
+                                    }
+                                ),
+                            ))
+                        : of({})
             }
         }).subscribe((response) => {
             let data = Object.keys(values).length > 0 ? values : this.reference;
@@ -119,6 +165,9 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                 comment,
                 photos,
                 exists,
+                packComment,
+                packWeight,
+                packVolume,
             } = data;
 
             if (this.viewMode) {
@@ -130,6 +179,66 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
             }
 
             this.formConfig = [
+                {
+                    item: FormPanelSelectComponent,
+                    config: {
+                        label: 'Nature',
+                        name: 'natureId',
+                        value: this.reference?.natureId || this.packData?.natureId || this.defaultNature?.id || null,
+                        inputConfig: {
+                            required: true,
+                            searchType: SelectItemTypeEnum.TRACKING_NATURES,
+                            filterItem: (nature: Nature) => (!nature.hide),
+                            disabled: this.viewMode,
+                        },
+                        errors: {
+                            required: 'Vous devez renseigner une nature.'
+                        },
+                    }
+                },
+                {
+                    item: FormPanelInputComponent,
+                    config: {
+                        label: 'Poids (kg)',
+                        name: 'packWeight',
+                        value: this.packData?.weight ?? (packWeight ? Number(packWeight) : null),
+                        inputConfig: {
+                            type: 'number',
+                            required: false,
+                            disabled: this.viewMode
+                        },
+                        errors: {
+                            required: 'Vous devez renseigner un poids.'
+                        }
+                    }
+                },
+                {
+                    item: FormPanelInputComponent,
+                    config: {
+                        label: 'Volume (m3)',
+                        name: 'packVolume',
+                        value: this.packData?.volume ?? (packVolume ? Number(packVolume) : null),
+                        inputConfig: {
+                            type: 'number',
+                            required: false,
+                            disabled: this.viewMode
+                        },
+                        errors: {
+                            required: 'Vous devez renseigner un poids.'
+                        }
+                    }
+                },
+                {
+                    item: FormPanelTextareaComponent,
+                    config: {
+                        label: 'Commentaire',
+                        name: 'packComment',
+                        value: this.packData?.comment || packComment || null,
+                        inputConfig: {
+                            disabled: this.viewMode
+                        },
+                    }
+                },
                 {
                     item: FormPanelInputComponent,
                     config: {
@@ -147,19 +256,21 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                         },
                     },
                 },
-                ...(!this.edit ? [{
-                    item: FormPanelButtonsComponent,
-                    config: {
-                        inputConfig: {
-                            type: 'text',
-                            disabled: this.disabledAddReference,
-                            elements: [
-                                {id: `searchRef`, label: `Rechercher`}
-                            ],
-                            onChange: () => this.getReference(),
-                        },
-                    }
-                }] : [])
+                ...(!this.edit
+                    ? [{
+                        item: FormPanelButtonsComponent,
+                        config: {
+                            inputConfig: {
+                                type: 'text',
+                                disabled: this.disabledAddReference,
+                                elements: [
+                                    {id: `searchRef`, label: `Rechercher`}
+                                ],
+                                onChange: () => this.getReference(),
+                            },
+                        }
+                    }]
+                    : [])
             ];
             if (Object.keys(values).length > 0 || Object.keys(this.reference).length > 0 || this.viewMode) {
                 this.formConfig.push({
@@ -184,7 +295,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                         config: {
                             label: 'Matériel hors format',
                             name: 'outFormatEquipment',
-                            value: outFormatEquipment ? Boolean(outFormatEquipment) : null,
+                            value: outFormatEquipment ? Number(outFormatEquipment) : null,
                             inputConfig: {
                                 disabled: this.viewMode
                             },
@@ -344,16 +455,20 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                         config: {
                             label: 'Types de documents associés',
                             name: 'associatedDocumentTypes',
-                            value: associatedDocumentTypes
-                                ? (Array.isArray(associatedDocumentTypes) ? associatedDocumentTypes : associatedDocumentTypes.split(`,`))
-                                    .map((label: any) => ({
-                                        id: label,
-                                        label
-                                    }))
-                                : null,
+                            value: associatedDocumentTypes || this.reference.associatedDocumentTypes
+                                ? (
+                                    Array.isArray(associatedDocumentTypes)
+                                        ? associatedDocumentTypes
+                                        : (this.reference.associatedDocumentTypes
+                                            ? this.reference.associatedDocumentTypes
+                                            : this.associatedDocumentTypeElements.map(({label}) => ({
+                                                id: label,
+                                                label
+                                            })))
+                                ) : null,
                             inputConfig: {
                                 required: true,
-                                elements: this.associatedDocumentTypeElements.split(`,`).map((label) => ({
+                                elements: this.associatedDocumentTypeElements.map(({label}) => ({
                                     id: label,
                                     label
                                 })),
@@ -410,7 +525,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
         if (this.formPanelComponent.firstError) {
             this.toastService.presentToast(this.formPanelComponent.firstError);
         } else {
-            const reference: Reference = Object.keys(this.formPanelComponent.values).reduce((acc: any, key) => {
+            const reference = Object.keys(this.formPanelComponent.values).reduce((acc: any, key) => {
                 if (this.formPanelComponent.values[key] !== undefined && key !== 'undefined') {
                     acc[key] = (key === 'associatedDocumentTypes')
                         ? this.formPanelComponent.values[key].replace(/;/g, ',')
@@ -418,23 +533,44 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                 }
 
                 return acc;
-            }, {}) as Reference;
+            }, {});
             if (!this.reference.exists && !reference.volume) {
                 this.toastService.presentToast(`Le calcul du volume est nécessaire pour valider l'ajout de la référence.`)
             } else {
-                reference.logisticUnit = this.logisticUnit;
                 this.loadingService.presentLoadingWhile({
-                    event: () => zip(
-                        this.sqliteService.deleteBy(`dispatch_pack`, [`code = '${this.logisticUnit}'`, `dispatchId = ${this.dispatch.id}`]),
-                        this.sqliteService.insert(`dispatch_pack`, {
+                    event: () => this.sqliteService.findBy(`dispatch_pack`, [
+                        `code = '${this.logisticUnit}'`,
+                        this.dispatch.id ? `dispatchId = ${this.dispatch.id || ''}` : `localDispatchId = ${this.dispatch.localId || ''}`
+                    ]).pipe(
+                        mergeMap((dispatchPacks) => {
+                            const deletedIds = dispatchPacks.map(({localId}) => localId);
+                            return deletedIds.length > 0
+                                ? zip(
+                                    this.sqliteService.deleteBy(`dispatch_pack`, [`localId IN (${deletedIds.join(',')})`,]),
+                                    this.sqliteService.deleteBy(`dispatch_reference`, [`localDispatchPackId IN (${deletedIds.join(',')})`,]),
+                                )
+                                : of(undefined);
+                        }),
+                        mergeMap(() => this.sqliteService.insert(`dispatch_pack`, {
                             code: this.logisticUnit,
                             quantity: reference.quantity,
                             dispatchId: this.dispatch.id,
+                            localDispatchId: this.dispatch.localId,
                             treated: 1,
-                            reference: reference.reference
+                            natureId: reference.natureId,
+                            comment: reference.packComment,
+                            volume: reference.packVolume,
+                            weight: reference.packWeight,
+                        })),
+                        tap((dispatchPackId) => {
+                            reference.localDispatchPackId = dispatchPackId as number;
+                            delete reference.natureId;
+                            delete reference.packComment;
+                            delete reference.packVolume;
+                            delete reference.packWeight;
                         }),
-                        this.sqliteService.deleteBy('reference', [`reference = '${reference.reference}'`, `logisticUnit = '${reference.logisticUnit}'`]),
-                        this.sqliteService.insert(`reference`, reference)
+                        mergeMap(() => this.sqliteService.insert(`dispatch_reference`, reference)),
+                        mergeMap(() => this.updateDispatch()),
                     )
                 }).subscribe(() => {
                     this.navService.pop();
@@ -443,19 +579,96 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
         }
     }
 
+    public updateDispatch() {
+        return this.sqliteService.findBy('dispatch_pack', [`localDispatchId = ${this.dispatch.localId}`]).pipe(
+            mergeMap((dispatchPacks) => {
+                const dispatchPackLocalIds = dispatchPacks.map((dispatchPack: DispatchPack) => dispatchPack.localId);
+                const dispatchPackCodes = dispatchPacks.map((dispatchPack: DispatchPack) => dispatchPack.code);
+                return zip(
+                    this.sqliteService.update(`dispatch`, [{
+                        values: {
+                            packs: `${dispatchPackCodes.join(',')}`,
+                        },
+                        where: [`localId = ${this.dispatch.localId}`]
+                    }])
+                ).pipe(
+                    mergeMap(() => this.sqliteService.findBy('dispatch_reference', [`localDispatchPackId IN (${dispatchPackLocalIds.join(',')})`]))
+                )
+            }),
+            mergeMap((dispatchReferences) => {
+                const dispatchPackReferences = dispatchReferences.map((dispatchReference: DispatchReference) => dispatchReference.reference);
+                const dispatchReferenceQuantities = dispatchReferences.map((dispatchReference: DispatchReference) => `${dispatchReference.reference} (${dispatchReference.quantity})`);
+                return this.sqliteService.update(`dispatch`, [{
+                    values: {
+                        packReferences: `${dispatchPackReferences.join(',')}`,
+                        quantities: `${dispatchReferenceQuantities.join(',')}`,
+                    },
+                    where: [`localId = ${this.dispatch.localId}`]
+                }]);
+            })
+        );
+    }
+
     public getReference() {
-        const {reference} = this.formPanelComponent.values;
-        if (reference) {
+        const {reference, natureId, packWeight, packVolume, packComment} = this.formPanelComponent.values;
+        if (reference && natureId) {
             this.loadingService.presentLoadingWhile({
-                event: () => this.apiService.requestApi(ApiService.GET_REFERENCE, {params: {reference}}),
+                event: () => this.getReferenceEvent(reference),
                 message: `Récupération des informations de la référence en cours...`
             }).subscribe(({reference}) => {
                 this.disableValidate = false;
                 this.reference = reference;
+                this.packData = {
+                    natureId,
+                    weight: packWeight,
+                    volume: packVolume,
+                    comment: packComment,
+                };
                 this.getFormConfig();
             });
         } else {
-            this.toastService.presentToast(`Veuillez renseigner une référence valide.`);
+            this.toastService.presentToast(!natureId
+                ? `Veuillez renseigner une nature.`
+                : (!reference
+                    ? `Veuillez renseigner une référence valide.`
+                    : '')
+            );
+        }
+    }
+
+    private getReferenceEvent(reference: string): Observable<any> {
+        if (this.offlineMode) {
+            return this.sqliteService.findOneBy('reference_article', {reference})
+                .pipe(
+                    mergeMap((localRef?: DispatchReference) => {
+                        let serializedReference;
+                        if (localRef) {
+                            serializedReference = {
+                                reference: localRef.reference,
+                                outFormatEquipment: localRef.outFormatEquipment ?? '',
+                                manufacturerCode: localRef.manufacturerCode ?? '',
+                                width: localRef.width ?? '',
+                                height: localRef.height ?? '',
+                                length: localRef.length ?? '',
+                                volume: localRef.volume ?? '',
+                                weight: localRef.weight ?? '',
+                                associatedDocumentTypes: localRef.associatedDocumentTypes ?? '',
+                                exists: true,
+                            };
+                        } else {
+                            serializedReference = {
+                                reference: reference,
+                                exists: false,
+                            };
+                        }
+                        return of({
+                            success: true,
+                            reference: serializedReference,
+                        });
+                    })
+                );
+        } else {
+            return this.apiService.requestApi(ApiService.GET_REFERENCE, {params: {reference}});
         }
     }
 

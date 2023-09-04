@@ -16,6 +16,8 @@ import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {AlertService} from '@app/services/alert.service';
 import {Translations} from '@entities/translation';
 import {TranslationService} from '@app/services/translations.service';
+import {ApiService} from "@app/services/api.service";
+import {LoadingService} from "@app/services/loading.service";
 
 @Component({
     selector: 'wii-main-header',
@@ -100,7 +102,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                        private userService: UserService,
                        public router: Router,
                        private alertService: AlertService,
-                       private translationService: TranslationService) {
+                       private translationService: TranslationService,
+                       private apiService: ApiService,
+                       private loadingService: LoadingService) {
         this.pagesInStack = 0;
         this.loading = true;
         this.withHeader = new EventEmitter<boolean>();
@@ -183,7 +187,20 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                 label: demandeLivraisonTrad,
             },
             {pagePath: NavPathEnum.DISPATCH_WAYBILL, label: 'Lettre de voiture'},
-            {pagePath: NavPathEnum.DISPATCH_REQUEST_MENU, label: 'Acheminement'},
+            {
+                pagePath: NavPathEnum.DISPATCH_REQUEST_MENU,
+                label: 'Acheminement',
+                filter: (params) => (
+                    (typeof params.dispatchOfflineMode === 'boolean') && !params.dispatchOfflineMode
+                )
+            },
+            {
+                pagePath: NavPathEnum.DISPATCH_REQUEST_MENU,
+                label: 'Acheminement | Hors ligne',
+                filter: (params) => (
+                    (typeof params.dispatchOfflineMode === 'boolean') && params.dispatchOfflineMode
+                )
+            },
             {pagePath: NavPathEnum.DISPATCH_NEW, label: 'Création'},
             {pagePath: NavPathEnum.HANDLING_VALIDATE, label: 'Création'},
             {pagePath: NavPathEnum.GROUP_SCAN_GROUP, label: 'Groupage'},
@@ -335,7 +352,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             `fromStock = 0`,
         ];
 
-        this.sqliteService.findBy('mouvement_traca', where).subscribe(async result => {
+        zip(
+            this.sqliteService.findBy('mouvement_traca', where),
+            this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE)
+        ).subscribe(async ([result, isDispatchOfflineMode]: [any, boolean]) => {
             if(result.length) {
                 await this.alertService.show({
                     header: 'Déconnexion impossible',
@@ -346,9 +366,33 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                     }]
                 });
             } else {
-                this.userService.doLogout();
+                if(isDispatchOfflineMode) {
+                    await this.alertService.show({
+                        header: `Vous êtes en mode hors-ligne sur les acheminements. Vos données seront perdues si elles ne sont pas synchronisées.`,
+                        backdropDismiss: false,
+                        buttons: [
+                            {
+                                text: 'Annuler',
+                                role: 'cancel',
+                            },
+                            {
+                                text: 'Confirmer',
+                                handler: () => {
+                                    this.loadingService.presentLoadingWhile({
+                                        event: () => this.apiService.requestApi(ApiService.LOGOUT),
+                                    }).subscribe(() => this.userService.doLogout());
+                                },
+                                cssClass: 'alert-success'
+                            }
+                        ]
+                    });
+                } else {
+                    this.loadingService.presentLoadingWhile({
+                        event: () => this.apiService.requestApi(ApiService.LOGOUT),
+                    }).subscribe(() => this.userService.doLogout());
+                }
             }
-        })
+        });
     }
 
     private refreshTitles(navigationId: number, currentPagePath: NavPathEnum, paramsId: number): void {

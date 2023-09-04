@@ -237,15 +237,7 @@ export class InventoryLocationsPage implements ViewWillEnter, ViewWillLeave, Can
 
                                 const nbLogisticUnits = logisticUnits.length;
 
-                                const notUniqueReferences = inventoryArticles
-                                    .filter(({mission_id: missionIdArt, is_ref}) => missionIdArt === id && is_ref === 0)
-                                    .map(line => line.reference);
-
-                                const nbRefFromArtInMission = notUniqueReferences
-                                    .filter((reference, index, self) => self.indexOf(reference) === index)
-                                    .length;
-
-                                const nbRefInMission = nbRefFromArtInMission + inventoryArticles
+                                const nbRefInMission = inventoryArticles
                                     .filter(({mission_id: missionIdArt, is_ref}) => missionIdArt === id && is_ref === 1)
                                     .length;
 
@@ -260,9 +252,9 @@ export class InventoryLocationsPage implements ViewWillEnter, ViewWillLeave, Can
                                         ...(type === 'article' ? {
                                             details: {
                                                 value: `
-                                                ${nbLogisticUnits} unité(s) logistique(s),
-                                                ${nbRefInMission} référence${nbRefInMission > 1 ? 's' : ''},
-                                                ${nbArtInMission} article${nbArtInMission > 1 ? 's' : ''},
+                                                ${nbLogisticUnits} unité$${nbLogisticUnits > 1 ? 's' : ''} logistique${nbLogisticUnits > 1 ? 's' : ''},
+                                                ${nbRefInMission} référence${nbRefInMission > 1 ? 's' : ''} et
+                                                ${nbArtInMission} article${nbArtInMission > 1 ? 's' : ''}
                                             `
                                             }
                                         } : {})

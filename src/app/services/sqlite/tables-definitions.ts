@@ -16,6 +16,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
             {column: 'label', value: 'VARCHAR(255)'},
             {column: 'temperature_ranges', value: 'VARCHAR(255)'},
+            {column: 'signatories', value: 'VARCHAR(255)'},
         ]
     },
     {
@@ -366,7 +367,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
             {column: 'label', value: 'VARCHAR(255)'},
             {column: 'color', value: 'VARCHAR(255)'},
-            {column: 'hide', value: 'INTEGER'}
+            {column: 'hide', value: 'INTEGER'},
+            {column: 'defaultNature', value: 'INTEGER'},
         ]
     },
     {
@@ -390,11 +392,13 @@ export const TablesDefinitions: Array<TableDefinition> = [
     {
         name: 'dispatch',
         schema: [
-            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'localId', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'id', value: 'INTEGER'},
             {column: 'requester', value: 'VARCHAR(255)'},
             {column: 'number', value: 'VARCHAR(255)'},
             {column: 'statusId', value: 'INTEGER'},
             {column: 'startDate', value: 'VARCHAR(255)'},
+            {column: 'createdAt', value: 'VARCHAR(255)'},
             {column: 'endDate', value: 'VARCHAR(255)'},
             {column: 'carrierTrackingNumber', value: 'VARCHAR(255)'},
             {column: 'emergency', value: 'VARCHAR(255)'},
@@ -415,23 +419,29 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'draft', value: 'INTEGER'},
             {column: 'comment', value: 'TEXT'},
             {column: 'groupedSignatureStatusColor', value: 'VARCHAR(255)'},
+            {column: 'createdBy', value: 'VARCHAR(255)'},
+            {column: 'updatedAt', value: 'VARCHAR(255)'},
+            {column: 'validatedAt', value: 'VARCHAR(255)'},
         ]
     },
     {
         name: 'dispatch_pack',
         schema: [
-            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'localId', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'id', value: 'INTEGER'},
             {column: 'code', value: 'VARCHAR(255)'},
             {column: 'natureId', value: 'INTEGER'},
             {column: 'quantity', value: 'INTEGER'},
             {column: 'dispatchId', value: 'INTEGER'},
+            {column: 'localDispatchId', value: 'INTEGER'},
             {column: 'lastLocation', value: 'VARCHAR(255)'},
             {column: 'treated', value: 'INTEGER'},
             {column: 'already_treated', value: 'INTEGER'},
             {column: 'comment', value: 'VARCHAR(255)'},
+            {column: 'volume', value: 'REAL'},
+            {column: 'weight', value: 'REAL'},
             {column: 'photo1', value: 'TEXT'},
             {column: 'photo2', value: 'TEXT'},
-            {column: 'reference', value: 'TEXT'},
         ]
     },
     {
@@ -441,10 +451,12 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'label', value: 'VARCHAR(255)'},
             {column: 'typeId', value: 'INTEGER'},
             {column: 'state', value: 'VARCHAR(255)'},
+            {column: 'stateNumber', value: 'INTEGER'},
             {column: 'category', value: 'VARCHAR(255)'},
             {column: 'displayOrder', value: 'INTEGER'},
             {column: 'commentNeeded', value: 'INTEGER'},
             {column: 'groupedSignatureType', value: 'VARCHAR(255)'},
+            {column: 'groupedSignatureColor', value: 'VARCHAR(255)'},
         ]
     },
     {
@@ -487,7 +499,9 @@ export const TablesDefinitions: Array<TableDefinition> = [
         schema: [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
             {column: 'label', value: 'VARCHAR(255)'},
-            {column: 'category', value: 'VARCHAR(255)'}
+            {column: 'category', value: 'VARCHAR(255)'},
+            {column: 'suggestedDropLocations', value: 'TEXT'},
+            {column: 'suggestedPickLocations', value: 'TEXT'}
         ]
     },
     {
@@ -502,7 +516,15 @@ export const TablesDefinitions: Array<TableDefinition> = [
         name: 'reference_article',
         schema: [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
-            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'reference', value: 'VARCHAR(255)'},
+            {column: 'outFormatEquipment', value: 'VARCHAR(255)'},
+            {column: 'manufacturerCode', value: 'VARCHAR(255)'},
+            {column: 'length', value: 'REAL'},
+            {column: 'width', value: 'REAL'},
+            {column: 'height', value: 'REAL'},
+            {column: 'volume', value: 'REAL'},
+            {column: 'weight', value: 'REAL'},
+            {column: 'associatedDocumentTypes', value: 'JSON'},
         ]
     },
     {
@@ -517,12 +539,14 @@ export const TablesDefinitions: Array<TableDefinition> = [
         schema: [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
             {column: 'username', value: 'VARCHAR(255)'},
+            {column: 'signatoryPassword', value: 'VARCHAR(255)'},
         ]
     },
     {
-        name: 'reference',
+        name: 'dispatch_reference',
         schema: [
             {column: 'reference', value: 'VARCHAR(255)'},
+            {column: 'localDispatchPackId', value: 'INTEGER'},
             {column: 'quantity', value: 'INTEGER'},
             {column: 'outFormatEquipment', value: 'VARCHAR(255)'},
             {column: 'manufacturerCode', value: 'VARCHAR(255)'},
@@ -538,7 +562,6 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'associatedDocumentTypes', value: 'TEXT'},
             {column: 'comment', value: 'TEXT'},
             {column: 'photos', value: 'TEXT'},
-            {column: 'logisticUnit', value: 'VARCHAR(255)'},
         ]
     },
     {
@@ -588,6 +611,61 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'minTrackingNumberLength', value: 'INTEGER'},
             {column: 'maxTrackingNumberLength', value: 'INTEGER'},
             {column: 'recurrent', value: 'INTEGER'},
+        ]
+    },
+    {
+        name: 'dispatch_waybill',
+        schema: [
+            {column: 'carrier', value: 'VARCHAR(255)'},
+            {column: 'consignor', value: 'VARCHAR(255)'},
+            {column: 'consignorEmail', value: 'VARCHAR(255)'},
+            {column: 'consignorUsername', value: 'VARCHAR(255)'},
+            {column: 'dispatchDate', value: 'VARCHAR(255)'},
+            {column: 'locationFrom', value: 'VARCHAR(255)'},
+            {column: 'locationTo', value: 'VARCHAR(255)'},
+            {column: 'notes', value: 'TEXT'},
+            {column: 'receiver', value: 'VARCHAR(255)'},
+            {column: 'receiverEmail', value: 'VARCHAR(255)'},
+            {column: 'receiverUsername', value: 'VARCHAR(255)'},
+            {column: 'localId', value: 'INTEGER'},
+        ]
+    },
+    {
+        name: 'grouped_signature_history',
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'groupedSignatureType', value: 'VARCHAR(255)'},
+            {column: 'location', value: 'TEXT'},
+            {column: 'signatory', value: 'INTEGER'},
+            {column: 'operateur', value: 'VARCHAR(255)'},
+            {column: 'statutFrom', value: 'INTEGER'},
+            {column: 'statutTo', value: 'INTEGER'},
+            {column: 'signatureDate', value: 'VARCHAR(255)'},
+            {column: 'comment', value: 'TEXT'},
+            {column: 'localDispatchId', value: 'INTEGER'},
+            {column: 'dispatchId', value: 'INTEGER'},
+        ]
+    },
+    {
+        name: 'dispatch_emergency',
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'label', value: 'VARCHAR(255)'},
+        ]
+    },
+    {
+        name: 'associated_document_type',
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
+            {column: 'label', value: 'VARCHAR(255)'},
+        ]
+    },
+    {
+        name: 'reserve_type',
+        schema: [
+            {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'defaultReserveType', value: 'INTEGER'},
         ]
     },
 ];

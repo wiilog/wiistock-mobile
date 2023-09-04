@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {Observable, of, Subscription, zip} from 'rxjs';
 import {NavService} from '@app/services/nav/nav.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
@@ -25,6 +25,9 @@ import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {StorageService} from "@app/services/storage/storage.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {Browser} from '@capacitor/browser';
+import {Status} from "@entities/status";
+import * as moment from "moment";
+import {DispatchReference} from "@entities/dispatch-reference";
 
 @Component({
     selector: 'wii-dispatch-packs',
@@ -39,6 +42,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
     public loading: boolean;
     public wayBillData = {};
     public hasWayBillData = false;
+    public dispatchOfflineMode = false;
     public scannerMode: BarcodeScannerModeEnum;
 
     public dispatchHeaderConfig: {
@@ -59,13 +63,14 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
         body: Array<ListPanelItemConfig>;
     };
 
-    public readonly listBoldValues = ['code', 'reference', 'quantity'];
+    public readonly listBoldValues = ['code', 'reference', 'quantity', 'nature'];
 
-    private dispatch: Dispatch;
+    public dispatch: Dispatch;
     public fromCreate: boolean = false;
     public viewMode: boolean = false;
     public ableToCreateWaybill: boolean = false;
     private dispatchPacks: Array<DispatchPack>;
+    private dispatchReferences: Array<DispatchReference>;
 
     private typeHasNoPartialStatuses: boolean;
 
@@ -104,6 +109,10 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
         needsReceiver: false,
     };
 
+    public offlineMode: boolean = false;
+
+    private waybillDefaultData?: { [field: string]: any };
+
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
                        private mainHeaderService: MainHeaderService,
@@ -111,6 +120,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                        private translationService: TranslationService,
                        private apiService: ApiService,
                        private fileService: FileService,
+                       private changeDetectorRef: ChangeDetectorRef,
                        private storage: StorageService,
                        private storageService: StorageService,
                        private navService: NavService) {
@@ -124,17 +134,28 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
         if (!this.packsToTreatListConfig || !this.packsTreatedListConfig) {
             this.loading = true;
             this.unsubscribeLoading();
+            const localDispatchId = this.navService.param('localDispatchId');
             const dispatchId = this.navService.param('dispatchId');
+
             this.loadingSubscription = (this.loadingService.presentLoading()
                 .pipe(
                     tap((loader) => {
                         this.loadingElement = loader;
                     }),
                     mergeMap(() => zip(
-                            this.sqliteService.findOneBy('dispatch', {id: dispatchId}),
-                            this.sqliteService.findBy('dispatch_pack', [`dispatchId = ${dispatchId}`]),
+                            localDispatchId
+                                ? this.sqliteService.findOneBy('dispatch', {localId: localDispatchId})
+                                : this.sqliteService.findOneBy('dispatch', {id: dispatchId}),
+                            localDispatchId
+                                ? this.sqliteService.findBy('dispatch_pack', [`localDispatchId = ${localDispatchId}`])
+                                : this.sqliteService.findBy('dispatch_pack', [`dispatchId = ${dispatchId}`]),
+                            localDispatchId
+                                ? this.sqliteService.findOneBy('dispatch_waybill', {localId: localDispatchId})
+                                : of(null),
                             this.sqliteService.findAll('nature'),
                             this.translationService.get(null, `Traçabilité`, `Général`),
+                            this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
+                            this.storageService.getString(StorageKeyEnum.DISPATCH_DEFAULT_WAYBILL),
                             zip(
                                 this.storageService.getNumber('acheminements.carrierTrackingNumber.displayedCreate'),
                                 this.storageService.getNumber('acheminements.carrierTrackingNumber.requiredCreate'),
@@ -160,12 +181,22 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                                 .pipe(map((partialStatuses) => ([
                                     ...data,
                                     partialStatuses
-                                ]))))
+                                ])))),
+                            mergeMap((data) => (
+                                data[1].length > 0
+                                    ? this.sqliteService
+                                        .findBy('dispatch_reference', [`localDispatchPackId IN (${data[1].map(({localId}: DispatchPack) => localId).join(',')})`])
+                                        .pipe(map((dispatchReferences) => ([
+                                            ...data,
+                                            dispatchReferences
+                                        ])))
+                                    : of([...data, []])
+                            ))
                         )
                     ),
                     filter(([dispatch]) => Boolean(dispatch))
-                ) as Observable<[Dispatch, Array<DispatchPack>, Array<Nature>, Translations, Array<any>, Array<any>]>)
-                .subscribe(([dispatch, packs, natures, natureTranslations, fieldParams, partialStatuses]) => {
+                ) as Observable<[Dispatch, Array<DispatchPack>, any, Array<Nature>, Translations, boolean, string, Array<any>, Array<any>, Array<DispatchReference>]>)
+                .subscribe(([dispatch, packs, dispatchWaybill, natures, natureTranslations, dispatchOfflineMode, waybillDefaultData, fieldParams, partialStatuses, dispatchReferences]) => {
                     const [
                         displayCarrierTrackingNumber,
                         needsCarrierTrackingNumber,
@@ -195,6 +226,11 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                         needsReceiver: Boolean(needsReceiver),
                     };
 
+                    this.hasWayBillData = Boolean(dispatchWaybill);
+                    this.offlineMode = dispatchOfflineMode;
+                    this.waybillDefaultData = waybillDefaultData ? JSON.parse(waybillDefaultData) : {};
+
+                    this.dispatchOfflineMode = dispatchOfflineMode;
                     this.typeHasNoPartialStatuses = partialStatuses.length === 0;
                     this.natureIdsToColors = natures.reduce((acc, {id, color}) => ({
                         ...acc,
@@ -205,6 +241,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                         [Number(id)]: label
                     }), {});
                     this.natureTranslations = natureTranslations;
+                    this.dispatchReferences = dispatchReferences;
                     this.dispatchPacks = packs.map((pack) => ({
                         ...pack,
                         treated: !this.fromCreate ? 0 : 1,
@@ -287,7 +324,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
             const fullTranslations = fieldsTranslations.concat(generalTranslations);
             const dispatchTranslations = TranslationService.CreateTranslationDictionaryFromArray(fullTranslations);
             this.dispatchHeaderConfig = {
-                title: `Demande N°${this.dispatch.number}`,
+                title: this.dispatch.number ? `Demande N°${this.dispatch.number}` : `Type ${this.dispatch.typeLabel}`,
                 subtitle: [
                     this.fromCreate && this.fieldParams.displayCarrierTrackingNumber
                         ? TranslationService.Translate(dispatchTranslations, 'N° tracking transporteur') + ` : ${this.dispatch.carrierTrackingNumber || ''}`
@@ -306,7 +343,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                             : null,
                     this.dispatch.destination ? `Destination : ${this.dispatch.destination || ''}` : null
                 ].filter((item) => item) as Array<string>,
-                info: `Type ${this.dispatch.typeLabel}`,
+                info: this.dispatch.number ? `Type ${this.dispatch.typeLabel}` : undefined,
                 transparent: true,
                 leftIcon: {
                     color: CardListColorEnum.GREEN,
@@ -402,17 +439,32 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                             ? {
                                 pressAction: () => {
                                     this.loadingService.presentLoadingWhile({
-                                        event: () => this.sqliteService.findOneBy(`reference`, {reference: pack.reference})
+                                        event: () => this.sqliteService.findOneBy(`dispatch_reference`, {localDispatchPackId: pack.localId})
                                     }).subscribe((reference) => {
                                         this.navService.push(NavPathEnum.DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION, {
                                             logisticUnit: pack.code,
                                             dispatch: this.dispatch,
-                                            reference,
+                                            reference : {
+                                                packComment: pack?.comment,
+                                                packWeight: pack?.weight,
+                                                packVolume: pack?.volume,
+                                                natureId: pack.natureId,
+                                                ...reference
+                                            },
                                             edit: true,
-                                            viewMode: this.viewMode
+                                            viewMode: !Boolean(this.dispatch.draft),
                                         });
                                     });
-                                }
+                                },
+                                ...(this.dispatch.draft
+                                    ? {
+                                        rightIcon: {
+                                            name: 'trash.svg',
+                                            color: 'danger',
+                                            action: () => this.deletePack(pack.code)
+                                        }
+                                    }
+                                    : {})
                             }
                             : {})
                 )
@@ -420,12 +472,18 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
         };
     }
 
-    private packToListItemConfig({code, quantity, natureId, lastLocation, already_treated, reference}: DispatchPack, natureTranslation: string) {
+    private packToListItemConfig({code, natureId, lastLocation, already_treated, localId}: DispatchPack, natureTranslation: string) {
+        const {reference, quantity} = this.dispatchReferences.find(({localDispatchPackId}) => localDispatchPackId === localId) || {};
+
         return {
             infos: {
                 code: {
                     label: 'Unité logistique',
                     value: code
+                },
+                nature: {
+                    label: natureTranslation,
+                    value: this.natureIdsToLabels[Number(natureId)]
                 },
                 ...(reference ? {
                     reference: {
@@ -438,12 +496,6 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                     value: `${quantity}`
                 },
                 ...(!reference ? {
-                    nature: {
-                        label: natureTranslation,
-                        value: this.natureIdsToLabels[Number(natureId)]
-                    },
-                } : {}),
-                ...(!reference ? {
                     lastLocation: {
                         label: 'Dernier emplacement',
                         value: lastLocation
@@ -451,7 +503,6 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                 } : {}),
             },
             color: this.natureIdsToColors[Number(natureId)],
-            disabled: Boolean(already_treated)
         }
     }
 
@@ -463,8 +514,34 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
             if (this.fromCreate) {
                 this.loadingService.presentLoadingWhile({
                     event: () => zip(
-                        this.sqliteService.deleteBy(`dispatch_pack`, [`id = ${dispatchPack.id}`]),
-                        this.sqliteService.deleteBy(`reference`, [`reference = '${dispatchPack.reference}'`]),
+                        this.sqliteService.deleteBy(`dispatch_pack`, [`localId = ${dispatchPack.localId}`]),
+                        this.sqliteService.deleteBy(`dispatch_reference`, [`localDispatchPackId = ${dispatchPack.localId}`]),
+                    )
+                }).subscribe(() => {
+                    this.dispatchPacks.splice(selectedIndex, 1);
+                    this.refreshListTreatedConfig();
+                    this.refreshHeaderPanelConfigFromDispatch();
+                });
+            } else {
+                dispatchPack.treated = 0;
+
+                this.refreshListToTreatConfig();
+                this.refreshListTreatedConfig();
+                this.refreshHeaderPanelConfigFromDispatch();
+            }
+        }
+    }
+
+    private deletePack(barCode: string): void {
+        const selectedIndex = this.dispatchPacks.findIndex(({code}) => (code === barCode));
+        if (selectedIndex > -1
+            && this.dispatchPacks[selectedIndex].treated) {
+            const dispatchPack = this.dispatchPacks[selectedIndex];
+            if (this.fromCreate) {
+                this.loadingService.presentLoadingWhile({
+                    event: () => zip(
+                        this.sqliteService.deleteBy(`dispatch_pack`, [`localId = ${dispatchPack.localId}`]),
+                        this.sqliteService.deleteBy(`dispatch_reference`, [`localDispatchPackId = ${dispatchPack.localId}`]),
                     )
                 }).subscribe(() => {
                     this.dispatchPacks.splice(selectedIndex, 1);
@@ -489,66 +566,19 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                 this.loadingService.presentLoadingWhile({
                     event: () => of(undefined)
                         .pipe(
-                            mergeMap(() => this.sqliteService.update(`dispatch`, [{
-                                values: {
-                                    draft: 0
-                                },
-                                where: [`id = ${this.dispatch.id}`]
-                            }])),
-                            mergeMap(() => this.sqliteService.findBy(`reference`, [
-                                `reference IN (${this.dispatchPacks.map((dispatchPack: DispatchPack) => `'${dispatchPack.reference}'`).join(',')})`
-                            ])),
-                            mergeMap((references) => of(references.map((reference) => {
-                                const photos = JSON.parse(reference.photos);
-                                const volume = `${reference.volume}`;
-                                delete reference.photos;
-                                return {...reference, ...{volume}, ...(
-                                    photos && photos.length > 0
-                                        ? photos.reduce((acc: { [name: string]: File}, photoBase64: string, index: number) => {
-                                            const name = `photo_${index + 1}`;
-                                            return ({
-                                                ...acc,
-                                                [name]: photoBase64,
-                                            })
-                                        }, {})
-                                        : {})};
-                            }))),
-                            mergeMap((references) => {
-                                return this.apiService.requestApi(ApiService.DISPATCH_VALIDATE, {
-                                    params: {
-                                        references,
-                                        dispatch: this.dispatch.id
-                                    }
-                                })
-                            })
+                            mergeMap(() => this.updateCurrentDispatchStatus()),
+                            mergeMap(() => this.tryValidateDispatch()),
+                            mergeMap(({local, success, msg}) => (
+                                local || !success
+                                    ? of({local, success, msg})
+                                    : this.treatApiSuccess().pipe(map(() => ({local, success, msg})))
+                            )),
                         )
-                }).subscribe(({success, msg}) => {
+                }).subscribe(({success, msg, local}) => {
                     if (!success) {
                         this.toastService.presentToast(msg);
-                    } else {
-                        this.loadingService
-                            .presentLoadingWhile({
-                                event: () => {
-                                    return zip(
-                                        this.sqliteService.deleteBy(`reference`),
-                                        this.hasWayBillData
-                                            ? this.apiService.requestApi(ApiService.DISPATCH_WAYBILL, {
-                                                pathParams: {dispatch: this.dispatch.id},
-                                                params: this.wayBillData
-                                            })
-                                            : of(null),
-                                        this.storage.getString(StorageKeyEnum.URL_SERVER)
-                                    )
-                                }
-                            })
-                            .pipe(
-                                mergeMap((res) => this.navService.pop({path: NavPathEnum.MAIN_MENU}).pipe(map(() => res)))
-                            )
-                            .subscribe(([ignoredQueryResponse, waybillResponse, url]) => {
-                                if (this.hasWayBillData && waybillResponse.filePath) {
-                                    Browser.open({url: url + waybillResponse.filePath})
-                                }
-                            });
+                    } else if (local) {
+                        this.navService.pop();
                     }
                 });
             }
@@ -578,6 +608,15 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
             this.dispatchPacks[packIndexToConfirm].quantity = Number(quantity);
             this.dispatchPacks[packIndexToConfirm].photo1 = photo1;
             this.dispatchPacks[packIndexToConfirm].photo2 = photo2;
+            this.sqliteService.update('dispatch_pack', [{
+                values: {
+                    natureId: this.dispatchPacks[packIndexToConfirm].natureId,
+                    quantity: this.dispatchPacks[packIndexToConfirm].quantity,
+                    photo1: this.dispatchPacks[packIndexToConfirm].photo1,
+                    photo2: this.dispatchPacks[packIndexToConfirm].photo2,
+                },
+                where: [`localId = ${this.dispatchPacks[packIndexToConfirm].localId}`]
+            }])
             this.refreshListTreatedConfig();
         }
     }
@@ -591,32 +630,161 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
     }
 
     public goToWayBill() {
-        if(!this.hasWayBillData) {
+        if (!this.hasWayBillData) {
             this.loadingService.presentLoadingWhile({
-                event: () => {
-                    return this.apiService.requestApi(ApiService.GET_WAYBILL_DATA, {
-                        pathParams: {
-                            dispatch: this.dispatch.id
-                        }
-                    })
-                }
+                event: () => this.getDefaultDispatchWaybillData()
             }).subscribe((apiWayBill) => {
                 const fusedData = {
                     ...apiWayBill.data,
                     ...this.wayBillData
                 };
                 this.navService.push(NavPathEnum.DISPATCH_WAYBILL, {
-                    dispatchId: this.dispatch.id,
+                    dispatchLocalId: this.dispatch.localId,
                     dispatchPacks: this.dispatchPacks,
                     data: fusedData,
                     afterValidate: (data: any) => {
                         this.wayBillData = data;
                         this.hasWayBillData = true;
+                        this.changeDetectorRef.detectChanges();
                     }
                 });
-            })
+            });
         } else {
-            this.hasWayBillData = false;
+            this.loadingService.presentLoadingWhile({
+                event: () => this.sqliteService.deleteBy('dispatch_waybill', [`localId = ${this.dispatch.localId}`])
+            }).subscribe(() => {
+                this.hasWayBillData = false;
+            });
         }
+    }
+
+    private getDefaultDispatchWaybillData(): Observable<{ [field: string]: any }> {
+        if (this.offlineMode) {
+            let data;
+            if (this.waybillDefaultData) {
+                data = {
+                    carrier: this.waybillDefaultData.carrier,
+                    consignor: this.waybillDefaultData.consignor,
+                    consignorEmail: this.waybillDefaultData.consignorEmail,
+                    consignorUsername: this.waybillDefaultData.consignorUsername,
+                    dispatchDate: this.waybillDefaultData.dispatchDate,
+                    locationFrom: this.waybillDefaultData.locationFrom,
+                    locationTo: this.waybillDefaultData.locationTo,
+                    notes: this.waybillDefaultData.notes,
+                    receiver: this.waybillDefaultData.receiver,
+                    receiverEmail: this.waybillDefaultData.receiverEmail,
+                    receiverUsername: this.waybillDefaultData.receiverUsername,
+                };
+            } else {
+                data = {};
+            }
+
+            return of({
+                success: true,
+                data,
+            });
+        } else {
+            return this.apiService.requestApi(ApiService.GET_WAYBILL_DATA, {
+                pathParams: {
+                    dispatch: this.dispatch.id as number
+                }
+            })
+        }
+    }
+
+    private makeApiReferencesParam(): Observable<any> {
+        return this.sqliteService
+            .findBy(`dispatch_reference`, [
+                `localDispatchPackId IN (${this.dispatchPacks.map(({localId}: DispatchPack) => localId).join(',')})`
+            ])
+            .pipe(
+                map((references) => references.map(({localDispatchPackId, ...reference}) => {
+                    const {code: logisticUnit, natureId, comment: packComment, weight: packWeight, volume: packVolume} = this.dispatchPacks.find(({localId}) => localId === localDispatchPackId) as DispatchPack;
+
+                    const photos = JSON.parse(reference.photos);
+                    const volume = `${reference.volume}`;
+                    delete reference.photos;
+                    return {
+                        ...reference,
+                        volume,
+                        natureId,
+                        packComment,
+                        packWeight,
+                        packVolume,
+                        logisticUnit,
+                        ...(
+                            photos && photos.length > 0
+                                ? photos.reduce((acc: { [name: string]: File}, photoBase64: string, index: number) => {
+                                    const name = `photo_${index + 1}`;
+                                    return ({
+                                        ...acc,
+                                        [name]: photoBase64,
+                                    })
+                                }, {})
+                                : {}
+                        )
+                    };
+                }))
+            );
+    }
+
+    private updateCurrentDispatchStatus(): Observable<any> {
+        return this.sqliteService
+            .findBy('status', [
+                `state = 'notTreated'`,
+                `category = 'acheminement'`,
+                `typeId = ${this.dispatch.typeId}`
+            ], {displayOrder: 'ASC'})
+            .pipe(
+                mergeMap(([notTreatedStatus]: Array<Status>) => {
+                    return this.sqliteService.update(`dispatch`, [{
+                        values: {
+                            draft: 0,
+                            statusId: notTreatedStatus?.id || this.dispatch.statusId,
+                            statusLabel: notTreatedStatus?.label || this.dispatch.statusLabel,
+                            groupedSignatureStatusColor: notTreatedStatus?.groupedSignatureColor || this.dispatch.groupedSignatureStatusColor,
+                            validatedAt: moment().format(),
+                        },
+                        where: [`localId = ${this.dispatch.localId}`]
+                    }])
+                }),
+            );
+    }
+
+    private tryValidateDispatch() {
+        return this.dispatchOfflineMode
+            ? of({success: true, msg: `L'acheminement a bien été enregistré sur le nomade`, local: true})
+            : this.makeApiReferencesParam().pipe(
+                mergeMap((references) => {
+                    return this.apiService.requestApi(ApiService.DISPATCH_VALIDATE, {
+                        params: {
+                            references,
+                            dispatch: this.dispatch.id
+                        }
+                    })
+                })
+            );
+    }
+
+    private treatApiSuccess() {
+        // only in online mode
+        return zip(
+            this.sqliteService.deleteBy(`dispatch_reference`),
+            this.hasWayBillData
+                ? this.apiService.requestApi(ApiService.DISPATCH_WAYBILL, {
+                    pathParams: {dispatch: this.dispatch.id as number},
+                    params: this.wayBillData
+                })
+                : of(null),
+            this.storage.getString(StorageKeyEnum.URL_SERVER)
+        )
+            .pipe(
+                mergeMap((res) => this.navService.pop({path: NavPathEnum.DISPATCH_REQUEST_MENU}).pipe(map(() => res))),
+                tap(([ignoredQueryResponse, waybillResponse, url]) => {
+                    if (this.hasWayBillData && waybillResponse.filePath) {
+                        Browser.open({url: url + waybillResponse.filePath})
+                    }
+                })
+            );
     }
 }

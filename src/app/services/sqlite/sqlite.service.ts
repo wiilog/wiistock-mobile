@@ -17,63 +17,24 @@ import {DemandeLivraisonArticle} from '@entities/demande-livraison-article';
 import {CapacitorSQLite, CapacitorSQLitePlugin} from '@capacitor-community/sqlite';
 import {Carrier} from '@entities/carrier';
 import {Driver} from "@entities/driver";
+import {Dispatch} from "@entities/dispatch";
+import {DispatchPack} from "@entities/dispatch-pack";
 
 @Injectable({
     providedIn: 'root'
 })
 export class SqliteService {
 
-    private static readonly DB_NAME: string = 'wiistock_db';
+    private static readonly DB_PREFIX: string = 'wiistock_db';
+    private static readonly DB_VERSION: number = 20230718; // day of the last modification 2023-07-18
+
+    private static readonly DB_NAME: string = `${SqliteService.DB_PREFIX}_${SqliteService.DB_VERSION}`;
 
     private readonly sqlite: CapacitorSQLitePlugin;
 
     public constructor(private storageService: StorageService) {
         this.sqlite = CapacitorSQLite;
     }
-
-    // private retrieveDBConnection(): Observable<void> {
-    //     if (this.db) {
-    //         return of(undefined);
-    //     }
-    //     else {
-    //         return from(this.sqlite.checkConnectionsConsistency())
-    //             .pipe(
-    //                 mergeMap(() => from(this.sqlite.isConnection(SqliteService.DB_NAME, false))),
-    //                 mergeMap(({result}) => (
-    //                     result
-    //                         ? from(this.sqlite.retrieveConnection(SqliteService.DB_NAME, false))
-    //                         : from(this.sqlite.createConnection(SqliteService.DB_NAME, false, 'no-encryption', 1, false))
-    //                 )),
-    //                 tap((db: SQLiteDBConnection) => {
-    //                     if (!db) {
-    //                         throw new Error(`Database returned is null`);
-    //                     }
-    //                     // save database connexion for next queries
-    //                     this.db = db;
-    //                 }),
-    //                 map(() => undefined)
-    //             );
-    //     }
-    // }
-
-   /* private ensureDBIsOpened(): Observable<void> {
-        if (this.db) {
-            return from(this.db.isDBOpen()).pipe(
-                mergeMap(({result}) => {
-                    if (!this.db) {
-                        throw new Error('You had to retrieve connection before');
-                    }
-                    return !result
-                            ? from(this.db.open())
-                            : of(undefined)
-                })
-            );
-        }
-        else {
-            throw new Error('You had to retrieve connection before');
-        }
-    }*/
-
 
     public resetDataBase(force: boolean = false): Observable<void> {
         return this.clearDatabase(force)
@@ -110,7 +71,8 @@ export class SqliteService {
      * @return TRUE if the connection was opened or has been opened. FALSE if database does not exist
      */
     public ensureDatabaseOpened(): Observable<boolean> {
-        return from(this.sqlite.isDBOpen({database: SqliteService.DB_NAME})).pipe(
+        return this.removeOldDatabases().pipe(
+            mergeMap(() => this.sqlite.isDBOpen({database: SqliteService.DB_NAME})),
             catchError(() => from(this.sqlite.createConnection({database: SqliteService.DB_NAME})).pipe(
                 map(() => ({result: false}))
             )),
@@ -281,10 +243,12 @@ export class SqliteService {
     private importDispatchesData(data: any): Observable<any> {
         const dispatches = data['dispatches'] || [];
         const dispatchPacks = data['dispatchPacks'] || [];
+        const dispatchReferences = data['dispatchReferences'] || [];
 
         return zip(
             this.deleteBy('dispatch'),
-            this.deleteBy('dispatch_pack')
+            this.deleteBy('dispatch_pack'),
+            this.deleteBy('dispatch_reference'),
         )
             .pipe(
                 mergeMap(() => (
@@ -292,9 +256,38 @@ export class SqliteService {
                         ? this.insert('dispatch', dispatches)
                         : of(undefined)
                 )),
-                mergeMap(() => (
+                mergeMap(() => this.findAll('dispatch')),
+
+                map((localDispatches: Array<Dispatch>) => (
+                    localDispatches.reduce((acc, {id, localId}) => ({
+                        ...acc,
+                        [id as number]: localId,
+                    }), {})
+                )),
+                mergeMap((localDispatches: { [id: number]: number }) => (
                     dispatchPacks.length > 0
-                        ? this.insert('dispatch_pack', dispatchPacks)
+                        ? this.insert('dispatch_pack', dispatchPacks.map(({dispatchId, ...dispatchPack}: DispatchPack) => ({
+                            dispatchId,
+                            ...dispatchPack,
+                            localDispatchId: localDispatches[dispatchId],
+                        })))
+                        : of(undefined)
+                )),
+
+                mergeMap(() => this.findAll('dispatch_pack')),
+
+                map((localDispatchPacks: Array<DispatchPack>) => (
+                    localDispatchPacks.reduce((acc, {id, localId}) => ({
+                        ...acc,
+                        [id as number]: localId,
+                    }), {})
+                )),
+                mergeMap((localDispatchPacks: { [id: number]: number }) => (
+                    dispatchReferences.length > 0
+                        ? this.insert('dispatch_reference', dispatchReferences.map(({dispatchPackId, ...dispatchPack}: DispatchPack&{dispatchPackId: number}) => ({
+                            ...dispatchPack,
+                            localDispatchPackId: localDispatchPacks[dispatchPackId],
+                        })))
                         : of(undefined)
                 ))
             );
@@ -576,6 +569,18 @@ export class SqliteService {
             mergeMap(() => (
                 dispatchTypes.length > 0
                     ? this.insert('dispatch_type', dispatchTypes)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
+    public importReserveTypes(data: any): Observable<void> {
+        const reserveTypes = data['reserveTypes'] || [];
+        return this.deleteBy('reserve_type').pipe(
+            mergeMap(() => (
+                reserveTypes.length > 0
+                    ? this.insert('reserve_type', reserveTypes)
                     : of(undefined)
             )),
             map(() => undefined)
@@ -905,12 +910,15 @@ export class SqliteService {
             mergeMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),
             mergeMap(() => this.importTransportRoundData(data).pipe(tap(() => {console.log('--- > importTransportRoundData')}))),
             mergeMap(() => this.importDispatchTypes(data).pipe(tap(() => {console.log('--- > importDispatchTypesData')}))),
+            mergeMap(() => this.importReserveTypes(data).pipe(tap(() => {console.log('--- > importReserveTypesData')}))),
             mergeMap(() => this.importTransporteursData(data).pipe(tap(() => (console.log('--- > importTransporteursData'))))),
             mergeMap(() => this.importTypes(data).pipe(tap(() => {console.log('--- > importTypes')}))),
             mergeMap(() => this.importSuppliers(data).pipe(tap(() => {console.log('--- > importSuppliers')}))),
             mergeMap(() => this.importRefs(data).pipe(tap(() => {console.log('--- > importRefs')}))),
             mergeMap(() => this.importUsers(data).pipe(tap(() => {console.log('--- > importUsersData')}))),
             mergeMap(() => this.importProjects(data).pipe(tap(() => {console.log('--- > importProjects')}))),
+            mergeMap(() => this.importDispatchEmergencies(data).pipe(tap(() => {console.log('--- > importDispatchEmergencies')}))),
+            mergeMap(() => this.importAssociatedDocumentTypes(data).pipe(tap(() => {console.log('--- > importAssociatedDocumentTypes')}))),
             mergeMap(() => (
                 this.storageService.getRight(StorageKeyEnum.RIGHT_INVENTORY_MANAGER).pipe(
                     mergeMap((res) => (res
@@ -1207,6 +1215,35 @@ export class SqliteService {
             map(() => undefined)
         );
     }
+
+    public importDispatchEmergencies(data: any): Observable<void> {
+        const emergencies = data['dispatchEmergencies'] || [];
+        return this.deleteBy('dispatch_emergency').pipe(
+            mergeMap(() => (
+                emergencies.length > 0
+                    ? this.insert('dispatch_emergency', emergencies.map((label: string) => ({
+                        label
+                    })))
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
+    public importAssociatedDocumentTypes(data: any): Observable<void> {
+        const associatedDocumentTypes = data['associatedDocumentTypes'] || [];
+        return this.deleteBy('associated_document_type').pipe(
+            mergeMap(() => (
+                associatedDocumentTypes.length > 0
+                    ? this.insert('associated_document_type', associatedDocumentTypes.map((label: string) => ({
+                        label
+                    })))
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
     public importInventoryMission(data: any): Observable<any> {
         const inventoryMission = data['inventoryMission'];
         return this.deleteBy('inventory_mission')
@@ -1317,6 +1354,27 @@ export class SqliteService {
                     : of(undefined)
             )),
             map(() => undefined)
+        );
+    }
+
+    private removeOldDatabases(): Observable<void> {
+        return from(this.sqlite.getDatabaseList()).pipe(
+            map((res) => (res?.values || [])
+                .map((database: string) => database.match(/(.*)SQLite.db$/))
+                .map((matchRes: RegExpMatchArray|null) => matchRes && matchRes[1])
+                .filter((databaseName) => databaseName && databaseName !== SqliteService.DB_NAME) as Array<string>
+            ),
+            mergeMap((oldDatabases: Array<string>) => (
+                oldDatabases.length > 0
+                    ? zip(...oldDatabases.map((database) => (
+                        from(this.sqlite.createConnection({database})).pipe(
+                            mergeMap(() => this.sqlite.open({database})),
+                            mergeMap(() => this.sqlite.deleteDatabase({database})),
+                            mergeMap(() => this.sqlite.close({database}))
+                        )
+                    ))).pipe(map(() => undefined))
+                    : of(undefined)
+            ))
         );
     }
 

@@ -10,6 +10,13 @@ import {
 } from "@common/components/panel/form-panel/form-panel-camera/form-panel-camera.component";
 import {TabConfig} from "@common/components/tab/tab-config";
 import {ViewWillEnter} from "@ionic/angular";
+import {
+    FormPanelSelectComponent
+} from "@common/components/panel/form-panel/form-panel-select/form-panel-select.component";
+import {SelectItemTypeEnum} from "@common/components/select-item/select-item-type.enum";
+import {SqliteService} from "@app/services/sqlite/sqlite.service";
+import {LoadingService} from "@app/services/loading.service";
+import {ReserveType} from "@entities/reserve-type";
 
 
 enum QuantityType {
@@ -27,8 +34,8 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
     @ViewChild('formPanelComponent', {static: false})
     public formPanelComponent: FormPanelComponent;
 
-    public QUALITY = 'quality';
-    public QUANTITY = 'quantity';
+    public KIND_LINE = 'line';
+    public KIND_QUANTITY = 'quantity';
 
     public defaultQuantityType = QuantityType.MINUS;
 
@@ -38,7 +45,9 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
 
     public reserveDetailsListConfig: Array<FormPanelParam>;
 
-    public reserveType?: string;
+    public reserveKind?: string;
+
+    public defaultReserveTypeId?: number;
 
     public tabConfig: TabConfig[] = [
         { label: 'En moins', key: QuantityType.MINUS },
@@ -48,14 +57,13 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
     public truckArrivalLine?: {
         number?: string;
         reserve?: {
-            type?: string;
+            reserveTypeId?: number;
             comment?: string;
             photos?: Array<string>;
         }
     };
 
     public reserve: {
-        type?: string;
         quantity?: number;
         quantityType?: string
     };
@@ -64,22 +72,43 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
 
     public afterValidate: (data: any) => void;
 
-    public constructor(private navService: NavService) {}
+    public constructor(private navService: NavService,
+                       private loadingService: LoadingService,
+                       private sqliteService: SqliteService) {
+
+    }
 
     public ionViewWillEnter(): void {
-        this.loading = false;
-        this.truckArrivalLine = this.navService.param('truckArrivalLine') ?? [];
-        this.newReserve = this.navService.param('newReserve') ?? true;
-        this.reserveType = this.navService.param('type');
-        this.afterValidate = this.navService.param('afterValidate');
+        this.loadingService.presentLoadingWhile({
+            event: () => this.sqliteService.findOneBy('reserve_type', {defaultReserveType: '1'})
+        }).subscribe((defaultReserveType: ReserveType) => {
+                this.defaultReserveTypeId = defaultReserveType.id ?? null;
+                this.loading = false;
+                this.truckArrivalLine = this.navService.param('truckArrivalLine') ?? [];
+                this.newReserve = this.navService.param('newReserve') ?? true;
+                this.reserveKind = this.navService.param('kind');
+                this.afterValidate = this.navService.param('afterValidate');
 
-        this.reserve = {};
-        this.generateReserveDetails();
+                this.reserve = {};
+                this.generateReserveDetails();
+            });
     }
 
     public generateReserveDetails(){
-        if (this.reserveType === this.QUALITY){
+        if (this.reserveKind === this.KIND_LINE){
             this.reserveDetailsListConfig = [
+                {
+                    item: FormPanelSelectComponent,
+                    config: {
+                        label: 'Type de réserve',
+                        name: 'reserveType',
+                        value: this.truckArrivalLine?.reserve?.reserveTypeId || this.defaultReserveTypeId,
+                        inputConfig: {
+                            required: true,
+                            searchType: SelectItemTypeEnum.RESERVE_TYPE,
+                        },
+                    }
+                },
                 {
                     item: FormPanelInputComponent,
                     config: {
@@ -119,7 +148,7 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
                     }
                 },
             ];
-        } else if (this.reserveType === this.QUANTITY) {
+        } else if (this.reserveKind === this.KIND_QUANTITY) {
             this.reserveDetailsListConfig = [
                 {
                     item: FormPanelInputComponent,
@@ -158,11 +187,11 @@ export class TruckArrivalReserveDetailsPage implements ViewWillEnter {
 
     public validate() {
         let data = {};
-        if(this.reserveType === this.QUALITY){
-            const {photos, qualityComment} = this.formPanelComponent.values;
+        if(this.reserveKind === this.KIND_LINE){
+            const {photos, qualityComment, reserveType} = this.formPanelComponent.values;
 
-            data = {photos, comment: qualityComment};
-        } else if(this.reserveType === this.QUANTITY) {
+            data = {photos, comment: qualityComment, reserveTypeId: reserveType};
+        } else if(this.reserveKind === this.KIND_QUANTITY) {
             const {quantityComment} = this.formPanelComponent.values;
 
             data = {

@@ -5,11 +5,7 @@ import {FormPanelItemComponent} from '@common/components/panel/model/form-panel/
 import {FormPanelCalendarConfig} from '@common/components/panel/model/form-panel/configs/form-panel-calendar-config';
 import {FormPanelCalendarMode} from '@common/components/panel/form-panel/form-panel-calendar/form-panel-calendar-mode';
 import * as moment from 'moment';
-import { Plugins } from "@capacitor/core";
-import { DatePickerPluginInterface } from "@capacitor-community/date-picker";
-
-// TODO WIIS-7970 Voir si il y a un fork mieux sans le Plugins ?
-const DatePicker: DatePickerPluginInterface = Plugins["DatePickerPlugin"] as any;
+import {DatePicker} from '@capacitor-community/date-picker';
 
 @Component({
     selector: 'wii-form-panel-calendar',
