@@ -252,9 +252,9 @@ export class InventoryLocationsPage implements ViewWillEnter, ViewWillLeave, Can
                                         ...(type === 'article' ? {
                                             details: {
                                                 value: `
-                                                ${nbLogisticUnits} unité(s) logistique(s),
-                                                ${nbRefInMission} référence${nbRefInMission > 1 ? 's' : ''},
-                                                ${nbArtInMission} article${nbArtInMission > 1 ? 's' : ''},
+                                                ${nbLogisticUnits} unité$${nbLogisticUnits > 1 ? 's' : ''} logistique${nbLogisticUnits > 1 ? 's' : ''},
+                                                ${nbRefInMission} référence${nbRefInMission > 1 ? 's' : ''} et
+                                                ${nbArtInMission} article${nbArtInMission > 1 ? 's' : ''}
                                             `
                                             }
                                         } : {})

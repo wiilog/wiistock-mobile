@@ -9,7 +9,7 @@ import {LocalDataManagerService} from '@app/services/local-data-manager.service'
 import {MainHeaderService} from '@app/services/main-header.service';
 import {ToastService} from '@app/services/toast.service';
 import {from, Observable, of, ReplaySubject, Subscription, zip} from 'rxjs';
-import {mergeMap, tap} from 'rxjs/operators';
+import {mergeMap} from 'rxjs/operators';
 import {SaisieInventaire} from '@entities/saisie-inventaire';
 import * as moment from 'moment';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
@@ -115,14 +115,12 @@ export class InventoryArticlesPage implements ViewWillEnter, ViewWillLeave, CanL
             this.dataSubscription = this.loadingService
                 .presentLoading('Chargement...')
                 .pipe(
-                    tap(() => {
-                        this.refreshSubTitle();
-                    }),
                     mergeMap((loader) => from(loader.dismiss())),
                     mergeMap(() => this.sqliteService.findBy(table, this.requestParams))
                 )
                 .subscribe((articlesFromDB) => {
                     this.articles = articlesFromDB;
+                    this.refreshSubTitle();
                     // this map creates an array with unique logistic unit code
                     const logisticUnitsUnique: Array<ArticleInventaire> = [];
                     articlesFromDB
@@ -241,10 +239,25 @@ export class InventoryArticlesPage implements ViewWillEnter, ViewWillLeave, CanL
     }
 
     public refreshSubTitle(): void {
-        const articlesLength = this.selectItemComponent ? this.selectItemComponent.dbItemsLength : 0;
-        this.mainHeaderService.emitSubTitle(articlesLength === 0
+        const nbLogisticUnits = this.articles
+            .filter((article) => article.logistic_unit_code)
+            .length;
+
+        const nbRefInMission = this.articles
+            .filter(({is_ref}) =>  is_ref === 1)
+            .length;
+
+        const nbArtInMission = this.articles
+            .filter(({is_ref}) => is_ref === 0)
+            .length;
+
+        this.mainHeaderService.emitSubTitle(this.articles.length === 0
             ? 'Les inventaires pour cet emplacements sont à jour'
-            : `${articlesLength} ${this.logisticUnit ? 'article' : 'unité(s) logistique'}${articlesLength > 1 ? 's' : ''}`)
+            : `
+                ${nbLogisticUnits} unité${nbLogisticUnits > 1 ? 's' : ''} logistique${nbLogisticUnits > 1 ? 's' : ''},
+                ${nbRefInMission} référence${nbRefInMission > 1 ? 's' : ''} et
+                ${nbArtInMission} article${nbArtInMission > 1 ? 's' : ''}
+            `);
     }
 
     public validateQuantity(selectedArticle: ArticleInventaire&Anomalie, quantity: number): Observable<any> {
