@@ -132,7 +132,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             placeholder: 'Sélectionnez un utilisateur'
         },
         [SelectItemTypeEnum.DEMANDE_LIVRAISON_ARTICLES]: {
-            label: ['label', 'bar_code'],
+            label: ['bar_code', 'label'],
             valueField: 'bar_code',
             templateIndex: 'article-demande',
             databaseTable: 'demande_livraison_article',
@@ -376,10 +376,9 @@ export class SearchItemComponent implements OnInit, OnDestroy {
     }
 
     public findItem(search: string|number, searchAttribute: string|Array<string> = this.config[this.smartType]['label']): any {
-        let searchAttributes = (Array.isArray(searchAttribute) ? searchAttribute : [searchAttribute])
-            .map((attribute) => attribute.trim());
+        let searchAttributes = (Array.isArray(searchAttribute) ? searchAttribute : [searchAttribute]);
         return this.dbItems
-            ? this.dbItems.find((element) => searchAttributes.some((attribute: string) => element[attribute] === String(search).trim()))
+            ? this.dbItems.find((element) => searchAttributes.some((attribute: string) => String(element[attribute]).trim() === String(search).trim()))
             : undefined;
     }
 
@@ -426,7 +425,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             ? this.dbItems.filter((item) => (
                 (
                     !search
-                    || (labels.some((label) => item[label].toLowerCase().includes(search.toLowerCase())))
+                    || (labels.some((label: string) => (item[label] || '').toLowerCase().includes(search.toLowerCase())))
                 )
                 && (
                     !this.filterItem
