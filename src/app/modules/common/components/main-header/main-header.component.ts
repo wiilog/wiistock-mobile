@@ -361,7 +361,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                         ]
                     });
                 } else {
-                    this.userService.doLogout();
+                    this.loadingService.presentLoadingWhile({
+                        event: () => this.apiService.requestApi(ApiService.LOGOUT),
+                    }).subscribe(() => this.userService.doLogout());
                 }
             }
         });

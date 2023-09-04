@@ -95,11 +95,12 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
     }
 
     private valueToText(value: any) {
-        const labelItem = SearchItemComponent.SEARCH_CONFIGS[this.searchComponent?.smartType]?.label || 'label';
+        const label = SearchItemComponent.SEARCH_CONFIGS[this.searchComponent?.smartType]?.label || `label`;
+        const labels = Array.isArray(label) ? label : [label];
 
         return Array.isArray(value)
-            ? value.map(v => v[labelItem]).join(FormPanelSelectComponent.MULTIPLE_SEPARATOR)
-            : value[labelItem]
+            ? value.map(v => labels.map((label: string) => v[label])[0]).join(FormPanelSelectComponent.MULTIPLE_SEPARATOR)
+            : labels.map((label: string) => value[label])[0]
     }
 
     public fireZebraScan(): void {

@@ -76,10 +76,11 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
                 .map((zoneLabel) => zonesData[zoneLabel].zoneId);
 
             this.listZonesConfig = Object.keys(zonesData).map((index) => {
+                const counter = zonesData[index].counter;
                 return {
                     infos: {
                         label: {value: index},
-                        details: {value: zonesData[index].counter + ' emplacements à inventorier'}
+                        details: {value: `${counter} emplacement${counter > 1 ? 's' : ''} à inventorier`},
                     },
                     pressAction: () => {
                         this.navService.push(NavPathEnum.INVENTORY_MISSION_ZONE_CONTROLE, {
