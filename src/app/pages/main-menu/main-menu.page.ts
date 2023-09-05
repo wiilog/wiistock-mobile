@@ -53,7 +53,6 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                        private toastService: ToastService,
                        private networkService: NetworkService,
                        private changeDetector: ChangeDetectorRef,
-                       private platform: Platform,
                        private ngZone: NgZone,
                        private notificationService: NotificationService,
                        private navService: NavService,

@@ -6,7 +6,6 @@ import {ToastService} from '@app/services/toast.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {ApiService} from '@app/services/api.service';
 import {NavService} from '@app/services/nav/nav.service';
-import {NetworkService} from '@app/services/network.service';
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {StorageService} from "@app/services/storage/storage.service";
 import {
@@ -17,11 +16,9 @@ import {FormPanelParam} from '@common/directives/form-panel/form-panel-param';
 import {
     FormPanelInputComponent
 } from '@common/components/panel/form-panel/form-panel-input/form-panel-input.component';
-import {Emplacement} from '@entities/emplacement';
 import {FormPanelComponent} from '@common/components/panel/form-panel/form-panel.component';
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
-import {LocalDataManagerService} from "@app/services/local-data-manager.service";
 import {of, zip} from "rxjs";
 import {LoadingService} from "@app/services/loading.service";
 import {AlertService} from "@app/services/alert.service";
@@ -85,10 +82,8 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
 
     public constructor(private toastService: ToastService,
                        private sqliteService: SqliteService,
-                       private networkService: NetworkService,
                        private apiService: ApiService,
                        private storageService: StorageService,
-                       private localDataManagerService: LocalDataManagerService,
                        private loadingService: LoadingService,
                        private alertService: AlertService,
                        private navService: NavService) {
@@ -101,8 +96,8 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
         this.listConfig = this.createBodyConfig();
 
         zip(
-            this.storageService.getNumber('demande.project.displayedCreate'),
-            this.storageService.getNumber('demande.project.requiredCreate'),
+            this.storageService.getNumber('demande.deliveryRequestProject.displayedCreate'),
+            this.storageService.getNumber('demande.deliveryRequestProject.requiredCreate'),
             this.storageService.getNumber('demande.expectedAt.displayedCreate'),
             this.storageService.getNumber('demande.expectedAt.requiredCreate'),
         ).subscribe((fieldParams) => {
@@ -171,7 +166,7 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
             this.formConfig.push({
                 item: FormPanelSelectComponent,
                 config: {
-                    label: 'Projet',
+                    label: `Projet`,
                     name: 'project',
                     value: Number(logisticUnitProject) || project,
                     inputConfig: {
@@ -228,7 +223,7 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
             event: () => this.apiService.requestApi(ApiService.GET_ARTICLES, {params}).pipe(
                 mergeMap((response: any) => zip(
                         of(response),
-                        this.sqliteService.findOneBy(`project`, {code: response.article.project})
+                    this.sqliteService.findOneBy(`project`, {code: response.article?.project || null})
                     )
                 )
             )

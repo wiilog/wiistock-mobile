@@ -14,6 +14,8 @@ import {LoadingService} from '@app/services/loading.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import * as moment from "moment";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {TranslationService} from "@app/services/translations.service";
+import {Translations} from "@entities/translation";
 
 
 @Component({
@@ -44,10 +46,14 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
 
     private loadingSubscription?: Subscription;
 
+    public deliveryOrderTranslation: string;
+    public projectTranslation: string;
+
     public constructor(private mainHeaderService: MainHeaderService,
                        private sqliteService: SqliteService,
                        private loadingService: LoadingService,
-                       private navService: NavService) {
+                       private navService: NavService,
+                       private translationService: TranslationService) {
         this.resetEmitter$ = new EventEmitter();
         this.locationFilterRequestParams = [];
         this.firstLaunch = true;
@@ -62,9 +68,11 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
             this.unsubscribeLoading();
             this.loadingSubscription = zip(
                 this.loadingService.presentLoading(),
-                this.sqliteService.findAll<Livraison>('livraison')
+                this.sqliteService.findAll<Livraison>('livraison'),
+                this.translationService.get(null, `Ordre`, `Livraison`),
+                this.translationService.get(null, `Référentiel`, `Projet`)
             )
-                .subscribe(([loader, deliveries]: [HTMLIonLoadingElement, Array<Livraison>]) => {
+                .subscribe(([loader, deliveries, deliveryOrderTranslations, projectTranslations]: [HTMLIonLoadingElement, Array<Livraison>, Translations, Translations]) => {
                     this.loader = loader;
                     this.deliveryOrders = deliveries
                         .filter(({date_end}) => (date_end === null))
@@ -77,6 +85,9 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
                                         0
                             );
                         });
+                    this.deliveryOrderTranslation = TranslationService.Translate(deliveryOrderTranslations, 'Livraison');
+                    this.projectTranslation = TranslationService.Translate(projectTranslations, 'Projet');
+
                     const preparationLocationsStr = deliveries
                         .reduce((acc: Array<string>, {preparationLocation}) => {
                             if (preparationLocation && acc.indexOf(preparationLocation) === -1) {
@@ -90,6 +101,7 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
                     this.locationFilterRequestParams = preparationLocationsStr.length > 0
                         ? [`label IN (${preparationLocationsStr.join(',')})`]
                         : [];
+
 
                     this.refreshListConfig(this.deliveryOrders);
                     this.refreshSubTitle(this.deliveryOrders);
@@ -106,7 +118,7 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
 
     public refreshSubTitle(deliveryOrders: Array<Livraison>): void {
         const deliveryOrdersLength = deliveryOrders.length;
-        this.mainHeaderService.emitSubTitle(`${deliveryOrdersLength === 0 ? 'Aucune' : deliveryOrdersLength} livraison${deliveryOrdersLength > 1 ? 's' : ''}`)
+        this.mainHeaderService.emitSubTitle(`${deliveryOrdersLength === 0 ? 'Aucune' : deliveryOrdersLength} ${this.deliveryOrderTranslation.toLowerCase()}${deliveryOrdersLength > 1 ? 's' : ''}`)
     }
 
     public ionViewWillLeave(): void {
@@ -167,7 +179,7 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
                     ...(
                         livraison.project
                             ? [{
-                                label: 'Projet',
+                                label: this.projectTranslation,
                                 value: livraison.project
                             }]
                             : []

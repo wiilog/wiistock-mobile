@@ -90,6 +90,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
     public titleLabelTranslations: Translations = {};
 
+    public deliveryOrderTranslation: string;
+
     public constructor(private storageService: StorageService,
                        private sqliteService: SqliteService,
                        private navController: NavController,
@@ -113,12 +115,20 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
         this.translationService.changedTranslations$
             .pipe(
-                mergeMap(() => this.translationService.get())
-            )
-            .subscribe((result: Translations) => {
-                this.titleLabelTranslations = result;
+                mergeMap(() => (
+                        this.translationService.get(null, `Ordre`, `Livraison`)
+                    )
+                )
+            ).subscribe((deliveryOrderTranslations: Translations) => {
+                this.deliveryOrderTranslation = TranslationService.Translate(deliveryOrderTranslations, 'Livraison');
+
+                this.initTitlesConfig();
             });
 
+        this.initTitlesConfig();
+    }
+
+    public initTitlesConfig(): void {
         this.titlesConfig = [
             {pagePath: NavPathEnum.TRACKING_MENU, label: 'Traçabilité'},
             {pagePath: NavPathEnum.DISPATCH_MENU, label: 'Acheminements'},
@@ -151,7 +161,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             },
             {pagePath: NavPathEnum.STOCK_MOVEMENT_MENU, label: 'Transfert manuel'},
             {pagePath: NavPathEnum.PREPARATION_MENU, label: 'Préparation'},
-            {pagePath: NavPathEnum.LIVRAISON_MENU, label: 'Livraison'},
+            {
+                pagePath: NavPathEnum.LIVRAISON_MENU,
+                label: this.deliveryOrderTranslation || `Livraison`,
+            },
             {pagePath: NavPathEnum.MANUAL_DELIVERY, label: 'Livraison manuelle'},
             {pagePath: NavPathEnum.MANUAL_DELIVERY_LOCATION, label: 'Emplacement'},
             {pagePath: NavPathEnum.COLLECTE_MENU, label: 'Collecte'},
@@ -159,7 +172,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.INVENTORY_LOCATIONS_ANOMALIES, label: 'Anomalies'},
             {pagePath: NavPathEnum.DEMANDE_MENU, label: 'Demande'},
             {pagePath: NavPathEnum.HANDLING_MENU, label: 'Service'},
-            {pagePath: NavPathEnum.DEMANDE_LIVRAISON_MENU, label: 'Livraison'},
+            {
+                pagePath: NavPathEnum.DEMANDE_LIVRAISON_MENU,
+                label: `Livraison`,
+            },
             {pagePath: NavPathEnum.DISPATCH_WAYBILL, label: 'Lettre de voiture'},
             {
                 pagePath: NavPathEnum.DISPATCH_REQUEST_MENU,
@@ -195,7 +211,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             },
             {
                 pagePath: NavPathEnum.TRANSPORT_SHOW,
-                label: 'Livraison',
+                label: `Livraison`,
                 filter: (params) => (
                     params.transport?.kind === 'delivery'
                 )

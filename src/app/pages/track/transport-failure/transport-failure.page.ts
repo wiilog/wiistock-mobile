@@ -22,6 +22,7 @@ import {mergeMap, map} from 'rxjs/operators';
 import {TransportService} from '@app/services/transport.service';
 import {TransportRound} from "@entities/transport-round";
 import {ViewWillEnter} from "@ionic/angular";
+import {TranslationService} from "@app/services/translations.service";
 
 @Component({
     selector: 'wii-transport-failure',
@@ -43,6 +44,8 @@ export class TransportFailurePage implements ViewWillEnter {
     public round: TransportRound;
 
     public edit: boolean = false;
+
+    public deliveryOrderTranslation: string;
 
     constructor(private apiService: ApiService,
                 private loadingService: LoadingService,
@@ -67,7 +70,7 @@ export class TransportFailurePage implements ViewWillEnter {
                 ? this.collectRejectMotives
                 : this.deliveryRejectMotives;
 
-            const kind = this.transport.kind === 'collect' ? 'Collecte' : 'Livraison'
+            const kind = this.transport.kind === 'collect' ? 'Collecte' : this.deliveryOrderTranslation
             this.headerConfig = {
                 title: `${kind} impossible`,
                 leftIcon: {
