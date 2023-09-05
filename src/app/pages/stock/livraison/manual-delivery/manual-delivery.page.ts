@@ -6,7 +6,6 @@ import {ToastService} from '@app/services/toast.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {ApiService} from '@app/services/api.service';
 import {NavService} from '@app/services/nav/nav.service';
-import {NetworkService} from '@app/services/network.service';
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {StorageService} from "@app/services/storage/storage.service";
 import {
@@ -17,11 +16,9 @@ import {FormPanelParam} from '@common/directives/form-panel/form-panel-param';
 import {
     FormPanelInputComponent
 } from '@common/components/panel/form-panel/form-panel-input/form-panel-input.component';
-import {Emplacement} from '@entities/emplacement';
 import {FormPanelComponent} from '@common/components/panel/form-panel/form-panel.component';
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
-import {LocalDataManagerService} from "@app/services/local-data-manager.service";
 import {of, zip} from "rxjs";
 import {LoadingService} from "@app/services/loading.service";
 import {AlertService} from "@app/services/alert.service";
@@ -32,7 +29,6 @@ import {
     FormPanelCalendarMode
 } from "@common/components/panel/form-panel/form-panel-calendar/form-panel-calendar-mode";
 import {mergeMap} from "rxjs/operators";
-import {TranslationService} from "@app/services/translations.service";
 
 
 @Component({
@@ -84,26 +80,13 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
         needsExpectedAt: false
     };
 
-    public livraisonTrad: string;
-    public projetTrad: string;
-
     public constructor(private toastService: ToastService,
                        private sqliteService: SqliteService,
-                       private networkService: NetworkService,
                        private apiService: ApiService,
                        private storageService: StorageService,
-                       private localDataManagerService: LocalDataManagerService,
                        private loadingService: LoadingService,
                        private alertService: AlertService,
-                       private navService: NavService,
-                       private translationService: TranslationService) {
-        zip(
-            this.translationService.get(null, `Ordre`, `Livraison`),
-            this.translationService.get(null, `Référentiel`, `Projet`)
-        ).subscribe(([ordreTranslations, projetTranslations]) => {
-            this.livraisonTrad = TranslationService.Translate(ordreTranslations, 'Livraison');
-            this.projetTrad = TranslationService.Translate(projetTranslations, 'Projet');
-        });
+                       private navService: NavService) {
     }
 
     public ngOnInit() {
@@ -183,7 +166,7 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
             this.formConfig.push({
                 item: FormPanelSelectComponent,
                 config: {
-                    label: this.projetTrad,
+                    label: `Projet`,
                     name: 'project',
                     value: Number(logisticUnitProject) || project,
                     inputConfig: {
@@ -194,7 +177,7 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
                     ...(this.fieldParams.needsProject
                         ? ({
                             errors: {
-                                required: 'Vous devez sélectionner un ' + this.projetTrad.toLowerCase()
+                                required: 'Vous devez sélectionner un projet'
                             }
                         })
                         : {})
@@ -264,7 +247,7 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
 
                         const values = this.formPanelComponent.values;
                         if (response.article.is_lu && project && values.project && values.project != project.id) {
-                            this.toastService.presentToast(`Vous ne pouvez pas scanner une unité logistique avec un ` + this.projetTrad.toLowerCase() + ` différent de celui sélectionné.`);
+                            this.toastService.presentToast(`Vous ne pouvez pas scanner une unité logistique avec un projet différent de celui sélectionné.`);
                         } else if (response.article.currentLogisticUnitId) {
                             this.alertService.show({
                                 message: `L'article ${response.article.barCode} sera enlevé de l'unité logistique ${response.article.currentLogisticUnitCode}`,
@@ -285,7 +268,7 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
                     this.toastService.presentToast(`Vous ne pouvez pas ajouter de référence`);
                 }
             } else {
-                this.toastService.presentToast(`L'article n'existe pas ou n'est pas disponible pour être mis dans une ` + this.livraisonTrad.toLowerCase());
+                this.toastService.presentToast(`L'article n'existe pas ou n'est pas disponible pour être mis dans une livraison`);
             }
         });
     }

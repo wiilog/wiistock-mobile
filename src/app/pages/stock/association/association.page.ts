@@ -1,15 +1,9 @@
-import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {BarcodeScannerComponent} from '@common/components/barcode-scanner/barcode-scanner.component';
 import {ApiService} from '@app/services/api.service';
-import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {ToastService} from '@app/services/toast.service';
 import {LoadingService} from '@app/services/loading.service';
-import {LocalDataManagerService} from '@app/services/local-data-manager.service';
-import {TrackingListFactoryService} from '@app/services/tracking-list-factory.service';
-import {StorageService} from '@app/services/storage/storage.service';
-import {ActivatedRoute} from '@angular/router';
 import {NavService} from '@app/services/nav/nav.service';
-import {TranslationService} from '@app/services/translations.service';
 import {AlertService} from '@app/services/alert.service';
 import {NetworkService} from '@app/services/network.service';
 import {zip} from 'rxjs';
@@ -19,7 +13,6 @@ import {IconConfig} from "@common/components/panel/model/icon-config";
 import {mergeMap} from "rxjs/operators";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {CardListConfig} from "@common/components/card-list/card-list-config";
-import {Livraison} from "@entities/livraison";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 
 type ArticleAssociation = {
@@ -57,26 +50,13 @@ export class AssociationPage implements ViewWillEnter, ViewWillLeave {
         subtitle?: Array<string>;
         info?: string;
     };
-    private livraisonToRedirect: Livraison;
-
-    public projetTrad: string;
 
     public constructor(private networkService: NetworkService,
                        private apiService: ApiService,
-                       private sqliteService: SqliteService,
                        private alertService: AlertService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
-                       private changeDetectorRef: ChangeDetectorRef,
-                       private localDataManager: LocalDataManagerService,
-                       private trackingListFactory: TrackingListFactoryService,
-                       private activatedRoute: ActivatedRoute,
-                       private storageService: StorageService,
-                       private translationService: TranslationService,
                        private navService: NavService) {
-        this.translationService.get(null, `Référentiel`, `Projet`).subscribe((projetTranslations) => {
-            this.projetTrad = TranslationService.Translate(projetTranslations, 'Projet');
-        });
     }
 
     public ionViewWillEnter(): void {
@@ -293,7 +273,7 @@ export class AssociationPage implements ViewWillEnter, ViewWillLeave {
             ...(
                 articleOrPack.is_lu && articleOrPack.project
                     ? [{
-                        label: this.projetTrad,
+                        label: `Projet`,
                         value: articleOrPack.project
                     }]
                     : (!articleOrPack.is_lu ? [{

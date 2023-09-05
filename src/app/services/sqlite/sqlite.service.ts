@@ -875,7 +875,6 @@ export class SqliteService {
 
     private importTranslations(data: any): Observable<any> {
         const translations = data.translations;
-
         return this.deleteBy('translations')
             .pipe(
                 mergeMap(() => (

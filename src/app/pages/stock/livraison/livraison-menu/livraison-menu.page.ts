@@ -15,6 +15,7 @@ import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import * as moment from "moment";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {TranslationService} from "@app/services/translations.service";
+import {Translations} from "@entities/translation";
 
 
 @Component({
@@ -45,8 +46,8 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
 
     private loadingSubscription?: Subscription;
 
-    public livraisonTrad: string;
-    public projetTrad: string;
+    public deliveryOrderTranslation: string;
+    public projectTranslation: string;
 
     public constructor(private mainHeaderService: MainHeaderService,
                        private sqliteService: SqliteService,
@@ -60,9 +61,9 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
         zip(
             this.translationService.get(null, `Ordre`, `Livraison`),
             this.translationService.get(null, `Référentiel`, `Projet`)
-        ).subscribe(([ordreTranslations, projetTranslations]) => {
-            this.livraisonTrad = TranslationService.Translate(ordreTranslations, 'Livraison');
-            this.projetTrad = TranslationService.Translate(projetTranslations, 'Projet');
+        ).subscribe(([deliveryOrderTranslations, projectTranslations]: [Translations, Translations]) => {
+            this.deliveryOrderTranslation = TranslationService.Translate(deliveryOrderTranslations, 'Livraison');
+            this.projectTranslation = TranslationService.Translate(projectTranslations, 'Projet');
         });
     }
 
@@ -119,7 +120,7 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
 
     public refreshSubTitle(deliveryOrders: Array<Livraison>): void {
         const deliveryOrdersLength = deliveryOrders.length;
-        this.mainHeaderService.emitSubTitle(`${deliveryOrdersLength === 0 ? 'Aucune' : deliveryOrdersLength} ${this.livraisonTrad.toLowerCase()}${deliveryOrdersLength > 1 ? 's' : ''}`)
+        this.mainHeaderService.emitSubTitle(`${deliveryOrdersLength === 0 ? 'Aucune' : deliveryOrdersLength} ${this.deliveryOrderTranslation.toLowerCase()}${deliveryOrdersLength > 1 ? 's' : ''}`)
     }
 
     public ionViewWillLeave(): void {
@@ -180,7 +181,7 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
                     ...(
                         livraison.project
                             ? [{
-                                label: this.projetTrad,
+                                label: this.projectTranslation,
                                 value: livraison.project
                             }]
                             : []

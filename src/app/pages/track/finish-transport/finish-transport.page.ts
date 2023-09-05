@@ -18,7 +18,6 @@ import {TransportCardMode} from '@common/components/transport-card/transport-car
 import {TransportService} from '@app/services/transport.service';
 import {TransportRound} from "@entities/transport-round";
 import {FormPanelTextareaComponent} from '@common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component';
-import {TranslationService} from "@app/services/translations.service";
 
 @Component({
     selector: 'wii-finish-transport',
@@ -39,26 +38,19 @@ export class FinishTransportPage implements ViewWillEnter {
     public round: TransportRound;
     public edit: boolean = false;
 
-    public livraisonTrad: string;
-
     public constructor(private networkService: NetworkService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
                        private apiService: ApiService,
                        private navService: NavService,
                        private transportService: TransportService,
-                       private fileService: FileService,
-                       private translationService: TranslationService) {
+                       private fileService: FileService) {
     }
 
     public ionViewWillEnter() {
         this.transport = this.navService.param('transport');
         this.round = this.navService.param('round');
         this.edit = this.navService.param('edit');
-
-        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((ordreTranslations) => {
-            this.livraisonTrad = TranslationService.Translate(ordreTranslations, 'Livraison');
-        });
 
         this.bodyConfig = [{
             item: FormPanelTextareaComponent ,

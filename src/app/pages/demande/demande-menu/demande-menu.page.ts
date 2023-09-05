@@ -12,7 +12,6 @@ import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {StorageService} from '@app/services/storage/storage.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {NetworkService} from '@app/services/network.service';
-import {TranslationService} from "@app/services/translations.service";
 
 
 @Component({
@@ -40,8 +39,7 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
                        private toastService: ToastService,
                        private storageService: StorageService,
                        private sqliteService: SqliteService,
-                       private navService: NavService,
-                       private translationService: TranslationService) {
+                       private navService: NavService) {
         this.avoidSync = true;
         const self = this;
         this.menuConfig = [
@@ -69,10 +67,6 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
                 }
             }
         ];
-
-        this.translationService.get(null, `Demande`, `Livraison`).subscribe((demandeTranslations) => {
-            this.menuConfig[1].label = TranslationService.Translate(demandeTranslations, 'Livraison');
-        });
     }
 
     public ionViewWillEnter(): void {

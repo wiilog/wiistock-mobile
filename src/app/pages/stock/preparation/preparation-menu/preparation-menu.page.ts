@@ -25,17 +25,12 @@ export class PreparationMenuPage implements ViewWillEnter {
     public hasLoaded: boolean;
     public firstLaunch: boolean;
 
-    public projetTrad: string;
+    public projectTranslation: string;
 
     public constructor(private mainHeaderService: MainHeaderService,
                        private sqlLiteProvider: SqliteService,
-                       private navService: NavService,
-                       private translationService: TranslationService) {
+                       private navService: NavService) {
         this.firstLaunch = true;
-
-        this.translationService.get(null, `Référentiel`, `Projet`).subscribe((projetTranslations) => {
-            this.projetTrad = TranslationService.Translate(projetTranslations, 'Projet');
-        });
     }
 
     public ionViewWillEnter(): void {
@@ -90,7 +85,7 @@ export class PreparationMenuPage implements ViewWillEnter {
                         ...(
                             preparation.project
                                 ? [{
-                                    label: this.projetTrad,
+                                    label: this.projectTranslation,
                                     value: preparation.project
                                 }]
                                 : []

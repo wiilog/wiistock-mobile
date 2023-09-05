@@ -11,9 +11,7 @@ import {NetworkService} from '@app/services/network.service';
 import {TransportCardMode} from '@common/components/transport-card/transport-card.component';
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {AlertService} from '@app/services/alert.service';
-import {MainHeaderService} from '@app/services/main-header.service';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
-import {TranslationService} from "@app/services/translations.service";
 
 @Component({
     selector: 'wii-transport-round-list',
@@ -29,14 +27,12 @@ export class TransportRoundListPage implements ViewWillEnter {
     public loading: boolean;
 
     public constructor(private navService: NavService,
-                       private mainHeaderService: MainHeaderService,
                        private apiService: ApiService,
                        private localDataService: LocalDataManagerService,
                        private loadingService: LoadingService,
                        private toastService: ToastService,
                        private networkService: NetworkService,
-                       private alertService: AlertService,
-                       private translationService: TranslationService) {
+                       private alertService: AlertService) {
     }
 
     public ionViewWillEnter(): void {

@@ -5,8 +5,6 @@ import {SelectItemTypeEnum} from '@common/components/select-item/select-item-typ
 import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {IconConfig} from '@common/components/panel/model/icon-config';
 import {ToastService} from '@app/services/toast.service';
-import {SqliteService} from '@app/services/sqlite/sqlite.service';
-import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {StorageService} from '@app/services/storage/storage.service';
@@ -15,7 +13,6 @@ import {NetworkService} from '@app/services/network.service';
 import {ApiService} from "@app/services/api.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
-import {TranslationService} from "@app/services/translations.service";
 
 @Component({
     selector: 'wii-livraison-emplacement',
@@ -52,23 +49,14 @@ export class ManualDeliveryLocationPage implements ViewWillEnter, ViewWillLeave 
 
     public skipValidation: boolean = false;
 
-    public livraisonTrad: string;
-
-    public constructor(private sqliteService: SqliteService,
-                       private toastService: ToastService,
+    public constructor(private toastService: ToastService,
                        private api: ApiService,
                        private networkService: NetworkService,
-                       private localDataManager: LocalDataManagerService,
                        private loadingService: LoadingService,
                        private storageService: StorageService,
-                       private navService: NavService,
-                       private translationService: TranslationService) {
+                       private navService: NavService) {
         this.validateIsLoading = false;
         this.resetEmitter$ = new EventEmitter();
-
-        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((result) => {
-            this.livraisonTrad = TranslationService.Translate(result, 'Livraison');
-        });
     }
 
     public ionViewWillEnter(): void {
@@ -107,7 +95,7 @@ export class ManualDeliveryLocationPage implements ViewWillEnter, ViewWillLeave 
                 if (this.location && this.location.label) {
                     this.loadingService.presentLoadingWhile(
                         {
-                            message: 'Envoi de la ' + this.livraisonTrad.toLowerCase() + ' en cours...',
+                            message: 'Envoi de la livraison en cours...',
                             event: () => {
                                 this.validateIsLoading = true;
                                 return this.api
@@ -141,7 +129,7 @@ export class ManualDeliveryLocationPage implements ViewWillEnter, ViewWillLeave 
     }
 
     private handleLivraisonSuccess(): void {
-        this.toastService.presentToast(this.livraisonTrad + ' directe enregistrée avec succès');
+        this.toastService.presentToast(`Livraison directe enregistrée avec succès.`);
         this.closeScreen();
     }
 

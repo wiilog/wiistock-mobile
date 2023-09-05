@@ -90,8 +90,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
     public titleLabelTranslations: Translations = {};
 
-    public ordreLivraisonTrad: string;
-    public demandeLivraisonTrad: string;
+    public deliveryOrderTranslation: string;
 
     public constructor(private storageService: StorageService,
                        private sqliteService: SqliteService,
@@ -117,28 +116,24 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.translationService.changedTranslations$
             .pipe(
                 mergeMap(() => (
-                    zip(
-                        this.translationService.get(),
-                        this.translationService.get(null, `Demande`, `Livraison`),
-                        this.translationService.get(null, `Ordre`, `Livraison`))
+                        this.translationService.get(null, `Ordre`, `Livraison`)
                     ).pipe(
-                        map(([result, demandeTranslations, ordreTanslations]) => ({
-                            result,
-                            demandeTranslations,
-                            ordreTanslations
+                        map((deliveryOrderTranslations: Translations) => ({
+                            deliveryOrderTranslations
                         }))
                     )
                 )
             )
-            .subscribe(({result, demandeTranslations, ordreTanslations}) => {
-                this.titleLabelTranslations = result;
-                this.demandeLivraisonTrad = TranslationService.Translate(demandeTranslations, 'Livraison');
-                this.ordreLivraisonTrad = TranslationService.Translate(ordreTanslations, 'Livraison');
-                this.initTitlesConfig(this.demandeLivraisonTrad, this.ordreLivraisonTrad);
+            .subscribe(({deliveryOrderTranslations}) => {
+                this.deliveryOrderTranslation = TranslationService.Translate(deliveryOrderTranslations, 'Livraison');
+
+                this.initTitlesConfig();
             });
+
+        this.initTitlesConfig();
     }
 
-    public initTitlesConfig(demandeLivraisonTrad: string, ordreLivraisonTrad: string) {
+    public initTitlesConfig(): void {
         this.titlesConfig = [
             {pagePath: NavPathEnum.TRACKING_MENU, label: 'Traçabilité'},
             {pagePath: NavPathEnum.DISPATCH_MENU, label: 'Acheminements'},
@@ -173,7 +168,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.PREPARATION_MENU, label: 'Préparation'},
             {
                 pagePath: NavPathEnum.LIVRAISON_MENU,
-                label: ordreLivraisonTrad,
+                label: this.deliveryOrderTranslation || `Livraison`,
             },
             {pagePath: NavPathEnum.MANUAL_DELIVERY, label: 'Livraison manuelle'},
             {pagePath: NavPathEnum.MANUAL_DELIVERY_LOCATION, label: 'Emplacement'},
@@ -184,7 +179,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.HANDLING_MENU, label: 'Service'},
             {
                 pagePath: NavPathEnum.DEMANDE_LIVRAISON_MENU,
-                label: demandeLivraisonTrad,
+                label: `Livraison`,
             },
             {pagePath: NavPathEnum.DISPATCH_WAYBILL, label: 'Lettre de voiture'},
             {
@@ -221,7 +216,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             },
             {
                 pagePath: NavPathEnum.TRANSPORT_SHOW,
-                label: ordreLivraisonTrad,
+                label: `Livraison`,
                 filter: (params) => (
                     params.transport?.kind === 'delivery'
                 )

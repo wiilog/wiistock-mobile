@@ -45,23 +45,18 @@ export class TransportFailurePage implements ViewWillEnter {
 
     public edit: boolean = false;
 
-    public livraisonTrad: string;
+    public deliveryOrderTranslation: string;
 
     constructor(private apiService: ApiService,
                 private loadingService: LoadingService,
                 private toastService: ToastService,
                 private fileService: FileService,
                 private transportService: TransportService,
-                private navService: NavService,
-                private translationService: TranslationService) {
+                private navService: NavService) {
     }
 
     public ionViewWillEnter(): void {
         this.edit = this.navService.param('edit');
-
-        this.translationService.get(null, `Ordre`, `Livraison`).subscribe((ordreTranslations) => {
-            this.livraisonTrad = TranslationService.Translate(ordreTranslations, 'Livraison');
-        });
 
         this.loadingService.presentLoadingWhile({
             event: () => this.apiService.requestApi(ApiService.GET_REJECT_MOTIVES)
@@ -75,7 +70,7 @@ export class TransportFailurePage implements ViewWillEnter {
                 ? this.collectRejectMotives
                 : this.deliveryRejectMotives;
 
-            const kind = this.transport.kind === 'collect' ? 'Collecte' : this.livraisonTrad
+            const kind = this.transport.kind === 'collect' ? 'Collecte' : this.deliveryOrderTranslation
             this.headerConfig = {
                 title: `${kind} impossible`,
                 leftIcon: {
