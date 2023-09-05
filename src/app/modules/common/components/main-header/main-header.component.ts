@@ -117,14 +117,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             .pipe(
                 mergeMap(() => (
                         this.translationService.get(null, `Ordre`, `Livraison`)
-                    ).pipe(
-                        map((deliveryOrderTranslations: Translations) => ({
-                            deliveryOrderTranslations
-                        }))
                     )
                 )
-            )
-            .subscribe(({deliveryOrderTranslations}) => {
+            ).subscribe((deliveryOrderTranslations: Translations) => {
                 this.deliveryOrderTranslation = TranslationService.Translate(deliveryOrderTranslations, 'Livraison');
 
                 this.initTitlesConfig();

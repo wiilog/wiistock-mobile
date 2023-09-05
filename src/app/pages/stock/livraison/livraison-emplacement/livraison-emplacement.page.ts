@@ -63,20 +63,18 @@ export class LivraisonEmplacementPage implements ViewWillEnter, ViewWillLeave{
                        private translationService: TranslationService) {
         this.validateIsLoading = false;
         this.resetEmitter$ = new EventEmitter<void>();
-
-        this.translationService.get(null, `Demande`, `Livraison`).subscribe((deliveryRequestTranslations: Translations) => {
-            this.deliveryRequestTranslation = TranslationService.Translate(deliveryRequestTranslations, 'Livraison');
-        });
     }
 
     public ionViewWillEnter(): void {
         zip(
             this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_DELIVERY),
-            this.storageService.getRight(StorageKeyEnum.PARAMETER_DELIVERY_REQUEST_ALLOWED_DROP_ON_FREE_LOCATION)
+            this.storageService.getRight(StorageKeyEnum.PARAMETER_DELIVERY_REQUEST_ALLOWED_DROP_ON_FREE_LOCATION),
+            this.translationService.get(null, `Demande`, `Livraison`)
         )
-        .subscribe(([skipValidation, dropOnFreeLocation]) => {
+        .subscribe(([skipValidation, dropOnFreeLocation, deliveryRequestTranslations]: [boolean, boolean, Translations]) => {
             this.skipValidation = skipValidation;
             this.dropOnFreeLocation = dropOnFreeLocation;
+            this.deliveryRequestTranslation = TranslationService.Translate(deliveryRequestTranslations, 'Livraison');
             this.validateLivraison = this.navService.param('validateLivraison');
             this.livraison = this.navService.param('livraison');
 

@@ -57,14 +57,6 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
         this.resetEmitter$ = new EventEmitter();
         this.locationFilterRequestParams = [];
         this.firstLaunch = true;
-
-        zip(
-            this.translationService.get(null, `Ordre`, `Livraison`),
-            this.translationService.get(null, `Référentiel`, `Projet`)
-        ).subscribe(([deliveryOrderTranslations, projectTranslations]: [Translations, Translations]) => {
-            this.deliveryOrderTranslation = TranslationService.Translate(deliveryOrderTranslations, 'Livraison');
-            this.projectTranslation = TranslationService.Translate(projectTranslations, 'Projet');
-        });
     }
 
     public ionViewWillEnter(): void {
@@ -76,9 +68,11 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
             this.unsubscribeLoading();
             this.loadingSubscription = zip(
                 this.loadingService.presentLoading(),
-                this.sqliteService.findAll<Livraison>('livraison')
+                this.sqliteService.findAll<Livraison>('livraison'),
+                this.translationService.get(null, `Ordre`, `Livraison`),
+                this.translationService.get(null, `Référentiel`, `Projet`)
             )
-                .subscribe(([loader, deliveries]: [HTMLIonLoadingElement, Array<Livraison>]) => {
+                .subscribe(([loader, deliveries, deliveryOrderTranslations, projectTranslations]: [HTMLIonLoadingElement, Array<Livraison>, Translations, Translations]) => {
                     this.loader = loader;
                     this.deliveryOrders = deliveries
                         .filter(({date_end}) => (date_end === null))
@@ -91,6 +85,9 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
                                         0
                             );
                         });
+                    this.deliveryOrderTranslation = TranslationService.Translate(deliveryOrderTranslations, 'Livraison');
+                    this.projectTranslation = TranslationService.Translate(projectTranslations, 'Projet');
+
                     const preparationLocationsStr = deliveries
                         .reduce((acc: Array<string>, {preparationLocation}) => {
                             if (preparationLocation && acc.indexOf(preparationLocation) === -1) {
@@ -104,6 +101,7 @@ export class LivraisonMenuPage implements ViewWillEnter, ViewWillLeave {
                     this.locationFilterRequestParams = preparationLocationsStr.length > 0
                         ? [`label IN (${preparationLocationsStr.join(',')})`]
                         : [];
+
 
                     this.refreshListConfig(this.deliveryOrders);
                     this.refreshSubTitle(this.deliveryOrders);
