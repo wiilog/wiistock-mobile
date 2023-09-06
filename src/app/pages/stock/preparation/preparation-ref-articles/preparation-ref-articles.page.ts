@@ -80,14 +80,19 @@ export class PreparationRefArticlesPage implements ViewWillEnter, ViewWillLeave,
     }
 
     public ionViewWillEnter(): void {
-        this.navParams = this.navService.params();
-        this.refArticle = this.navParams.article;
-        this.listWhereClause = [`reference_barCode LIKE '${this.refArticle.barcode}'`];
+        if (this.navService.popItem
+            && this.navService.popItem.path !== NavPathEnum.PREPARATION_REF_ARTICLES) {
+            return;
+        }
 
         this.resetEmitter$.emit();
         if (!this.pageHasLoadedOnce) {
             this.loading = true;
             this.pageHasLoadedOnce = true;
+            this.navParams = this.navService.params();
+            this.refArticle = this.navParams.article;
+            this.listWhereClause = [`reference_barCode LIKE '${this.refArticle.barcode}'`];
+
             this.countSubscription = this.loadingService
                 .presentLoadingWhile({
                     event: () => zip(
@@ -176,7 +181,9 @@ export class PreparationRefArticlesPage implements ViewWillEnter, ViewWillLeave,
 
     public selectArticle(selectedArticle: ArticlePrepaByRefArticle): void {
         if (this.parameterSkipQuantities) {
-            this.selectArticleAndPop(selectedArticle, Math.min(selectedArticle.quantity, this.refArticle.quantite));
+            this.navService.pop().subscribe(() => {
+                this.navParams.selectArticle(Math.min(selectedArticle.quantity, this.refArticle.quantite), selectedArticle);
+            });
         }
         else {
             this.navService.push(NavPathEnum.PREPARATION_ARTICLE_TAKE, {
@@ -186,24 +193,17 @@ export class PreparationRefArticlesPage implements ViewWillEnter, ViewWillLeave,
                 started: this.navParams.started,
                 valid: this.navParams.valid,
                 selectArticle: (selectedQuantity: number) => {
-                    this.selectArticleAndPop(selectedArticle, selectedQuantity);
+                    this.navParams.selectArticle(selectedQuantity, selectedArticle);
                 }
             });
         }
-    }
-
-    private selectArticleAndPop(selectedArticle: ArticlePrepaByRefArticle, selectedQuantity: number): void {
-        this.navService.pop().subscribe(() => {
-            const selectArticle = this.navParams.get('selectArticle');
-            selectArticle(selectedQuantity, selectedArticle);
-        });
     }
 
     private findSuggestingArticleList(withoutManual: boolean): Observable<Array<ArticlePrepaByRefArticle>> {
         return withoutManual
             ? this.sqliteService.findBy(
                 'article_prepa_by_ref_article',
-                this.listWhereClause,
+                this.listWhereClause || [],
                 {
                     'pickingPriority': 'DESC',
                     'management_order IS NULL': 'ASC', // put null at the end

@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, NgZone} from '@angular/core';
 import {MenuConfig} from '@common/components/menu/menu-config';
 import {Observable, Subject, Subscription, zip} from 'rxjs';
-import {mergeMap, map} from 'rxjs/operators';
+import {map, mergeMap} from 'rxjs/operators';
 import {Platform, ViewWillEnter, ViewWillLeave} from '@ionic/angular';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {StorageService} from '@app/services/storage/storage.service';
@@ -53,7 +53,6 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                        private toastService: ToastService,
                        private networkService: NetworkService,
                        private changeDetector: ChangeDetectorRef,
-                       private platform: Platform,
                        private ngZone: NgZone,
                        private notificationService: NotificationService,
                        private navService: NavService,

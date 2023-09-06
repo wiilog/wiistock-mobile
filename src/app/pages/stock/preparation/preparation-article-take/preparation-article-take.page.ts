@@ -5,6 +5,7 @@ import {Preparation} from '@entities/preparation';
 import {NavService} from '@app/services/nav/nav.service';
 import {ToastService} from '@app/services/toast.service';
 import {ViewWillEnter} from "@ionic/angular";
+import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 
 @Component({
     selector: 'wii-preparation-article-take',
@@ -62,7 +63,7 @@ export class PreparationArticleTakePage implements ViewWillEnter {
             this.toastService.presentToast('Veuillez sélectionner une quantité valide.');
         }
         else {
-            this.navService.pop().subscribe(() => {
+            this.navService.pop({path: NavPathEnum.PREPARATION_ARTICLES}).subscribe(() => {
                 this.selectArticle(quantity);
             });
         }

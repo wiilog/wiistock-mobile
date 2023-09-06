@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {BarcodeScannerComponent} from '@common/components/barcode-scanner/barcode-scanner.component';
 import {Preparation} from '@entities/preparation';
 import {ArticlePrepa} from '@entities/article-prepa';
@@ -23,7 +23,6 @@ import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode
 import {Nature} from "@entities/nature";
 import {LoadingService} from "@app/services/loading.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
-import {ArticleLivraison} from "@entities/article-livraison";
 
 
 @Component({
@@ -66,12 +65,16 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
                        private apiService: ApiService,
                        private storageService: StorageService,
                        private loadingService: LoadingService,
-                       private changeDetector: ChangeDetectorRef,
                        private navService: NavService) {
         this.loadingStartPreparation = false;
     }
 
     public ionViewWillEnter(): void {
+        if (this.navService.popItem
+            && this.navService.popItem.path !== NavPathEnum.PREPARATION_ARTICLES) {
+            return;
+        }
+
         this.preparation = this.navService.param('preparation');
         this.preparationsHeaderConfig = {
             leftIcon: {name: 'preparation.svg'},

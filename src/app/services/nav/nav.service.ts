@@ -3,7 +3,7 @@ import {NavController, Platform} from '@ionic/angular';
 import {from, mergeMap, Observable, of} from 'rxjs';
 import {Router, NavigationStart} from '@angular/router';
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
-import {map} from "rxjs/operators";
+import {map, tap} from "rxjs/operators";
 import {NavParams} from "@app/services/nav/nav-params";
 
 @Injectable({
@@ -12,10 +12,11 @@ import {NavParams} from "@app/services/nav/nav-params";
 export class NavService {
 
     private stack: Array<{ path: NavPathEnum, params: NavParams }> = [];
+    private _popItem?: { path: NavPathEnum, params: NavParams };
+
     private justNavigated: boolean;
 
-    public constructor(private platform: Platform,
-                       private navController: NavController,
+    public constructor(private navController: NavController,
                        private router: Router) {
         this.router.events.subscribe(event => {
             if (event instanceof NavigationStart) {
@@ -51,19 +52,46 @@ export class NavService {
             }
 
             // keep as last the found stacked element and remove the rest of the stack
-            this.spliceStack(this.stack.length - reverseIndex, params);
+            // remove elements in stack after the request path params
+            this.stack.splice(this.stack.length - reverseIndex);
+
+            this._popItem = {
+                path: path,
+                params: params || {}
+            };
 
             return from(this.navController.navigateBack(path))
                 .pipe(map(() => undefined));
         }
         else {
             this.stack.pop();
+
+            // we guess the destination path
+            const pageToPop = number || 1;
+            const destinationItem = this.stack[this.stack.length - pageToPop];
+            if (destinationItem) {
+                this._popItem = {
+                    path: destinationItem.path,
+                    params: {}
+                };
+            }
+
             return from(this.navController.pop()).pipe(
                 mergeMap(() => (
                     number && number > 1
                         ? this.pop({number: number - 1})
                         : of(undefined)
-                ))
+                )),
+                tap(() => {
+                    // synchronise with the real page
+                    const destinationItem = this.stack[this.stack.length - 1];
+                    if (destinationItem) {
+                        this._popItem = {
+                            path: destinationItem.path,
+                            params: {}
+                        };
+                    }
+                })
             );
         }
     }
@@ -71,6 +99,7 @@ export class NavService {
     public setRoot(path: NavPathEnum, params: NavParams = {}): Observable<boolean> {
         this.justNavigated = true;
         this.stack = [{path, params}];
+        this._popItem = undefined;
 
         return from(this.navController.navigateRoot(path));
     }
@@ -87,24 +116,15 @@ export class NavService {
         return this.stack[stackIndex].params[key];
     }
 
+    public get popItem(): { path: NavPathEnum, params: NavParams }|undefined {
+        return this._popItem;
+    }
+
     public currentPath(stackId?: number): NavPathEnum|undefined {
         const stackIndex = stackId !== undefined
             ? stackId
             : (this.stack.length - 1);
         return this.stack[stackIndex].path;
-    }
-
-    private spliceStack(index: number, newParams: NavParams = {}): void {
-        // remove elements in stack after the request path params
-        this.stack.splice(index);
-
-        const stackElement = this.stack[this.stack.length - 1];
-        if (stackElement) {
-            stackElement.params = {
-                ...(stackElement.params || {}),
-                ...(newParams || {}),
-            };
-        }
     }
 
 }
