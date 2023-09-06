@@ -65,20 +65,20 @@ ion-button {
     }
 
     &[disabled]:not(.outline), &.disabled:not(.outline) {
-        --ion-color-base: $darkGray !important;
+        --ion-color-base: #{$darkGray} !important;
         opacity: 1;
     }
 
     &.outline {
         --border-width: 2px;
         --border-style: solid;
-        --border-color: $primary;
-        --ion-color-base: $white !important;
-        --ion-color-contrast: $primary !important;
+        --border-color: #{$primary};
+        --ion-color-base: #{$white} !important;
+        --ion-color-contrast: #{$primary} !important;
 
         &[disabled] {
-            --ion-color-base: $white !important;
-            --ion-color-contrast: $primary !important;
+            --ion-color-base: #{$white} !important;
+            --ion-color-contrast: #{$primary} !important;
             opacity: 0.5;
         }
     }
