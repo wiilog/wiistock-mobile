@@ -5,8 +5,6 @@ import {SelectItemTypeEnum} from '@common/components/select-item/select-item-typ
 import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {IconConfig} from '@common/components/panel/model/icon-config';
 import {ToastService} from '@app/services/toast.service';
-import {SqliteService} from '@app/services/sqlite/sqlite.service';
-import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {StorageService} from '@app/services/storage/storage.service';
@@ -51,11 +49,9 @@ export class ManualDeliveryLocationPage implements ViewWillEnter, ViewWillLeave 
 
     public skipValidation: boolean = false;
 
-    public constructor(private sqliteService: SqliteService,
-                       private toastService: ToastService,
+    public constructor(private toastService: ToastService,
                        private api: ApiService,
                        private networkService: NetworkService,
-                       private localDataManager: LocalDataManagerService,
                        private loadingService: LoadingService,
                        private storageService: StorageService,
                        private navService: NavService) {
@@ -133,7 +129,7 @@ export class ManualDeliveryLocationPage implements ViewWillEnter, ViewWillLeave 
     }
 
     private handleLivraisonSuccess(): void {
-        this.toastService.presentToast('Livraison directe enregistrée avec succès');
+        this.toastService.presentToast(`Livraison directe enregistrée avec succès.`);
         this.closeScreen();
     }
 

@@ -4,10 +4,8 @@ import {HeaderConfig} from '@common/components/panel/model/header-config';
 import {Emplacement} from '@entities/emplacement';
 import {ToastService} from '@app/services/toast.service';
 import {NavService} from '@app/services/nav/nav.service';
-import {ActivatedRoute} from '@angular/router';
 import {SelectItemTypeEnum} from '@common/components/select-item/select-item-type.enum';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
-import {FormPanelService} from '@app/services/form-panel.service';
 import {FormPanelParam} from '@common/directives/form-panel/form-panel-param';
 import {FormPanelInputComponent} from '@common/components/panel/form-panel/form-panel-input/form-panel-input.component';
 import {FormPanelSelectComponent} from '@common/components/panel/form-panel/form-panel-select/form-panel-select.component';
@@ -48,10 +46,8 @@ export class PriseUlDetails implements ViewWillEnter {
     private validate: (values: {comment: string; signature: string; photo: string; natureId: number; projectId?: number}) => void;
     public natureIdToNature: { [natureId: string]: Nature };
 
-    public constructor(private activatedRoute: ActivatedRoute,
-                       private toastService: ToastService,
+    public constructor(private toastService: ToastService,
                        private sqliteService: SqliteService,
-                       private formPanelService: FormPanelService,
                        private apiService: ApiService,
                        private navService: NavService,
                        private loadingService: LoadingService) {
@@ -149,7 +145,7 @@ export class PriseUlDetails implements ViewWillEnter {
                         {
                             item: FormPanelSelectComponent,
                             config: {
-                                label: 'Projet',
+                                label: `Projet`,
                                 name: 'projectId',
                                 value: projectId,
                                 inputConfig: {

@@ -14,6 +14,8 @@ import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {map} from 'rxjs/operators';
 import {NetworkService} from '@app/services/network.service';
 import {LoadingService} from "@app/services/loading.service";
+import {TranslationService} from "@app/services/translations.service";
+import {Translations} from "@entities/translation";
 
 @Component({
     selector: 'wii-stock-menu',
@@ -34,6 +36,8 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
     private navigationSubscription?: Subscription;
     private deposeAlreadyNavigate: boolean;
 
+    public deliveryOrderTranslation: string;
+
     public constructor(private platform: Platform,
                        private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
@@ -42,34 +46,48 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                        private storageService: StorageService,
                        private loadingService: LoadingService,
                        private sqliteService: SqliteService,
-                       private navService: NavService) {
+                       private navService: NavService,
+                       private translationService: TranslationService) {
         this.avoidSync = true;
-        const self = this;
+    }
+
+    public ionViewWillEnter(): void {
+        this.avoidSync = this.navService.param<boolean>('avoidSync');
+        this.navigationSubscription = merge(
+            this.mainHeaderService.navigationChange$,
+            this.platform.backButton
+        )
+            .subscribe(() => {
+                this.avoidSync = true;
+            });
+
         this.loadingService.presentLoadingWhile({
-            event: () => {
-                return this.storageService.getRight(StorageKeyEnum.RIGHT_CREATE_ARTICLE_FROM_NOMADE)
-            }
-        }).subscribe((hasRightDisplayCreateArticleButton) => {
-            self.menuConfig = [
+            event: () => zip(
+                this.storageService.getRight(StorageKeyEnum.RIGHT_CREATE_ARTICLE_FROM_NOMADE),
+                this.translationService.get(null, `Ordre`, `Livraison`)
+            )
+        }).subscribe(([hasRightDisplayCreateArticleButton, deliveryOrderTranslations]: [Boolean, Translations]) => {
+            this.deliveryOrderTranslation = TranslationService.Translate(deliveryOrderTranslations, 'Livraison');
+            this.menuConfig = [
                 {
                     icon: 'preparation.svg',
                     label: 'Préparation',
                     action: () => {
-                        self.navService.push(NavPathEnum.PREPARATION_MENU);
+                        this.navService.push(NavPathEnum.PREPARATION_MENU);
                     }
                 },
                 {
                     icon: 'delivery.svg',
-                    label: 'Livraison',
+                    label: this.deliveryOrderTranslation,
                     action: () => {
-                        self.navService.push(NavPathEnum.LIVRAISON_MENU);
+                        this.navService.push(NavPathEnum.LIVRAISON_MENU);
                     }
                 },
                 {
                     icon: 'manual-delivery.svg',
-                    label: 'Livraison<br/>manuelle',
+                    label: `Livraison manuelle`,
                     action: () => {
-                        self.navService.push(NavPathEnum.MANUAL_DELIVERY);
+                        this.navService.push(NavPathEnum.MANUAL_DELIVERY);
                     }
                 },
                 {
@@ -78,10 +96,10 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                     action: () => {
                         this.navService.push(NavPathEnum.COLLECTE_MENU, {
                             avoidSync: () => {
-                                self.setAvoidSync(true);
+                                this.setAvoidSync(true);
                             },
                             goToDrop: () => {
-                                self.goToDrop();
+                                this.goToDrop();
                             }
                         });
                     }
@@ -104,14 +122,14 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                     icon: 'inventory.svg',
                     label: 'Inventaire',
                     action: () => {
-                        self.navService.push(NavPathEnum.INVENTORY_LOCATIONS);
+                        this.navService.push(NavPathEnum.INVENTORY_LOCATIONS);
                     }
                 },
                 {
                     icon: 'association.svg',
                     label: 'Association Articles - UL',
                     action: () => {
-                        self.navService.push(NavPathEnum.ASSOCIATION);
+                        this.navService.push(NavPathEnum.ASSOCIATION);
                     }
                 },
                 ...(hasRightDisplayCreateArticleButton
@@ -119,38 +137,27 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                         icon: 'new-article-RFID.svg',
                         label: 'Créer article',
                         action: () => {
-                            self.navService.push(NavPathEnum.ARTICLE_CREATION_SCAN_RFID_TAG);
+                            this.navService.push(NavPathEnum.ARTICLE_CREATION_SCAN_RFID_TAG);
                         }
                     }]
                     : [])
             ];
+
+            if (!this.avoidSync) {
+                this.synchronise();
+            } else {
+                this.avoidSync = false;
+                this.refreshSlidersData();
+            }
+
+            // TODO WIIS-7970 test this
+            const goToDropDirectly = (!this.deposeAlreadyNavigate && Boolean(this.navService.param('goToDropDirectly')));
+
+            if (goToDropDirectly) {
+                this.deposeAlreadyNavigate = true;
+                this.navigateToPriseDeposePage(true);
+            }
         });
-    }
-
-    public ionViewWillEnter(): void {
-        this.avoidSync = this.navService.param<boolean>('avoidSync');
-        this.navigationSubscription = merge(
-            this.mainHeaderService.navigationChange$,
-            this.platform.backButton
-        )
-            .subscribe(() => {
-                this.avoidSync = true;
-            });
-
-        if (!this.avoidSync) {
-            this.synchronise();
-        } else {
-            this.avoidSync = false;
-            this.refreshSlidersData();
-        }
-
-        // TODO WIIS-7970 test this
-        const goToDropDirectly = (!this.deposeAlreadyNavigate && Boolean(this.navService.param('goToDropDirectly')));
-
-        if (goToDropDirectly) {
-            this.deposeAlreadyNavigate = true;
-            this.navigateToPriseDeposePage(true);
-        }
     }
 
     public ionViewWillLeave(): void {
@@ -259,7 +266,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                 {label: `Transfert${sToTreat.transfers} à traiter`, counter: transfers.toTreat},
                 {label: `Préparation${sToTreat.preparations} à traiter`, counter: preparations.toTreat},
                 {label: `Collecte${sToTreat.collects} à traiter`, counter: collects.toTreat},
-                {label: `Livraison${sToTreat.deliveries} à traiter`, counter: deliveries.toTreat},
+                {label: `${this.deliveryOrderTranslation}${sToTreat.deliveries} à traiter`, counter: deliveries.toTreat},
             ],
             [
                 {
@@ -275,7 +282,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                     counter: collects.treated
                 },
                 {
-                    label: `Livraison${sTreated.deliveries} traitée${sTreated.deliveries}`,
+                    label: `${this.deliveryOrderTranslation}${sTreated.deliveries} traitée${sTreated.deliveries}`,
                     counter: deliveries.treated
                 },
             ],

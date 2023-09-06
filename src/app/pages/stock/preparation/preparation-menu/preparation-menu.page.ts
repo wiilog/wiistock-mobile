@@ -8,6 +8,7 @@ import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import * as moment from "moment";
 import {ViewWillEnter} from "@ionic/angular";
+import {TranslationService} from "@app/services/translations.service";
 
 @Component({
     selector: 'wii-preparation-menu',
@@ -23,6 +24,8 @@ export class PreparationMenuPage implements ViewWillEnter {
 
     public hasLoaded: boolean;
     public firstLaunch: boolean;
+
+    public projectTranslation: string;
 
     public constructor(private mainHeaderService: MainHeaderService,
                        private sqlLiteProvider: SqliteService,
@@ -82,7 +85,7 @@ export class PreparationMenuPage implements ViewWillEnter {
                         ...(
                             preparation.project
                                 ? [{
-                                    label: 'Projet',
+                                    label: this.projectTranslation,
                                     value: preparation.project
                                 }]
                                 : []

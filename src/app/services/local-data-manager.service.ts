@@ -56,6 +56,7 @@ export class LocalDataManagerService {
                        private storageService: StorageService,
                        private alertService: AlertService,
                        private translationService: TranslationService) {
+
         this.apiProccessConfigs = {
             preparation: {
                 service: ApiService.FINISH_PREPA,

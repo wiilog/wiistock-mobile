@@ -11,6 +11,7 @@ import {TransportRoundLine} from '@entities/transport-round-line';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {AlertService} from '@app/services/alert.service';
 import {TransportService} from '@app/services/transport.service';
+import {TranslationService} from "@app/services/translations.service";
 
 @Component({
     selector: 'wii-transport-list',

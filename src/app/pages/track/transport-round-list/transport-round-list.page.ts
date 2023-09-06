@@ -11,7 +11,6 @@ import {NetworkService} from '@app/services/network.service';
 import {TransportCardMode} from '@common/components/transport-card/transport-card.component';
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {AlertService} from '@app/services/alert.service';
-import {MainHeaderService} from '@app/services/main-header.service';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 
 @Component({
@@ -28,7 +27,6 @@ export class TransportRoundListPage implements ViewWillEnter {
     public loading: boolean;
 
     public constructor(private navService: NavService,
-                       private mainHeaderService: MainHeaderService,
                        private apiService: ApiService,
                        private localDataService: LocalDataManagerService,
                        private loadingService: LoadingService,
@@ -39,6 +37,7 @@ export class TransportRoundListPage implements ViewWillEnter {
 
     public ionViewWillEnter(): void {
         moment.locale('fr');
+
         this.synchronise();
     }
 
@@ -153,7 +152,6 @@ export class TransportRoundListPage implements ViewWillEnter {
                             this.toastService.presentToast(`Aucun emplacement de retour des colis non livrés n'a été paramétré, vous ne pouvez pas continuer.`)
                         }
                     });
-
                 }
             } else {
                 this.toastService.presentToast(`Aucun emplacement de fin de tournée n'a été paramétré, vous ne pouvez pas continuer.`)
