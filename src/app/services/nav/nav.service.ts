@@ -32,6 +32,7 @@ export class NavService {
     public push(path: NavPathEnum, params: NavParams = {}): Observable<boolean> {
         this.justNavigated = true;
         this.stack.push({path, params});
+        this._popItem = undefined;
 
         return from(this.navController.navigateForward(path));
     }
@@ -56,7 +57,7 @@ export class NavService {
             this.stack.splice(this.stack.length - reverseIndex);
 
             this._popItem = {
-                path: path,
+                path,
                 params: params || {}
             };
 
