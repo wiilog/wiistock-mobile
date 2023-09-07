@@ -70,6 +70,11 @@ export class TransportRoundPackLoadPage implements ViewWillEnter, ViewWillLeave 
     }
 
     public async ionViewWillEnter() {
+        if (this.navService.popItem
+            && this.navService.popItem.path !== NavPathEnum.TRANSPORT_ROUND_PACK_LOAD) {
+            return;
+        }
+
         this.round = this.navService.param('round');
         this.unpreparedDeliveries = this.navService.param('unpreparedDeliveries');
         this.packs = this.round.lines.reduce(
@@ -293,9 +298,11 @@ export class TransportRoundPackLoadPage implements ViewWillEnter, ViewWillLeave 
 
     public validate(): void {
         const loadedPacks = this.packs.filter(({loaded, loading, rejected}) => !loaded && loading && !rejected);
+        const packsToLoad = this.packs.filter(({loaded, loading, rejected}) => (!loaded && !loading && !rejected)).length;
+
         if (loadedPacks.length > 0) {
             this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD_VALIDATE, {
-                everythingLoaded: loadedPacks.length + this.packs.filter(({loaded, rejected}) => loaded && !rejected).length === this.packs.filter(({rejected}) => !rejected).length,
+                everythingLoaded: packsToLoad == 0,
                 unpreparedDeliveries: this.unpreparedDeliveries,
                 packs: loadedPacks,
                 round: this.round,

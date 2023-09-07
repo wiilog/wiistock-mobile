@@ -15,6 +15,7 @@ import {zip} from 'rxjs';
 import {NetworkService} from "@app/services/network.service";
 import {TransportRound} from "@entities/transport-round";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 
 @Component({
     selector: 'wii-transport-round-pack-load-validate',
@@ -37,6 +38,7 @@ export class TransportRoundPackLoadValidatePage implements ViewWillEnter, ViewWi
         nature: string;
     }>;
     private round: TransportRound;
+    private everythingLoaded: boolean;
     private unpreparedDeliveries: () => void;
 
     public panelHeaderConfig: {
@@ -60,6 +62,7 @@ export class TransportRoundPackLoadValidatePage implements ViewWillEnter, ViewWi
 
     public ionViewWillEnter(): void {
         this.packs = this.navService.param('packs');
+        this.everythingLoaded = this.navService.param('everythingLoaded');
         this.round = this.navService.param('round');
         this.unpreparedDeliveries = this.navService.param('unpreparedDeliveries');
         this.resetEmitter$.emit();
@@ -167,14 +170,14 @@ export class TransportRoundPackLoadValidatePage implements ViewWillEnter, ViewWi
                 ).subscribe(([loading, response]: [HTMLIonLoadingElement, any]) => {
                     loading.dismiss();
                     if (response && response.success) {
-                        const onValidate = this.navService.param('onValidate');
+                        const  onValidate = this.navService.param('onValidate');
                         if(onValidate) {
                             onValidate();
                         }
 
-                        this.navService.pop().subscribe(() => {
-                            if (this.navService.param('everythingLoaded')) {
-                                this.navService.pop().subscribe(() => {
+                        this.navService.pop({path: NavPathEnum.TRANSPORT_ROUND_PACK_LOAD}).subscribe(() => {
+                            if (this.everythingLoaded) {
+                                this.navService.pop({path: NavPathEnum.TRANSPORT_ROUND_LIST}).subscribe(() => {
                                     if(this.unpreparedDeliveries) {
                                         this.unpreparedDeliveries();
                                     }
