@@ -3,9 +3,13 @@ import {ViewWillEnter} from '@ionic/angular';
 import {NavService} from '@app/services/nav/nav.service';
 import {FormPanelParam} from '@common/directives/form-panel/form-panel-param';
 import {TransportRoundLine} from '@entities/transport-round-line';
-import {FormPanelSigningComponent} from '@common/components/panel/form-panel/form-panel-signing/form-panel-signing.component';
-import {FormPanelCameraComponent} from '@common/components/panel/form-panel/form-panel-camera/form-panel-camera.component';
-import {mergeMap, map, tap} from 'rxjs/operators';
+import {
+    FormPanelSigningComponent
+} from '@common/components/panel/form-panel/form-panel-signing/form-panel-signing.component';
+import {
+    FormPanelCameraComponent
+} from '@common/components/panel/form-panel/form-panel-camera/form-panel-camera.component';
+import {map, mergeMap, tap} from 'rxjs/operators';
 import {ApiService} from '@app/services/api.service';
 import {from, Observable, of, Subscription} from 'rxjs';
 import {NetworkService} from '@app/services/network.service';
@@ -17,7 +21,9 @@ import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {TransportCardMode} from '@common/components/transport-card/transport-card.component';
 import {TransportService} from '@app/services/transport.service';
 import {TransportRound} from "@entities/transport-round";
-import {FormPanelTextareaComponent} from '@common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component';
+import {
+    FormPanelTextareaComponent
+} from '@common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component';
 
 @Component({
     selector: 'wii-finish-transport',
@@ -144,7 +150,7 @@ export class FinishTransportPage implements ViewWillEnter {
                                 this.toastService.presentToast("Les données ont été sauvegardées");
 
                                 if (!this.edit && this.transport.collect) {
-                                     await this.navService.pop({number: allTransportsTreated ? 4 : 3});
+                                     await this.navService.pop({path: allTransportsTreated ? NavPathEnum.TRANSPORT_ROUND_LIST : NavPathEnum.TRANSPORT_LIST});
 
                                     this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
                                         transport: this.transport.collect,
@@ -153,7 +159,7 @@ export class FinishTransportPage implements ViewWillEnter {
                                     })
                                 } else {
                                     const additionalPop = allTransportsTreated ? 1 : 0;
-                                    this.navService.pop({number: this.edit ? 1 : (3 + additionalPop)});
+                                    this.navService.pop({path: this.edit ? NavPathEnum.TRANSPORT_PACK_DELIVER : (additionalPop ? NavPathEnum.TRANSPORT_ROUND_LIST : NavPathEnum.TRANSPORT_LIST)});
                                 }
                             } else {
                                 this.toastService.presentToast(message || "Une erreur s'est produite.");

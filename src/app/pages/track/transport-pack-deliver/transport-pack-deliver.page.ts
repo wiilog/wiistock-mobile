@@ -61,6 +61,10 @@ export class TransportPackDeliverPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public ionViewWillEnter(): void {
+        if (this.navService.popItem
+            && this.navService.popItem.path !== NavPathEnum.TRANSPORT_PACK_DELIVER) {
+            return;
+        }
         this.transport = this.navService.param('transport');
         this.round = this.navService.param('round');
         this.packs = this.transport.packs;

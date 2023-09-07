@@ -42,6 +42,11 @@ export class TransportListPage implements ViewWillEnter {
     }
 
     public ionViewWillEnter(): void {
+        if (this.navService.popItem
+            && this.navService.popItem.path !== NavPathEnum.TRANSPORT_LIST) {
+            return;
+        }
+
         this.mode = this.navService.param('mode');
         this.round = this.navService.param('round');
 

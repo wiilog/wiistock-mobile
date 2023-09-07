@@ -26,6 +26,11 @@ export class TransportShowPage implements ViewWillEnter {
     }
 
     public ionViewWillEnter(): void {
+        if (this.navService.popItem
+            && this.navService.popItem.path !== NavPathEnum.TRANSPORT_SHOW) {
+            return;
+        }
+
         this.mode = this.navService.param('mode');
         this.transport = this.navService.param('transport');
         this.round = this.navService.param('round');
