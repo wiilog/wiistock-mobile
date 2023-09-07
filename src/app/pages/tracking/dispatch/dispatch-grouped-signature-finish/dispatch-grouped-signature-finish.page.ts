@@ -277,62 +277,66 @@ export class DispatchGroupedSignatureFinishPage implements ViewWillEnter, ViewWi
     }
 
     public finishGroupedSignature() {
-        const {signatoryTrigram, signatoryPassword, comment} = this.formPanelComponent.values;
-        if (signatoryTrigram && signatoryPassword && (!Boolean(this.selectedStatus.commentNeeded) || comment)) {
-            this.loadingService.presentLoadingWhile({
-                event: () => {
-                    return this.sqliteService.findOneBy('user', {username: signatoryTrigram})
-                        .pipe(
-                            mergeMap((signatory) => {
-                                return this.checkSignatureAndUpdateStatuses(signatoryPassword, signatory);
-                            }),
-                            mergeMap(() => {
-                                if (this.offlineMode) {
-                                    return zip(
-                                        this.sqliteService.findOneBy('user', {username: signatoryTrigram}),
-                                        this.storageService.getString(StorageKeyEnum.OPERATOR_ID)
-                                    ).pipe(
-                                        mergeMap(([signatory, operator]) => {
-                                            return this.checkSignatureAndInsertProcesses(signatoryPassword, operator, signatory, comment);
-                                        }));
-                                } else {
-                                    return this.apiService.requestApi(ApiService.FINISH_GROUPED_SIGNATURE, {
-                                        params: {
-                                            from: this.from ? this.from.id : null,
-                                            to: this.to ? this.to.id : null,
-                                            status: this.selectedStatus.id,
-                                            signatoryTrigram,
-                                            signatoryPassword,
-                                            comment,
-                                            dispatchesToSign: this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.id).join(','),
-                                        }
-                                    })
-                                }
-                            })
-                        )
-                }
-            }).subscribe((response) => {
-                this.toastService.presentToast(response.msg).subscribe(() => {
-                    if (response.success) {
-                        if (this.offlineMode) {
-                            this.navService.pop({
-                                path: NavPathEnum.DISPATCH_REQUEST_MENU
-                            })
-                        } else {
-                            this.navService.setRoot(NavPathEnum.MAIN_MENU);
-                        }
-                    }
-                });
-            });
+        if(!this.to?.id && !this.from?.id) {
+            this.toastService.presentToast(`Aucun emplacement n'a été trouvé dans la signature groupée.`)
         } else {
-            if (!signatoryTrigram && !signatoryPassword) {
-                this.toastService.presentToast('Veuillez saisir un trigramme signataire et un code signataire.');
-            } else if (!signatoryTrigram) {
-                this.toastService.presentToast('Veuillez saisir un trigramme signataire.');
-            } else if (!signatoryPassword) {
-                this.toastService.presentToast('Veuillez saisir un code signataire.');
-            } else if (Boolean(this.selectedStatus.commentNeeded) && !comment) {
-                this.toastService.presentToast('Veuillez saisir un commentaire.');
+            const {signatoryTrigram, signatoryPassword, comment} = this.formPanelComponent.values;
+            if (signatoryTrigram && signatoryPassword && (!Boolean(this.selectedStatus.commentNeeded) || comment)) {
+                this.loadingService.presentLoadingWhile({
+                    event: () => {
+                        return this.sqliteService.findOneBy('user', {username: signatoryTrigram})
+                            .pipe(
+                                mergeMap((signatory) => {
+                                    return this.checkSignatureAndUpdateStatuses(signatoryPassword, signatory);
+                                }),
+                                mergeMap(() => {
+                                    if (this.offlineMode) {
+                                        return zip(
+                                            this.sqliteService.findOneBy('user', {username: signatoryTrigram}),
+                                            this.storageService.getString(StorageKeyEnum.OPERATOR_ID)
+                                        ).pipe(
+                                            mergeMap(([signatory, operator]) => {
+                                                return this.checkSignatureAndInsertProcesses(signatoryPassword, operator, signatory, comment);
+                                            }));
+                                    } else {
+                                        return this.apiService.requestApi(ApiService.FINISH_GROUPED_SIGNATURE, {
+                                            params: {
+                                                from: this.from ? this.from.id : null,
+                                                to: this.to ? this.to.id : null,
+                                                status: this.selectedStatus.id,
+                                                signatoryTrigram,
+                                                signatoryPassword,
+                                                comment,
+                                                dispatchesToSign: this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.id).join(','),
+                                            }
+                                        })
+                                    }
+                                })
+                            )
+                    }
+                }).subscribe((response) => {
+                    this.toastService.presentToast(response.msg).subscribe(() => {
+                        if (response.success) {
+                            if (this.offlineMode) {
+                                this.navService.pop({
+                                    path: NavPathEnum.DISPATCH_REQUEST_MENU
+                                })
+                            } else {
+                                this.navService.setRoot(NavPathEnum.MAIN_MENU);
+                            }
+                        }
+                    });
+                });
+            } else {
+                if (!signatoryTrigram && !signatoryPassword) {
+                    this.toastService.presentToast('Veuillez saisir un trigramme signataire et un code signataire.');
+                } else if (!signatoryTrigram) {
+                    this.toastService.presentToast('Veuillez saisir un trigramme signataire.');
+                } else if (!signatoryPassword) {
+                    this.toastService.presentToast('Veuillez saisir un code signataire.');
+                } else if (Boolean(this.selectedStatus.commentNeeded) && !comment) {
+                    this.toastService.presentToast('Veuillez saisir un commentaire.');
+                }
             }
         }
     }
