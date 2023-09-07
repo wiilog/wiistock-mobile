@@ -19,6 +19,7 @@ import {NetworkService} from '@app/services/network.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {TranslationService} from "@app/services/translations.service";
 import {Translations} from "@entities/translation";
+import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 
 @Component({
     selector: 'wii-livraison-emplacement',
@@ -192,7 +193,7 @@ export class LivraisonEmplacementPage implements ViewWillEnter, ViewWillLeave{
 
     private closeScreen(): void {
         this.validateIsLoading = false;
-        this.navService.pop().subscribe(() => {
+        this.navService.pop({path: NavPathEnum.LIVRAISON_ARTICLES}).subscribe(() => {
             this.validateLivraison();
         });
     }

@@ -79,6 +79,10 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public ionViewWillEnter(): void {
+        if (this.navService.popItem
+            && this.navService.popItem.path !== NavPathEnum.LIVRAISON_ARTICLES) {
+            return;
+        }
         this.livraison = this.navService.param('livraison');
 
         this.listBoldValues = ['label', 'barCode', 'location', 'quantity', 'targetLocationPicking', 'logisticUnit', 'articlesCount', 'nature'];
