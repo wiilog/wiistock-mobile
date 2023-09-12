@@ -35,6 +35,11 @@ export class TransportCollectNaturesPage implements ViewWillEnter {
     }
 
     public ionViewWillEnter(): void {
+        if (this.navService.popItem
+            && this.navService.popItem.path !== NavPathEnum.TRANSPORT_COLLECT_NATURES) {
+            return;
+        }
+
         this.transport = this.navService.param('transport');
         this.collectedPacksLocations = this.navService.param('collectedPacksLocations');
         this.round = this.navService.param('round');

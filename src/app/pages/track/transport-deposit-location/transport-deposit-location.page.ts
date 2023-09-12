@@ -15,6 +15,7 @@ import {zip} from 'rxjs';
 import {NetworkService} from "@app/services/network.service";
 import {TransportRound} from "@entities/transport-round";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 
 @Component({
     selector: 'wii-transport-deposit-location',
@@ -193,7 +194,7 @@ export class TransportDepositLocationPage implements ViewWillEnter, ViewWillLeav
                 zip(
                     this.loadingService.presentLoading(),
                     this.apiService.requestApi(ApiService.DEPOSIT_TRANSPORT, {params})
-                ).subscribe(async ([loading, response]: [HTMLIonLoadingElement, any]) => {
+                ).subscribe(([loading, response]: [HTMLIonLoadingElement, any]) => {
                     loading.dismiss();
 
                     if (response && response.success) {
@@ -206,8 +207,8 @@ export class TransportDepositLocationPage implements ViewWillEnter, ViewWillLeav
                             this.toastService.presentToast('Les objets collectés ont bien été déposés');
                         }
 
-                        await this.navService.pop({
-                            number: this.everythingReturned || this.depositedCollectPacks.length ? 3 - (Number(this.skippedMenu) || 0) : 1
+                        this.navService.pop({
+                            path: this.everythingReturned || this.depositedCollectPacks.length ? NavPathEnum.TRANSPORT_ROUND_LIST : NavPathEnum.TRANSPORT_COLLECT_NATURES,
                         });
                     }
                 });
