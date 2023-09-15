@@ -472,8 +472,8 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
         };
     }
 
-    private packToListItemConfig({code, natureId, lastLocation, already_treated, localId}: DispatchPack, natureTranslation: string) {
-        const {reference, quantity} = this.dispatchReferences.find(({localDispatchPackId}) => localDispatchPackId === localId) || {};
+    private packToListItemConfig({code, quantity, natureId, lastLocation, already_treated, localId}: DispatchPack, natureTranslation: string) {
+        const dispatchReference: any = this.dispatchReferences.find(({localDispatchPackId}) => localDispatchPackId === localId) || {};
 
         return {
             infos: {
@@ -485,17 +485,17 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                     label: natureTranslation,
                     value: this.natureIdsToLabels[Number(natureId)]
                 },
-                ...(reference ? {
+                ...(dispatchReference.reference ? {
                     reference: {
                         label: `Référence`,
-                        value: reference
+                        value: dispatchReference.reference
                     }
                 }: {}),
                 quantity: {
                     label: 'Quantité',
-                    value: `${quantity}`
+                    value: `${dispatchReference.quantity || quantity}`
                 },
-                ...(!reference ? {
+                ...(!dispatchReference.reference ? {
                     lastLocation: {
                         label: 'Dernier emplacement',
                         value: lastLocation
