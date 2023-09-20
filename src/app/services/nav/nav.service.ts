@@ -1,10 +1,11 @@
 import {Injectable} from '@angular/core';
 import {NavController, Platform} from '@ionic/angular';
-import {from, mergeMap, Observable, of} from 'rxjs';
+import {from, merge, mergeMap, Observable, of} from 'rxjs';
 import {Router, NavigationStart} from '@angular/router';
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {map, tap} from "rxjs/operators";
 import {NavParams} from "@app/services/nav/nav-params";
+import {MainHeaderService} from "@app/services/main-header.service";
 
 @Injectable({
     providedIn: 'root'
@@ -17,6 +18,8 @@ export class NavService {
     private justNavigated: boolean;
 
     public constructor(private navController: NavController,
+                       private mainHeaderService: MainHeaderService,
+                       private platform: Platform,
                        private router: Router) {
         this.router.events.subscribe(event => {
             if (event instanceof NavigationStart) {
@@ -121,6 +124,10 @@ export class NavService {
         return this._popItem;
     }
 
+    public set popItem(popItem: { path: NavPathEnum, params: NavParams }|undefined) {
+        this._popItem = popItem;
+    }
+
     public currentPath(stackId?: number): NavPathEnum|undefined {
         const stackIndex = stackId !== undefined
             ? stackId
@@ -128,4 +135,25 @@ export class NavService {
         return this.stack[stackIndex].path;
     }
 
+    /**
+     * Trigger on :
+     *  * Action from header (pop or breadcrumb action)
+     *  * OR back button action
+     */
+    public userHasPopManually(path: NavPathEnum): Observable<NavParams|undefined> {
+        return merge(
+            this.mainHeaderService.navigationChange$,
+            this.platform.backButton
+        )
+            .pipe(
+                map(() => (
+                    (this.popItem?.path === path)
+                        ? this.popItem.params
+                        : undefined
+                )),
+                tap(() => {
+                    this._popItem = undefined;
+                })
+            );
+    }
 }

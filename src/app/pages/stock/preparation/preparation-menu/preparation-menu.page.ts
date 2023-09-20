@@ -8,7 +8,6 @@ import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import * as moment from "moment";
 import {ViewWillEnter} from "@ionic/angular";
-import {TranslationService} from "@app/services/translations.service";
 
 @Component({
     selector: 'wii-preparation-menu',
@@ -36,6 +35,19 @@ export class PreparationMenuPage implements ViewWillEnter {
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
         const withoutLoading = this.navService.param('withoutLoading');
+
+        if (this.navService.popItem?.path === NavPathEnum.PREPARATION_MENU
+            && this.navService.popItem?.params?.avoidSync === false) {
+            // If user pop manually we sync automatically if a preparation has been validated
+            this.navService.popItem = {
+                path: NavPathEnum.STOCK_MENU,
+                params: {
+                    avoidSync: false
+                }
+            };
+        }
+
+
         if (!this.firstLaunch || !withoutLoading) {
             this.sqlLiteProvider.findAll('preparation').subscribe((preparations) => {
                 this.preparations = preparations

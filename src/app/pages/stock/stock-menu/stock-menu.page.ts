@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
-import {merge, Subscription, zip} from 'rxjs';
-import {MenuConfig, ColumnNumber} from '@common/components/menu/menu-config';
+import {Subscription, zip} from 'rxjs';
+import {ColumnNumber, MenuConfig} from '@common/components/menu/menu-config';
 import {Platform, ViewWillEnter, ViewWillLeave} from '@ionic/angular';
 import {MainHeaderService} from '@app/services/main-header.service';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
@@ -30,6 +30,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
 
     public messageLoading?: string;
     public loading: boolean;
+    public synchroniseLoading: boolean;
 
     private avoidSync: boolean;
     private synchronisationSubscription?: Subscription;
@@ -38,9 +39,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
 
     public deliveryOrderTranslation: string;
 
-    public constructor(private platform: Platform,
-                       private mainHeaderService: MainHeaderService,
-                       private localDataManager: LocalDataManagerService,
+    public constructor(private localDataManager: LocalDataManagerService,
                        private networkService: NetworkService,
                        private toastService: ToastService,
                        private storageService: StorageService,
@@ -52,14 +51,10 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public ionViewWillEnter(): void {
+
+        // TODO WIIS-7970 test this
+        const goToDropDirectly = (!this.deposeAlreadyNavigate && Boolean(this.navService.param('goToDropDirectly')));
         this.avoidSync = this.navService.param<boolean>('avoidSync');
-        this.navigationSubscription = merge(
-            this.mainHeaderService.navigationChange$,
-            this.platform.backButton
-        )
-            .subscribe(() => {
-                this.avoidSync = true;
-            });
 
         this.loadingService.presentLoadingWhile({
             event: () => zip(
@@ -143,15 +138,12 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                     : [])
             ];
 
-            if (!this.avoidSync) {
-                this.synchronise();
-            } else {
-                this.avoidSync = false;
-                this.refreshSlidersData();
-            }
+            this.synchronise(false);
 
-            // TODO WIIS-7970 test this
-            const goToDropDirectly = (!this.deposeAlreadyNavigate && Boolean(this.navService.param('goToDropDirectly')));
+            if (this.navService.popItem?.path === NavPathEnum.STOCK_MENU
+                && this.navService.popItem.params.avoidSync === false) {
+                this.synchronise(true);
+            }
 
             if (goToDropDirectly) {
                 this.deposeAlreadyNavigate = true;
@@ -171,33 +163,40 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
         }
     }
 
-    public synchronise(): void {
-        this.networkService.hasNetwork().then((hasNetwork) => {
-            if (hasNetwork) {
-                this.loading = true;
+    public synchronise(force: boolean = true): void {
+        if (!this.avoidSync || force) {
+            this.networkService.hasNetwork().then((hasNetwork) => {
+                if (hasNetwork && !this.synchroniseLoading) {
+                    this.loading = true;
+                    this.synchroniseLoading = true;
 
-                this.synchronisationSubscription = this.localDataManager.synchroniseData().subscribe({
-                    next: ({finished, message}) => {
-                        this.messageLoading = message;
-                        this.loading = !finished;
-                        this.refreshSlidersData();
-                    },
-                    error: (error) => {
-                        const {api, message} = error;
-                        this.loading = false;
-                        this.refreshSlidersData();
-                        if (api && message) {
-                            this.toastService.presentToast(message);
+                    this.synchronisationSubscription = this.localDataManager.synchroniseData().subscribe({
+                        next: ({finished, message}) => {
+                            this.messageLoading = message;
+                            this.loading = !finished;
+                            this.synchroniseLoading = !finished;
+                            this.refreshSlidersData();
+                        },
+                        error: (error) => {
+                            const {api, message} = error;
+                            this.synchroniseLoading = false;
+                            this.refreshSlidersData();
+                            if (api && message) {
+                                this.toastService.presentToast(message);
+                            }
+                            throw error;
                         }
-                        throw error;
-                    }
-                });
-            } else {
-                this.loading = false;
-                this.refreshSlidersData();
-                this.toastService.presentToast('Veuillez vous connecter à internet afin de synchroniser vos données');
-            }
-        });
+                    });
+                } else {
+                    this.synchroniseLoading = false;
+                    this.refreshSlidersData();
+                    this.toastService.presentToast('Veuillez vous connecter à internet afin de synchroniser vos données');
+                }
+            });
+        } else {
+            this.avoidSync = false;
+            this.refreshSlidersData();
+        }
     }
 
     public goToDrop() {
