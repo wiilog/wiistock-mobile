@@ -291,7 +291,10 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
             this.navService.push(NavPathEnum.PREPARATION_EMPLACEMENT, {
                 preparation: this.preparation,
                 validatePrepa: () => {
-                    this.navService.pop();
+                    this.navService.pop({
+                        path: NavPathEnum.PREPARATION_MENU,
+                        params: {avoidSync: false}
+                    });
                 }
             });
         }
