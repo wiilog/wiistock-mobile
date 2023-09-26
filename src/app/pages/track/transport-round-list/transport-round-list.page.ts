@@ -263,6 +263,7 @@ export class TransportRoundListPage implements ViewWillEnter {
                                 );
                             })
                             .reduce((acc: any, round) => ({
+                                ...acc,
                                 [round.date]: [
                                     ...(acc[round.date] || []),
                                     round,
