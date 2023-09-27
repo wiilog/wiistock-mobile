@@ -14,6 +14,7 @@ export class NavService {
 
     private stack: Array<{ path: NavPathEnum, params: NavParams }> = [];
     private _popItem?: { path: NavPathEnum, params: NavParams };
+    private _nextPopItem?: { path: NavPathEnum, params: NavParams };
 
     private justNavigated: boolean;
 
@@ -36,6 +37,7 @@ export class NavService {
         this.justNavigated = true;
         this.stack.push({path, params});
         this._popItem = undefined;
+        this._nextPopItem = undefined;
 
         return from(this.navController.navigateForward(path));
     }
@@ -58,27 +60,22 @@ export class NavService {
             // keep as last the found stacked element and remove the rest of the stack
             // remove elements in stack after the request path params
             this.stack.splice(this.stack.length - reverseIndex);
+            const nextPopItem = this._nextPopItem?.path === path
+                ? this._nextPopItem?.params
+                : undefined
 
             this._popItem = {
                 path,
-                params: params || {}
+                params: params || nextPopItem || {}
             };
+            this._nextPopItem = undefined;
 
             return from(this.navController.navigateBack(path))
                 .pipe(map(() => undefined));
         }
         else {
             this.stack.pop();
-
-            // we guess the destination path
-            const pageToPop = number || 1;
-            const destinationItem = this.stack[this.stack.length - pageToPop];
-            if (destinationItem) {
-                this._popItem = {
-                    path: destinationItem.path,
-                    params: {}
-                };
-            }
+            this._popItem = undefined;
 
             return from(this.navController.pop()).pipe(
                 mergeMap(() => (
@@ -87,14 +84,8 @@ export class NavService {
                         : of(undefined)
                 )),
                 tap(() => {
-                    // synchronise with the real page
-                    const destinationItem = this.stack[this.stack.length - 1];
-                    if (destinationItem) {
-                        this._popItem = {
-                            path: destinationItem.path,
-                            params: {}
-                        };
-                    }
+                    this.syncPopItem();
+                    this._nextPopItem = undefined;
                 })
             );
         }
@@ -104,6 +95,7 @@ export class NavService {
         this.justNavigated = true;
         this.stack = [{path, params}];
         this._popItem = undefined;
+        this._nextPopItem = undefined;
 
         return from(this.navController.navigateRoot(path));
     }
@@ -124,8 +116,8 @@ export class NavService {
         return this._popItem;
     }
 
-    public set popItem(popItem: { path: NavPathEnum, params: NavParams }|undefined) {
-        this._popItem = popItem;
+    public set nextPopItem(nextPopItem: { path: NavPathEnum, params: NavParams }|undefined) {
+        this._nextPopItem = nextPopItem;
     }
 
     public currentPath(stackId?: number): NavPathEnum|undefined {
@@ -155,5 +147,22 @@ export class NavService {
                     this._popItem = undefined;
                 })
             );
+    }
+
+    private syncPopItem(): void {
+        // synchronise with the real page
+        const destinationItem = this.stack[this.stack.length - 1];
+        if (destinationItem) {
+            const nextPopItem = this._nextPopItem?.path === destinationItem.path
+                ? this._nextPopItem?.params
+                : undefined
+            this._popItem = {
+                path: destinationItem.path,
+                params: nextPopItem || {}
+            };
+        }
+        else {
+            this._popItem = undefined;
+        }
     }
 }

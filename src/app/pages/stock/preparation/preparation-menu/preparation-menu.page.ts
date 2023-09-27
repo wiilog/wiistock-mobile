@@ -39,14 +39,13 @@ export class PreparationMenuPage implements ViewWillEnter {
         if (this.navService.popItem?.path === NavPathEnum.PREPARATION_MENU
             && this.navService.popItem?.params?.avoidSync === false) {
             // If user pop manually we sync automatically if a preparation has been validated
-            this.navService.popItem = {
+            this.navService.nextPopItem = {
                 path: NavPathEnum.STOCK_MENU,
                 params: {
                     avoidSync: false
                 }
             };
         }
-
 
         if (!this.firstLaunch || !withoutLoading) {
             this.sqlLiteProvider.findAll('preparation').subscribe((preparations) => {

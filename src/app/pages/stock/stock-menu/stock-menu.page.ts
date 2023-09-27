@@ -141,7 +141,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
             this.synchronise(false);
 
             if (this.navService.popItem?.path === NavPathEnum.STOCK_MENU
-                && this.navService.popItem.params.avoidSync === false) {
+                && this.navService.popItem.params?.avoidSync === false) {
                 this.synchronise(true);
             }
 
@@ -164,6 +164,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public synchronise(force: boolean = true): void {
+        console.log('ON PASSE ICI', force)
         if (!this.avoidSync || force) {
             this.networkService.hasNetwork().then((hasNetwork) => {
                 if (hasNetwork && !this.synchroniseLoading) {
