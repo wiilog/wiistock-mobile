@@ -6,6 +6,7 @@ import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {map, tap} from "rxjs/operators";
 import {NavParams} from "@app/services/nav/nav-params";
 import {MainHeaderService} from "@app/services/main-header.service";
+import {App} from "@capacitor/app";
 
 @Injectable({
     providedIn: 'root'
@@ -31,6 +32,12 @@ export class NavService {
                 this.justNavigated = false;
             }
         });
+
+        // App.addListener('backButton', () => {
+        //     this.stack.pop();
+        //     this.syncPopItem();
+        //     this._nextPopItem = undefined;
+        // });
     }
 
     public push(path: NavPathEnum, params: NavParams = {}): Observable<boolean> {
@@ -77,17 +84,17 @@ export class NavService {
             this.stack.pop();
             this._popItem = undefined;
 
-            return from(this.navController.pop()).pipe(
-                mergeMap(() => (
-                    number && number > 1
-                        ? this.pop({number: number - 1})
-                        : of(undefined)
-                )),
-                tap(() => {
+            return from(this.navController.pop()
+                .then(() => {
+                if(number && number > 1){
+                    return this.pop({number: number - 1}).toPromise();
+                } else {
                     this.syncPopItem();
                     this._nextPopItem = undefined;
-                })
-            );
+                    return of(undefined).toPromise();
+                }
+
+            }).catch(err => console.log(err)));
         }
     }
 
@@ -155,7 +162,7 @@ export class NavService {
         if (destinationItem) {
             const nextPopItem = this._nextPopItem?.path === destinationItem.path
                 ? this._nextPopItem?.params
-                : undefined
+                : undefined;
             this._popItem = {
                 path: destinationItem.path,
                 params: nextPopItem || {}
