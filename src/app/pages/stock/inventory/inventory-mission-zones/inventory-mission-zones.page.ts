@@ -2,9 +2,6 @@ import {Component, ViewChild} from '@angular/core';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {LoadingService} from '@app/services/loading.service';
-import {LocalDataManagerService} from '@app/services/local-data-manager.service';
-import {MainHeaderService} from '@app/services/main-header.service';
-import {ToastService} from '@app/services/toast.service';
 import {SelectItemComponent} from '@common/components/select-item/select-item.component';
 import {ListPanelItemConfig} from "@common/components/panel/model/list-panel/list-panel-item-config";
 import {IconColor} from "@common/components/icon/icon-color";
@@ -26,16 +23,13 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
     public listBoldValues?: Array<string>;
     public listZonesConfig?: Array<ListPanelItemConfig>;
     public selectedMissionId?: number;
-    public rfidTags: Array<string> = [];
+    public rfidTags: {[zone: number]: Array<string>} = {};
     public zones: Array<number>;
     public treated: boolean = false;
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
                        private apiService: ApiService,
-                       private localDataManager: LocalDataManagerService,
-                       private mainHeaderService: MainHeaderService,
-                       private toastService: ToastService,
                        private navService: NavService) {
     }
 
@@ -83,13 +77,14 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
                         details: {value: `${counter} emplacement${counter > 1 ? 's' : ''} à inventorier`},
                     },
                     pressAction: () => {
+                        const zoneId = zonesData[index].zoneId;
                         this.navService.push(NavPathEnum.INVENTORY_MISSION_ZONE_CONTROLE, {
                             zoneLabel: index,
-                            zoneId: zonesData[index].zoneId,
+                            zoneId,
                             missionId: this.selectedMissionId,
-                            rfidTags: this.rfidTags,
-                            afterValidate: ({tags, zoneId}: any) => {
-                                this.rfidTags = tags;
+                            afterValidate: ({inputRfidTags, zoneId}: any) => {
+                                this.rfidTags[zoneId] = inputRfidTags;
+                                console.log(this.rfidTags);
                                 this.refreshListConfig(zoneId);
                             }
                         });
@@ -126,9 +121,14 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
         this.loadingService.presentLoadingWhile({
             message: 'Correction des quantités, cela peut prendre un certain temps...',
             event: () => {
+                console.log(this.rfidTags);
+                const tags = Object.values(this.rfidTags).reduce((acc, zoneTags) => [
+                    ...acc,
+                    ...(zoneTags || [])
+                ], []);
                 return this.apiService.requestApi(ApiService.FINISH_MISSION, {
                     params: {
-                        tags: this.rfidTags,
+                        tags,
                         zones: this.zones,
                         mission: this.selectedMissionId,
                     }

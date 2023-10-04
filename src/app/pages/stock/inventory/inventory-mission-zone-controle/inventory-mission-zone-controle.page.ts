@@ -1,9 +1,6 @@
 import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
-import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {LoadingService} from '@app/services/loading.service';
-import {LocalDataManagerService} from '@app/services/local-data-manager.service';
-import {MainHeaderService} from '@app/services/main-header.service';
 import {ToastService} from '@app/services/toast.service';
 import {SelectItemComponent} from '@common/components/select-item/select-item.component';
 import {IconConfig} from "@common/components/panel/model/icon-config";
@@ -38,7 +35,6 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
     public zoneLabel: string;
     public zoneId: number;
     public missionId: number;
-    public rfidTags: Array<string>;
 
     public numberOfScannedItems: number;
 
@@ -71,29 +67,23 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
 
     private availableRFIDScan?: boolean;
 
-    public constructor(private sqliteService: SqliteService,
-                       private loadingService: LoadingService,
-                       private localDataManager: LocalDataManagerService,
-                       private mainHeaderService: MainHeaderService,
+    public constructor(private loadingService: LoadingService,
                        private toastService: ToastService,
                        private apiService: ApiService,
                        private rfidManager: RfidManagerService,
                        private changeDetector: ChangeDetectorRef,
                        private storageService: StorageService,
                        private navService: NavService) {
-
-        this.rfidTags = [];
     }
 
     public ionViewWillEnter(): void {
         this.loading = false;
-        this.rfidTags = [];
         this.numberOfScannedItems = 0
         this.afterValidate = this.navService.param('afterValidate');
         this.zoneLabel = this.navService.param('zoneLabel');
         this.zoneId = this.navService.param('zoneId');
         this.missionId = this.navService.param('missionId');
-        this.inputRfidTags = this.navService.param('rfidTags') || [];
+        this.inputRfidTags = [];
         this.headerConfig = {
             leftIcon: {
                 name: 'inventory.svg',
@@ -159,10 +149,9 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
                 }))
             )
             .subscribe(({tags}) => {
-                const newCurrentZoneTags = tags.filter((tag) => this.rfidTags.indexOf(tag) === -1);
                 const newCurrentMissionTags = tags.filter((tag) => this.inputRfidTags.indexOf(tag) === -1);
-                this.rfidTags.push(...newCurrentZoneTags);
                 this.inputRfidTags.push(...newCurrentMissionTags);
+                console.log(this.inputRfidTags);
             });
 
         this.rfidManager.scanStarted$
@@ -269,7 +258,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
                 this.navService.pop().subscribe(() => {
                     this.afterValidate({
                         zoneId: this.zoneId,
-                        tags: this.inputRfidTags
+                        inputRfidTags: this.inputRfidTags
                     });
                 });
             }
@@ -277,8 +266,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
     }
 
     public addManualRFID(rfidTag: string){
-        if(!this.rfidTags.includes(rfidTag)){
-            this.rfidTags.push(rfidTag);
+        if(!this.inputRfidTags.includes(rfidTag)){
             this.inputRfidTags.push(rfidTag);
         }
 
@@ -287,13 +275,13 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
 
     private retrieveZoneRfidSummary() {
         if (!this.loading) {
-            if (this.rfidTags?.length > 0) {
+            if (this.inputRfidTags?.length > 0) {
                 this.loading = true;
                 this.loadingService.presentLoadingWhile({
                     event: () => {
                         return this.apiService.requestApi(ApiService.ZONE_RFID_SUMMARY, {
                             params: {
-                                rfidTags: this.rfidTags,
+                                rfidTags: this.inputRfidTags,
                             },
                             pathParams: {
                                 zone: this.zoneId,
