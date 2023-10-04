@@ -9,6 +9,8 @@ import {InventoryLocationMission} from "@entities/inventory_location_mission";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {ViewWillEnter} from "@ionic/angular";
 import {ApiService} from "@app/services/api.service";
+import {map, mergeMap} from "rxjs/operators";
+import {InventoryLocationMissionTag} from "@entities/inventory_location_zone_tag";
 
 
 @Component({
@@ -23,7 +25,6 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
     public listBoldValues?: Array<string>;
     public listZonesConfig?: Array<ListPanelItemConfig>;
     public selectedMissionId?: number;
-    public rfidTags: {[zone: number]: Array<string>} = {};
     public zones: Array<number>;
     public treated: boolean = false;
 
@@ -82,11 +83,6 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
                             zoneLabel: index,
                             zoneId,
                             missionId: this.selectedMissionId,
-                            afterValidate: ({inputRfidTags, zoneId}: any) => {
-                                this.rfidTags[zoneId] = inputRfidTags;
-                                console.log(this.rfidTags);
-                                this.refreshListConfig(zoneId);
-                            }
                         });
                     },
                     ...(zonesData[index].done ? {
@@ -100,39 +96,31 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
         });
     }
 
-    public refreshListConfig(zoneId?: number): void{
-        this.sqliteService.update(
-            'inventory_location_zone',
-            [{
-                values: {
-                    done: 1
-                },
-                where: [
-                    'mission_id = ' + this.selectedMissionId,
-                    'zone_id = ' + zoneId
-                ],
-            }]
-        ).subscribe(() => {
-            this.initZoneView();
-        });
-    }
-
     public validate() {
         this.loadingService.presentLoadingWhile({
             message: 'Correction des quantités, cela peut prendre un certain temps...',
             event: () => {
-                console.log(this.rfidTags);
-                const tags = Object.values(this.rfidTags).reduce((acc, zoneTags) => [
-                    ...acc,
-                    ...(zoneTags || [])
-                ], []);
-                return this.apiService.requestApi(ApiService.FINISH_MISSION, {
-                    params: {
-                        tags,
-                        zones: this.zones,
-                        mission: this.selectedMissionId,
-                    }
-                })
+                return this.sqliteService.findBy('inventory_location_zone_tag', [
+                    `zone_id IN (${this.zones.join(',')})`,
+                    `mission_id = ${this.selectedMissionId}`,
+                ]).pipe(
+                    map((savedTags: Array<InventoryLocationMissionTag>) => savedTags.map(({tag}) => tag)),
+                    mergeMap((tags) => (
+                        this.apiService.requestApi(ApiService.FINISH_MISSION, {
+                            params: {
+                                tags,
+                                zones: this.zones,
+                                mission: this.selectedMissionId,
+                            }
+                        })
+                    )),
+                    mergeMap(() => (
+                        this.sqliteService.deleteBy('inventory_location_zone_tag', [
+                            `zone_id IN (${this.zones.join(',')})`,
+                            `mission_id = ${this.selectedMissionId}`,
+                        ])
+                    ))
+                )
             }
         }).subscribe(() => {
             this.navService.setRoot(NavPathEnum.MAIN_MENU);

@@ -594,6 +594,14 @@ export const TablesDefinitions: Array<TableDefinition> = [
         ]
     },
     {
+        name: 'inventory_location_zone_tag',
+        schema: [
+            {column: 'mission_id', value: 'INTEGER'},
+            {column: 'zone_id', value: 'INTEGER'},
+            {column: 'tag', value: 'TEXT'},
+        ]
+    },
+    {
         name: 'driver',
         schema: [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},

@@ -11,10 +11,11 @@ import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcod
 import {ApiService} from "@app/services/api.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {RfidManagerService} from "@app/services/rfid-manager.service";
-import {mergeMap, tap} from "rxjs";
+import {mergeMap, of, tap} from "rxjs";
 import {filter, map} from "rxjs/operators";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {StorageService} from "@app/services/storage/storage.service";
+import {SqliteService} from "@app/services/sqlite/sqlite.service";
 
 
 @Component({
@@ -39,14 +40,13 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
     public numberOfScannedItems: number;
 
     public inputRfidTags: Array<string>;
+
     public headerConfig?: {
         leftIcon: IconConfig;
         rightIcon: IconConfig;
         title: string;
         subtitle?: string;
     };
-
-    public afterValidate: (data: any) => void;
 
     public elementsToDisplay: Array<{reference?: string, location: string, missing: boolean, ratio?: number}>;
 
@@ -69,6 +69,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
 
     public constructor(private loadingService: LoadingService,
                        private toastService: ToastService,
+                       private sqliteService: SqliteService,
                        private apiService: ApiService,
                        private rfidManager: RfidManagerService,
                        private changeDetector: ChangeDetectorRef,
@@ -79,7 +80,6 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
     public ionViewWillEnter(): void {
         this.loading = false;
         this.numberOfScannedItems = 0
-        this.afterValidate = this.navService.param('afterValidate');
         this.zoneLabel = this.navService.param('zoneLabel');
         this.zoneId = this.navService.param('zoneId');
         this.missionId = this.navService.param('missionId');
@@ -246,21 +246,34 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
     public validateInventoryMissionZoneControl(){
         this.loadingService.presentLoadingWhile({
             event: () => {
-                return this.apiService.requestApi(ApiService.INVENTORY_MISSION_VALIDATE_ZONE, {
-                    params: {
-                        zone: this.zoneId,
-                        mission: this.missionId,
-                    }
-                })
+                return this.apiService
+                    .requestApi(ApiService.INVENTORY_MISSION_VALIDATE_ZONE, {
+                        params: {
+                            zone: this.zoneId,
+                            mission: this.missionId,
+                        }
+                    })
+                    .pipe(
+                        mergeMap((response) => this.sqliteService.deleteBy('inventory_location_zone_tag', [
+                            `zone_id = ${this.zoneId}`,
+                            `mission_id = ${this.missionId}`,
+                        ])
+                            .pipe(map(() => response))),
+                        mergeMap((response) => (
+                            this.inputRfidTags?.length > 0
+                                ? this.sqliteService.insert('inventory_location_zone_tag', this.inputRfidTags.map((tag) => ({
+                                    tag,
+                                    zone_id: this.zoneId,
+                                    mission_id: this.missionId,
+                                })))
+                                    .pipe(map(() => response))
+                                : of(response)
+                        ))
+                    )
             }
         }).subscribe((response) => {
-            if(response.success){
-                this.navService.pop().subscribe(() => {
-                    this.afterValidate({
-                        zoneId: this.zoneId,
-                        inputRfidTags: this.inputRfidTags
-                    });
-                });
+            if(response.success) {
+                this.navService.pop();
             }
         });
     }

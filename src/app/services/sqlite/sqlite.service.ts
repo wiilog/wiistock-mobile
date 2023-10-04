@@ -1271,6 +1271,7 @@ export class SqliteService {
         const inventoryLocationZone = data['inventoryLocationZone'];
         return this.deleteBy('inventory_location_zone')
             .pipe(
+                mergeMap(() => this.deleteBy('inventory_location_zone_tag')),
                 mergeMap(() => (
                     (inventoryLocationZone && inventoryLocationZone.length > 0)
                         ? this.insert('inventory_location_zone', inventoryLocationZone.map(({
