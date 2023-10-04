@@ -164,7 +164,6 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public synchronise(force: boolean = true): void {
-        console.log('ON PASSE ICI', force)
         if (!this.avoidSync || force) {
             this.networkService.hasNetwork().then((hasNetwork) => {
                 if (hasNetwork && !this.synchroniseLoading) {

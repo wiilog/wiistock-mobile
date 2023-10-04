@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {NavController, Platform} from '@ionic/angular';
-import {from, merge, mergeMap, Observable, of} from 'rxjs';
+import {from, lastValueFrom, merge, mergeMap, Observable, of} from 'rxjs';
 import {Router, NavigationStart} from '@angular/router';
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {map, tap} from "rxjs/operators";
@@ -23,21 +23,19 @@ export class NavService {
                        private mainHeaderService: MainHeaderService,
                        private platform: Platform,
                        private router: Router) {
-        this.router.events.subscribe(event => {
+        this.router.events.subscribe((event) => {
             if (event instanceof NavigationStart) {
+                // event which is not triggered by NavService functions
+                // like native back button action
                 if (!this.justNavigated && this.stack.length) {
                     this.stack.pop();
+                    this.syncPopItem();
+                    this._nextPopItem = undefined;
                 }
 
                 this.justNavigated = false;
             }
         });
-
-        // App.addListener('backButton', () => {
-        //     this.stack.pop();
-        //     this.syncPopItem();
-        //     this._nextPopItem = undefined;
-        // });
     }
 
     public push(path: NavPathEnum, params: NavParams = {}): Observable<boolean> {
@@ -86,15 +84,14 @@ export class NavService {
 
             return from(this.navController.pop()
                 .then(() => {
-                if(number && number > 1){
-                    return this.pop({number: number - 1}).toPromise();
-                } else {
-                    this.syncPopItem();
-                    this._nextPopItem = undefined;
-                    return of(undefined).toPromise();
-                }
-
-            }).catch(err => console.log(err)));
+                    if(number && number > 1){
+                        return lastValueFrom(this.pop({number: number - 1}));
+                    } else {
+                        this.syncPopItem();
+                        this._nextPopItem = undefined;
+                        return Promise.resolve(undefined);
+                    }
+                }));
         }
     }
 
