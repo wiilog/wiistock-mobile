@@ -11,7 +11,7 @@ import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcod
 import {ApiService} from "@app/services/api.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {RfidManagerService} from "@app/services/rfid-manager.service";
-import {mergeMap, of, tap} from "rxjs";
+import {mergeMap, of, tap, zip} from "rxjs";
 import {filter, map} from "rxjs/operators";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {StorageService} from "@app/services/storage/storage.service";
@@ -48,7 +48,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
         subtitle?: string;
     };
 
-    public elementsToDisplay: Array<{reference?: string, location: string, missing: boolean, ratio?: number}>;
+    public elementsToDisplay: Array<{ reference?: string, location: string, missing: boolean, ratio?: number }>;
 
     public missingsRefsListConfig: {
         header: HeaderConfig;
@@ -179,13 +179,12 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
                 this.retrieveZoneRfidSummary();
             }
             this.refreshHeaderConfig();
-        }
-        else {
+        } else {
             this.toastService.presentToast('Lancement du scan RFID impossible');
         }
     }
 
-    public refreshMissingsRefsListConfig(){
+    public refreshMissingsRefsListConfig() {
         const missingsRefsToDisplay = this.elementsToDisplay.filter(({missing}) => missing);
         const plural = missingsRefsToDisplay.length > 1 ? 's' : '';
         const msgToDisplay = `référence${plural} manquante${plural}`;
@@ -214,7 +213,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
         };
     }
 
-    public refreshLocationsQualityListConfig(){
+    public refreshLocationsQualityListConfig() {
         const locationQualityToDisplay = this.elementsToDisplay.filter(({missing}) => !missing);
         const plural = locationQualityToDisplay.length > 1 ? 's' : '';
 
@@ -243,7 +242,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
         }
     }
 
-    public validateInventoryMissionZoneControl(){
+    public validateInventoryMissionZoneControl() {
         this.loadingService.presentLoadingWhile({
             event: () => {
                 return this.apiService
@@ -261,25 +260,37 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
                             .pipe(map(() => response))),
                         mergeMap((response) => (
                             this.inputRfidTags?.length > 0
-                                ? this.sqliteService.insert('inventory_location_zone_tag', this.inputRfidTags.map((tag) => ({
-                                    tag,
-                                    zone_id: this.zoneId,
-                                    mission_id: this.missionId,
-                                })))
+                                ? zip(
+                                    this.sqliteService.insert('inventory_location_zone_tag', this.inputRfidTags.map((tag) => ({
+                                        tag,
+                                        zone_id: this.zoneId,
+                                        mission_id: this.missionId,
+                                    }))),
+                                    this.sqliteService.update(
+                                        'inventory_location_zone',
+                                        [{
+                                            values: {
+                                                done: 1
+                                            },
+                                            where: [
+                                                `mission_id = ${this.missionId}`,
+                                                `zone_id = ${this.zoneId}`,
+                                            ],
+                                        }]))
                                     .pipe(map(() => response))
                                 : of(response)
                         ))
                     )
             }
         }).subscribe((response) => {
-            if(response.success) {
+            if (response.success) {
                 this.navService.pop();
             }
         });
     }
 
-    public addManualRFID(rfidTag: string){
-        if(!this.inputRfidTags.includes(rfidTag)){
+    public addManualRFID(rfidTag: string) {
+        if (!this.inputRfidTags.includes(rfidTag)) {
             this.inputRfidTags.push(rfidTag);
         }
 
@@ -318,8 +329,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
                         this.loading = false;
                     }
                 });
-            }
-            else {
+            } else {
                 this.toastService.presentToast("Aucun tag RFID détecté");
             }
         }
