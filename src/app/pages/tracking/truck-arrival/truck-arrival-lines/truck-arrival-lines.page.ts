@@ -69,7 +69,6 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
     }
 
     public ionViewWillEnter(): void {
-        this.mainHeaderService.emitSubTitle('Etape 3/4');
 
         // if first initialisation
         if(!this.loaded) {
