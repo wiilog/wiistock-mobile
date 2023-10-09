@@ -245,47 +245,37 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
     public validateInventoryMissionZoneControl() {
         this.loadingService.presentLoadingWhile({
             event: () => {
-                return this.apiService
-                    .requestApi(ApiService.INVENTORY_MISSION_VALIDATE_ZONE, {
-                        params: {
-                            zone: this.zoneId,
-                            mission: this.missionId,
-                        }
-                    })
+                return this.sqliteService.deleteBy('inventory_location_tag', [
+                    `zone_id = ${this.zoneId}`,
+                    `mission_id = ${this.missionId}`,
+                ])
                     .pipe(
-                        mergeMap((response) => this.sqliteService.deleteBy('inventory_location_zone_tag', [
-                            `zone_id = ${this.zoneId}`,
-                            `mission_id = ${this.missionId}`,
-                        ])
-                            .pipe(map(() => response))),
-                        mergeMap((response) => (
+                        mergeMap(() => (
                             this.inputRfidTags?.length > 0
                                 ? zip(
-                                    this.sqliteService.insert('inventory_location_zone_tag', this.inputRfidTags.map((tag) => ({
+                                    this.sqliteService.insert('inventory_location_tag', this.inputRfidTags.map((tag) => ({
                                         tag,
                                         zone_id: this.zoneId,
                                         mission_id: this.missionId,
                                     }))),
                                     this.sqliteService.update(
-                                        'inventory_location_zone',
+                                        'inventory_location_line',
                                         [{
                                             values: {
-                                                done: 1
+                                                done: 1,
+                                                validated_at: (new Date()).toUTCString()
                                             },
                                             where: [
                                                 `mission_id = ${this.missionId}`,
                                                 `zone_id = ${this.zoneId}`,
                                             ],
                                         }]))
-                                    .pipe(map(() => response))
-                                : of(response)
+                                : of(undefined)
                         ))
                     )
             }
-        }).subscribe((response) => {
-            if (response.success) {
-                this.navService.pop();
-            }
+        }).subscribe(() => {
+            this.navService.pop();
         });
     }
 

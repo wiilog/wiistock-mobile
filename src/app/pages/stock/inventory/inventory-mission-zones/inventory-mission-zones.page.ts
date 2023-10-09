@@ -5,12 +5,13 @@ import {LoadingService} from '@app/services/loading.service';
 import {SelectItemComponent} from '@common/components/select-item/select-item.component';
 import {ListPanelItemConfig} from "@common/components/panel/model/list-panel/list-panel-item-config";
 import {IconColor} from "@common/components/icon/icon-color";
-import {InventoryLocationMission} from "@entities/inventory_location_mission";
+import {InventoryLocationLine} from "@entities/inventory_location_line";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {ViewWillEnter} from "@ionic/angular";
 import {ApiService} from "@app/services/api.service";
 import {map, mergeMap} from "rxjs/operators";
-import {InventoryLocationMissionTag} from "@entities/inventory_location_zone_tag";
+import {InventoryLocationTag} from "@entities/inventory_location_tag";
+import {zip} from "rxjs";
 
 
 @Component({
@@ -25,98 +26,111 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
     public listBoldValues?: Array<string>;
     public listZonesConfig?: Array<ListPanelItemConfig>;
     public selectedMissionId?: number;
-    public zones: Array<number>;
     public treated: boolean = false;
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
                        private apiService: ApiService,
-                       private navService: NavService) {
-    }
+                       private navService: NavService) {}
 
     public ionViewWillEnter(): void {
         this.selectedMissionId = this.navService.param('missionId');
         this.listZonesConfig = [];
-        this.zones = [];
-
+        this.treated = false;
 
         this.initZoneView();
     }
 
     public initZoneView() {
         this.listBoldValues = ['label'];
-        this.sqliteService.findBy('inventory_location_zone', [
-            'mission_id = ' + this.selectedMissionId
-        ]).subscribe((locationsInMission: Array<InventoryLocationMission>) => {
-            const zonesData = locationsInMission.reduce((acc: {[zoneLabel: string]: {counter: number, zoneId: number, done: boolean}}, inventoryMissionZone: InventoryLocationMission) => {
-                const missionDone = Boolean(inventoryMissionZone.done)
-
-                if(acc[inventoryMissionZone.zone_label]) {
-                    acc[inventoryMissionZone.zone_label].counter++;
-                    acc[inventoryMissionZone.zone_label].done = missionDone;
-                } else {
-                    acc[inventoryMissionZone.zone_label] = {
-                        zoneId: inventoryMissionZone.zone_id,
-                        counter: 1,
-                        done: missionDone
-                    };
-                }
-                return acc;
-            }, {});
-
-            this.treated = Object.keys(zonesData)
-                .every((zoneLabel) => zonesData[zoneLabel].done);
-
-            this.zones = Object.keys(zonesData)
-                .map((zoneLabel) => zonesData[zoneLabel].zoneId);
-
-            this.listZonesConfig = Object.keys(zonesData).map((index) => {
-                const counter = zonesData[index].counter;
-                return {
-                    infos: {
-                        label: {value: index},
-                        details: {value: `${counter} emplacement${counter > 1 ? 's' : ''} à inventorier`},
-                    },
-                    pressAction: () => {
-                        const zoneId = zonesData[index].zoneId;
-                        this.navService.push(NavPathEnum.INVENTORY_MISSION_ZONE_CONTROLE, {
-                            zoneLabel: index,
-                            zoneId,
-                            missionId: this.selectedMissionId,
-                        });
-                    },
-                    ...(zonesData[index].done ? {
-                        rightIcon: {
-                            color: 'list-green' as IconColor,
-                            name: 'check.svg',
-                        }
-                    } : {})
-                }
-            });
-        });
-    }
-
-    public validate() {
         this.loadingService.presentLoadingWhile({
             message: 'Correction des quantités, cela peut prendre un certain temps...',
             event: () => {
-                return this.sqliteService.findBy('inventory_location_zone_tag', [
-                    `zone_id IN (${this.zones.join(',')})`,
-                    `mission_id = ${this.selectedMissionId}`,
-                ]).pipe(
-                    map((savedTags: Array<InventoryLocationMissionTag>) => savedTags.map(({tag}) => tag)),
-                    mergeMap((tags) => (
+                return this.sqliteService
+                    .findBy('inventory_location_line', ['mission_id = ' + this.selectedMissionId])
+                    .pipe(
+                        map((locationsInMission: Array<InventoryLocationLine>) => {
+                            return locationsInMission.reduce((acc: {
+                                [zoneLabel: string]: { counter: number, zoneId: number, done: boolean }
+                            }, inventoryMissionZone: InventoryLocationLine) => {
+                                const missionDone = Boolean(inventoryMissionZone.done)
+
+                                if (acc[inventoryMissionZone.zone_label]) {
+                                    acc[inventoryMissionZone.zone_label].counter++;
+                                    acc[inventoryMissionZone.zone_label].done = missionDone;
+                                } else {
+                                    acc[inventoryMissionZone.zone_label] = {
+                                        zoneId: inventoryMissionZone.zone_id,
+                                        counter: 1,
+                                        done: missionDone
+                                    };
+                                }
+                                return acc;
+                            }, {});
+                        })
+                    );
+            }
+        })
+            .subscribe((zonesData) => {
+                this.treated = Object.keys(zonesData)
+                    .every((zoneLabel) => zonesData[zoneLabel].done);
+
+                this.listZonesConfig = Object.keys(zonesData).map((index) => {
+                    const counter = zonesData[index].counter;
+                    return {
+                        infos: {
+                            label: {value: index},
+                            details: {value: `${counter} emplacement${counter > 1 ? 's' : ''} à inventorier`},
+                        },
+                        pressAction: () => {
+                            const zoneId = zonesData[index].zoneId;
+                            this.navService.push(NavPathEnum.INVENTORY_MISSION_ZONE_CONTROLE, {
+                                zoneLabel: index,
+                                zoneId,
+                                missionId: this.selectedMissionId,
+                            });
+                        },
+                        ...(zonesData[index].done ? {
+                            rightIcon: {
+                                color: 'list-green' as IconColor,
+                                name: 'check.svg',
+                            }
+                        } : {})
+                    }
+                });
+            });
+    }
+
+    public validate(): void {
+        this.loadingService.presentLoadingWhile({
+            message: 'Correction des quantités, cela peut prendre un certain temps...',
+            event: () => {
+                return zip(
+                    this.sqliteService.findBy<InventoryLocationTag>('inventory_location_tag', [
+                        `mission_id = ${this.selectedMissionId}`,
+                    ]),
+                    this.sqliteService.findBy<InventoryLocationLine>('inventory_location_line', [
+                        `mission_id = ${this.selectedMissionId}`,
+                    ])
+                ).pipe(
+                    map(([savedTags, zones]) => [
+                        savedTags.map(({tag}) => tag),
+                        zones.reduce((acc, {location_id, validated_at}) => ({
+                            [location_id]: validated_at,
+                            ...acc,
+                        }), {}),
+                    ]),
+                    mergeMap(([tags, validatedAtDates]) => (
                         this.apiService.requestApi(ApiService.FINISH_MISSION, {
                             params: {
                                 tags,
-                                zones: this.zones,
-                                mission: this.selectedMissionId,
+                                validatedAtDates,
+                                mission: this.selectedMissionId
                             }
                         })
                     )),
                     mergeMap(() => (
-                        this.sqliteService.deleteBy('inventory_location_zone_tag', [
-                            `zone_id IN (${this.zones.join(',')})`,
+                        this.sqliteService.deleteBy('inventory_location_tag', [
                             `mission_id = ${this.selectedMissionId}`,
                         ])
                     ))

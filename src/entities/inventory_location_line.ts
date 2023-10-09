@@ -1,4 +1,4 @@
-export interface InventoryLocationMission {
+export interface InventoryLocationLine {
     id: number;
     location_id: number;
     location_label: string;
@@ -6,4 +6,5 @@ export interface InventoryLocationMission {
     zone_id: number;
     zone_label: string;
     done: number;
+    validated_at: string;
 }

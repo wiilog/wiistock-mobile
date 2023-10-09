@@ -82,7 +82,6 @@ export class ApiService {
     public static readonly CREATE_ARTICLE = {method: POST, service: '/create-article'};
     public static readonly GET_SUPPLIER_REF_BY_REF_AND_SUPPLIER = {method: GET, service: '/supplier_reference/{ref}/{supplier}'};
     public static readonly ZONE_RFID_SUMMARY = {method: POST, service: '/inventory-missions/{mission}/summary/{zone}'};
-    public static readonly INVENTORY_MISSION_VALIDATE_ZONE = {method: POST, service: '/inventory-mission-validate-zone'};
     public static readonly FINISH_MISSION = {method: POST, service: '/finish-mission'};
     public static readonly FINISH_TRUCK_ARRIVAL = {method: POST, service: '/finish-truck-arrival'};
     public static readonly GET_WAYBILL_DATA = {method: GET, service: '/get-waybill-data/{dispatch}'};

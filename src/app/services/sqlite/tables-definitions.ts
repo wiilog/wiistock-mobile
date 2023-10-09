@@ -582,7 +582,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
         ]
     },
     {
-        name: 'inventory_location_zone',
+        name: 'inventory_location_line',
         schema: [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
             {column: 'location_id', value: 'INTEGER'},
@@ -591,10 +591,11 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'zone_id', value: 'INTEGER'},
             {column: 'zone_label', value: 'VARCHAR(255)'},
             {column: 'done', value: 'INTEGER'},
+            {column: 'validated_at', value: 'VARCHAR(255)'},
         ]
     },
     {
-        name: 'inventory_location_zone_tag',
+        name: 'inventory_location_tag',
         schema: [
             {column: 'mission_id', value: 'INTEGER'},
             {column: 'zone_id', value: 'INTEGER'},
