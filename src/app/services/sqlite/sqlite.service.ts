@@ -19,6 +19,7 @@ import {Carrier} from '@entities/carrier';
 import {Driver} from "@entities/driver";
 import {Dispatch} from "@entities/dispatch";
 import {DispatchPack} from "@entities/dispatch-pack";
+import {InventoryLocationLine} from "@entities/inventory_location_line";
 
 @Injectable({
     providedIn: 'root'
@@ -1269,29 +1270,34 @@ export class SqliteService {
 
     public importInventoryLocationZone(data: any): Observable<any> {
         const inventoryLocationZone = data['inventoryLocationZone'];
-        return this.deleteBy('inventory_location_line')
+        return this.findAll<InventoryLocationLine>('inventory_location_line')
             .pipe(
-                mergeMap(() => (
-                    (inventoryLocationZone && inventoryLocationZone.length > 0)
-                        ? this.insert('inventory_location_line', inventoryLocationZone.map(({
-                                                                                                id,
-                                                                                                location_id,
-                                                                                                location_label,
-                                                                                                mission_id,
-                                                                                                zone_id,
-                                                                                                zone_label,
-                                                                                                done,
-                                                                                            }: any) => ({
-                            id,
-                            location_id,
-                            location_label,
-                            mission_id,
-                            zone_id,
-                            zone_label,
-                            done,
-                        })))
-                        : of(undefined)
-                ))
+                mergeMap((inventoryLocationLines) => {
+                    const lines = inventoryLocationZone
+                        .filter(({location_id, mission_id}: any) => inventoryLocationLines
+                            .findIndex((line) => line.location_id === location_id && line.mission_id === mission_id) === -1);
+                    return (
+                        (lines && lines.length > 0)
+                            ? this.insert('inventory_location_line', lines.map(({
+                                                                                                    id,
+                                                                                                    location_id,
+                                                                                                    location_label,
+                                                                                                    mission_id,
+                                                                                                    zone_id,
+                                                                                                    zone_label,
+                                                                                                    done,
+                                                                                                }: any) => ({
+                                id,
+                                location_id,
+                                location_label,
+                                mission_id,
+                                zone_id,
+                                zone_label,
+                                done,
+                            })))
+                            : of(undefined)
+                    )
+                })
             );
     }
 
