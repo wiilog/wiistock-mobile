@@ -44,7 +44,9 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
     public truckArrivalLinesListConfig?: Array<ListPanelItemConfig>;
 
     public truckArrivalLinesNumber?: Array<{
-        number?: string;
+        id: number;
+        number: string;
+        disableTrackingNumber?: boolean;
     }>;
 
     public truckArrivalLines?: Array<{
@@ -174,8 +176,11 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
     public checkIfAlreadyExist(truckArrivalLineNumber: string) {
         if (this.truckArrivalLines && this.truckArrivalLinesNumber) {
             const alreadyAddedToList = this.truckArrivalLines.findIndex((line) => line.number === truckArrivalLineNumber) !== -1;
-            const alreadyExistInDatabase = this.truckArrivalLinesNumber.findIndex((line) => line.number === truckArrivalLineNumber) !== -1;
-            if (!alreadyAddedToList && !alreadyExistInDatabase) {
+            const alreadyExistInDatabaseAndDisabled = this.truckArrivalLinesNumber
+                .filter(({number}) => number === truckArrivalLineNumber)
+                .sort((a,b) => a.id < b.id ? 1 : -1)[0];
+
+            if (!alreadyAddedToList && ((alreadyExistInDatabaseAndDisabled && alreadyExistInDatabaseAndDisabled.disableTrackingNumber) || !alreadyExistInDatabaseAndDisabled)) {
                 this.truckArrivalLines.unshift({
                     number: truckArrivalLineNumber,
                 });
@@ -184,7 +189,7 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
                     header: '',
                     message: alreadyAddedToList
                         ? 'Vous avez déjà scanné ce numéro de tracking transporteur.'
-                        : (alreadyExistInDatabase
+                        : (alreadyExistInDatabaseAndDisabled && !alreadyExistInDatabaseAndDisabled.disableTrackingNumber
                             ? 'Vous avez déjà ajouté ce numéro de tracking transporteur à un autre arrivage camion'
                             : ''),
                     buttons: [{

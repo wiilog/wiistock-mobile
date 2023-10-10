@@ -50,12 +50,14 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
         displayRegistrationNumber: boolean,
         needsRegistrationNumber: boolean,
         displayUnloadingLocation: boolean,
+        needsUnloadingLocation: boolean,
     } = {
         displayDriver: false,
         needsDriver: false,
         displayRegistrationNumber: false,
         needsRegistrationNumber: false,
         displayUnloadingLocation: false,
+        needsUnloadingLocation: false,
     };
 
     public constructor(private navService: NavService,
@@ -80,6 +82,7 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                     this.storageService.getNumber('truckArrivals.registrationNumber.onMobile'),
                     this.storageService.getNumber('truckArrivals.registrationNumber.requiredCreate'),
                     this.storageService.getNumber('truckArrivals.unloadingLocation.onMobile'),
+                    this.storageService.getNumber('truckArrivals.unloadingLocation.requiredCreate'),
                 )
             }
         }).subscribe(([defaultUnloadingLocationId, ...fieldParams]) => {
@@ -89,20 +92,21 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                 displayRegistrationNumber,
                 needsRegistrationNumber,
                 displayUnloadingLocation,
+                needsUnloadingLocation,
             ] = fieldParams;
 
-            this.truckArrivalDefaultUnloadingLocationId = defaultUnloadingLocationId;
-
-            if(!displayDriver && !displayUnloadingLocation && !displayRegistrationNumber && defaultUnloadingLocationId){
+            if(!displayDriver && !displayUnloadingLocation && !displayRegistrationNumber){
                 this.next()
             }
 
+            this.truckArrivalDefaultUnloadingLocationId = defaultUnloadingLocationId;
             this.fieldParams = {
                 displayDriver: Boolean(displayDriver),
                 needsDriver: Boolean(needsDriver),
                 displayRegistrationNumber: Boolean(displayRegistrationNumber),
                 needsRegistrationNumber: Boolean(needsRegistrationNumber),
                 displayUnloadingLocation: Boolean(displayUnloadingLocation),
+                needsUnloadingLocation: Boolean(needsUnloadingLocation),
             };
 
             this.generateForm();
@@ -153,7 +157,7 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                     }
                 ]
                 : []),
-            ...(this.fieldParams.displayUnloadingLocation || !this.truckArrivalDefaultUnloadingLocationId ?
+            ...(this.fieldParams.displayUnloadingLocation ?
                 [{
                     item: FormPanelSelectComponent,
                     config: {
@@ -161,7 +165,7 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                         name: 'unloadingLocation',
                         value: this.truckArrivalDefaultUnloadingLocationId ?? null,
                         inputConfig: {
-                            required: true,
+                            required: Boolean(this.fieldParams.needsUnloadingLocation),
                             searchType: SelectItemTypeEnum.LOCATION,
                             onChange: (unloadingLocationId: any) => {
                                 this.truckArrivalUnloadingLocationId = unloadingLocationId;
@@ -187,17 +191,13 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
         } else {
             const {registrationNumber} = this.formPanelComponent.values;
             this.sqliteService.findOneById('emplacement', this.truckArrivalUnloadingLocationId || this.truckArrivalDefaultUnloadingLocationId).subscribe((unloadingLocation) => {
-                if (unloadingLocation) {
-                    this.truckArrivalUnloadingLocation = unloadingLocation;
-                    this.navService.push(NavPathEnum.TRUCK_ARRIVAL_LINES, {
-                        truckArrivalUnloadingLocation: this.truckArrivalUnloadingLocation,
-                        driver: this.driver,
-                        carrier: this.carrier,
-                        registrationNumber,
-                    });
-                } else {
-                    this.toastService.presentToast('Veuillez sélectionner un emplacement de déchargement.');
-                }
+                this.truckArrivalUnloadingLocation = unloadingLocation;
+                this.navService.push(NavPathEnum.TRUCK_ARRIVAL_LINES, {
+                    truckArrivalUnloadingLocation: this.truckArrivalUnloadingLocation,
+                    driver: this.driver,
+                    carrier: this.carrier,
+                    registrationNumber,
+                });
             });
         }
     }
