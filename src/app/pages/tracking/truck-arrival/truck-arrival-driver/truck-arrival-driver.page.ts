@@ -66,7 +66,6 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
     }
 
     public ionViewWillEnter(): void {
-        this.mainHeaderService.emitSubTitle('Etape 2/4');
         this.carrier = this.navService.param('carrier') ?? null;
         this.loadingService.presentLoadingWhile({
             event: () => {

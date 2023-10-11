@@ -72,7 +72,6 @@ export class TruckArrivalReservesPage implements ViewWillEnter {
     }
 
     public ionViewWillEnter(): void {
-        this.mainHeaderService.emitSubTitle('Etape 4/4');
         if(this.truckArrivalLines && this.truckArrivalLines.length === 0){
             this.loading = false;
             this.carrier = this.navService.param('carrier') ?? [];

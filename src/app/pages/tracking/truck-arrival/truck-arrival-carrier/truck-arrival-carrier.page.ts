@@ -55,7 +55,6 @@ export class TruckArrivalCarrierPage implements ViewWillEnter {
 
     public ionViewWillEnter(): void {
         this.footerScannerComponent.fireZebraScan();
-        this.mainHeaderService.emitSubTitle('Etape 1/4');
 
         this.afterNext = this.navService.param('afterNext');
         this.carrier = this.navService.param('carrier');
