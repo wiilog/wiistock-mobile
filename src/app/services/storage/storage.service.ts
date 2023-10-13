@@ -10,7 +10,7 @@ import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 })
 export class StorageService {
 
-    private static FIELD_TYPES_TO_KEEP = ['displayedCreate', 'requiredCreate'];
+    private static FIELD_TYPES_TO_KEEP = ['displayedCreate', 'requiredCreate', 'onMobile'];
 
     public constructor() {}
 
