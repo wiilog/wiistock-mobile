@@ -49,11 +49,13 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
         needsDriver: boolean,
         displayRegistrationNumber: boolean,
         needsRegistrationNumber: boolean,
+        displayUnloadingLocation: boolean,
     } = {
         displayDriver: false,
         needsDriver: false,
         displayRegistrationNumber: false,
         needsRegistrationNumber: false,
+        displayUnloadingLocation: false,
     };
 
     public constructor(private navService: NavService,
@@ -72,10 +74,11 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                 return zip(
                     this.apiService.requestApi(ApiService.GET_TRUCK_ARRIVALS_DEFAULT_UNLOADING_LOCATION),
 
-                    this.storageService.getNumber('truckArrivals.driver.displayedCreate'),
+                    this.storageService.getNumber('truckArrivals.driver.onMobile'),
                     this.storageService.getNumber('truckArrivals.driver.requiredCreate'),
-                    this.storageService.getNumber('truckArrivals.registrationNumber.displayedCreate'),
+                    this.storageService.getNumber('truckArrivals.registrationNumber.onMobile'),
                     this.storageService.getNumber('truckArrivals.registrationNumber.requiredCreate'),
+                    this.storageService.getNumber('truckArrivals.unloadingLocation.onMobile'),
                 )
             }
         }).subscribe(([defaultUnloadingLocationId, ...fieldParams]) => {
@@ -84,15 +87,23 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                 needsDriver,
                 displayRegistrationNumber,
                 needsRegistrationNumber,
+                displayUnloadingLocation,
             ] = fieldParams;
+
+            this.truckArrivalDefaultUnloadingLocationId = defaultUnloadingLocationId;
+
+            if(!displayDriver && !displayUnloadingLocation && !displayRegistrationNumber && defaultUnloadingLocationId){
+                this.next()
+            }
+
             this.fieldParams = {
                 displayDriver: Boolean(displayDriver),
                 needsDriver: Boolean(needsDriver),
                 displayRegistrationNumber: Boolean(displayRegistrationNumber),
                 needsRegistrationNumber: Boolean(needsRegistrationNumber),
+                displayUnloadingLocation: Boolean(displayUnloadingLocation),
             };
 
-            this.truckArrivalDefaultUnloadingLocationId = defaultUnloadingLocationId;
             this.generateForm();
         });
     }
@@ -141,28 +152,30 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                     }
                 ]
                 : []),
-            {
-                item: FormPanelSelectComponent,
-                config: {
-                    label: 'Emplacement',
-                    name: 'unloadingLocation',
-                    value: this.truckArrivalDefaultUnloadingLocationId ?? null,
-                    inputConfig: {
-                        required: true,
-                        searchType: SelectItemTypeEnum.LOCATION,
-                        onChange: (unloadingLocationId: any) => {
-                            this.truckArrivalUnloadingLocationId = unloadingLocationId;
+            ...(this.fieldParams.displayUnloadingLocation || !this.truckArrivalDefaultUnloadingLocationId ?
+                [{
+                    item: FormPanelSelectComponent,
+                    config: {
+                        label: 'Emplacement',
+                        name: 'unloadingLocation',
+                        value: this.truckArrivalDefaultUnloadingLocationId ?? null,
+                        inputConfig: {
+                            required: true,
+                            searchType: SelectItemTypeEnum.LOCATION,
+                            onChange: (unloadingLocationId: any) => {
+                                this.truckArrivalUnloadingLocationId = unloadingLocationId;
+                            }
+                        },
+                        section: {
+                            title: 'Emplacement de déchargement',
+                            bold: true,
+                        },
+                        errors: {
+                            required: 'Vous devez sélectionner un emplacement de déchargement.'
                         }
-                    },
-                    section: {
-                        title: 'Emplacement de déchargement',
-                        bold: true,
-                    },
-                    errors: {
-                        required: 'Vous devez sélectionner un emplacement de déchargement.'
                     }
-                }
-            },
+                }]
+                : []),
         ];
     }
 
