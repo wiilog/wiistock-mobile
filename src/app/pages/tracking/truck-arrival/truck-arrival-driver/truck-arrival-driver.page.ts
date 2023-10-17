@@ -94,11 +94,11 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                 needsUnloadingLocation,
             ] = fieldParams;
 
+            this.truckArrivalDefaultUnloadingLocationId = defaultUnloadingLocationId;
             if(!displayDriver && !displayUnloadingLocation && !displayRegistrationNumber){
                 this.next()
-            }
 
-            this.truckArrivalDefaultUnloadingLocationId = defaultUnloadingLocationId;
+            }
             this.fieldParams = {
                 displayDriver: Boolean(displayDriver),
                 needsDriver: Boolean(needsDriver),
