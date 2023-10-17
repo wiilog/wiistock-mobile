@@ -76,12 +76,12 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                 return zip(
                     this.apiService.requestApi(ApiService.GET_TRUCK_ARRIVALS_DEFAULT_UNLOADING_LOCATION),
 
-                    this.storageService.getNumber('truckArrivals.driver.onMobile'),
-                    this.storageService.getNumber('truckArrivals.driver.requiredCreate'),
-                    this.storageService.getNumber('truckArrivals.registrationNumber.onMobile'),
-                    this.storageService.getNumber('truckArrivals.registrationNumber.requiredCreate'),
-                    this.storageService.getNumber('truckArrivals.unloadingLocation.onMobile'),
-                    this.storageService.getNumber('truckArrivals.unloadingLocation.requiredCreate'),
+                    this.storageService.getNumber('truckArrival.driver.onMobile'),
+                    this.storageService.getNumber('truckArrival.driver.requiredCreate'),
+                    this.storageService.getNumber('truckArrival.registrationNumber.onMobile'),
+                    this.storageService.getNumber('truckArrival.registrationNumber.requiredCreate'),
+                    this.storageService.getNumber('truckArrival.unloadingLocation.onMobile'),
+                    this.storageService.getNumber('truckArrival.unloadingLocation.requiredCreate'),
                 )
             }
         }).subscribe(([defaultUnloadingLocationId, ...fieldParams]) => {
