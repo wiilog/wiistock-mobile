@@ -24,7 +24,7 @@ export class NetworkService {
 
 
     public hasNetworkTry({remainingTry, shouldWeContinuing} : {remainingTry?: number, shouldWeContinuing?: () => Observable<boolean>}): Observable<boolean> {
-        let remaining = remainingTry !== undefined ? remainingTry : NetworkService.NETWORK_CHECK_TRY_NUMBER;
+        const remaining = remainingTry !== undefined ? remainingTry : NetworkService.NETWORK_CHECK_TRY_NUMBER;
         return zip(
             this.hasNetwork(),
             shouldWeContinuing ? shouldWeContinuing() : of(true),
@@ -37,7 +37,7 @@ export class NetworkService {
                             ? of(true).pipe(
                                 delay(1000),
                                 mergeMap(() => this.hasNetworkTry({
-                                    remainingTry: remaining -1,
+                                    remainingTry: remaining - 1,
                                     shouldWeContinuing,
                                 }))
                             )

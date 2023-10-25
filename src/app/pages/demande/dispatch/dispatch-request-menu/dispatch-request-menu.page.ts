@@ -95,11 +95,9 @@ export class DispatchRequestMenuPage implements ViewWillEnter, ViewWillLeave, Ca
                     }),
                     filter(({plugged}) => plugged),
                     mergeMap(() => this.loadingService.presentLoadingWhile({
-                        event: () =>
-                            this.networkService.hasNetworkTry({
-                                    shouldWeContinuing: () =>  this.batteryManager.batteryInfo().pipe(map(({plugged}) => plugged)),
-                                }
-                            ),
+                        event: () => this.networkService.hasNetworkTry({
+                            shouldWeContinuing: () =>  this.batteryManager.batteryInfo().pipe(map(({plugged}) => plugged)),
+                        }),
                         message: 'Vérification de la connexion...',
                     })),
                     mergeMap(() => this.batteryManager.batteryInfo()),
