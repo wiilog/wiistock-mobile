@@ -226,79 +226,70 @@ export class DispatchRequestMenuPage implements ViewWillEnter, ViewWillLeave, Ca
         this.refreshPageList(this.dispatches);
     }
 
-    public synchronise(): Observable<void> {
-        const $res = new Subject<void>();
+    public async synchronise(): Promise<void> {
+        const hasNetwork = await this.networkService.hasNetwork();
+        if (hasNetwork) {
+            this.loading = true;
+            this.hasLoaded = false;
+            this.localDataManager.synchroniseDispatchesData()
+                .subscribe({
+                    next: ({finished, message}) => {
+                        this.messageLoading = message;
+                        if (finished) {
+                            this.initializeDispatchesList()
+                                .subscribe((dispatches) => {
+                                    this.loading = false;
+                                    this.hasLoaded = true;
+                                    this.dispatches = dispatches;
+                                    this.refreshPageList(this.dispatches);
+                                    this.changeDetectorRef.detectChanges();
+                                });
 
-        this.networkService.hasNetwork().then((hasNetwork) => {
-            if (hasNetwork) {
-                this.loading = true;
-                this.hasLoaded = false;
-                this.changeDetectorRef.detectChanges();
-                this.localDataManager.synchroniseDispatchesData()
-                    .subscribe({
-                        next: ({finished, message}) => {
-                            this.messageLoading = message;
-                            if (finished) {
-                                this.initializeDispatchesList()
-                                    .subscribe((dispatches) => {
-                                        this.dispatches = dispatches;
-                                        this.refreshPageList(this.dispatches);
-                                    });
-
-                                this.loading = false;
-                                this.hasLoaded = true;
-                                this.changeDetectorRef.detectChanges();
-                                $res.next();
-                                $res.complete();
-                            } else {
-                                this.loading = true;
-                                this.hasLoaded = false;
-                                this.changeDetectorRef.detectChanges();
-                            }
-                        },
-                        error: (error) => {
-                            this.loading = false;
-                            this.hasLoaded = true;
+                        } else {
+                            this.loading = true;
+                            this.hasLoaded = false;
                             this.changeDetectorRef.detectChanges();
-
-                            if (error instanceof HttpErrorResponse) {
-                                if (error.status === 0) { // connection lost
-                                    // For testing => turn on plane mode during synchronisation
-                                    // not working in livereload build
-                                    this.alertService.show({
-                                        header: 'Attention',
-                                        message: `La connexion avec le serveur a été perdue, la récupération des données n'a pas pu se faire`,
-                                        buttons: [
-                                            {
-                                                text: 'Réessayer',
-                                                handler: () => {
-                                                    this.synchronise();
-                                                },
-                                            },
-                                        ]
-                                    })
-                                }
-                            }
-                            else {
-                                const {api, message} = error;
-                                if (api && message) {
-                                    this.toastService.presentToast(message);
-                                }
-                            }
-                            $res.complete();
-                            throw error;
                         }
-                    });
-            }
-            else {
-                this.loading = false;
-                this.hasLoaded = true;
-                this.toastService.presentToast('Veuillez vous connecter à internet afin de synchroniser vos données');
-                $res.complete();
-            }
-        });
+                    },
+                    error: (error) => {
+                        this.loading = false;
+                        this.hasLoaded = true;
+                        this.changeDetectorRef.detectChanges();
 
-        return $res;
+                        if (error instanceof HttpErrorResponse) {
+                            if (error.status === 0) { // connection lost
+                                // For testing => turn on plane mode during synchronisation
+                                // not working in livereload build
+                                this.alertService.show({
+                                    header: 'Attention',
+                                    message: `La connexion avec le serveur a été perdue, la récupération des données n'a pas pu se faire`,
+                                    buttons: [
+                                        {
+                                            text: 'Réessayer',
+                                            handler: () => {
+                                                this.synchronise();
+                                            },
+                                        },
+                                    ]
+                                })
+                            }
+                        }
+                        else {
+                            const {api, message} = error;
+                            if (api && message) {
+                                this.toastService.presentToast(message);
+                            }
+                        }
+                        throw error;
+                    }
+                });
+        }
+        else {
+            this.loading = false;
+            this.hasLoaded = true;
+            this.toastService.presentToast('Veuillez vous connecter à internet afin de synchroniser vos données');
+            this.changeDetectorRef.detectChanges();
+        }
     }
 
     public initializeDispatchesList(): Observable<Array<Dispatch>>{
