@@ -59,33 +59,47 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
         this.loadingService.presentLoadingWhile({
             event: () => zip(
                 this.storageService.getRight(StorageKeyEnum.RIGHT_CREATE_ARTICLE_FROM_NOMADE),
+                this.storageService.getRight(StorageKeyEnum.RIGHT_PREPARATION),
+                this.storageService.getRight(StorageKeyEnum.RIGHT_DELIVERY_ORDER),
+                this.storageService.getRight(StorageKeyEnum.RIGHT_MANUAL_DELIVERY),
+                this.storageService.getRight(StorageKeyEnum.RIGHT_COLLECT_ORDER),
+                this.storageService.getRight(StorageKeyEnum.RIGHT_TRANSFER_ORDER),
+                this.storageService.getRight(StorageKeyEnum.RIGHT_MANUAL_TRANSFER),
+                this.storageService.getRight(StorageKeyEnum.RIGHT_INVENTORY),
+                this.storageService.getRight(StorageKeyEnum.RIGHT_ARTICLE_UL_ASSOCIATION),
                 this.translationService.get(null, `Ordre`, `Livraison`)
             )
-        }).subscribe(([hasRightDisplayCreateArticleButton, deliveryOrderTranslations]: [Boolean, Translations]) => {
+        }).subscribe(([hasRightDisplayCreateArticleButton, preparation, deliveryOrder, manualDelivery, collectOrder, transferOrder, manualTransfer, inventory, articleUlAssociation, deliveryOrderTranslations]) => {
             this.deliveryOrderTranslation = TranslationService.Translate(deliveryOrderTranslations, 'Livraison');
-            this.menuConfig = [
-                {
+            if(preparation){
+                this.menuConfig.push({
                     icon: 'preparation.svg',
                     label: 'Préparation',
                     action: () => {
                         this.navService.push(NavPathEnum.PREPARATION_MENU);
                     }
-                },
-                {
+                });
+            }
+            if(deliveryOrder){
+                this.menuConfig.push({
                     icon: 'delivery.svg',
                     label: this.deliveryOrderTranslation,
                     action: () => {
                         this.navService.push(NavPathEnum.LIVRAISON_MENU);
                     }
-                },
-                {
+                });
+            }
+            if(manualDelivery){
+                this.menuConfig.push({
                     icon: 'manual-delivery.svg',
                     label: `Livraison manuelle`,
                     action: () => {
                         this.navService.push(NavPathEnum.MANUAL_DELIVERY);
                     }
-                },
-                {
+                });
+            }
+            if(collectOrder){
+                this.menuConfig.push({
                     icon: 'collect.svg',
                     label: 'Collecte',
                     action: () => {
@@ -98,45 +112,53 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                             }
                         });
                     }
-                },
-                {
+                });
+            }
+            if(transferOrder){
+                this.menuConfig.push({
                     icon: 'stock-transfer.svg',
                     label: 'Transfert',
                     action: () => {
                         this.navService.push(NavPathEnum.TRANSFER_LIST);
                     }
-                },
-                {
+                });
+            }
+            if(manualTransfer){
+                this.menuConfig.push({
                     icon: 'manual-transfer.svg',
                     label: 'Transfert<br/>manuel',
                     action: () => {
                         this.navigateToPriseDeposePage()
                     }
-                },
-                {
+                });
+            }
+            if(inventory){
+                this.menuConfig.push({
                     icon: 'inventory.svg',
                     label: 'Inventaire',
                     action: () => {
                         this.navService.push(NavPathEnum.INVENTORY_LOCATIONS);
                     }
-                },
-                {
+                });
+            }
+            if(articleUlAssociation){
+                this.menuConfig.push({
                     icon: 'association.svg',
                     label: 'Association Articles - UL',
                     action: () => {
                         this.navService.push(NavPathEnum.ASSOCIATION);
                     }
-                },
-                ...(hasRightDisplayCreateArticleButton
-                    ? [{
-                        icon: 'new-article-RFID.svg',
-                        label: 'Créer article',
-                        action: () => {
-                            this.navService.push(NavPathEnum.ARTICLE_CREATION_SCAN_RFID_TAG);
-                        }
-                    }]
-                    : [])
-            ];
+                });
+            }
+            if(hasRightDisplayCreateArticleButton){
+                this.menuConfig.push({
+                    icon: 'new-article-RFID.svg',
+                    label: 'Créer article',
+                    action: () => {
+                        this.navService.push(NavPathEnum.ARTICLE_CREATION_SCAN_RFID_TAG);
+                    }
+                });
+            }
 
             this.synchronise(false);
 

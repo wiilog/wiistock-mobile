@@ -42,31 +42,6 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
                        private navService: NavService) {
         this.avoidSync = true;
         const self = this;
-        this.menuConfig = [
-            {
-                icon: 'people.svg',
-                label: 'Service',
-                action: () => {
-                    self.navService.push(NavPathEnum.HANDLING_MENU);
-                }
-            },
-            {
-                icon: 'demande.svg',
-                iconColor: 'list-yellow',
-                label: 'Livraison',
-                action: () => {
-                    self.navService.push(NavPathEnum.DEMANDE_LIVRAISON_MENU);
-                }
-            },
-            {
-                icon: 'transfer.svg',
-                iconColor: 'success',
-                label: 'Acheminement',
-                action: () => {
-                    self.navService.push(NavPathEnum.DISPATCH_REQUEST_MENU, {dispatchOfflineMode: this.dispatchOfflineMode});
-                }
-            }
-        ];
     }
 
     public ionViewWillEnter(): void {
@@ -88,11 +63,43 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
         zip(
             this.storageService.getCounter(StorageKeyEnum.COUNTERS_HANDLINGS_TREATED),
             this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
+            this.storageService.getRight(StorageKeyEnum.RIGHT_HANDLING),
+            this.storageService.getRight(StorageKeyEnum.RIGHT_DISPATCH),
+            this.storageService.getRight(StorageKeyEnum.RIGHT_DELIVERY_REQUEST),
             this.sqliteService.count('handling')
         ).subscribe(
-            ([treatedHandlings, dispatchOfflineMode, toTreatDispatches]) => {
+            ([treatedHandlings, dispatchOfflineMode, handling, dispatch, deliveryRequest, toTreatDispatches]) => {
                 this.statsSlidersData = this.createStatsSlidersData(treatedHandlings, toTreatDispatches);
                 this.dispatchOfflineMode = dispatchOfflineMode;
+                if(handling){
+                    this.menuConfig.push({
+                        icon: 'people.svg',
+                        label: 'Service',
+                        action: () => {
+                            this.navService.push(NavPathEnum.HANDLING_MENU);
+                        }
+                    })
+                }
+                if(dispatch){
+                    this.menuConfig.push({
+                        icon: 'demande.svg',
+                        iconColor: 'list-yellow',
+                        label: 'Livraison',
+                        action: () => {
+                            this.navService.push(NavPathEnum.DEMANDE_LIVRAISON_MENU);
+                        }
+                    });
+                }
+                if(deliveryRequest){
+                    this.menuConfig.push({
+                        icon: 'transfer.svg',
+                        iconColor: 'success',
+                        label: 'Acheminement',
+                        action: () => {
+                            this.navService.push(NavPathEnum.DISPATCH_REQUEST_MENU, {dispatchOfflineMode: this.dispatchOfflineMode});
+                        }
+                    });
+                }
             }
         )
     }

@@ -44,13 +44,15 @@ export class TrackingMenuPage implements ViewWillEnter {
             this.storageService.getRight(StorageKeyEnum.TRUCK_ARRIVAL),
             this.storageService.getRight(StorageKeyEnum.FORCE_GROUPED_SIGNATURE),
             this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
+            this.storageService.getRight(StorageKeyEnum.RIGHT_MOVEMENT),
+            this.storageService.getRight(StorageKeyEnum.RIGHT_DISPATCH),
             this.storageService.getCounter(StorageKeyEnum.COUNTERS_DISPATCHES_TREATED),
             this.sqliteService.count('dispatch', ['treatedStatusId IS NULL OR partial = 1']),
 
             this.translationService.get(`Demande`, `Acheminements`, `Général`)
         ).subscribe(
-            ([group, ungroup, truckArrival, forceSignature, dispatchOfflineMode, treatedDispatches, toTreatDispatches, translations]) => {
-                if (!dispatchOfflineMode) {
+            ([group, ungroup, truckArrival, forceSignature, dispatchOfflineMode, movement, dispatch, treatedDispatches, toTreatDispatches, translations]) => {
+                if (!dispatchOfflineMode && dispatch) {
                     this.menuConfig.push(
                         {
                             icon: 'stock-transfer.svg',
@@ -65,16 +67,17 @@ export class TrackingMenuPage implements ViewWillEnter {
                         }
                     );
                 }
-
-                this.menuConfig.push(
-                    {
-                        icon: 'tracking.svg',
-                        label: 'Mouvements',
-                        action: () => {
-                            this.navService.push(NavPathEnum.TRACKING_MOVEMENT_MENU);
-                        }
-                    },
-                );
+                if(movement){
+                    this.menuConfig.push(
+                        {
+                            icon: 'tracking.svg',
+                            label: 'Mouvements',
+                            action: () => {
+                                this.navService.push(NavPathEnum.TRACKING_MOVEMENT_MENU);
+                            }
+                        },
+                    );
+                }
                 if(truckArrival){
                     this.menuConfig.push({
                         icon: 'arrivage-camion.svg',
