@@ -12,6 +12,7 @@ import {ApiService} from "@app/services/api.service";
 import {map, mergeMap} from "rxjs/operators";
 import {InventoryLocationTag} from "@entities/inventory_location_tag";
 import {zip} from "rxjs";
+import {AlertService} from "@app/services/alert.service";
 
 
 @Component({
@@ -31,6 +32,7 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
                        private apiService: ApiService,
+                       private alertService: AlertService,
                        private navService: NavService) {}
 
     public ionViewWillEnter(): void {
@@ -129,15 +131,27 @@ export class InventoryMissionZonesPage implements ViewWillEnter{
                             }
                         })
                     )),
-                    mergeMap(() => (
+                    mergeMap((response) => (
                         this.sqliteService.deleteBy('inventory_location_tag', [
                             `mission_id = ${this.selectedMissionId}`,
-                        ])
+                        ]).pipe(map(() => response))
                     ))
                 )
             }
-        }).subscribe(() => {
-            this.navService.setRoot(NavPathEnum.MAIN_MENU);
+        }).subscribe(({success, message}: {success: boolean, message: string}) => {
+            if (success) {
+                this.navService.setRoot(NavPathEnum.MAIN_MENU);
+            }
+            else {
+                this.alertService.show({
+                    header: 'Inventaire en erreur',
+                    message: message || undefined,
+                    buttons: [{
+                        text: 'Annuler',
+                        role: 'cancel'
+                    }]
+                })
+            }
         });
     }
 }
