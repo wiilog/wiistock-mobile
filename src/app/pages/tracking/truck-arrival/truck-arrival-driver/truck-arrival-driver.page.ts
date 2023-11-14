@@ -16,7 +16,6 @@ import {Emplacement} from "@entities/emplacement";
 import {ApiService} from "@app/services/api.service";
 import {LoadingService} from "@app/services/loading.service";
 import {Driver} from "@entities/driver";
-import {MainHeaderService} from "@app/services/main-header.service";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {Carrier} from "@entities/carrier";
 import {zip} from "rxjs";
@@ -41,8 +40,8 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
     public truckArrivalUnloadingLocation: Emplacement;
 
     public driver?: Driver;
-
     public carrier: Carrier;
+    public popOnBack: boolean = false;
 
     private fieldParams: {
         displayDriver: boolean,
@@ -65,53 +64,58 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                        public apiService: ApiService,
                        public loadingService: LoadingService,
                        public storageService: StorageService,
-                       public toastService: ToastService,
-                       private mainHeaderService: MainHeaderService) {
+                       public toastService: ToastService) {
     }
 
     public ionViewWillEnter(): void {
         this.carrier = this.navService.param('carrier') ?? null;
-        this.loadingService.presentLoadingWhile({
-            event: () => {
-                return zip(
-                    this.apiService.requestApi(ApiService.GET_TRUCK_ARRIVALS_DEFAULT_UNLOADING_LOCATION),
 
-                    this.storageService.getNumber('truckArrival.driver.onMobile'),
-                    this.storageService.getNumber('truckArrival.driver.requiredCreate'),
-                    this.storageService.getNumber('truckArrival.registrationNumber.onMobile'),
-                    this.storageService.getNumber('truckArrival.registrationNumber.requiredCreate'),
-                    this.storageService.getNumber('truckArrival.unloadingLocation.onMobile'),
-                    this.storageService.getNumber('truckArrival.unloadingLocation.requiredCreate'),
-                )
-            }
-        }).subscribe(([defaultUnloadingLocationId, ...fieldParams]) => {
-            const [
-                displayDriver,
-                needsDriver,
-                displayRegistrationNumber,
-                needsRegistrationNumber,
-                displayUnloadingLocation,
-                needsUnloadingLocation,
-            ] = fieldParams;
+        if(this.popOnBack) {
+            this.popOnBack = false;
+            this.navService.pop();
+        } else {
+            this.loadingService.presentLoadingWhile({
+                event: () => {
+                    return zip(
+                        this.apiService.requestApi(ApiService.GET_TRUCK_ARRIVALS_DEFAULT_UNLOADING_LOCATION),
 
-            this.truckArrivalDefaultUnloadingLocationId = defaultUnloadingLocationId;
+                        this.storageService.getNumber('truckArrival.driver.onMobile'),
+                        this.storageService.getNumber('truckArrival.driver.requiredCreate'),
+                        this.storageService.getNumber('truckArrival.registrationNumber.onMobile'),
+                        this.storageService.getNumber('truckArrival.registrationNumber.requiredCreate'),
+                        this.storageService.getNumber('truckArrival.unloadingLocation.onMobile'),
+                        this.storageService.getNumber('truckArrival.unloadingLocation.requiredCreate'),
+                    )
+                }
+            }).subscribe(([defaultUnloadingLocationId, ...fieldParams]) => {
+                const [
+                    displayDriver,
+                    needsDriver,
+                    displayRegistrationNumber,
+                    needsRegistrationNumber,
+                    displayUnloadingLocation,
+                    needsUnloadingLocation,
+                ] = fieldParams;
 
-            if(!displayDriver && !displayUnloadingLocation && !displayRegistrationNumber){
-                this.next()
+                this.truckArrivalDefaultUnloadingLocationId = defaultUnloadingLocationId;
 
-            }
+                if(!displayDriver && !displayUnloadingLocation && !displayRegistrationNumber){
+                    this.popOnBack = true;
+                    this.next();
+                }
 
-            this.fieldParams = {
-                displayDriver: Boolean(displayDriver),
-                needsDriver: Boolean(needsDriver),
-                displayRegistrationNumber: Boolean(displayRegistrationNumber),
-                needsRegistrationNumber: Boolean(needsRegistrationNumber),
-                displayUnloadingLocation: Boolean(displayUnloadingLocation),
-                needsUnloadingLocation: Boolean(needsUnloadingLocation),
-            };
+                this.fieldParams = {
+                    displayDriver: Boolean(displayDriver),
+                    needsDriver: Boolean(needsDriver),
+                    displayRegistrationNumber: Boolean(displayRegistrationNumber),
+                    needsRegistrationNumber: Boolean(needsRegistrationNumber),
+                    displayUnloadingLocation: Boolean(displayUnloadingLocation),
+                    needsUnloadingLocation: Boolean(needsUnloadingLocation),
+                };
 
-            this.generateForm();
-        });
+                this.generateForm();
+            });
+        }
     }
 
     public generateForm() {
