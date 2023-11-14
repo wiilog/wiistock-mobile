@@ -51,6 +51,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public ionViewWillEnter(): void {
+        this.menuConfig = [];
 
         // TODO WIIS-7970 test this
         const goToDropDirectly = (!this.deposeAlreadyNavigate && Boolean(this.navService.param('goToDropDirectly')));
