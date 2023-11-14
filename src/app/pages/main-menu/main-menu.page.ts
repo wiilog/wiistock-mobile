@@ -113,14 +113,12 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                     .pipe(
                         mergeMap(({finished, message}) => (
                             zip(
-                                this.storageService.getRight(StorageKeyEnum.RIGHT_DEMANDE),
-                                this.storageService.getRight(StorageKeyEnum.RIGHT_TRACKING),
-                                this.storageService.getRight(StorageKeyEnum.RIGHT_STOCK),
                                 this.storageService.getRight(StorageKeyEnum.RIGHT_TRACK),
-                            ).pipe(map(([demande, tracking, stock, track]) => ({
+                                this.storageService.getRight(StorageKeyEnum.RIGHT_HANDLING),
+                            ).pipe(map(([track, stock]) => ({
                                 finished,
                                 message,
-                                rights: {demande, tracking, stock, track}
+                                rights: {track, stock}
                             })))
                         ))
                     )
@@ -214,49 +212,43 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
         });
     }
 
-    private resetMainMenuConfig(rights: {stock?: boolean, demande?: boolean, tracking?: boolean, track?: boolean}) {
+    private resetMainMenuConfig(rights: {track?: boolean, stock?: boolean}) {
         this.menuConfig = [];
 
         const actions = [];
 
-        if (rights.tracking) {
-            const action = () => {
-                this.navService.push(NavPathEnum.TRACKING_MENU, {
-                    fromStock: false
-                });
-            }
-            this.menuConfig.push({
-                icon: 'tracking.svg',
-                label: 'Traçabilité',
-                action
+        const actionTracking = () => {
+            this.navService.push(NavPathEnum.TRACKING_MENU, {
+                fromStock: false
             });
-            actions.push(action);
         }
+        this.menuConfig.push({
+            icon: 'tracking.svg',
+            label: 'Traçabilité',
+            action: actionTracking,
+        });
+        actions.push(actionTracking);
 
-        if (rights.stock) {
-            const action = () => {
-                this.navService.push(NavPathEnum.STOCK_MENU, {avoidSync: true});
-            }
-            this.menuConfig.push({
-                icon: 'stock.svg',
-                label: 'Stock',
-                action
-            });
-            actions.push(action);
+        const actionStock = () => {
+            this.navService.push(NavPathEnum.STOCK_MENU, {avoidSync: true});
         }
+        this.menuConfig.push({
+            icon: 'stock.svg',
+            label: 'Stock',
+            action: actionStock,
+        });
+        actions.push(actionStock);
 
-        if (rights.demande) {
-            const action = () => {
-                this.navService.push(NavPathEnum.DEMANDE_MENU);
-            };
-            this.menuConfig.push({
-                icon: 'demande.svg',
-                iconColor: 'success',
-                label: 'Demande',
-                action
-            });
-            actions.push(action);
-        }
+        const actionDemande = () => {
+            this.navService.push(NavPathEnum.DEMANDE_MENU);
+        };
+        this.menuConfig.push({
+            icon: 'demande.svg',
+            iconColor: 'success',
+            label: 'Demande',
+            action: () => actionDemande(),
+        });
+        actions.push(actionDemande);
 
         if (rights.track) {
             const action = () => {
