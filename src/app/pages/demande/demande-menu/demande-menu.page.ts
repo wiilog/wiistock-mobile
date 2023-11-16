@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {MenuConfig} from '@common/components/menu/menu-config';
+import {ColumnNumber, MenuConfig} from '@common/components/menu/menu-config';
 import {merge, Subscription, zip} from 'rxjs';
 import {NavService} from '@app/services/nav/nav.service';
 import {Platform, ViewWillEnter, ViewWillLeave} from '@ionic/angular';
@@ -21,7 +21,9 @@ import {NetworkService} from '@app/services/network.service';
 })
 export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
 
-    public readonly menuConfig: Array<MenuConfig>;
+    protected readonly ColumnNumber = ColumnNumber;
+
+    public menuConfig: Array<MenuConfig>;
     public statsSlidersData: Array<StatsSlidersData>;
 
     public messageLoading?: string;
@@ -41,10 +43,11 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
                        private sqliteService: SqliteService,
                        private navService: NavService) {
         this.avoidSync = true;
-        const self = this;
     }
 
     public ionViewWillEnter(): void {
+        this.menuConfig = [];
+
         this.navigationSubscription = merge(
             this.mainHeaderService.navigationChange$,
             this.platform.backButton

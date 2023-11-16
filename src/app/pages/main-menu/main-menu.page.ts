@@ -246,7 +246,7 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
             icon: 'demande.svg',
             iconColor: 'success',
             label: 'Demande',
-            action: () => actionDemande(),
+            action: actionDemande,
         });
         actions.push(actionDemande);
 

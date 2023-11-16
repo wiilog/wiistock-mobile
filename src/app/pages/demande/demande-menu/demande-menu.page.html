@@ -4,5 +4,7 @@
                        [data]="statsSlidersData">
     </wii-stats-sliders>
 
-    <wii-menu [config]="menuConfig"></wii-menu>
+    <wii-menu *ngIf="menuConfig"
+              [config]="menuConfig"
+              [columns]="ColumnNumber.TWO"></wii-menu>
 </div>
