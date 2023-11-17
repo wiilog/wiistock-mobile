@@ -83,7 +83,7 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
                         }
                     })
                 }
-                if(dispatch){
+                if(deliveryRequest){
                     this.menuConfig.push({
                         icon: 'demande.svg',
                         iconColor: 'list-yellow',
@@ -93,7 +93,7 @@ export class DemandeMenuPage implements ViewWillEnter, ViewWillLeave {
                         }
                     });
                 }
-                if(deliveryRequest){
+                if(dispatch){
                     this.menuConfig.push({
                         icon: 'transfer.svg',
                         iconColor: 'success',
