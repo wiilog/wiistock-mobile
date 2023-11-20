@@ -48,40 +48,40 @@ export class DispatchNewPage implements ViewWillEnter {
     private dispatchTranslations: Translations;
 
     private fieldParams: {
-        displayCarrierTrackingNumber: boolean,
-        needsCarrierTrackingNumber: boolean,
-        displayPickLocation: boolean,
-        needsPickLocation: boolean,
-        displayDropLocation: boolean,
-        needsDropLocation: boolean,
-        displayComment: boolean,
-        needsComment: boolean,
-        displayEmergency: boolean,
-        needsEmergency: boolean,
-        displayReceiver: boolean,
-        needsReceiver: boolean,
+        displayCarrierTrackingNumber: Array<string>,
+        needsCarrierTrackingNumber: Array<string>,
+        displayPickLocation: Array<string>,
+        needsPickLocation: Array<string>,
+        displayDropLocation: Array<string>,
+        needsDropLocation: Array<string>,
+        displayComment: Array<string>,
+        needsComment: Array<string>,
+        displayEmergency: Array<string>,
+        needsEmergency: Array<string>,
+        displayReceiver: Array<string>,
+        needsReceiver: Array<string>,
+        displayEmails: Array<string>,
+        needsEmails: Array<string>,
     } = {
-        displayCarrierTrackingNumber: false,
-        needsCarrierTrackingNumber: false,
-        displayPickLocation: false,
-        needsPickLocation: false,
-        displayDropLocation: false,
-        needsDropLocation: false,
-        displayComment: false,
-        needsComment: false,
-        displayEmergency: false,
-        needsEmergency: false,
-        displayReceiver: false,
-        needsReceiver: false,
+        displayCarrierTrackingNumber: [],
+        needsCarrierTrackingNumber: [],
+        displayPickLocation: [],
+        needsPickLocation: [],
+        displayDropLocation: [],
+        needsDropLocation: [],
+        displayComment: [],
+        needsComment: [],
+        displayEmergency: [],
+        needsEmergency: [],
+        displayReceiver: [],
+        needsReceiver: [],
+        displayEmails: [],
+        needsEmails: [],
     };
 
     private savedInputData: any;
 
     public constructor(private sqliteService: SqliteService,
-                       private networkService: NetworkService,
-                       private alertService: AlertService,
-                       private mainHeaderService: MainHeaderService,
-                       private localDataManager: LocalDataManagerService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
                        private storageService: StorageService,
@@ -101,23 +101,26 @@ export class DispatchNewPage implements ViewWillEnter {
                     this.translationService.getRaw(`Demande`, `Acheminements`, `Champs fixes`),
                     this.translationService.getRaw(`Demande`, `Acheminements`, `Général`),
 
-                    this.storageService.getNumber('acheminements.carrierTrackingNumber.displayedCreate'),
-                    this.storageService.getNumber('acheminements.carrierTrackingNumber.requiredCreate'),
+                    this.storageService.getItem('acheminements.carrierTrackingNumber.displayedCreate'),
+                    this.storageService.getItem('acheminements.carrierTrackingNumber.requiredCreate'),
 
-                    this.storageService.getNumber('acheminements.pickLocation.displayedCreate'),
-                    this.storageService.getNumber('acheminements.pickLocation.requiredCreate'),
+                    this.storageService.getItem('acheminements.pickLocation.displayedCreate'),
+                    this.storageService.getItem('acheminements.pickLocation.requiredCreate'),
 
-                    this.storageService.getNumber('acheminements.dropLocation.displayedCreate'),
-                    this.storageService.getNumber('acheminements.dropLocation.requiredCreate'),
+                    this.storageService.getItem('acheminements.dropLocation.displayedCreate'),
+                    this.storageService.getItem('acheminements.dropLocation.requiredCreate'),
 
-                    this.storageService.getNumber('acheminements.comment.displayedCreate'),
-                    this.storageService.getNumber('acheminements.comment.requiredCreate'),
+                    this.storageService.getItem('acheminements.comment.displayedCreate'),
+                    this.storageService.getItem('acheminements.comment.requiredCreate'),
 
-                    this.storageService.getNumber('acheminements.emergency.displayedCreate'),
-                    this.storageService.getNumber('acheminements.emergency.requiredCreate'),
+                    this.storageService.getItem('acheminements.emergency.displayedCreate'),
+                    this.storageService.getItem('acheminements.emergency.requiredCreate'),
 
-                    this.storageService.getNumber('acheminements.receiver.displayedCreate'),
-                    this.storageService.getNumber('acheminements.receiver.requiredCreate'),
+                    this.storageService.getItem('acheminements.receiver.displayedCreate'),
+                    this.storageService.getItem('acheminements.receiver.requiredCreate'),
+
+                    this.storageService.getItem('acheminements.emails.requiredCreate'),
+                    this.storageService.getItem('acheminements.emails.requiredCreate'),
                 )
             }
         }).subscribe(([emergencies, dispatchOfflineMode, fieldsTranslations, generalTranslations,  ...fieldsParam]) => {
@@ -134,20 +137,25 @@ export class DispatchNewPage implements ViewWillEnter {
                 needsEmergency,
                 displayReceiver,
                 needsReceiver,
+                displayEmails,
+                needsEmails,
             ] = fieldsParam;
+
             this.fieldParams = {
-                displayCarrierTrackingNumber: Boolean(displayCarrierTrackingNumber),
-                needsCarrierTrackingNumber: Boolean(needsCarrierTrackingNumber),
-                displayPickLocation: Boolean(displayPickLocation),
-                needsPickLocation: Boolean(needsPickLocation),
-                displayDropLocation: Boolean(displayDropLocation),
-                needsDropLocation: Boolean(needsDropLocation),
-                displayComment: Boolean(displayComment),
-                needsComment: Boolean(needsComment),
-                displayEmergency: Boolean(displayEmergency),
-                needsEmergency: Boolean(needsEmergency),
-                displayReceiver: Boolean(displayReceiver),
-                needsReceiver: Boolean(needsReceiver),
+                displayCarrierTrackingNumber: displayCarrierTrackingNumber ? displayCarrierTrackingNumber.split(' ') : [],
+                needsCarrierTrackingNumber: needsCarrierTrackingNumber ? needsCarrierTrackingNumber.split(' ') : [],
+                displayPickLocation: displayPickLocation ? displayPickLocation.split(' ') : [],
+                needsPickLocation: needsPickLocation ? needsPickLocation.split(' ') : [],
+                displayDropLocation: displayDropLocation ? displayDropLocation.split(' ') : [],
+                needsDropLocation: needsDropLocation ? needsDropLocation.split(' ') : [],
+                displayComment: displayComment ? displayComment.split(' ') : [],
+                needsComment: needsComment ? needsComment.split(' ') : [],
+                displayEmergency: displayEmergency ? displayEmergency.split(' ') : [],
+                needsEmergency: needsEmergency? needsEmergency.split(' ') : [],
+                displayReceiver: displayReceiver ? displayReceiver.split(' ') : [],
+                needsReceiver: needsReceiver ? needsReceiver.split(' ') : [],
+                displayEmails: displayEmails ? displayEmails.split(' ') : [],
+                needsEmails: needsEmails ? needsEmails.split(' ') : [],
             };
             const fullTranslations = fieldsTranslations.concat(generalTranslations);
             this.dispatchTranslations = TranslationService.CreateTranslationDictionaryFromArray(fullTranslations);
@@ -161,25 +169,7 @@ export class DispatchNewPage implements ViewWillEnter {
     }
 
     private getFormConfig(type: any = undefined) {
-
         this.formConfig = [
-            ...(this.fieldParams.displayCarrierTrackingNumber ? [{
-                item: FormPanelInputComponent,
-                config: {
-                    label: TranslationService.Translate(this.dispatchTranslations, 'N° tracking transporteur'),
-                    name: 'carrierTrackingNumber',
-                    ...type ? {
-                        value: this.savedInputData.carrierTrackingNumber,
-                    } : {},
-                    inputConfig: {
-                        required: Boolean(this.fieldParams.needsCarrierTrackingNumber),
-                        type: 'text',
-                    },
-                    errors: {
-                        required: 'Vous devez renseigner un numéro de tracking transporteur.'
-                    }
-                }
-            }] : []),
             {
                 item: FormPanelSelectComponent,
                 config: {
@@ -208,13 +198,30 @@ export class DispatchNewPage implements ViewWillEnter {
                     }
                 }
             },
-            ...(this.fieldParams.displayPickLocation ? [{
+            ...(type && this.fieldParams.displayCarrierTrackingNumber.includes(String(type.id)) ? [{
+                item: FormPanelInputComponent,
+                config: {
+                    label: TranslationService.Translate(this.dispatchTranslations, 'N° tracking transporteur'),
+                    name: 'carrierTrackingNumber',
+                    ...type ? {
+                        value: this.savedInputData.carrierTrackingNumber,
+                    } : {},
+                    inputConfig: {
+                        required: Boolean(this.fieldParams.needsCarrierTrackingNumber.includes(String(type.id))),
+                        type: 'text',
+                    },
+                    errors: {
+                        required: 'Vous devez renseigner un numéro de tracking transporteur.'
+                    }
+                }
+            }] : []),
+            ...(type && this.fieldParams.displayPickLocation.includes(String(type.id)) ? [{
                 item: FormPanelSelectComponent,
                 config: {
                     label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de prise'),
                     name: 'pickLocation',
                     inputConfig: {
-                        required: Boolean(this.fieldParams.needsPickLocation),
+                        required: Boolean(this.fieldParams.needsPickLocation.includes(String(type.id))),
                         searchType: SelectItemTypeEnum.LOCATION,
                         ...type && type.suggestedPickLocations !== '' ? {
                             filterItem: (location: any) => type.suggestedPickLocations
@@ -227,14 +234,14 @@ export class DispatchNewPage implements ViewWillEnter {
                     }
                 }
             }] : []),
-            ...(this.fieldParams.displayDropLocation
+            ...(type && this.fieldParams.displayDropLocation.includes(String(type.id))
                 ? [{
                     item: FormPanelSelectComponent,
                     config: {
                         label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de dépose'),
                         name: 'dropLocation',
                         inputConfig: {
-                            required: Boolean(this.fieldParams.needsDropLocation),
+                            required: Boolean(this.fieldParams.needsDropLocation.includes(String(type.id))),
                             searchType: SelectItemTypeEnum.LOCATION,
                             ...type && type.suggestedDropLocations !== '' ? {
                                 filterItem: (location: any) => type.suggestedDropLocations
@@ -248,7 +255,7 @@ export class DispatchNewPage implements ViewWillEnter {
                     }
                 }]
                 : []),
-            ...(this.fieldParams.displayComment ? [{
+            ...(type && this.fieldParams.displayComment.includes(String(type.id)) ? [{
                 item: FormPanelTextareaComponent,
                 config: {
                     label: `Commentaire`,
@@ -257,7 +264,7 @@ export class DispatchNewPage implements ViewWillEnter {
                         value: this.savedInputData.comment,
                     } : {},
                     inputConfig: {
-                        required: Boolean(this.fieldParams.needsComment),
+                        required: Boolean(this.fieldParams.needsComment.includes(String(type.id))),
                         maxLength: '512',
                     },
                     errors: {
@@ -265,7 +272,7 @@ export class DispatchNewPage implements ViewWillEnter {
                     }
                 }
             }] : []),
-            ...(this.fieldParams.displayEmergency ? [{
+            ...(type && this.fieldParams.displayEmergency.includes(String(type.id)) ? [{
                 item: FormPanelSelectComponent,
                 config: {
                     label: 'Urgence',
@@ -274,7 +281,7 @@ export class DispatchNewPage implements ViewWillEnter {
                         value: this.savedInputData.emergency,
                     } : {},
                     inputConfig: {
-                        required: Boolean(this.fieldParams.needsEmergency),
+                        required: Boolean(this.fieldParams.needsEmergency.includes(String(type.id))),
                         elements: this.emergencies
                     },
                     errors: {
@@ -282,7 +289,7 @@ export class DispatchNewPage implements ViewWillEnter {
                     }
                 }
             }] : []),
-            ...(this.fieldParams.displayReceiver ? [{
+            ...(type && this.fieldParams.displayReceiver.includes(String(type.id)) ? [{
                 item: FormPanelSelectComponent,
                 config: {
                     label: 'Destinataire',
@@ -291,7 +298,7 @@ export class DispatchNewPage implements ViewWillEnter {
                         value: this.savedInputData.receiver,
                     } : {},
                     inputConfig: {
-                        required: Boolean(this.fieldParams.needsReceiver),
+                        required: Boolean(this.fieldParams.needsReceiver.includes(String(type.id))),
                         searchType: SelectItemTypeEnum.USER,
                     },
                     errors: {
@@ -299,7 +306,7 @@ export class DispatchNewPage implements ViewWillEnter {
                     }
                 }
             }] : []),
-            ...(this.fieldParams.needsEmergency ? [{
+            ...(type && this.fieldParams.displayEmails.includes(String(type.id)) ? [{
                 item: FormPanelInputComponent,
                 config: {
                     label: 'Email(s)',
@@ -308,6 +315,7 @@ export class DispatchNewPage implements ViewWillEnter {
                         value: this.savedInputData.emails,
                     } : {},
                     inputConfig: {
+                        required: Boolean(this.fieldParams.needsEmails.includes(String(type.id))),
                         type: 'text',
                     }
                 }

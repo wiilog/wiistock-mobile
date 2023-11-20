@@ -12,6 +12,8 @@ export class StorageService {
 
     private static FIELD_TYPES_TO_KEEP = ['displayedCreate', 'requiredCreate', 'onMobile'];
 
+    private static ENTITY_FIELDS_BY_TYPE = ['acheminements'];
+
     public constructor() {}
 
     public initStorage(apiKey: string,
@@ -80,7 +82,9 @@ export class StorageService {
                         const key = `${entity}.${field}.${condition}`;
                         storageObservables.push(this.setItem(
                             key,
-                            `${Number(Boolean(fieldParams[entity][field][condition]))}`
+                            `${StorageService.ENTITY_FIELDS_BY_TYPE.includes(entity)
+                                ? Array(fieldParams[entity][field][condition])
+                                : Number(Boolean(fieldParams[entity][field][condition]))}`
                         ));
                     }
                 })
