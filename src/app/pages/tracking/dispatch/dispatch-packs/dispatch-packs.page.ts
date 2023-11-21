@@ -161,23 +161,23 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                             this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
                             this.storageService.getString(StorageKeyEnum.DISPATCH_DEFAULT_WAYBILL),
                             zip(
-                                this.storageService.getNumber('acheminements.carrierTrackingNumber.displayedCreate'),
-                                this.storageService.getNumber('acheminements.carrierTrackingNumber.requiredCreate'),
+                                this.storageService.getItem('acheminements.carrierTrackingNumber.displayedCreate'),
+                                this.storageService.getItem('acheminements.carrierTrackingNumber.requiredCreate'),
 
-                                this.storageService.getNumber('acheminements.pickLocation.displayedCreate'),
-                                this.storageService.getNumber('acheminements.pickLocation.requiredCreate'),
+                                this.storageService.getItem('acheminements.pickLocation.displayedCreate'),
+                                this.storageService.getItem('acheminements.pickLocation.requiredCreate'),
 
-                                this.storageService.getNumber('acheminements.dropLocation.displayedCreate'),
-                                this.storageService.getNumber('acheminements.dropLocation.requiredCreate'),
+                                this.storageService.getItem('acheminements.dropLocation.displayedCreate'),
+                                this.storageService.getItem('acheminements.dropLocation.requiredCreate'),
 
-                                this.storageService.getNumber('acheminements.comment.displayedCreate'),
-                                this.storageService.getNumber('acheminements.comment.requiredCreate'),
+                                this.storageService.getItem('acheminements.comment.displayedCreate'),
+                                this.storageService.getItem('acheminements.comment.requiredCreate'),
 
-                                this.storageService.getNumber('acheminements.emergency.displayedCreate'),
-                                this.storageService.getNumber('acheminements.emergency.requiredCreate'),
+                                this.storageService.getItem('acheminements.emergency.displayedCreate'),
+                                this.storageService.getItem('acheminements.emergency.requiredCreate'),
 
-                                this.storageService.getNumber('acheminements.receiver.displayedCreate'),
-                                this.storageService.getNumber('acheminements.receiver.requiredCreate'),
+                                this.storageService.getItem('acheminements.receiver.displayedCreate'),
+                                this.storageService.getItem('acheminements.receiver.requiredCreate'),
                             ),
                         ).pipe(
                             mergeMap((data) => this.sqliteService
