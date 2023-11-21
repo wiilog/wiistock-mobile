@@ -82,31 +82,35 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
     private loadingElement?: HTMLIonLoadingElement;
 
     private fieldParams: {
-        displayCarrierTrackingNumber: boolean,
-        needsCarrierTrackingNumber: boolean,
-        displayPickLocation: boolean,
-        needsPickLocation: boolean,
-        displayDropLocation: boolean,
-        needsDropLocation: boolean,
-        displayComment: boolean,
-        needsComment: boolean,
-        displayEmergency: boolean,
-        needsEmergency: boolean,
-        displayReceiver: boolean,
-        needsReceiver: boolean,
+        displayCarrierTrackingNumber: Array<string>,
+        needsCarrierTrackingNumber: Array<string>,
+        displayPickLocation: Array<string>,
+        needsPickLocation: Array<string>,
+        displayDropLocation: Array<string>,
+        needsDropLocation: Array<string>,
+        displayComment: Array<string>,
+        needsComment: Array<string>,
+        displayEmergency: Array<string>,
+        needsEmergency: Array<string>,
+        displayReceiver: Array<string>,
+        needsReceiver: Array<string>,
+        displayEmails: Array<string>,
+        needsEmails: Array<string>,
     } = {
-        displayCarrierTrackingNumber: false,
-        needsCarrierTrackingNumber: false,
-        displayPickLocation: false,
-        needsPickLocation: false,
-        displayDropLocation: false,
-        needsDropLocation: false,
-        displayComment: false,
-        needsComment: false,
-        displayEmergency: false,
-        needsEmergency: false,
-        displayReceiver: false,
-        needsReceiver: false,
+        displayCarrierTrackingNumber: [],
+        needsCarrierTrackingNumber: [],
+        displayPickLocation: [],
+        needsPickLocation: [],
+        displayDropLocation: [],
+        needsDropLocation: [],
+        displayComment: [],
+        needsComment: [],
+        displayEmergency: [],
+        needsEmergency: [],
+        displayReceiver: [],
+        needsReceiver: [],
+        displayEmails: [],
+        needsEmails: [],
     };
 
     public offlineMode: boolean = false;
@@ -210,20 +214,25 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                         needsEmergency,
                         displayReceiver,
                         needsReceiver,
+                        displayEmails,
+                        needsEmails,
                     ] = fieldParams;
+
                     this.fieldParams = {
-                        displayCarrierTrackingNumber: Boolean(displayCarrierTrackingNumber),
-                        needsCarrierTrackingNumber: Boolean(needsCarrierTrackingNumber),
-                        displayPickLocation: Boolean(displayPickLocation),
-                        needsPickLocation: Boolean(needsPickLocation),
-                        displayDropLocation: Boolean(displayDropLocation),
-                        needsDropLocation: Boolean(needsDropLocation),
-                        displayComment: Boolean(displayComment),
-                        needsComment: Boolean(needsComment),
-                        displayEmergency: Boolean(displayEmergency),
-                        needsEmergency: Boolean(needsEmergency),
-                        displayReceiver: Boolean(displayReceiver),
-                        needsReceiver: Boolean(needsReceiver),
+                        displayCarrierTrackingNumber: displayCarrierTrackingNumber ? displayCarrierTrackingNumber.split(' ') : [],
+                        needsCarrierTrackingNumber: needsCarrierTrackingNumber ? needsCarrierTrackingNumber.split(' ') : [],
+                        displayPickLocation: displayPickLocation ? displayPickLocation.split(' ') : [],
+                        needsPickLocation: needsPickLocation ? needsPickLocation.split(' ') : [],
+                        displayDropLocation: displayDropLocation ? displayDropLocation.split(' ') : [],
+                        needsDropLocation: needsDropLocation ? needsDropLocation.split(' ') : [],
+                        displayComment: displayComment ? displayComment.split(' ') : [],
+                        needsComment: needsComment ? needsComment.split(' ') : [],
+                        displayEmergency: displayEmergency ? displayEmergency.split(' ') : [],
+                        needsEmergency: needsEmergency? needsEmergency.split(' ') : [],
+                        displayReceiver: displayReceiver ? displayReceiver.split(' ') : [],
+                        needsReceiver: needsReceiver ? needsReceiver.split(' ') : [],
+                        displayEmails: displayEmails ? displayEmails.split(' ') : [],
+                        needsEmails: needsEmails ? needsEmails.split(' ') : [],
                     };
 
                     this.hasWayBillData = Boolean(dispatchWaybill);
@@ -326,19 +335,19 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
             this.dispatchHeaderConfig = {
                 title: this.dispatch.number ? `Demande N°${this.dispatch.number}` : `Type ${this.dispatch.typeLabel}`,
                 subtitle: [
-                    this.fromCreate && this.fieldParams.displayCarrierTrackingNumber
+                    this.fromCreate && this.fieldParams.displayCarrierTrackingNumber.includes(String(this.dispatch.typeId))
                         ? TranslationService.Translate(dispatchTranslations, 'N° tracking transporteur') + ` : ${this.dispatch.carrierTrackingNumber || ''}`
                         : null,
-                    !this.fromCreate || (this.fromCreate && this.fieldParams.displayPickLocation)
+                    !this.fromCreate || (this.fromCreate && this.fieldParams.displayPickLocation.includes(String(this.dispatch.typeId)))
                         ? TranslationService.Translate(dispatchTranslations, 'Emplacement de prise') + ' : ' + this.dispatch.locationFromLabel || ''
                         : null,
-                    this.fromCreate && this.fieldParams.displayDropLocation
+                    this.fromCreate && this.fieldParams.displayDropLocation.includes(String(this.dispatch.typeId))
                             ? TranslationService.Translate(dispatchTranslations, 'Emplacement de dépose') + ' : ' + this.dispatch.locationToLabel || ''
                             : null,
-                    this.fromCreate && this.fieldParams.displayComment
+                    this.fromCreate && this.fieldParams.displayComment.includes(String(this.dispatch.typeId))
                             ? `Commentaire : ${this.dispatch.comment || ''}`
                             : null,
-                    this.fromCreate && this.fieldParams.displayEmergency
+                    this.fromCreate && this.fieldParams.displayEmergency.includes(String(this.dispatch.typeId))
                             ? `Urgence : ${this.dispatch.emergency || ''}`
                             : null,
                     this.dispatch.destination ? `Destination : ${this.dispatch.destination || ''}` : null
