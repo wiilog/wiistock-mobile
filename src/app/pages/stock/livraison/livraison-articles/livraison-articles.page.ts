@@ -301,7 +301,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
             this.navService.push(NavPathEnum.LIVRAISON_EMPLACEMENT, {
                 livraison: this.livraison,
                 validateLivraison: () => {
-                    this.navService.pop();
+                    this.navService.pop({path: NavPathEnum.LIVRAISON_MENU});
                 }
             });
         }
