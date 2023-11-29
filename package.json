@@ -14,7 +14,8 @@
         "build:dev": "yarn ng build --configuration development && yarn sync",
         "build:android": "yarn build && yarn android:open",
         "android:open": "yarn capacitor copy && yarn capacitor copy android && yarn capacitor open android",
-        "watch": "yarn build:dev && yarn ionic capacitor run android --livereload --external",
+        "watch": "yarn watch --public-host=$HOST_IP",
+        "watch-default": "yarn build:dev && yarn ionic capacitor run android --livereload --external",
         "wiis:version": "node scripts/set-app-version"
     },
     "private": true,
