@@ -4,4 +4,5 @@ export interface Nature {
     color?: string;
     hide: number;
     default?: boolean;
+    isDisplayedOnDispatch?: number;
 }

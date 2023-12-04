@@ -369,6 +369,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'color', value: 'VARCHAR(255)'},
             {column: 'hide', value: 'INTEGER'},
             {column: 'defaultNature', value: 'INTEGER'},
+            {column: 'isDisplayedOnDispatch', value: 'INTEGER'},
         ]
     },
     {
