@@ -526,6 +526,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'volume', value: 'REAL'},
             {column: 'weight', value: 'REAL'},
             {column: 'associatedDocumentTypes', value: 'JSON'},
+            {column: 'storageRuleLocations', value: 'VARCHAR(255)'},
         ]
     },
     {

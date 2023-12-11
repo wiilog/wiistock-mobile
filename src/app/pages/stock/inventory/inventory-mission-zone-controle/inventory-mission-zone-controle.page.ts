@@ -151,7 +151,6 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
             .subscribe(({tags}) => {
                 const newCurrentMissionTags = tags.filter((tag) => this.inputRfidTags.indexOf(tag) === -1);
                 this.inputRfidTags.push(...newCurrentMissionTags);
-                console.log(this.inputRfidTags);
             });
 
         this.rfidManager.scanStarted$

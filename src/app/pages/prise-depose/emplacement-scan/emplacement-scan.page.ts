@@ -11,6 +11,9 @@ import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {NetworkService} from '@app/services/network.service';
 import {Livraison} from "@entities/livraison";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {SqliteService} from "@app/services/sqlite/sqlite.service";
+import {LoadingService} from "@app/services/loading.service";
+import {AlertService} from "@app/services/alert.service";
 
 @Component({
     selector: 'wii-emplacement-scan',
@@ -26,6 +29,7 @@ export class EmplacementScanPage implements ViewWillEnter, ViewWillLeave {
     public fromDepose: boolean;
     public fromStock: boolean;
     public fromEmptyRound: boolean;
+    public restrictedLocations: Array<Emplacement> = [];
 
     private livraisonToRedirect?: Livraison;
 
@@ -35,13 +39,16 @@ export class EmplacementScanPage implements ViewWillEnter, ViewWillLeave {
 
     public loading: boolean;
     public isDemoMode: boolean;
-    public customAction?: (location: any) => void;
+    public customAction?: (location: Emplacement) => void;
     public finishAction?: () => void;
 
     public constructor(private networkService: NetworkService,
                        private toastService: ToastService,
                        private storageService: StorageService,
-                       private navService: NavService) {
+                       private navService: NavService,
+                       private sqliteService: SqliteService,
+                       private loadingService: LoadingService,
+                       private alertService: AlertService) {
         this.resetEmitter$ = new EventEmitter<void>();
         this.loading = true;
     }
@@ -53,13 +60,15 @@ export class EmplacementScanPage implements ViewWillEnter, ViewWillLeave {
             this.fromDepose = Boolean(this.navService.param('fromDepose'));
             this.fromStock = Boolean(this.navService.param('fromStock'));
             this.fromEmptyRound = Boolean(this.navService.param('fromEmptyRound'));
+            this.restrictedLocations = this.navService.param('restrictedLocations');
             this.customAction = this.navService.param('customAction');
             this.finishAction = this.navService.param('finishAction');
             this.loading = false;
             this.isDemoMode = isDemoMode;
-            this.barcodeScannerMode = this.fromStock || !isDemoMode
+            this.barcodeScannerMode = this.navService.param(`scanMode`) || (this.fromStock || !isDemoMode
                 ? BarcodeScannerModeEnum.TOOL_SEARCH
-                : BarcodeScannerModeEnum.TOOLS_FULL;
+                : BarcodeScannerModeEnum.TOOLS_FULL
+            )
 
             this.resetEmitter$.emit();
 
@@ -86,28 +95,75 @@ export class EmplacementScanPage implements ViewWillEnter, ViewWillLeave {
         });
     }
 
-    public selectLocation(emplacement: Emplacement) {
-        this.testNetwork(() => {
-            if (this.customAction) {
-                this.navService.pop().toPromise().then((_) => {
-                    if (this.customAction) {
-                        this.customAction(emplacement.label)
-                    }
+    public async checkRestrictions(location: Emplacement): Promise<boolean> {
+        return new Promise(async (resolve) => {
+            if (location
+                && this.restrictedLocations
+                && this.restrictedLocations.length > 0
+                && this.restrictedLocations.findIndex(({id}) => id === location.id) === -1) {
+                this.loadingService.presentLoadingWhile({
+                    event: () => this.sqliteService.findBy(`emplacement`, [`id IN (${this.restrictedLocations.map(({id}) => id).join(',')})`])
+                }).subscribe(async (locations: Array<Emplacement>) => {
+                    this.selectItemComponent.unsubscribeZebraScan();
+                    const retrictedLocations = locations
+                        .sort((l1, l2) => l1.label < l2.label ? -1 : 1)
+                        .slice(0, 3)
+                        .map(({label}) => `<br><strong>${label}</strong>`)
+                        .join(' ');
+                    await this.alertService.show({
+                        message: `
+                            <img src="assets/icons/round-exclamation.svg" class="medium">
+                            <br>L'emplacement scanné n'est pas autorisé pour une dépose. Vous pouvez scanner ${locations.length > 1 ? `les emplacements suivants` : `l'emplacement suivant`} :
+                            ${retrictedLocations}
+                        `,
+                        cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+                        backdropDismiss: false,
+                        buttons: [
+                            {
+                                text: 'OK',
+                                role: 'cancel',
+                                handler: () => {
+                                    this.selectItemComponent.fireZebraScan();
+                                    resolve(false);
+                                },
+                            },
+                        ]
+                    });
                 });
             } else {
-                const nextPagePath = this.fromDepose
-                    ? NavPathEnum.DEPOSE
-                    : (this.fromEmptyRound
-                        ? NavPathEnum.EMPTY_ROUND
-                        : NavPathEnum.PRISE);
-                this.navService.push(nextPagePath, {
-                    emplacement,
-                    articlesList: this.navService.param('articlesList'),
-                    fromStockLivraison: Boolean(this.navService.param('articlesList')),
-                    livraisonToRedirect: this.livraisonToRedirect,
-                    fromStock: this.fromStock,
-                    createTakeAndDrop: this.navService.param('createTakeAndDrop') || false,
-                    finishAction: this.finishAction || (() => {this.navService.pop();})
+                resolve(true);
+            }
+        })
+    }
+
+    public selectLocation(location: Emplacement) {
+        this.checkRestrictions(location).then((noRestrictions: boolean) => {
+            if(noRestrictions) {
+                this.testNetwork(() => {
+                    if (this.customAction) {
+                        this.navService.pop().toPromise().then((_) => {
+                            if (this.customAction) {
+                                this.customAction(location)
+                            }
+                        });
+                    } else {
+                        const nextPagePath = this.fromDepose
+                            ? NavPathEnum.DEPOSE
+                            : (this.fromEmptyRound
+                                ? NavPathEnum.EMPTY_ROUND
+                                : NavPathEnum.PRISE);
+                        this.navService.push(nextPagePath, {
+                            emplacement: location,
+                            articlesList: this.navService.param('articlesList'),
+                            fromStockLivraison: Boolean(this.navService.param('articlesList')),
+                            livraisonToRedirect: this.livraisonToRedirect,
+                            fromStock: this.fromStock,
+                            createTakeAndDrop: this.navService.param('createTakeAndDrop') || false,
+                            finishAction: this.finishAction || (() => {
+                                this.navService.pop();
+                            })
+                        });
+                    }
                 });
             }
         });

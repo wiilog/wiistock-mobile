@@ -14,6 +14,7 @@ import {mergeMap} from "rxjs/operators";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {CardListConfig} from "@common/components/card-list/card-list-config";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {Emplacement} from "@entities/emplacement";
 
 type ArticleAssociation = {
     barCode: string,
@@ -110,7 +111,7 @@ export class AssociationPage implements ViewWillEnter, ViewWillLeave {
                 this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
                     fromDepose: false,
                     fromStock: true,
-                    customAction: (location: string) => this.locationSelectCallback(location)
+                    customAction: (location: Emplacement) => this.locationSelectCallback(location.label)
                 });
             } else {
                 this.doAPICall(logisticUnit);

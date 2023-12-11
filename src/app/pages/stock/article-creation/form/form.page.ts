@@ -27,6 +27,8 @@ import {mergeMap, Observable, of} from "rxjs";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {map} from "rxjs/operators";
 import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
+import {NavPathEnum} from "@app/services/nav/nav-path.enum";
+import {Emplacement} from "@entities/emplacement";
 
 
 @Component({
@@ -410,15 +412,47 @@ export class FormPage implements ViewWillEnter, ViewWillLeave {
         } else {
             this.loading = true;
             this.loadingService.presentLoadingWhile({
-                event: () => this.apiService.requestApi(ApiService.CREATE_ARTICLE, {params})
-            }).subscribe((response) => {
-                this.loading = false;
-                this.toastService.presentToast(response.message || response.msg);
-                if (response.success) {
-                    this.navService.pop();
+                event: () => this.storageService.getRight(StorageKeyEnum.PARAMETER_ARTICLE_LOCATION_DROP_WITH_REFERENCE_STORAGE_RULE)
+                    .pipe(
+                        mergeMap((needsLocationCheck) => needsLocationCheck
+                            ? this.sqliteService.findOneById('reference_article', this.reference)
+                            : of(false)),
+                        mergeMap((reference: any) => reference
+                            ? this.sqliteService.findBy(`emplacement`, [`id IN (${reference.storageRuleLocations})`])
+                            : of(undefined))
+                    )
+            }).subscribe((restrictedLocations: Array<Emplacement>|undefined) => {
+                if (restrictedLocations) {
+                    this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
+                        fromDepose: false,
+                        fromStock: true,
+                        restrictedLocations,
+                        scanMode: BarcodeScannerModeEnum.ONLY_SCAN,
+                        customAction: (location: Emplacement) => {
+                            this.navService.pop()
+                                .subscribe(() => this.createArticle(location, params));
+                        },
+                    });
+                } else {
+                    this.createArticle(undefined, params);
                 }
             });
         }
+    }
+
+    public createArticle(location: Emplacement|undefined, params: any) {
+        if(location) {
+            params.destination = location.id;
+        }
+        this.loadingService.presentLoadingWhile({
+            event: () => this.apiService.requestApi(ApiService.CREATE_ARTICLE, {params})
+        }).subscribe((response) => {
+            this.loading = false;
+            this.toastService.presentToast(response.message || response.msg);
+            if (response.success) {
+                this.navService.pop();
+            }
+        });
     }
 
     public onScan2DTouchstart(): void {
