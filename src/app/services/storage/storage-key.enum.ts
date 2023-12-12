@@ -39,6 +39,7 @@ export enum StorageKeyEnum {
     PARAMETER_DELIVERY_REQUEST_ALLOWED_DROP_ON_FREE_LOCATION = 'deliveryRequestDropOnFreeLocation',
     PARAMETER_DISPLAY_TARGET_LOCATION_PICKING = 'displayTargetLocationPicking',
     PARAMETER_DISPLAY_REFERENCE_CODE_AND_SCAN = 'displayReferenceCodeAndScan',
+    PARAMETER_ARTICLE_LOCATION_DROP_WITH_REFERENCE_STORAGE_RULE = 'articleLocationDropWithReferenceStorageRule',
     PARAMETER_RFID_PREFIX = 'rfidPrefix',
     DISPATCH_OFFLINE_MODE = 'dispatchOfflineMode',
 
