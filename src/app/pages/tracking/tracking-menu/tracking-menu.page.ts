@@ -46,12 +46,13 @@ export class TrackingMenuPage implements ViewWillEnter {
             this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
             this.storageService.getRight(StorageKeyEnum.RIGHT_MOVEMENT),
             this.storageService.getRight(StorageKeyEnum.RIGHT_DISPATCH),
+            this.storageService.getRight(StorageKeyEnum.RIGHT_RECEIPT_ASSOCIATION),
             this.storageService.getCounter(StorageKeyEnum.COUNTERS_DISPATCHES_TREATED),
             this.sqliteService.count('dispatch', ['treatedStatusId IS NULL OR partial = 1']),
 
             this.translationService.get(`Demande`, `Acheminements`, `Général`)
         ).subscribe(
-            ([group, ungroup, truckArrival, forceSignature, dispatchOfflineMode, movement, dispatch, treatedDispatches, toTreatDispatches, translations]) => {
+            ([group, ungroup, truckArrival, forceSignature, dispatchOfflineMode, movement, dispatch, receiptAssociation, treatedDispatches, toTreatDispatches, translations]) => {
                 if (!dispatchOfflineMode && dispatch) {
                     this.menuConfig.push(
                         {
@@ -117,6 +118,19 @@ export class TrackingMenuPage implements ViewWillEnter {
                         }
                     });
                 }
+
+                if (receiptAssociation) {
+                    this.menuConfig.push({
+                        icon: 'receipt-association.svg',
+                        label: 'Association BR',
+                        action: () => {
+                            this.networkService.proceedAction({
+                                action: () => this.navService.push(NavPathEnum.RECEIPT_ASSOCIATION_MENU),
+                            });
+                        }
+                    });
+                }
+
                 this.statsSlidersData = this.createStatsSlidersData(treatedDispatches, toTreatDispatches);
             }
         );

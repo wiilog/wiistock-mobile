@@ -1,0 +1,15 @@
+<div class="page-content" scroll-y="true">
+    <wii-list-panel *ngIf="packListHeader && packListBody"
+                    [header]="packListHeader"
+                    [body]="packListBody"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+</div>
+
+<div class="page-footer persisted-page-footer">
+    <wii-barcode-scanner #footerScannerComponent
+                         [mode]="scannerModeManual"
+                         (scanAdd)="checkExistingPack($event)"
+                         (manualAdd)="checkExistingPack($event)">
+    </wii-barcode-scanner>
+</div>

@@ -87,4 +87,6 @@ export enum NavPathEnum {
     TRUCK_ARRIVAL_LINES = 'truck-arrival-lines',
     TRUCK_ARRIVAL_RESERVES = 'truck-arrival-reserves',
     TRUCK_ARRIVAL_RESERVE_DETAILS = 'truck-arrival-reserve-details',
+    RECEIPT_ASSOCIATION_MENU = 'receipt-association-menu',
+    RECEIPT_ASSOCIATION_LOGISTIC_UNIT = 'receipt-association-logistic-unit',
 }

@@ -90,6 +90,7 @@ export class ApiService {
     public static readonly GET_TRUCK_ARRIVALS_LINES_NUMBER = {method: GET, service: '/get-truck-arrival-lines-number'};
     public static readonly NEW_OFFLINE_DISPATCHES = {method: POST, service: '/new-offline-dispatches'};
     public static readonly LOGOUT = {method: POST, service: '/logout'};
+    public static readonly POST_RECEIPT_ASSOCIATION = {method: POST, service: '/receipt-association'};
 
 
     private static readonly DEFAULT_HEADERS = {
