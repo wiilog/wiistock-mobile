@@ -60,6 +60,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
 
     public loading: boolean;
     public barcodeCheckLoading: boolean;
+    public displayWarningWrongLocation: boolean;
 
     public fromStock: boolean;
 
@@ -113,14 +114,16 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                 ? this.apiService.requestApi(ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})
                 : of({trackingDrops: []})),
             this.sqliteService.findAll('nature'),
-            this.translationService.get(null, `Traçabilité`, `Général`)
+            this.translationService.get(null, `Traçabilité`, `Général`),
+            this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_WARNING_WRONG_LOCATION)
         )
-            .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures, natureTranslations]) => {
+            .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures, natureTranslations, displayWarningWrongLocation]) => {
                 this.operator = operator;
                 this.colisPriseAlreadySaved = colisPriseAlreadySaved;
                 this.currentPacksOnLocation = trackingDrops;
                 this.footerScannerComponent.fireZebraScan();
                 this.natureTranslations = natureTranslations;
+                this.displayWarningWrongLocation = displayWarningWrongLocation;
 
                 if (natures) {
                     this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
@@ -585,14 +588,18 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                             params: {
                                 code: barCode,
                                 nature: 1,
-                                group: 1
+                                group: 1,
+                                ...this.displayWarningWrongLocation
+                                    ? {
+                                        location: 1
+                                    } : {},
                             }
                         })
                         .pipe(
-                            mergeMap(({nature, group, isPack, isGroup}) => (
+                            mergeMap(({nature, group, isPack, isGroup, location}) => (
                                 nature
-                                    ? this.sqliteService.importNaturesData({natures: [nature]}, false).pipe(map(() => ({nature, group, isPack, isGroup})))
-                                    : of({nature, group, isPack, isGroup})
+                                    ? this.sqliteService.importNaturesData({natures: [nature]}, false).pipe(map(() => ({nature, group, isPack, isGroup, location})))
+                                    : of({nature, group, isPack, isGroup, location})
                             )),
                             tap(({nature}) => {
                                 if (nature) {
@@ -602,65 +609,39 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                             }),
                             filter(() => this.viewEntered)
                         )
-                        .subscribe(
-                            ({nature, group, isPack, isGroup}) => {
-                                if(this.fromStock && isGroup) {
-                                    const cancelPicking = this.cancelPickingAction();
-                                    cancelPicking({object: {value: barCode, label: barCode}});
-
+                        .subscribe({
+                            next: ({nature, group, isPack, isGroup, location}) => {
+                                if (this.displayWarningWrongLocation && location && (this.emplacement.id !== location)) {
                                     this.alertService.show({
-                                        header: 'Transfert impossible',
+                                        header: `Confirmation`,
+                                        message: `Êtes-vous sûr que cet élément est présent sur cet emplacement ?`,
                                         backdropDismiss: false,
-                                        cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
-                                        message: `Vous ne pouvez pas transférer l'unité logistique ${barCode} car c'est un groupe`,
                                         buttons: [
                                             {
+                                                text: 'Confirmer',
+                                                cssClass: 'alert-success',
+                                                handler: () => {
+                                                    this.processLogisticUnitTaking(isGroup, isPack, barCode, group, nature);
+                                                },
+                                            },
+                                            {
                                                 text: 'Annuler',
-                                                cssClass: 'alert-danger',
                                                 role: 'cancel',
-                                            }
+                                                handler: () => {
+                                                    this.colisPrise.shift();
+                                                    this.refreshListComponent();
+                                                },
+                                            },
                                         ]
                                     });
-                                }
-
-                                if (isPack || !isGroup) {
-                                    if (group) {
-                                        this.alertService.show({
-                                            header: 'Confirmation',
-                                            backdropDismiss: false,
-                                            cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
-                                            message: `Le colis ${barCode} est contenu dans le groupe ${group.code}.
-                                                  Confirmer la prise l'enlèvera du groupe.`,
-                                            buttons: [
-                                                {
-                                                    text: 'Confirmer',
-                                                    cssClass: 'alert-success',
-                                                    handler: () => {
-                                                        this.updateTrackingMovementNature(barCode, nature && nature.id);
-                                                    }
-                                                },
-                                                {
-                                                    text: 'Annuler',
-                                                    cssClass: 'alert-danger',
-                                                    role: 'cancel',
-                                                    handler: () => {
-                                                        const cancelPicking = this.cancelPickingAction();
-                                                        cancelPicking({object: {value: barCode, label: barCode}});
-                                                    }
-                                                }
-                                            ]
-                                        });
-                                    }
-                                    else {
-                                        this.updateTrackingMovementNature(barCode, nature && nature.id);
-                                    }
-                                }
-                                else { // isGroup === true
-                                    this.updateTrackingMovementNature(barCode, nature && nature.id, group);
+                                } else {
+                                    this.processLogisticUnitTaking(isGroup, isPack, barCode, group, nature)
                                 }
                             },
-                            () => this.updateTrackingMovementNature(barCode)
-                        );
+                            error: () => {
+                                this.updateTrackingMovementNature(barCode);
+                            },
+                        });
                 }
             }
         }
@@ -687,6 +668,65 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                     })
                 )
             : of(undefined);
+    }
+
+    private processLogisticUnitTaking(isGroup: boolean, isPack: boolean, barCode: string, group: any, nature: Nature): void {
+        if(this.fromStock && isGroup) {
+            const cancelPicking = this.cancelPickingAction();
+            cancelPicking({object: {value: barCode, label: barCode}});
+
+            this.alertService.show({
+                header: 'Transfert impossible',
+                backdropDismiss: false,
+                cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+                message: `Vous ne pouvez pas transférer l'unité logistique ${barCode} car c'est un groupe`,
+                buttons: [
+                    {
+                        text: 'Annuler',
+                        cssClass: 'alert-danger',
+                        role: 'cancel',
+                    }
+                ]
+            });
+        }
+
+        if (isPack || !isGroup) {
+            if (group) {
+                this.alertService.show({
+                    header: 'Confirmation',
+                    backdropDismiss: false,
+                    cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+                    message: `
+                        Le colis ${barCode} est contenu dans le groupe ${group.code}.
+                        <br>Confirmer la prise l'enlèvera du groupe.
+                    `,
+                    buttons: [
+                        {
+                            text: 'Confirmer',
+                            cssClass: 'alert-success',
+                            handler: () => {
+                                this.updateTrackingMovementNature(barCode, nature && nature.id);
+                            }
+                        },
+                        {
+                            text: 'Annuler',
+                            cssClass: 'alert-danger',
+                            role: 'cancel',
+                            handler: () => {
+                                const cancelPicking = this.cancelPickingAction();
+                                cancelPicking({object: {value: barCode, label: barCode}});
+                            }
+                        }
+                    ]
+                });
+            }
+            else {
+                this.updateTrackingMovementNature(barCode, nature && nature.id);
+            }
+        }
+        else { // isGroup === true
+            this.updateTrackingMovementNature(barCode, nature && nature.id, group);
+        }
     }
 
     private unsubscribeSaveSubscription() {
