@@ -59,7 +59,7 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
 
     private resetEmitterSubscription?: Subscription;
 
-    public readonly config = {
+    public readonly config: any = {
         [SelectItemTypeEnum.DEMANDE_LIVRAISON_ARTICLES]: {
             invalidMessage: 'L\'article scanné n\'est pas présent dans la liste',
         },
@@ -94,7 +94,10 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
         [SelectItemTypeEnum.PROJECT]: {
             invalidMessage: 'Le project scanné n\'est pas dans la liste',
         },
-    }
+        [SelectItemTypeEnum.LOCATION]: {
+            invalidMessage: 'L\'emplacement scanné n\'est pas dans la liste',
+        },
+    };
 
     public constructor(private toastService: ToastService,
                        private changeDetector: ChangeDetectorRef,
@@ -195,8 +198,7 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
     }
 
     private presentInvalidItemToast(): void {
-        // @ts-ignore
-        const currentConfig = this.config[this.label];
+        const currentConfig = this.config[this.type as unknown as any];
         if (currentConfig) {
             const message = currentConfig.invalidMessage;
             if (currentConfig.alert) {
@@ -221,7 +223,7 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
 
     private validateItem(item: any, barcode: string): void {
         if (!item) {
-            if (this.scanMode === BarcodeScannerModeEnum.TOOL_SEARCH || this.checkBarcodeValidity) {
+            if ([BarcodeScannerModeEnum.TOOL_SEARCH, BarcodeScannerModeEnum.ONLY_SCAN].includes(this.scanMode) || this.checkBarcodeValidity) {
                 this.presentInvalidItemToast();
             }
             else {
