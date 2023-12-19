@@ -591,15 +591,19 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                 group: 1,
                                 ...this.displayWarningWrongLocation
                                     ? {
-                                        location: 1
+                                        location: 1,
+                                        existing: 1,
                                     } : {},
                             }
                         })
                         .pipe(
-                            mergeMap(({nature, group, isPack, isGroup, location}) => (
+                            mergeMap(({nature, group, isPack, isGroup, location, isExisting}) => (
                                 nature
-                                    ? this.sqliteService.importNaturesData({natures: [nature]}, false).pipe(map(() => ({nature, group, isPack, isGroup, location})))
-                                    : of({nature, group, isPack, isGroup, location})
+                                    ? this.sqliteService.importNaturesData({natures: [nature]}, false)
+                                        .pipe(
+                                            map(() => ({nature, group, isPack, isGroup, location, isExisting}))
+                                        )
+                                    : of({nature, group, isPack, isGroup, location, isExisting})
                             )),
                             tap(({nature}) => {
                                 if (nature) {
@@ -610,8 +614,8 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                             filter(() => this.viewEntered)
                         )
                         .subscribe({
-                            next: ({nature, group, isPack, isGroup, location}) => {
-                                if (this.displayWarningWrongLocation && location && (this.emplacement.id !== location)) {
+                            next: ({nature, group, isPack, isGroup, location, isExisting}) => {
+                                if (this.displayWarningWrongLocation && ((location && this.emplacement.id !== location) || !isExisting)) {
                                     this.alertService.show({
                                         header: `Confirmation`,
                                         message: `Êtes-vous sûr que cet élément est présent sur cet emplacement ?`,
