@@ -114,11 +114,33 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                         mergeMap(({finished, message}) => (
                             zip(
                                 this.storageService.getRight(StorageKeyEnum.RIGHT_TRACK),
-                                this.storageService.getRight(StorageKeyEnum.RIGHT_HANDLING),
-                            ).pipe(map(([track, stock]) => ({
+                                this.displayGlobalMenu([
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_CREATE_ARTICLE_FROM_NOMADE),
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_PREPARATION),
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_DELIVERY_ORDER),
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_MANUAL_DELIVERY),
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_COLLECT_ORDER),
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_TRANSFER_ORDER),
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_MANUAL_TRANSFER),
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_INVENTORY),
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_ARTICLE_UL_ASSOCIATION)
+                                ]),
+                                this.displayGlobalMenu([
+                                    this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_HANDLING),
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_DELIVERY_REQUEST),
+                                ]),
+                                this.displayGlobalMenu([
+                                    this.storageService.getRight(StorageKeyEnum.TRUCK_ARRIVAL),
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_GROUP),
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_UNGROUP),
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_MOVEMENT),
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_DISPATCH),
+                                ]),
+                            ).pipe(map(([track, stock, request, tracing]) => ({
                                 finished,
                                 message,
-                                rights: {track, stock}
+                                rights: {track, stock, request, tracing}
                             })))
                         ))
                     )
@@ -212,43 +234,49 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
         });
     }
 
-    private resetMainMenuConfig(rights: {track?: boolean, stock?: boolean}) {
+    private resetMainMenuConfig(rights: {track?: boolean, stock?: boolean, request?: boolean, tracing?: boolean}) {
         this.menuConfig = [];
 
         const actions = [];
 
-        const actionTracking = () => {
-            this.navService.push(NavPathEnum.TRACKING_MENU, {
-                fromStock: false
+        if(rights.tracing){
+            const actionTracking = () => {
+                this.navService.push(NavPathEnum.TRACKING_MENU, {
+                    fromStock: false
+                });
+            }
+            this.menuConfig.push({
+                icon: 'tracking.svg',
+                label: 'Traçabilité',
+                action: actionTracking,
             });
+            actions.push(actionTracking);
         }
-        this.menuConfig.push({
-            icon: 'tracking.svg',
-            label: 'Traçabilité',
-            action: actionTracking,
-        });
-        actions.push(actionTracking);
 
-        const actionStock = () => {
-            this.navService.push(NavPathEnum.STOCK_MENU, {avoidSync: true});
+        if(rights.stock){
+            const actionStock = () => {
+                this.navService.push(NavPathEnum.STOCK_MENU, {avoidSync: true});
+            }
+            this.menuConfig.push({
+                icon: 'stock.svg',
+                label: 'Stock',
+                action: actionStock,
+            });
+            actions.push(actionStock);
         }
-        this.menuConfig.push({
-            icon: 'stock.svg',
-            label: 'Stock',
-            action: actionStock,
-        });
-        actions.push(actionStock);
 
-        const actionDemande = () => {
-            this.navService.push(NavPathEnum.DEMANDE_MENU);
-        };
-        this.menuConfig.push({
-            icon: 'demande.svg',
-            iconColor: 'success',
-            label: 'Demande',
-            action: actionDemande,
-        });
-        actions.push(actionDemande);
+        if(rights.request){
+            const actionDemande = () => {
+                this.navService.push(NavPathEnum.DEMANDE_MENU);
+            };
+            this.menuConfig.push({
+                icon: 'demande.svg',
+                iconColor: 'success',
+                label: 'Demande',
+                action: actionDemande,
+            });
+            actions.push(actionDemande);
+        }
 
         if (rights.track) {
             const action = () => {
@@ -458,5 +486,10 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
             this.synchroniseActionSubscription.unsubscribe();
         }
         this.synchroniseActionSubscription = undefined;
+    }
+
+    private displayGlobalMenu(mobileRightsArray: Array<Observable<boolean>>): Observable<boolean> {
+        return zip(...mobileRightsArray)
+            .pipe(map((results: Array<boolean>) => results.some((value: boolean) => value)));
     }
 }
