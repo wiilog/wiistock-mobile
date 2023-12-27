@@ -10,10 +10,12 @@ export class MainHeaderService {
     private readonly _navigationChange$: Subject<any>;
     private readonly _title$: Subject<any>;
     private readonly _subTitle$: Subject<any>;
+    private readonly _environment$: Subject<any>;
 
     public constructor() {
         this._navigationChange$ = new Subject<any>();
         this._subTitle$ = new Subject<any>();
+        this._environment$ = new Subject<string>();
     }
 
     public emitNavigationChange() {
@@ -38,5 +40,13 @@ export class MainHeaderService {
 
     public get subTitle$(): Observable<any> {
         return this._subTitle$;
+    }
+
+    public emitEnvironment(environment: string) {
+        this._environment$.next(environment);
+    }
+
+    public get environment$(): Observable<any> {
+        return this._environment$;
     }
 }

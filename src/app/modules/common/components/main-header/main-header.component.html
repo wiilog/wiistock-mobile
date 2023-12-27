@@ -1,6 +1,6 @@
 <div *ngIf="!loading && isShown.header"
      #content>
-    <div class="main-toolbar">
+    <div class="main-toolbar" [ngClass]="environment">
         <ng-template #iconPlaceholderTemplate>
             <div class="header-icon-placeholder">
                 <div class="header-icon"></div>

@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {ApiService} from '@app/services/api.service';
 import {ToastService} from '@app/services/toast.service';
 import {Observable, of, Subscription, zip} from 'rxjs';
@@ -7,7 +7,6 @@ import {StorageService} from '@app/services/storage/storage.service';
 import {AppVersionService} from '@app/services/app-version.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {NavService} from '@app/services/nav/nav.service';
-import {ActivatedRoute, Router} from '@angular/router';
 import {environment} from '@environments/environment';
 import {credentials} from '@environments/credentials';
 import {ServerImageKeyEnum} from '@app/services/server-image/server-image-key.enum';
@@ -21,6 +20,8 @@ import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manage
 import {NotificationService} from "@app/services/notification.service";
 import {LocalNotificationSchema} from "@capacitor/local-notifications";
 import {LoadingService} from "@app/services/loading.service";
+import {MainHeaderService} from "@app/services/main-header.service";
+import {StyleService} from "@app/services/style.service";
 
 
 @Component({
@@ -55,23 +56,19 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
     private notificationSubscription?: Subscription;
     private loadingSubscription?: Subscription;
 
-    private passwordInputIsFocused: boolean;
-
     public constructor(private toastService: ToastService,
                        private loadingService: LoadingService,
                        private apiService: ApiService,
                        private networkService: NetworkService,
-                       private router: Router,
-                       private changeDetector: ChangeDetectorRef,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private sqliteService: SqliteService,
-                       private activatedRoute: ActivatedRoute,
                        private appVersionService: AppVersionService,
                        private storageService: StorageService,
                        private notificationService: NotificationService,
-                       private navService: NavService) {
+                       private navService: NavService,
+                       private mainHeader: MainHeaderService,
+                       private styleService: StyleService) {
         this.appVersionInvalid = false;
-        this.passwordInputIsFocused = false;
     }
 
     public ionViewWillEnter(): void {
@@ -289,13 +286,17 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
             .pipe(
                 mergeMap(({data, success, msg}) => {
                     if(success) {
-                        const {apiKey, rights, userId, username, notificationChannels, parameters, fieldsParam, dispatchDefaultWaybill} = data;
+                        const {apiKey, rights, userId, username, environment, notificationChannels, parameters, fieldsParam, dispatchDefaultWaybill} = data;
 
                         return this.sqliteService.resetDataBase()
                             .pipe(
                                 mergeMap(() => this.storageService.initStorage(apiKey, username, userId, rights, notificationChannels, parameters, fieldsParam, dispatchDefaultWaybill)),
                                 tap(() => {
                                     this.loginKey = '';
+                                    this.mainHeader.emitEnvironment(environment);
+                                    const color = environment === `rec` ? `#6433D7` : `#1B1464`;
+                                    this.styleService.updatePrimaryColor(color);
+                                    this.styleService.setStatusBarColor(true, color);
                                 }),
                                 mergeMap(() => this.notificationService.initialize()),
                                 map(() => ({success: true, msg}))
