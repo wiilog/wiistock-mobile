@@ -9,7 +9,6 @@ import {ListPanelItemConfig} from "@common/components/panel/model/list-panel/lis
 import {ApiService} from "@app/services/api.service";
 import {ViewWillEnter} from "@ionic/angular";
 import {NetworkService} from '@app/services/network.service';
-import {IconColor} from "@common/components/icon/icon-color";
 
 @Component({
     selector: `wii-receipt-association-logistic-unit`,
@@ -68,12 +67,13 @@ export class ReceiptAssociationLogisticUnitPage implements ViewWillEnter {
                 }
             },
             rightIcon: {
-                color: `danger` as IconColor,
+                color: `danger`,
                 name: `trash.svg`,
                 action: () => {
                     const packIndex = this.logisticUnits.indexOf(logisticUnit);
                     if (packIndex > -1) {
                         this.logisticUnits.splice(packIndex, 1);
+                        this.updatePanelHeader();
                         this.updatePackList();
                         this.toastService.presentToast(`L'unité logistique a bien été supprimée.`);
                     }
@@ -82,35 +82,37 @@ export class ReceiptAssociationLogisticUnitPage implements ViewWillEnter {
         }));
     }
 
-    public checkExistingPack(barcode: string) {
-        this.networkService.proceedAction({
-            action: () => {
-                this.loadingService
-                    .presentLoadingWhile({
-                        event: () => this.apiService.requestApi(ApiService.GET_PACK_DATA, {
-                            params: {
-                                code: barcode,
-                                existing: 1
-                            }
-                        })
-                    })
-                    .subscribe(({existing}) => {
-                            if (existing) {
-                                if (this.logisticUnits.indexOf(barcode) === -1) {
-                                    this.logisticUnits.push(barcode);
-                                    this.updatePanelHeader();
-                                    this.updatePackList();
-                                } else {
-                                    this.toastService.presentToast(`Cette unité logistique a déjà été ajoutée à l'association.`);
-                                }
-                            } else {
-                                this.toastService.presentToast(`L'unité logistique renseignée n'existe pas.`);
-                            }
-                        }
-                    );
-            }
-        });
+    public async checkExistingPack(barcode: string) {
+        const hasNetwork = await this.networkService.hasNetwork();
+        if (!hasNetwork) {
+            this.toastService.presentToast(NetworkService.DEFAULT_HAS_NETWORK_MESSAGE)
+            return;
+        }
+
+        this.loadingService
+            .presentLoadingWhile({
+                event: () => this.apiService.requestApi(ApiService.GET_PACK_DATA, {
+                    params: {
+                        code: barcode,
+                        existing: 1
+                    }
+                })
+            })
+            .subscribe(({isExisting}) => {
+                if (isExisting) {
+                    if (this.logisticUnits.indexOf(barcode) === -1) {
+                        this.logisticUnits.push(barcode);
+                        this.updatePanelHeader();
+                        this.updatePackList();
+                    } else {
+                        this.toastService.presentToast(`Cette unité logistique a déjà été ajoutée à l'association.`);
+                    }
+                } else {
+                    this.toastService.presentToast(`L'unité logistique renseignée n'existe pas.`);
+                }
+            });
     }
+
 
     public validate(): void {
         if (this.logisticUnits.length === 0) {

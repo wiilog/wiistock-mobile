@@ -1,8 +1,7 @@
 import {Component} from '@angular/core';
 import {MenuConfig} from '@common/components/menu/menu-config';
-import {Platform, ViewWillEnter} from '@ionic/angular';
+import {ViewWillEnter} from '@ionic/angular';
 import {MainHeaderService} from '@app/services/main-header.service';
-import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {ToastService} from '@app/services/toast.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
@@ -24,9 +23,7 @@ export class TrackingMenuPage implements ViewWillEnter {
     public menuConfig: Array<MenuConfig> = [];
     public statsSlidersData: Array<StatsSlidersData>;
 
-    public constructor(private platform: Platform,
-                       private mainHeaderService: MainHeaderService,
-                       private localDataManager: LocalDataManagerService,
+    public constructor(private mainHeaderService: MainHeaderService,
                        private networkService: NetworkService,
                        private toastService: ToastService,
                        private storageService: StorageService,
@@ -123,10 +120,14 @@ export class TrackingMenuPage implements ViewWillEnter {
                     this.menuConfig.push({
                         icon: 'receipt-association.svg',
                         label: 'Association BR',
-                        action: () => {
-                            this.networkService.proceedAction({
-                                action: () => this.navService.push(NavPathEnum.RECEIPT_ASSOCIATION_MENU),
-                            });
+                        action: async () => {
+                            const hasNetwork = await this.networkService.hasNetwork();
+                            if (!hasNetwork) {
+                                this.toastService.presentToast(NetworkService.DEFAULT_HAS_NETWORK_MESSAGE);
+                                return;
+                            }
+
+                            this.navService.push(NavPathEnum.RECEIPT_ASSOCIATION_MENU);
                         }
                     });
                 }
