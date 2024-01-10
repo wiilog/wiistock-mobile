@@ -1,15 +1,14 @@
 import {Injectable} from '@angular/core';
 import {Network} from '@capacitor/network';
-import {from, mergeMap, Observable, of, zip} from "rxjs";
+import {mergeMap, Observable, of, zip} from "rxjs";
 import {delay} from "rxjs/operators";
-import {ToastService} from "@app/services/toast.service";
-import {BatteryManagerService} from "@plugins/battery-manager/battery-manager.service";
 
 @Injectable({
     providedIn: 'root'
 })
 export class NetworkService {
 
+    public static DEFAULT_HAS_NETWORK_MESSAGE: string = `Une connexion internet est requise pour accéder à cette fonctionnalité.`;
     private static NETWORK_CHECK_TRY_NUMBER: number = 60;
 
     public async hasNetwork(): Promise<boolean> {

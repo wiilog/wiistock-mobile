@@ -14,6 +14,7 @@ export enum StorageKeyEnum {
     DEMO_MODE = 'demoMode',
     RIGHT_MOVEMENT = 'movement',
     RIGHT_DISPATCH = 'dispatch',
+    RIGHT_RECEIPT_ASSOCIATION = 'receiptAssociation',
     RIGHT_PREPARATION = 'preparation',
     RIGHT_DELIVERY_ORDER = 'deliveryOrder',
     RIGHT_MANUAL_DELIVERY = 'manualDelivery',
