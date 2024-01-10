@@ -98,8 +98,8 @@ export class ReceiptAssociationLogisticUnitPage implements ViewWillEnter {
                     }
                 })
             })
-            .subscribe(({isExisting}) => {
-                if (isExisting) {
+            .subscribe(({existing}) => {
+                if (existing) {
                     if (this.logisticUnits.indexOf(barcode) === -1) {
                         this.logisticUnits.push(barcode);
                         this.updatePanelHeader();

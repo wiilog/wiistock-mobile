@@ -597,13 +597,13 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                             }
                         })
                         .pipe(
-                            mergeMap(({nature, group, isPack, isGroup, location, isExisting}) => (
+                            mergeMap(({nature, group, isPack, isGroup, location, existing}) => (
                                 nature
                                     ? this.sqliteService.importNaturesData({natures: [nature]}, false)
                                         .pipe(
-                                            map(() => ({nature, group, isPack, isGroup, location, isExisting}))
+                                            map(() => ({nature, group, isPack, isGroup, location, existing}))
                                         )
-                                    : of({nature, group, isPack, isGroup, location, isExisting})
+                                    : of({nature, group, isPack, isGroup, location, existing})
                             )),
                             tap(({nature}) => {
                                 if (nature) {
@@ -614,8 +614,8 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                             filter(() => this.viewEntered)
                         )
                         .subscribe({
-                            next: ({nature, group, isPack, isGroup, location, isExisting}) => {
-                                if (this.displayWarningWrongLocation && ((location && this.emplacement.id !== location) || !isExisting)) {
+                            next: ({nature, group, isPack, isGroup, location, existing}) => {
+                                if (this.displayWarningWrongLocation && ((location && this.emplacement.id !== location) || !existing)) {
                                     this.alertService.show({
                                         header: `Confirmation`,
                                         message: `Êtes-vous sûr que cet élément est présent sur cet emplacement ?`,
