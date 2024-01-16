@@ -85,7 +85,9 @@ export class DispatchMenuPage implements ViewWillEnter, ViewWillLeave {
         let loaderElement: HTMLIonLoadingElement|undefined;
 
         const withoutLoading = this.navService.param('withoutLoading');
-        if (!this.firstLaunch || !withoutLoading) {
+        if (!this.firstLaunch
+            || !withoutLoading
+            || this.navService.popItem?.path === NavPathEnum.DISPATCH_MENU) {
             this.loadingSubscription = this.loadingService.presentLoading()
                 .pipe(
                     tap(loader => loaderElement = loader),

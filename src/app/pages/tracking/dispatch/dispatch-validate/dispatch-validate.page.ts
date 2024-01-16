@@ -50,8 +50,6 @@ export class DispatchValidatePage implements ViewWillEnter, ViewWillLeave {
     private loadingSubscription?: Subscription;
     private loadingElement?: HTMLIonLoadingElement;
 
-    private afterValidate: () => void;
-
     public locationHeaderConfig: {
         title: string;
         subtitle?: string;
@@ -74,7 +72,6 @@ export class DispatchValidatePage implements ViewWillEnter, ViewWillLeave {
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
-                       private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
                        private toastService: ToastService,
                        private storageService: StorageService,
@@ -90,7 +87,6 @@ export class DispatchValidatePage implements ViewWillEnter, ViewWillLeave {
         this.dispatchPacks = this.navService.param('dispatchPacks') || [];
         const treatedDispatchPacks = this.dispatchPacks.filter(({treated, already_treated}) => (treated || already_treated));
         const partial = (treatedDispatchPacks.length < this.dispatchPacks.length);
-        this.afterValidate = this.navService.param('afterValidate');
 
         this.statusRequestParams = [
             `state = '${partial ? 'partial' : 'treated'}'`,
@@ -225,15 +221,13 @@ export class DispatchValidatePage implements ViewWillEnter, ViewWillLeave {
                                 ? this.storageService.incrementCounter(StorageKeyEnum.COUNTERS_DISPATCHES_TREATED).pipe(map(() => res))
                                 : of(res)
                         )),
-                        mergeMap(({offline, success}) => {
-                            if (!offline) {
-                                this.toastService.presentToast(success ? "L'acheminement a bien été traité." : "L'acheminement n'a pas pu être traité.");
-                            }
-                            return this.navService.pop();
-                        })
                     )
-                    .subscribe(() => {
-                        this.afterValidate();
+                    .subscribe(({offline, success}) => {
+                        if (!offline) {
+                            this.toastService.presentToast(success ? "L'acheminement a bien été traité." : "L'acheminement n'a pas pu être traité.");
+                        }
+
+                        this.navService.pop();
                     })
             }
             else {
