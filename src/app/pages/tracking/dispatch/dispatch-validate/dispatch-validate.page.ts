@@ -20,6 +20,7 @@ import {StorageService} from '@app/services/storage/storage.service';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {NetworkService} from '@app/services/network.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 
 enum Page {
     LOCATION,
@@ -227,8 +228,8 @@ export class DispatchValidatePage implements ViewWillEnter, ViewWillLeave {
                             this.toastService.presentToast(success ? "L'acheminement a bien été traité." : "L'acheminement n'a pas pu être traité.");
                         }
 
-                        this.navService.pop();
-                    })
+                        this.navService.pop({path: NavPathEnum.DISPATCH_MENU});
+                    });
             }
             else {
                 this.toastService.presentToast('Vous devez sélectionner un statut.');
