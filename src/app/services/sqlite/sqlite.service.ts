@@ -1117,11 +1117,6 @@ export class SqliteService {
             : of(undefined);
     }
 
-    public deleteArticlePrepa(reference: string, id_prepa: string, is_ref: number): Observable<void> {
-        return this.execute(`UPDATE \`article_prepa\` SET deleted = 1 WHERE reference = '${reference}' AND id_prepa = ${id_prepa} AND is_ref = ${is_ref}`)
-            .pipe(map(() => undefined));
-    }
-
     private getValueForQuery(value: any): string {
         return (
             (typeof value === 'string') ? `'${this.escapeQuotes(value)}'` :

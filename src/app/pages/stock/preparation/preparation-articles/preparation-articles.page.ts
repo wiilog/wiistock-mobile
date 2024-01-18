@@ -212,7 +212,17 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
                     return this.sqliteService
                         .updateArticlePrepaQuantity(articleAlready.reference, articleAlready.id_prepa, Number(articleAlready.is_ref), mouvement.quantity + articleAlready.quantite)
                         .pipe(
-                            mergeMap(() => this.sqliteService.deleteArticlePrepa(articleAlready.reference, articleAlready.id_prepa, Number(articleAlready.is_ref))),
+                            mergeMap(() => this.sqliteService.update(`article_prepa`, [{
+                                values: {
+                                    deleted: 1,
+                                },
+                                where: [
+                                    `reference = '${articleAlready.reference}'`,
+                                    `id_prepa = ${articleAlready.id_prepa}`,
+                                    `is_ref = ${Number(articleAlready.is_ref)}`,
+                                    `has_moved = 0`,
+                                ]
+                            }])),
                             mergeMap(() => this.updateViewLists()),
                             tap(() => validateAfterSelect())
                         );
@@ -463,8 +473,6 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
                             )
                         )),
                         mergeMap(() => this.sqliteService.deleteBy('article_prepa_by_ref_article', [`id = ${selectedArticle.id}`])),
-                        mergeMap(() => this.updateLists()),
-
                         // delete articlePrepa if all quantity has been selected
                         mergeMap(() => (
                             this.sqliteService.findOneBy('article_prepa', {
@@ -484,7 +492,17 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
                             ), selectedQuantityValid);
 
                             return (referenceArticle.quantite === quantityPicked)
-                                ? this.sqliteService.deleteArticlePrepa(referenceArticle.reference, referenceArticle.id_prepa, 1)
+                                ? this.sqliteService.update(`article_prepa`, [{
+                                    values: {
+                                        deleted: 1,
+                                    },
+                                    where: [
+                                        `reference = '${referenceArticle.reference}'`,
+                                        `id_prepa = ${referenceArticle.id_prepa}`,
+                                        `is_ref = 1`,
+                                        `has_moved = 0`,
+                                    ]
+                                }])
                                 : this.sqliteService.updateArticlePrepaQuantity(referenceArticle.reference, referenceArticle.id_prepa, 1, referenceArticle.quantite - selectedQuantityValid)
                         })
                     )
