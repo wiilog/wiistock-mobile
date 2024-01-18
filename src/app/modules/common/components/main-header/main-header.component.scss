@@ -8,9 +8,13 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background-color: $primary;
+        background: $prod-linear-gradient;
         width: 100%;
         padding: 4px 0;
+
+        &.rec {
+            background: $rec-linear-gradient;
+        }
 
         .header-icon-placeholder {
             width: 44px;

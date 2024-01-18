@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Observable, Subject} from 'rxjs';
+import {Observable, ReplaySubject, Subject} from 'rxjs';
 
 
 @Injectable({
@@ -10,10 +10,12 @@ export class MainHeaderService {
     private readonly _navigationChange$: Subject<any>;
     private readonly _title$: Subject<any>;
     private readonly _subTitle$: Subject<any>;
+    private readonly _appContext$: Subject<string>;
 
     public constructor() {
         this._navigationChange$ = new Subject<any>();
         this._subTitle$ = new Subject<any>();
+        this._appContext$ = new ReplaySubject<string>(1);
     }
 
     public emitNavigationChange() {
@@ -38,5 +40,13 @@ export class MainHeaderService {
 
     public get subTitle$(): Observable<any> {
         return this._subTitle$;
+    }
+
+    public emitContext(appContext: string) {
+        this._appContext$.next(appContext);
+    }
+
+    public get appContext$(): Observable<string> {
+        return this._appContext$;
     }
 }
