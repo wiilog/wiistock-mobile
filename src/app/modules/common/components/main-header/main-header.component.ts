@@ -236,6 +236,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                 )
             },
             {pagePath: NavPathEnum.TRUCK_ARRIVAL_CARRIER, label: 'Arrivage camion'},
+            {pagePath: NavPathEnum.RECEIPT_ASSOCIATION_MENU, label: 'Association BR'},
         ];
     }
 

@@ -135,6 +135,11 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
     }
 
     public ionViewWillEnter() {
+        if (this.navService.popItem?.path
+            && this.navService.popItem?.path !== NavPathEnum.DISPATCH_PACKS) {
+            return;
+        }
+
         if (!this.packsToTreatListConfig || !this.packsTreatedListConfig) {
             this.loading = true;
             this.unsubscribeLoading();
@@ -599,10 +604,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
             if (!partialDispatch || !this.typeHasNoPartialStatuses) {
                 this.navService.push(NavPathEnum.DISPATCH_VALIDATE, {
                     dispatchId: this.dispatch.id,
-                    dispatchPacks: this.dispatchPacks,
-                    afterValidate: () => {
-                        this.navService.pop();
-                    }
+                    dispatchPacks: this.dispatchPacks
                 });
             } else {
                 this.toastService.presentToast("Vous ne pouvez pas valider d'acheminement partiel.")

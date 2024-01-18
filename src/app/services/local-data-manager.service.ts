@@ -623,14 +623,14 @@ export class LocalDataManagerService {
                                     )
                                     .pipe(map(() => res));
                             }))
-                            .subscribe(
-                                (res: {success: any, error: any}) => {
-                                    (res$ as Subject<{success: any, error: any}>).next(res);
+                            .subscribe({
+                                next: (res: { success: any, error: any }) => {
+                                    (res$ as Subject<{ success: any, error: any }>).next(res);
                                 },
-                                (err) => {
-                                    (res$ as Subject<{success: any, error: any}>).error({...err, api: true})
+                                error: (err) => {
+                                    (res$ as Subject<{ success: any, error: any }>).error({...err, api: true})
                                 }
-                            )
+                            })
                     }
                     else {
                         res$ = of(false);

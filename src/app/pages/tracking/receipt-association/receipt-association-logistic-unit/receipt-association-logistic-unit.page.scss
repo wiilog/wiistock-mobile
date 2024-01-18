@@ -1,0 +1,11 @@
+@import "theme/variables";
+
+.page-content {
+    padding: $spacer;
+}
+
+wii-list-panel ::ng-deep {
+    .header-title {
+        font-size: 12px;
+    }
+}
