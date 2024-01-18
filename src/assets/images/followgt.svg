@@ -46,9 +46,9 @@
    id="style61">
 	.st0{fill:#DF0026;}
 	.st1{fill:#DF0026;stroke:#DF0026;stroke-width:4.7779;stroke-miterlimit:10;}
-	.st2{fill:#FFFFFF;stroke:#030F4C;stroke-width:8.1221;stroke-linecap:round;stroke-linejoin:round;}
+	.st2{fill:#FFFFFF;stroke:#1B1464;stroke-width:8.1221;stroke-linecap:round;stroke-linejoin:round;}
 	.st3{fill:none;stroke:#FFFFFF;stroke-width:8.1221;stroke-linecap:round;stroke-linejoin:round;}
-	.st4{fill:#030F4C;}
+	.st4{fill:#1B1464;}
 </style>
 <g
    id="g103">
@@ -109,7 +109,7 @@
    x2="156.9"
    y2="113.4"
    id="line89"
-   style="stroke:#030f4c;stroke-opacity:1" />
+   style="stroke:#1B1464;stroke-opacity:1" />
 		<line
    class="st3"
    x1="172.8"
@@ -117,7 +117,7 @@
    x2="175.7"
    y2="110.2"
    id="line91"
-   style="stroke:#030f4c;stroke-opacity:1" />
+   style="stroke:#1B1464;stroke-opacity:1" />
 	</g>
 	<g
    id="g97">
@@ -140,5 +140,5 @@
    x2="138.2"
    y2="115.9"
    id="line87"
-   style="enable-background:new 0 0 418.60000000000002274 272.19999999999998863;fill:#030f4c;fill-opacity:1;stroke:#030f4c;stroke-opacity:1" /></g>
+   style="enable-background:new 0 0 418.60000000000002274 272.19999999999998863;fill:#1B1464;fill-opacity:1;stroke:#1B1464;stroke-opacity:1" /></g>
 </svg>

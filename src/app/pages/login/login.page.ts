@@ -286,15 +286,15 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
             .pipe(
                 mergeMap(({data, success, msg}) => {
                     if(success) {
-                        const {apiKey, rights, userId, username, environment, notificationChannels, parameters, fieldsParam, dispatchDefaultWaybill} = data;
+                        const {apiKey, rights, userId, username, appContext, notificationChannels, parameters, fieldsParam, dispatchDefaultWaybill} = data;
 
                         return this.sqliteService.resetDataBase()
                             .pipe(
                                 mergeMap(() => this.storageService.initStorage(apiKey, username, userId, rights, notificationChannels, parameters, fieldsParam, dispatchDefaultWaybill)),
                                 tap(() => {
                                     this.loginKey = '';
-                                    this.mainHeader.emitEnvironment(environment);
-                                    const color = environment === `rec` ? `#6433D7` : `#1B1464`;
+                                    this.mainHeader.emitContext(appContext);
+                                    const color = appContext === `rec` ? `#6433D7` : `#1B1464`;
                                     this.styleService.updatePrimaryColor(color);
                                     this.styleService.setStatusBarColor(true, color);
                                 }),
