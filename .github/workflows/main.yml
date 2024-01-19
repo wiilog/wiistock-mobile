@@ -1,0 +1,45 @@
+name: Build
+
+on:
+    workflow_dispatch:
+    push:
+        branches:
+            - 'WIIS-10774'
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        container:
+            image: wiilog/wiistock-mobile-app
+            options: --user root
+
+        steps:
+            -   name: Checkout sources
+                uses: actions/checkout@v1
+
+            -   name: Copie credential.ts.dist
+                run: cp src/environments/credentials.ts.dist src/environments/credentials.ts
+
+            -   name: Creation du google-services.json
+                run: |
+                    touch android/app/google-services.json &&
+                    echo "${{ secrets.GOOGLE_SERVICES_JSON }}" >> android/app/google-services.json | base64 -d > android/app/google-services.json
+
+            -   name: Creation du keystore
+                run: |
+                    touch android/app/keystore.jks.asc &&
+                    echo "${{ secrets.KEYSTORE_JKS }}" >> android/app/keystore.jks.asc &&
+                    touch android/app/keystore.jks &&
+                    gpg -d --passphrase ${{ secrets.KEYSTORE_JKS_PASSPHRASE }} --batch android/app/keystore.jks.asc > android/app/keystore.jks
+
+            -   name: Creation du keystore.properties
+                run: |
+                    cp android/app/keystore.properties.dist android/app/keystore.properties &&
+                    sed -i "s/keyPassword=/keyPassword=${{ secrets.storePassword }}/g" android/app/keystore.properties &&
+                    sed -i "s/storePassword=/storePassword=${{ secrets.keyPassword }}/g" android/app/keystore.properties
+
+            -   name: Instalation des dépendances
+                run: yarn install
+
+            -   name: Build
+                run: yarn gradle:assemble
