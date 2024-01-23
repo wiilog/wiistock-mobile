@@ -5,8 +5,6 @@ on:
     push:
         tags:
             - 'v*'
-        branches:
-            - 'WIIS-10774'
 
 jobs:
     build:
@@ -58,3 +56,11 @@ jobs:
                 with:
                     name: wiistock.apk
                     path: wiistock.apk
+
+            -   name: Upload on release
+                uses: svenstaro/upload-release-action@v2
+                with:
+                    repo_token: ${{ secrets.ACCESS_TOKEN }}
+                    file: wiistock.apk
+                    asset_name: wiistock.apk
+                    tag: ${{ github.ref }}
