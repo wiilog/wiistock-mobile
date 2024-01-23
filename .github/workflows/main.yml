@@ -1,0 +1,65 @@
+name: Build
+
+on:
+    workflow_dispatch:
+    push:
+        tags:
+            - 'v*'
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        container:
+            image: wiilog/wiistock-mobile-app
+            options: --user root
+
+        steps:
+            -   name: Checkout sources
+                uses: actions/checkout@v1
+
+            -   name: credential.ts.dist copy
+                run: cp src/environments/credentials.ts.dist src/environments/credentials.ts
+
+            -   name: google-services.json creation
+                run: |
+                    touch android/app/google-services.json &&
+                    echo "${{ secrets.GOOGLE_SERVICES_JSON }}" >> android/app/google-services.json | base64 -d > android/app/google-services.json
+
+            -   name: Keystore creation
+                run: |
+                    touch android/app/keystore.jks.asc &&
+                    echo "${{ secrets.KEYSTORE_JKS }}" >> android/app/keystore.jks.asc | base64 --decode &&
+                    touch android/app/keystore.jks &&
+                    gpg -d --passphrase ${{ secrets.KEYSTORE_JKS_PASSPHRASE }} --batch android/app/keystore.jks.asc > android/app/keystore.jks
+
+            -   name: Keystore verification
+                run: keytool -list -v -keystore android/app/keystore.jks
+
+            -   name: keystore.properties creation
+                run: |
+                    cp android/app/keystore.properties.dist android/app/keystore.properties &&
+                    sed -i "s/keyPassword=/keyPassword=${{ secrets.KEYSTORE_PASSWORD }}/g" android/app/keystore.properties &&
+                    sed -i "s/storePassword=/storePassword=${{ secrets.KEYSTORE_PASSWORD }}/g" android/app/keystore.properties
+
+            -   name: Dependencies installation
+                run: yarn install
+
+            -   name: Build
+                run: yarn gradle:assemble
+
+            -   name: Apk copy
+                run: cp android/app/build/outputs/apk/release/app-release.apk wiistock.apk
+
+            -   name: Upload artifact
+                uses: actions/upload-artifact@v4
+                with:
+                    name: wiistock.apk
+                    path: wiistock.apk
+
+            -   name: Upload on release
+                uses: svenstaro/upload-release-action@v2
+                with:
+                    repo_token: ${{ secrets.ACCESS_TOKEN }}
+                    file: wiistock.apk
+                    asset_name: wiistock.apk
+                    tag: ${{ github.ref }}
