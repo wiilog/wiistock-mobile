@@ -3,6 +3,8 @@ name: Build
 on:
     workflow_dispatch:
     push:
+        tags:
+            - 'v*'
         branches:
             - 'WIIS-10774'
 
@@ -40,8 +42,7 @@ jobs:
                 run: |
                     cp android/app/keystore.properties.dist android/app/keystore.properties &&
                     sed -i "s/keyPassword=/keyPassword=${{ secrets.KEYSTORE_PASSWORD }}/g" android/app/keystore.properties &&
-                    sed -i "s/storePassword=/storePassword=${{ secrets.KEYSTORE_PASSWORD }}/g" android/app/keystore.properties &&
-                    cat android/app/keystore.properties
+                    sed -i "s/storePassword=/storePassword=${{ secrets.KEYSTORE_PASSWORD }}/g" android/app/keystore.properties
 
             -   name: Instalation des dépendances
                 run: yarn install
@@ -49,3 +50,11 @@ jobs:
             -   name: Build
                 run: yarn gradle:assemble
 
+            -   name: Copie de l'apk
+                run: cp android/app/build/outputs/apk/release/app-release.apk wiistock.apk
+
+            -   name: Upload Artifact
+                uses: actions/upload-artifact@v4
+                with:
+                    name: wiistock.apk
+                    path: wiistock.apk
