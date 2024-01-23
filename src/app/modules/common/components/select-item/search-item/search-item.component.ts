@@ -209,7 +209,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             label: 'label',
             valueField: 'id',
             templateIndex: 'default',
-            databaseTable: anomalyMode ? 'anomalie_inventaire' : 'article_inventaire',
+            databaseTable: anomalyMode ? 'anomalie_inventaire' : 'inventory_item',
             placeholder: 'Sélectionnez un emplacement',
             map: (list: Array<ArticleInventaire>) => {
                 return list
@@ -228,7 +228,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             label: 'barcode',
             valueField: 'barcode',
             templateIndex: 'article-inventory',
-            databaseTable: anomalyMode ? 'anomalie_inventaire' : 'article_inventaire',
+            databaseTable: anomalyMode ? 'anomalie_inventaire' : 'inventory_item',
             placeholder: 'Sélectionnez un article',
             reducer: (acc: Array<any>, current: any) => {
                 const {barcode: currentBarcode, logistic_unit_code: currentLogisticUnitCode} = current;
