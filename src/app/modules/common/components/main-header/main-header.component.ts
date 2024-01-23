@@ -91,6 +91,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     public titleLabelTranslations: Translations = {};
 
     public deliveryOrderTranslation: string;
+    public appContext$: Observable<string>;
 
     public constructor(private storageService: StorageService,
                        private sqliteService: SqliteService,
@@ -112,6 +113,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.pageStack = [];
         this.subTitle$ = this.mainHeaderService.subTitle$;
         this.lastDirections = {};
+
+        this.appContext$ = this.mainHeaderService.appContext$;
 
         this.translationService.changedTranslations$
             .pipe(

@@ -6,7 +6,7 @@ $lightGrey: #F2F2F4;
 $darkGray: #cbcbcb;
 
 // base colors
-$primary: #030f4c;
+$primary: #1B1464;
 $secondary: #3dc2ff;
 $tertiary: #5260ff;
 $success: #149914;
@@ -19,7 +19,12 @@ $tertiary-light: #98a4ff;
 $danger-light: #ff7b7b;
 $purple: #6433D7;
 $disabled: #CDCDCD;
+$aqua: #33D7D1;
+$header-left: #2E5391;
 
+// backgrounds
+$rec-linear-gradient: linear-gradient(-64deg, $purple, $aqua);
+$prod-linear-gradient: linear-gradient(-64deg, $primary, $header-left);
 
 $base-colors: (
     "primary": $primary,

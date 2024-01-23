@@ -129,7 +129,7 @@ export class NotificationService {
             ...(push.data?.image
                 ? {largeIcon: push.data.image}
                 : {}),
-            iconColor: '#030F4C',
+            iconColor: '#1B1464',
             extra: push.data,
         };
     }

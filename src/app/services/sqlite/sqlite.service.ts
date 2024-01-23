@@ -227,7 +227,7 @@ export class SqliteService {
         const sqlWhereClauses = (where && where.length > 0)
             ? `WHERE ${SqliteService.JoinWhereClauses(where)}`
             : '';
-        return this.execute(`DELETE FROM ${table} ${sqlWhereClauses};`).pipe(map(() => undefined));;
+        return this.execute(`DELETE FROM ${table} ${sqlWhereClauses};`).pipe(map(() => undefined));
     }
 
     private importLocations(data: any): Observable<any> {
@@ -769,27 +769,27 @@ export class SqliteService {
         );
     }
 
-    public importArticlesInventaire(data: any): Observable<any> {
-        let articlesInventaire = data['articlesInventaire'];
-        return this.deleteBy('article_inventaire')
+    public importInventoryItem(data: any): Observable<any> {
+        let inventoryItems = data['inventoryItems'];
+        return this.deleteBy('inventory_item')
             .pipe(
                 mergeMap(() => (
-                    (articlesInventaire && articlesInventaire.length > 0)
-                        ? this.insert('article_inventaire', articlesInventaire.map(({
-                                                                                        mission_id,
-                                                                                        reference,
-                                                                                        is_ref,
-                                                                                        location,
-                                                                                        barCode,
-                                                                                        type,
-                                                                                        done,
-                                                                                        mission_start,
-                                                                                        mission_end,
-                                                                                        mission_name,
-                                                                                        logistic_unit_code,
-                                                                                        logistic_unit_id,
-                                                                                        logistic_unit_nature,
-                                                                                    }: any) => ({
+                    (inventoryItems && inventoryItems.length > 0)
+                        ? this.insert('inventory_item', inventoryItems.map(({
+                                                                                mission_id,
+                                                                                reference,
+                                                                                is_ref,
+                                                                                location,
+                                                                                barCode,
+                                                                                type,
+                                                                                done,
+                                                                                mission_start,
+                                                                                mission_end,
+                                                                                mission_name,
+                                                                                logistic_unit_code,
+                                                                                logistic_unit_id,
+                                                                                logistic_unit_nature,
+                                                                            }: any) => ({
                             mission_id,
                             mission_start,
                             mission_end,
@@ -893,7 +893,7 @@ export class SqliteService {
             mergeMap(() => this.importArticlesPrepaByRefArticle(data).pipe(tap(() => {console.log('--- > importArticlesPrepaByRefArticle')}))),
             mergeMap(() => this.importPreparations(data).pipe(tap(() => {console.log('--- > importPreparations')}))),
             mergeMap(() => this.importLivraisons(data).pipe(tap(() => {console.log('--- > importLivraisons')}))),
-            mergeMap(() => this.importArticlesInventaire(data).pipe(tap(() => {console.log('--- > importArticlesInventaire')}))),
+            mergeMap(() => this.importInventoryItem(data).pipe(tap(() => {console.log('--- > importArticlesInventaire')}))),
             mergeMap(() => this.importInventoryMission(data).pipe(tap(() => {console.log('--- > importInventoryMission')}))),
             mergeMap(() => this.importInventoryLocationZone(data).pipe(tap(() => {console.log('--- > importInventoryLocationsZone')}))),
             mergeMap(() => this.importHandlings(data).pipe(tap(() => {console.log('--- > importHandlings')}))),

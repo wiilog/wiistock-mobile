@@ -5,7 +5,7 @@
     padding: 6px 7px;
 
     .round-date {
-        color: #030F4C;
+        color: $primary;
         font-weight: 700;
         margin-top: 10px;
         margin-bottom: 7px;
@@ -33,7 +33,7 @@
                 }
 
                 .status {
-                    color: #030F4C;
+                    color: $primary;
                     background-color: rgba(3, 15, 76, 0.2);
                     padding: 4px 12px;
                     border-radius: 5px;

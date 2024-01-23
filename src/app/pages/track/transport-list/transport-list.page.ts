@@ -93,7 +93,7 @@ export class TransportListPage implements ViewWillEnter {
                     label: `Tournée en cours`,
                     color: {
                         background: `#C4C7D5`,
-                        font: `#030f4c`,
+                        font: `#1B1464`,
                     },
                     inline: true
                 }
