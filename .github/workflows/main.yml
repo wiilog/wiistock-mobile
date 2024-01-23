@@ -40,7 +40,8 @@ jobs:
                 run: |
                     cp android/app/keystore.properties.dist android/app/keystore.properties &&
                     sed -i "s/keyPassword=/keyPassword=${{ secrets.storePassword }}/g" android/app/keystore.properties &&
-                    sed -i "s/storePassword=/storePassword=${{ secrets.keyPassword }}/g" android/app/keystore.properties
+                    sed -i "s/storePassword=/storePassword=${{ secrets.keyPassword }}/g" android/app/keystore.properties &&
+                    base64 --decode ${{ secrets.keyAlias }} > android/app/keystore.properties
 
             -   name: Instalation des dépendances
                 run: yarn install
