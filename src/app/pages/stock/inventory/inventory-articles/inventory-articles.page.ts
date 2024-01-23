@@ -111,7 +111,7 @@ export class InventoryArticlesPage implements ViewWillEnter, ViewWillLeave, CanL
         if (!this.dataSubscription) {
             const table = this.anomalyMode
                 ? 'anomalie_inventaire'
-                : 'article_inventaire';
+                : 'inventory_item';
             this.dataSubscription = this.loadingService
                 .presentLoading('Chargement...')
                 .pipe(
@@ -277,7 +277,7 @@ export class InventoryArticlesPage implements ViewWillEnter, ViewWillLeave, CanL
 
             return zip(
                 this.sqliteService.insert('saisie_inventaire', saisieInventaire),
-                this.sqliteService.deleteBy('article_inventaire', [`id = ${selectedArticle.id}`])
+                this.sqliteService.deleteBy('inventory_item', [`id = ${selectedArticle.id}`])
             );
         }
     }

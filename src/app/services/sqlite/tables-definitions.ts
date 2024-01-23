@@ -198,7 +198,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
         ]
     },
     {
-        name: 'article_inventaire',
+        name: 'inventory_item',
         schema: [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
             {column: 'reference', value: 'TEXT'},
