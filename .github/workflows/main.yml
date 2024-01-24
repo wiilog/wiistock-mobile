@@ -20,19 +20,19 @@ jobs:
             -   name: credential.ts.dist copy
                 run: cp src/environments/credentials.ts.dist src/environments/credentials.ts
 
-            -   name: google-services.json creation
-                run: |
-                    touch android/app/google-services.json.asc &&
-                    echo "${{ secrets.GOOGLE_SERVICES_JSON }}" >> android/app/keystore.jks.asc | base64 --decode &&
-                    touch android/app/google-services.json &&
-                    gpg -d --passphrase ${{ secrets.GOOGLE_SERVICES_JSON_PASSPHRASE }} --batch android/app/google-services.json.asc >> android/app/google-services.json
-
             -   name: Keystore creation
                 run: |
                     touch android/app/keystore.jks.asc &&
                     echo "${{ secrets.KEYSTORE_JKS }}" >> android/app/keystore.jks.asc | base64 --decode &&
                     touch android/app/keystore.jks &&
                     gpg -d --passphrase ${{ secrets.KEYSTORE_JKS_PASSPHRASE }} --batch android/app/keystore.jks.asc > android/app/keystore.jks
+
+            -   name: google-services.json creation
+                run: |
+                    touch android/app/google-services.json.asc &&
+                    echo "${{ secrets.GOOGLE_SERVICES_JSON }}" >> android/app/keystore.jks.asc | base64 --decode &&
+                    touch android/app/google-services.json &&
+                    gpg -d --passphrase ${{ secrets.GOOGLE_SERVICES_JSON_PASSPHRASE }} --batch android/app/google-services.json.asc > android/app/google-services.json
 
             -   name: Keystore verification
                 run: keytool -list -v -keystore android/app/keystore.jks
