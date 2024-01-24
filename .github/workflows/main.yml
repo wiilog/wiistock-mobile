@@ -61,5 +61,25 @@ jobs:
                 with:
                     repo_token: ${{ secrets.ACCESS_TOKEN }}
                     file: wiistock.apk
-                    asset_name: wiistock.apk
+                    asset_name: auto-build-wiistock.apk
+                    tag: ${{ github.ref }}
+
+            -   name: Build debug
+                run: yarn gradle:assemble:debug
+
+            -   name: Debug apk copy
+                run: cp android/app/build/outputs/apk/debug/app-debug.apk wiistock-debug.apk
+
+            -   name: Upload debug artifact
+                uses: actions/upload-artifact@v4
+                with:
+                    name: wiistock-debug.apk
+                    path: wiistock-debug.apk
+
+            -   name: Upload debug on release
+                uses: svenstaro/upload-release-action@v2
+                with:
+                    repo_token: ${{ secrets.ACCESS_TOKEN }}
+                    file: wiistock-debug.apk
+                    asset_name: auto-build-wiistock-debug.apk
                     tag: ${{ github.ref }}
