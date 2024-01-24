@@ -5,6 +5,8 @@ on:
     push:
         tags:
             - 'v*'
+        branches:
+            - 'WIIS-10774'
 
 jobs:
     build:
@@ -58,13 +60,13 @@ jobs:
                     name: wiistock.apk
                     path: wiistock.apk
 
-            -   name: Upload on release
-                uses: svenstaro/upload-release-action@v2
-                with:
-                    repo_token: ${{ secrets.ACCESS_TOKEN }}
-                    file: wiistock.apk
-                    asset_name: auto-build-wiistock.apk
-                    tag: ${{ github.ref }}
+#            -   name: Upload on release
+ #               uses: svenstaro/upload-release-action@v2
+  #              with:
+   #                 repo_token: ${{ secrets.ACCESS_TOKEN }}
+    #                file: wiistock.apk
+     #               asset_name: auto-build-wiistock.apk
+      #              tag: ${{ github.ref }}
 
             -   name: Build debug
                 run: yarn gradle:assemble:debug
@@ -78,10 +80,10 @@ jobs:
                     name: wiistock-debug.apk
                     path: wiistock-debug.apk
 
-            -   name: Upload debug on release
-                uses: svenstaro/upload-release-action@v2
-                with:
-                    repo_token: ${{ secrets.ACCESS_TOKEN }}
-                    file: wiistock-debug.apk
-                    asset_name: auto-build-wiistock-debug.apk
-                    tag: ${{ github.ref }}
+#            -   name: Upload debug on release
+ #               uses: svenstaro/upload-release-action@v2
+  #              with:
+   #                 repo_token: ${{ secrets.ACCESS_TOKEN }}
+    #                file: wiistock-debug.apk
+     #               asset_name: auto-build-wiistock-debug.apk
+      #              tag: ${{ github.ref }}
