@@ -25,7 +25,7 @@ jobs:
             -   name: Keystore creation
                 run: |
                     touch android/app/keystore.jks.asc &&
-                    echo "${{ secrets.KEYSTORE_JKS }}" >> android/app/keystore.jks.asc | base64 --decode &&
+                    echo "${{ secrets.KEYSTORE_JKS }}" >> android/app/keystore.jks.asc &&
                     touch android/app/keystore.jks &&
                     gpg -d --passphrase ${{ secrets.KEYSTORE_JKS_PASSPHRASE }} --batch android/app/keystore.jks.asc > android/app/keystore.jks
 
