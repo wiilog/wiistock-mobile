@@ -20,17 +20,15 @@ jobs:
             -   name: credential.ts.dist copy
                 run: cp src/environments/credentials.ts.dist src/environments/credentials.ts
 
+            -   name: Keystore creation
+                run: |
+                    touch android/app/keystore.jks &&
+                    gpg -d --passphrase ${{ secrets.KEYSTORE_JKS_PASSPHRASE }} --batch android/app/keystore.jks.asc > android/app/keystore.jks
+
             -   name: google-services.json creation
                 run: |
                     touch android/app/google-services.json &&
-                    echo "${{ secrets.GOOGLE_SERVICES_JSON }}" >> android/app/google-services.json | base64 -d > android/app/google-services.json
-
-            -   name: Keystore creation
-                run: |
-                    touch android/app/keystore.jks.asc &&
-                    echo "${{ secrets.KEYSTORE_JKS }}" >> android/app/keystore.jks.asc | base64 --decode &&
-                    touch android/app/keystore.jks &&
-                    gpg -d --passphrase ${{ secrets.KEYSTORE_JKS_PASSPHRASE }} --batch android/app/keystore.jks.asc > android/app/keystore.jks
+                    gpg -d --passphrase ${{ secrets.GOOGLE_SERVICES_JSON_PASSPHRASE }} --batch android/app/google-services.json.asc > android/app/google-services.json
 
             -   name: Keystore verification
                 run: keytool -list -v -keystore android/app/keystore.jks
@@ -61,5 +59,25 @@ jobs:
                 with:
                     repo_token: ${{ secrets.ACCESS_TOKEN }}
                     file: wiistock.apk
-                    asset_name: wiistock.apk
+                    asset_name: auto-build-wiistock.apk
+                    tag: ${{ github.ref }}
+
+            -   name: Build debug
+                run: yarn gradle:assemble:debug
+
+            -   name: Debug apk copy
+                run: cp android/app/build/outputs/apk/debug/app-debug.apk wiistock-debug.apk
+
+            -   name: Upload debug artifact
+                uses: actions/upload-artifact@v4
+                with:
+                    name: wiistock-debug.apk
+                    path: wiistock-debug.apk
+
+            -   name: Upload debug on release
+                uses: svenstaro/upload-release-action@v2
+                with:
+                    repo_token: ${{ secrets.ACCESS_TOKEN }}
+                    file: wiistock-debug.apk
+                    asset_name: auto-build-wiistock-debug.apk
                     tag: ${{ github.ref }}
