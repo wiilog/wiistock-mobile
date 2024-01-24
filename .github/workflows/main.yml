@@ -25,7 +25,7 @@ jobs:
                     touch android/app/google-services.json.asc &&
                     echo "${{ secrets.GOOGLE_SERVICES_JSON }}" >> android/app/keystore.jks.asc | base64 --decode &&
                     touch android/app/google-services.json &&
-                    gpg -d --passphrase ${{ secrets.GOOGLE_SERVICES_JSON_PASSPHRASE }} --batch android/app/google-services.json.asc > android/app/google-services.json
+                    gpg -d --passphrase ${{ secrets.GOOGLE_SERVICES_JSON_PASSPHRASE }} --batch android/app/google-services.json.asc >> android/app/google-services.json
 
             -   name: Keystore creation
                 run: |
