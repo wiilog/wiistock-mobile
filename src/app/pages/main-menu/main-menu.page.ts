@@ -136,6 +136,7 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                                     this.storageService.getRight(StorageKeyEnum.RIGHT_UNGROUP),
                                     this.storageService.getRight(StorageKeyEnum.RIGHT_MOVEMENT),
                                     this.storageService.getRight(StorageKeyEnum.RIGHT_DISPATCH),
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_RECEIPT_ASSOCIATION),
                                 ]),
                             ).pipe(map(([track, stock, request, tracing]) => ({
                                 finished,
