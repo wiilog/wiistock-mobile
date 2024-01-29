@@ -295,7 +295,7 @@ export class DispatchRequestMenuPage implements ViewWillEnter, ViewWillLeave, Ca
     public initializeDispatchesList(): Observable<Array<Dispatch>>{
         return zip(
             this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
-            this.storageService.getString(StorageKeyEnum.OPERATOR),
+            this.storageService.getNumber(StorageKeyEnum.OPERATOR_ID),
             this.translationService.getRaw(`Demande`, `Acheminements`, `Champs fixes`),
             this.translationService.getRaw(`Demande`, `Acheminements`, `Général`),
         ).pipe(

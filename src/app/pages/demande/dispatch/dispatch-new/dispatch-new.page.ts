@@ -387,13 +387,14 @@ export class DispatchNewPage implements ViewWillEnter {
             values.pickLocation ? this.sqliteService.findOneBy('emplacement', {id: values.pickLocation}) : of(undefined),
             values.dropLocation ? this.sqliteService.findOneBy('emplacement', {id: values.dropLocation}) : of(undefined),
             this.storageService.getString(StorageKeyEnum.OPERATOR),
+            this.storageService.getNumber(StorageKeyEnum.OPERATOR_ID),
             this.sqliteService.findBy('status', [
                 `state = 'draft'`,
                 `category = 'acheminement'`,
                 `typeId = ${values.type}`
             ], {displayOrder: 'ASC'})
         ).pipe(
-            map(([type, pickLocation, dropLocation, requester, statuses]) => ({
+            map(([type, pickLocation, dropLocation, requester, requesterId, statuses]) => ({
                 typeId: type?.id,
                 typeLabel: type?.label,
                 locationFromId: pickLocation?.id,
@@ -409,7 +410,7 @@ export class DispatchNewPage implements ViewWillEnter {
                 statusLabel: statuses[0]?.label,
                 groupedSignatureStatusColor: statuses[0]?.groupedSignatureStatusColor,
                 createdAt: moment().format(),
-                createdBy: requester,
+                createdBy: requesterId,
             } as Dispatch))
         )
     }
