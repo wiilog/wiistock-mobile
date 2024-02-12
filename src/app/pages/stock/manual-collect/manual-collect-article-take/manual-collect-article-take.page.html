@@ -1,0 +1,9 @@
+<div class="page-content"
+     scroll-y="true">
+    <wii-simple-form *ngIf="simpleFormConfig"
+                     [title]="simpleFormConfig.title"
+                     [info]="simpleFormConfig.info"
+                     [fields]="simpleFormConfig.fields"
+                     (submit)="addArticle($event)">
+    </wii-simple-form>
+</div>

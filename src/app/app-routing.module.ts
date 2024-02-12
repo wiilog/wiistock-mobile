@@ -454,6 +454,16 @@ const routes: Routes = [
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/tracking/receipt-association/receipt-association-logistic-unit/receipt-association-logistic-unit.module').then(m => m.ReceiptAssociationLogisticUnitPageModule)
     },
+    {
+        path: NavPathEnum.MANUAL_COLLECT_ARTICLES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/manual-collect/manual-collect-articles/manual-collect-articles.module').then(m => m.ManualCollectArticlesPageModule)
+    },
+    {
+        path: NavPathEnum.MANUAL_COLLECT_ARTICLE_TAKE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/manual-collect/manual-collect-article-take/manual-collect-article-take.module').then(m => m.ManualCollectArticleTakePageModule)
+    },
 ];
 
 @NgModule({

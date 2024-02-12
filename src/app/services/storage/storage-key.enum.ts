@@ -19,6 +19,7 @@ export enum StorageKeyEnum {
     RIGHT_DELIVERY_ORDER = 'deliveryOrder',
     RIGHT_MANUAL_DELIVERY = 'manualDelivery',
     RIGHT_COLLECT_ORDER = 'collectOrder',
+    RIGHT_MANUAL_COLLECT = 'manualCollect',
     RIGHT_TRANSFER_ORDER = 'transferOrder',
     RIGHT_MANUAL_TRANSFER = 'manualTransfer',
     RIGHT_INVENTORY = 'inventory',

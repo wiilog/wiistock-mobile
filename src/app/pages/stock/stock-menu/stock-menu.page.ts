@@ -64,13 +64,14 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                 this.storageService.getRight(StorageKeyEnum.RIGHT_DELIVERY_ORDER),
                 this.storageService.getRight(StorageKeyEnum.RIGHT_MANUAL_DELIVERY),
                 this.storageService.getRight(StorageKeyEnum.RIGHT_COLLECT_ORDER),
+                this.storageService.getRight(StorageKeyEnum.RIGHT_MANUAL_COLLECT),
                 this.storageService.getRight(StorageKeyEnum.RIGHT_TRANSFER_ORDER),
                 this.storageService.getRight(StorageKeyEnum.RIGHT_MANUAL_TRANSFER),
                 this.storageService.getRight(StorageKeyEnum.RIGHT_INVENTORY),
                 this.storageService.getRight(StorageKeyEnum.RIGHT_ARTICLE_UL_ASSOCIATION),
                 this.translationService.get(null, `Ordre`, `Livraison`)
             )
-        }).subscribe(([hasRightDisplayCreateArticleButton, preparation, deliveryOrder, manualDelivery, collectOrder, transferOrder, manualTransfer, inventory, articleUlAssociation, deliveryOrderTranslations]) => {
+        }).subscribe(([hasRightDisplayCreateArticleButton, preparation, deliveryOrder, manualDelivery, collectOrder, manualCollect, transferOrder, manualTransfer, inventory, articleUlAssociation, deliveryOrderTranslations]) => {
             this.deliveryOrderTranslation = TranslationService.Translate(deliveryOrderTranslations, 'Livraison');
             if(preparation){
                 this.menuConfig.push({
@@ -112,6 +113,15 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                                 this.goToDrop();
                             }
                         });
+                    }
+                });
+            }
+            if(manualCollect){
+                this.menuConfig.push({
+                    icon: 'manual-collect.svg',
+                    label: 'Collecte manuelle',
+                    action: () => {
+                        this.navService.push(NavPathEnum.MANUAL_COLLECT_ARTICLES);
                     }
                 });
             }
