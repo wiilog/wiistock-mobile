@@ -420,7 +420,6 @@ export class FormPage implements ViewWillEnter, ViewWillLeave {
                             })
                             : of(false)),
                         mergeMap((reference: any) => {
-                            console.log(reference);
                             return reference
                                 ? this.sqliteService.findBy(`emplacement`, [`id IN (${reference.storageRuleLocations})`])
                                 : of(undefined)
