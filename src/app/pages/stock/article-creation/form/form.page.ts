@@ -415,11 +415,15 @@ export class FormPage implements ViewWillEnter, ViewWillLeave {
                 event: () => this.storageService.getRight(StorageKeyEnum.PARAMETER_ARTICLE_LOCATION_DROP_WITH_REFERENCE_STORAGE_RULE)
                     .pipe(
                         mergeMap((needsLocationCheck) => needsLocationCheck
-                            ? this.sqliteService.findOneById('reference_article', this.reference)
+                            ? this.sqliteService.findOneBy('reference_article', {
+                                ...!params.fromMatrix ? {id: this.reference} : {reference: matrixValues?.reference},
+                            })
                             : of(false)),
-                        mergeMap((reference: any) => reference
-                            ? this.sqliteService.findBy(`emplacement`, [`id IN (${reference.storageRuleLocations})`])
-                            : of(undefined))
+                        mergeMap((reference: any) => {
+                            return reference
+                                ? this.sqliteService.findBy(`emplacement`, [`id IN (${reference.storageRuleLocations})`])
+                                : of(undefined)
+                        })
                     )
             }).subscribe((restrictedLocations: Array<Emplacement>|undefined) => {
                 if (restrictedLocations) {
