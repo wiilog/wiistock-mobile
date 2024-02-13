@@ -180,7 +180,14 @@ export class ManualCollectArticlesPage implements ViewWillLeave, ViewWillEnter {
                     }
                 )
             }).subscribe((response) => {
-                console.log(response);
+                if(response.success){
+                    this.navService.pop({path: NavPathEnum.STOCK_MENU})
+                        .subscribe(() => {
+                            this.toastService.presentToast(response.message);
+                        });
+                } else {
+                    this.toastService.presentToast(response.message);
+                }
             });
         }
     }
