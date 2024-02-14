@@ -59,7 +59,7 @@ jobs:
                 with:
                     repo_token: ${{ secrets.ACCESS_TOKEN }}
                     file: wiistock.apk
-                    asset_name: auto-build-wiistock.apk
+                    asset_name: wiistock.apk
                     tag: ${{ github.ref }}
 
             -   name: Build debug
@@ -79,5 +79,5 @@ jobs:
                 with:
                     repo_token: ${{ secrets.ACCESS_TOKEN }}
                     file: wiistock-debug.apk
-                    asset_name: auto-build-wiistock-debug.apk
+                    asset_name: wiistock-debug.apk
                     tag: ${{ github.ref }}

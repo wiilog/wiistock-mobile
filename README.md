@@ -1,6 +1,7 @@
 # Wiistock mobile app
 ## Installation
 ### Clone
+
 ### Keystore
 * Copier le fichier `android/app/keystore.properties.dist` -> `android/app/keystore.properties`
 * Modifier le fichier créer en les deux valeurs pour les passwords `DEV // APK mobile keystore password`
