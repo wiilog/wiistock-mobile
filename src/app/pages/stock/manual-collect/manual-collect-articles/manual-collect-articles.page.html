@@ -1,11 +1,11 @@
-<div *ngIf="headerConfig && formConfig && listConfig" scroll-y="true" class="page-content">
+<div *ngIf="headerConfig && formConfig && listConfig"
+     scroll-y="true"
+     class="page-content">
     <wii-form-panel #formPanelComponent
-                    *ngIf="formConfig"
                     [body]="formConfig"
                     [isForm]="true"></wii-form-panel>
 
-    <wii-list-panel *ngIf="headerConfig && listConfig"
-                    [header]="headerConfig"
+    <wii-list-panel [header]="headerConfig"
                     [body]="listConfig"
                     [boldValues]="listBoldValues">
     </wii-list-panel>

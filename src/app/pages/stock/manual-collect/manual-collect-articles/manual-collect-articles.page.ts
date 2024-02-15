@@ -122,17 +122,17 @@ export class ManualCollectArticlesPage implements ViewWillLeave, ViewWillEnter {
     }
 
     public addArticle(article: string) {
-        const params = {
-            barCode: article,
-        };
-
         const alreadyScanned = this.selectedReferences.some((selectedReference) => selectedReference.refArticleBarCode === article || selectedReference["article-to-pick"] === article);
 
         if(alreadyScanned) {
-            this.toastService.presentToast(`Ce code barre à déjà été scanné.`);
+            this.toastService.presentToast(`Ce code barre a déjà été scanné.`);
         } else {
             this.loadingService.presentLoadingWhile({
-                event: () => this.apiService.requestApi(ApiService.CHECK_MANUAL_COLLECT_SCAN, {params})
+                event: () => this.apiService.requestApi(ApiService.CHECK_MANUAL_COLLECT_SCAN, {
+                    params: {
+                        barCode: article,
+                    }
+                })
             }).subscribe((response) => {
                 if (response.reference.length > 0) {
                     this.navService.push(NavPathEnum.MANUAL_COLLECT_ARTICLE_TAKE, {
@@ -155,7 +155,7 @@ export class ManualCollectArticlesPage implements ViewWillLeave, ViewWillEnter {
                         }
                     });
                 } else {
-                    this.toastService.presentToast(`Le code barre scanné correspond à aucun article ou référence connu.`);
+                    this.toastService.presentToast(`Le code barre scanné ne correspond à aucun article ou référence connu.`);
                 }
             });
         }

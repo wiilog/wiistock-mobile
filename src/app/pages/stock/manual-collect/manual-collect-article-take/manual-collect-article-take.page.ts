@@ -49,18 +49,21 @@ export class ManualCollectArticleTakePage implements ViewWillEnter{
             info: [
                 {label: 'Référence', value: this.selectedReference.reference},
                 {label: 'Libellé', value: this.selectedReference.label},
-                {label: `Code barre ${this.selectedReference["article-to-pick"] ? 'article' : 'référence'}`, value: this.selectedReference["article-to-pick"] ? this.selectedReference["article-to-pick"] : this.selectedReference.refArticleBarCode},
+                {
+                    label: `Code barre ${this.selectedReference["article-to-pick"] ? 'article' : 'référence'}`,
+                    value: this.selectedReference["article-to-pick"] ? this.selectedReference["article-to-pick"] : this.selectedReference.refArticleBarCode
+                },
                 {label: 'Emplacement de stockage', value: this.selectedReference.location}
             ],
             fields: [
                 {
-                    label: 'Quantité collecté',
+                    label: 'Quantité collectée',
                     name: 'quantity',
                     type: 'number',
                     value: '',
                 }
             ]
-        }
+        };
     }
 
     public addArticle(data: any): void {
