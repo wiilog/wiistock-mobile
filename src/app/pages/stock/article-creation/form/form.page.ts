@@ -23,9 +23,8 @@ import {
     FormPanelTextareaComponent
 } from '@common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
-import {mergeMap, Observable, of} from "rxjs";
+import {mergeMap, Observable, of, map} from "rxjs";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
-import {map} from "rxjs/operators";
 import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {Emplacement} from "@entities/emplacement";
@@ -415,9 +414,10 @@ export class FormPage implements ViewWillEnter, ViewWillLeave {
                 event: () => this.storageService.getRight(StorageKeyEnum.PARAMETER_ARTICLE_LOCATION_DROP_WITH_REFERENCE_STORAGE_RULE)
                     .pipe(
                         mergeMap((needsLocationCheck) => needsLocationCheck
-                            ? this.sqliteService.findOneBy('reference_article', {
-                                ...!params.fromMatrix ? {id: this.reference} : {reference: matrixValues?.reference},
-                            })
+                            ? this.sqliteService.findOneBy('reference_article', !params.fromMatrix
+                                ? {id: this.reference}
+                                : {reference: matrixValues?.reference}
+                            )
                             : of(false)),
                         mergeMap((reference: any) => {
                             return reference
@@ -432,22 +432,19 @@ export class FormPage implements ViewWillEnter, ViewWillLeave {
                         fromStock: true,
                         restrictedLocations,
                         scanMode: BarcodeScannerModeEnum.ONLY_SCAN,
-                        customAction: (location: Emplacement) => {
+                        customAction: () => {
                             this.navService.pop()
-                                .subscribe(() => this.createArticle(location, params));
+                                .subscribe(() => this.createArticle(params));
                         },
                     });
                 } else {
-                    this.createArticle(undefined, params);
+                    this.createArticle(params);
                 }
             });
         }
     }
 
-    public createArticle(location: Emplacement|undefined, params: any) {
-        if(location) {
-            params.destination = location.id;
-        }
+    public createArticle(params: any) {
         this.loadingService.presentLoadingWhile({
             event: () => this.apiService.requestApi(ApiService.CREATE_ARTICLE, {params})
         }).subscribe((response) => {
