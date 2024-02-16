@@ -14,6 +14,7 @@ import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
 import {LoadingService} from "@app/services/loading.service";
 import {AlertService} from "@app/services/alert.service";
+import {mergeMap, Observable, of, Subject, tap} from "rxjs";
 
 @Component({
     selector: 'wii-emplacement-scan',
@@ -95,26 +96,30 @@ export class EmplacementScanPage implements ViewWillEnter, ViewWillLeave {
         });
     }
 
-    public async checkRestrictions(location: Emplacement): Promise<boolean> {
-        return new Promise(async (resolve) => {
-            if (location
-                && this.restrictedLocations
-                && this.restrictedLocations.length > 0
-                && this.restrictedLocations.findIndex(({id}) => id === location.id) === -1) {
-                this.loadingService.presentLoadingWhile({
-                    event: () => this.sqliteService.findBy(`emplacement`, [`id IN (${this.restrictedLocations.map(({id}) => id).join(',')})`])
-                }).subscribe(async (locations: Array<Emplacement>) => {
+    public checkRestrictions(location: Emplacement): Observable<boolean> {
+        if (location
+            && this.restrictedLocations
+            && this.restrictedLocations.length > 0
+            && this.restrictedLocations.findIndex(({id}) => id === location.id) === -1) {
+
+            const res$ = new Subject<boolean>();
+            return this.loadingService.presentLoadingWhile({
+                event: () => this.sqliteService.findBy(`emplacement`, [`id IN (${this.restrictedLocations.map(({id}) => id).join(',')})`])
+            }).pipe(
+                tap(() => {
                     this.selectItemComponent.unsubscribeZebraScan();
-                    const retrictedLocations = locations
+                }),
+                mergeMap((locations: Array<Emplacement>) => {
+                    const restrictedLocations = locations
                         .sort((l1, l2) => l1.label < l2.label ? -1 : 1)
                         .slice(0, 3)
                         .map(({label}) => `<br><strong>${label}</strong>`)
                         .join(' ');
-                    await this.alertService.show({
+                    return this.alertService.show({
                         message: `
                             <img src="assets/icons/round-exclamation.svg" class="medium">
-                            <br>L'emplacement scanné n'est pas autorisé pour une dépose. Vous pouvez scanner ${locations.length > 1 ? `les emplacements suivants` : `l'emplacement suivant`} :
-                            ${retrictedLocations}
+                            <br>L'emplacement scanné n'est pas autorisé pour une dépose. Vous pouvez scanner ${locations.length > 1 ? `les emplacements suivants` : `l'emplacement suivant`}&nbsp;:
+                            ${restrictedLocations}
                         `,
                         cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
                         backdropDismiss: false,
@@ -124,24 +129,26 @@ export class EmplacementScanPage implements ViewWillEnter, ViewWillLeave {
                                 role: 'cancel',
                                 handler: () => {
                                     this.selectItemComponent.fireZebraScan();
-                                    resolve(false);
+                                    res$.next(false);
                                 },
                             },
                         ]
                     });
-                });
-            } else {
-                resolve(true);
-            }
-        })
+                }),
+                mergeMap(() => res$)
+            )
+        }
+        else {
+            return of(true)
+        }
     }
 
-    public selectLocation(location: Emplacement) {
-        this.checkRestrictions(location).then((noRestrictions: boolean) => {
+    public selectLocation(location: Emplacement): void {
+        this.checkRestrictions(location).subscribe((noRestrictions: boolean) => {
             if(noRestrictions) {
                 this.testNetwork(() => {
                     if (this.customAction) {
-                        this.navService.pop().toPromise().then((_) => {
+                        this.navService.pop().subscribe(() => {
                             if (this.customAction) {
                                 this.customAction(location)
                             }
