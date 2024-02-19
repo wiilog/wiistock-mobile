@@ -134,10 +134,10 @@ export class ManualCollectArticlesPage implements ViewWillLeave, ViewWillEnter {
                     }
                 })
             }).subscribe((response) => {
-                if (response.reference.length > 0) {
+                if (response.reference?.id) {
                     this.navService.push(NavPathEnum.MANUAL_COLLECT_ARTICLE_TAKE, {
                         selectedReference: {
-                            ...response.reference[0],
+                            ...response.reference,
                             ...(response.article
                                     ? {
                                         'article-to-pick': response.article,
@@ -239,7 +239,7 @@ export class ManualCollectArticlesPage implements ViewWillLeave, ViewWillEnter {
                     value: article.location
                 },
                 quantity: {
-                    label: `Quantité collecté`,
+                    label: `Quantité collectée`,
                     value: `${article["quantity-to-pick"]}`,
                 },
             },
