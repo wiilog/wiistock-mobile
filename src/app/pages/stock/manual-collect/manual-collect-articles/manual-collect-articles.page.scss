@@ -1,0 +1,19 @@
+@import "theme/variables";
+
+.page-content {
+    padding-top: 10px;
+}
+
+.spinner {
+    margin: $spacer;
+    text-align: center;
+}
+
+wii-panel-header.page-header {
+    margin-top: $spacer;
+    margin-bottom: $spacer;
+}
+
+wii-form-panel {
+    margin-left: 2px;
+}

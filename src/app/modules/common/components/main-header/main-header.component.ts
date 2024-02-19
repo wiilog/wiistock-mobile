@@ -171,6 +171,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.MANUAL_DELIVERY, label: 'Livraison manuelle'},
             {pagePath: NavPathEnum.MANUAL_DELIVERY_LOCATION, label: 'Emplacement'},
             {pagePath: NavPathEnum.COLLECTE_MENU, label: 'Collecte'},
+            {pagePath: NavPathEnum.MANUAL_COLLECT_ARTICLES, label: 'Collecte manuelle'},
             {pagePath: NavPathEnum.INVENTORY_LOCATIONS, label: 'Inventaire'},
             {pagePath: NavPathEnum.INVENTORY_LOCATIONS_ANOMALIES, label: 'Anomalies'},
             {pagePath: NavPathEnum.DEMANDE_MENU, label: 'Demande'},

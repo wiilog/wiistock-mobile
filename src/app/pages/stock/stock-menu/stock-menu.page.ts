@@ -64,14 +64,16 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                 this.storageService.getRight(StorageKeyEnum.RIGHT_DELIVERY_ORDER),
                 this.storageService.getRight(StorageKeyEnum.RIGHT_MANUAL_DELIVERY),
                 this.storageService.getRight(StorageKeyEnum.RIGHT_COLLECT_ORDER),
+                this.storageService.getRight(StorageKeyEnum.RIGHT_MANUAL_COLLECT),
                 this.storageService.getRight(StorageKeyEnum.RIGHT_TRANSFER_ORDER),
                 this.storageService.getRight(StorageKeyEnum.RIGHT_MANUAL_TRANSFER),
                 this.storageService.getRight(StorageKeyEnum.RIGHT_INVENTORY),
                 this.storageService.getRight(StorageKeyEnum.RIGHT_ARTICLE_UL_ASSOCIATION),
                 this.translationService.get(null, `Ordre`, `Livraison`)
             )
-        }).subscribe(([hasRightDisplayCreateArticleButton, preparation, deliveryOrder, manualDelivery, collectOrder, transferOrder, manualTransfer, inventory, articleUlAssociation, deliveryOrderTranslations]) => {
+        }).subscribe(([hasRightDisplayCreateArticleButton, preparation, deliveryOrder, manualDelivery, collectOrder, manualCollect, transferOrder, manualTransfer, inventory, articleUlAssociation, deliveryOrderTranslations]) => {
             this.deliveryOrderTranslation = TranslationService.Translate(deliveryOrderTranslations, 'Livraison');
+
             if(preparation){
                 this.menuConfig.push({
                     icon: 'preparation.svg',
@@ -81,6 +83,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                     }
                 });
             }
+
             if(deliveryOrder){
                 this.menuConfig.push({
                     icon: 'delivery.svg',
@@ -90,6 +93,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                     }
                 });
             }
+
             if(manualDelivery){
                 this.menuConfig.push({
                     icon: 'manual-delivery.svg',
@@ -99,6 +103,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                     }
                 });
             }
+
             if(collectOrder){
                 this.menuConfig.push({
                     icon: 'collect.svg',
@@ -115,6 +120,17 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                     }
                 });
             }
+
+            if(manualCollect){
+                this.menuConfig.push({
+                    icon: 'manual-collect.svg',
+                    label: 'Collecte manuelle',
+                    action: () => {
+                        this.navService.push(NavPathEnum.MANUAL_COLLECT_ARTICLES);
+                    }
+                });
+            }
+
             if(transferOrder){
                 this.menuConfig.push({
                     icon: 'stock-transfer.svg',
@@ -124,6 +140,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                     }
                 });
             }
+
             if(manualTransfer){
                 this.menuConfig.push({
                     icon: 'manual-transfer.svg',
@@ -133,6 +150,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                     }
                 });
             }
+
             if(inventory){
                 this.menuConfig.push({
                     icon: 'inventory.svg',
@@ -142,6 +160,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                     }
                 });
             }
+
             if(articleUlAssociation){
                 this.menuConfig.push({
                     icon: 'association.svg',
@@ -151,6 +170,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                     }
                 });
             }
+
             if(hasRightDisplayCreateArticleButton){
                 this.menuConfig.push({
                     icon: 'new-article-RFID.svg',

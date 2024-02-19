@@ -91,6 +91,8 @@ export class ApiService {
     public static readonly NEW_OFFLINE_DISPATCHES = {method: POST, service: '/new-offline-dispatches'};
     public static readonly LOGOUT = {method: POST, service: '/logout'};
     public static readonly POST_RECEIPT_ASSOCIATION = {method: POST, service: '/receipt-association'};
+    public static readonly CHECK_MANUAL_COLLECT_SCAN = {method: GET, service: '/check-manual-collect-scan'};
+    public static readonly FINISH_MANUAL_COLLECT = {method: POST, service: '/finish-manual-collect'};
 
 
     private static readonly DEFAULT_HEADERS = {
