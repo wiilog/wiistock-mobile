@@ -5,6 +5,7 @@ import {ViewWillEnter} from "@ionic/angular";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {Emplacement} from "@entities/emplacement";
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
+import {SqliteService} from "@app/services/sqlite/sqlite.service";
 
 @Component({
     selector: 'wii-manual-collect-article-take',
@@ -32,6 +33,7 @@ export class ManualCollectArticleTakePage implements ViewWillEnter{
     private selectArticle: (quantity: number, selectedReference: any, dropLocation?: Emplacement) => void;
 
     public constructor(private toastService: ToastService,
+                       private sqliteService: SqliteService,
                        private navService: NavService) {
     }
 
@@ -72,22 +74,21 @@ export class ManualCollectArticleTakePage implements ViewWillEnter{
             this.toastService.presentToast('Veuillez selectionner une quantité valide.');
         }
         else {
-            if(this.selectedReference.quantityType === 'article'){
-                this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
-                    scanMode: BarcodeScannerModeEnum.TOOL_SEARCH,
-                    customAction: (location: Emplacement) => {
-                        this.navService.pop({path: NavPathEnum.MANUAL_COLLECT_ARTICLES})
-                            .subscribe(() => {
-                                this.selectArticle(quantity, this.selectedReference, location);
-                            });
-                    },
-                });
-            } else {
-                this.navService.pop({path: NavPathEnum.MANUAL_COLLECT_ARTICLES})
-                    .subscribe(() => {
-                        this.selectArticle(quantity, this.selectedReference);
+            this.sqliteService.findBy('emplacement', [`label = '${this.selectedReference.location}'`])
+                .subscribe((restrictedLocations) => {
+                    this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
+                        scanMode: BarcodeScannerModeEnum.TOOL_SEARCH,
+                        customAction: (location: Emplacement) => {
+                            this.navService.pop({path: NavPathEnum.MANUAL_COLLECT_ARTICLES})
+                                .subscribe(() => {
+                                    this.selectArticle(quantity, this.selectedReference, location);
+                                });
+                        },
+                        ...(this.selectedReference.quantityType === 'reference' && restrictedLocations.length > 0? {
+                            restrictedLocations
+                        } :  {}),
                     });
-            }
+                });
         }
     }
 }
