@@ -27,8 +27,16 @@ export class NotificationService {
     public initialize(): Observable<void> {
         return this.unsubscribe().pipe(
             mergeMap(() => this.registerPushNotification()),
-            mergeMap(() => this.subscribeToTopics()),
-            mergeMap(() => this.handleEvents()),
+            mergeMap((registered: boolean) => (
+                registered
+                    ? this.subscribeToTopics().pipe(map(() => registered))
+                    : of(registered)
+            )),
+            mergeMap((registered) => (
+                registered
+                    ? this.handleEvents()
+                    : of(undefined)
+            )),
         );
     }
 
@@ -66,7 +74,7 @@ export class NotificationService {
         return this._notificationTapped$;
     }
 
-    private registerPushNotification(): Observable<void> {
+    private registerPushNotification(): Observable<boolean> {
         return from(PushNotifications.checkPermissions())
             .pipe(
                 mergeMap((state: PermissionStatus) => {
@@ -75,12 +83,11 @@ export class NotificationService {
                     }
                     return of(state);
                 }),
-                tap((state) => {
-                    if (state.receive !== 'granted') {
-                        throw new Error('User denied permissions!');
-                    }
-                }),
-                mergeMap(() => PushNotifications.register())
+                mergeMap((state) => (
+                    state.receive !== 'granted'
+                        ? of(false)
+                        : from(PushNotifications.register()).pipe(map(() => true)))
+                )
             );
     }
 
@@ -88,25 +95,19 @@ export class NotificationService {
         console.warn('>> handleEvents')
         return from(PushNotifications.removeAllListeners()).pipe(
             mergeMap(() => {
-                console.warn('>> localNotificationActionPerformed')
                 // event on a tapped LocalNotification when app is in background
                 return LocalNotifications.addListener('localNotificationActionPerformed', ({notification}) => {
-                    console.warn('localNotificationActionPerformed', notification)
                     this._notificationTapped$.next(notification);
                 })
             }),
             mergeMap(() => {
-                console.warn('>> pushNotificationActionPerformed')
                 // event on a tapped PushNotification when app is in background
                 return PushNotifications.addListener('pushNotificationActionPerformed', async ({notification}) => {
                     await PushNotifications.removeAllDeliveredNotifications();
-                    console.log('pushNotificationActionPerformed', notification)
                     this._notificationTapped$.next(this.transformPushToLocal(notification));
                 });
             }),
             mergeMap(() => {
-
-                console.warn('>> pushNotificationReceived')
                 // event a PushNotification received when app is in background
                 // => we create a new LocalNotification
                 return PushNotifications.addListener('pushNotificationReceived', async (notification) => {
