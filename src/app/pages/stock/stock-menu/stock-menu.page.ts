@@ -47,7 +47,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                        private sqliteService: SqliteService,
                        private navService: NavService,
                        private translationService: TranslationService) {
-        this.avoidSync = true;
+        this.avoidSync = this.navService.param<boolean>(`avoidSync`);
     }
 
     public ionViewWillEnter(): void {
@@ -55,7 +55,6 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
 
         // TODO WIIS-7970 test this
         const goToDropDirectly = (!this.deposeAlreadyNavigate && Boolean(this.navService.param('goToDropDirectly')));
-        this.avoidSync = this.navService.param<boolean>('avoidSync');
 
         this.loadingService.presentLoadingWhile({
             event: () => zip(

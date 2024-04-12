@@ -448,7 +448,7 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                     this.sqliteService.findOneBy('collecte', {id: collectId}).subscribe((collect) => {
                         if (collect) {
                             this.navService
-                                .push(NavPathEnum.STOCK_MENU)
+                                .push(NavPathEnum.STOCK_MENU, {avoidSync: true})
                                 .pipe(
                                     mergeMap(() => this.navService.push(NavPathEnum.COLLECTE_MENU, {withoutLoading: true})),
                                     mergeMap(() => this.navService.push(NavPathEnum.COLLECTE_ARTICLES, {
