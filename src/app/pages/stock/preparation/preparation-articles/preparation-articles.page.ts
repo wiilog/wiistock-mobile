@@ -59,6 +59,8 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
     public skipValidation: boolean = false;
     public skipQuantities: boolean = false;
 
+    private pageAlreadyLoaded: boolean = false
+
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
                        private networkService: NetworkService,
@@ -70,10 +72,15 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public ionViewWillEnter(): void {
-        if (this.navService.popItem
-            && this.navService.popItem.path !== NavPathEnum.PREPARATION_ARTICLES) {
+        if (this.pageAlreadyLoaded
+            || (
+                this.navService.popItem
+                && this.navService.popItem.path !== NavPathEnum.PREPARATION_ARTICLES
+            )) {
             return;
         }
+
+        this.pageAlreadyLoaded = true;
 
         this.preparation = this.navService.param('preparation');
         this.preparationsHeaderConfig = {
@@ -234,7 +241,8 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
                         );
                 }
             }
-        } else {
+        }
+        else {
             return of(undefined);
         }
     }
