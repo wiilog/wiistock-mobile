@@ -47,11 +47,11 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                        private sqliteService: SqliteService,
                        private navService: NavService,
                        private translationService: TranslationService) {
-        this.avoidSync = this.navService.param<boolean>(`avoidSync`);
     }
 
     public ionViewWillEnter(): void {
         this.menuConfig = [];
+        this.avoidSync = this.navService.param<boolean>(`avoidSync`);
 
         // TODO WIIS-7970 test this
         const goToDropDirectly = (!this.deposeAlreadyNavigate && Boolean(this.navService.param('goToDropDirectly')));
