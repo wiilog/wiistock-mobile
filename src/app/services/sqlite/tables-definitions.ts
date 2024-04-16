@@ -423,6 +423,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'createdBy', value: 'INTEGER'},
             {column: 'updatedAt', value: 'VARCHAR(255)'},
             {column: 'validatedAt', value: 'VARCHAR(255)'},
+            {column: 'historyStatusesId', value: 'VARCHAR(255)'},
         ]
     },
     {

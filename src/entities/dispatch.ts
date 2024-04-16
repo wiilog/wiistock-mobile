@@ -30,4 +30,5 @@ export interface Dispatch {
     createdBy: number;
     updatedAt?: string;
     validatedAt?: string;
+    historyStatusesId?: string;
 }
