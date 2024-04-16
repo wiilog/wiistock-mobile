@@ -1,8 +1,7 @@
 import {Component} from '@angular/core';
 import {Subscription, zip} from 'rxjs';
 import {ColumnNumber, MenuConfig} from '@common/components/menu/menu-config';
-import {Platform, ViewWillEnter, ViewWillLeave} from '@ionic/angular';
-import {MainHeaderService} from '@app/services/main-header.service';
+import {ViewWillEnter, ViewWillLeave} from '@ionic/angular';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {ToastService} from '@app/services/toast.service';
 import {NavService} from '@app/services/nav/nav.service';
@@ -15,7 +14,6 @@ import {map} from 'rxjs/operators';
 import {NetworkService} from '@app/services/network.service';
 import {LoadingService} from "@app/services/loading.service";
 import {TranslationService} from "@app/services/translations.service";
-import {Translations} from "@entities/translation";
 
 @Component({
     selector: 'wii-stock-menu',
@@ -50,6 +48,10 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public ionViewWillEnter(): void {
+        if (this.navService.currentPath() !== NavPathEnum.STOCK_MENU) {
+            return;
+        }
+
         this.menuConfig = [];
         this.avoidSync = this.navService.param<boolean>(`avoidSync`);
 
