@@ -423,6 +423,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'createdBy', value: 'INTEGER'},
             {column: 'updatedAt', value: 'VARCHAR(255)'},
             {column: 'validatedAt', value: 'VARCHAR(255)'},
+            {column: 'historyStatusesId', value: 'VARCHAR(255)'},
         ]
     },
     {
@@ -502,7 +503,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'label', value: 'VARCHAR(255)'},
             {column: 'category', value: 'VARCHAR(255)'},
             {column: 'suggestedDropLocations', value: 'TEXT'},
-            {column: 'suggestedPickLocations', value: 'TEXT'}
+            {column: 'suggestedPickLocations', value: 'TEXT'},
+            {column: 'reusableStatuses', value: 'INTEGER'},
         ]
     },
     {
