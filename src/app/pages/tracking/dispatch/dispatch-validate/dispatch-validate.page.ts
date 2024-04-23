@@ -99,15 +99,27 @@ export class DispatchValidatePage implements ViewWillEnter, ViewWillLeave {
                     this.loadingElement = loader;
                 }),
                 mergeMap(() => zip(
-                    this.sqliteService.findOneBy('dispatch', {id: dispatchId}),
-                    this.sqliteService.findBy('status', this.statusRequestParams)
+                    this.sqliteService.findOneBy('dispatch', {id: dispatchId})
+                )),
+                mergeMap(([dispatch]) => zip(
+                    of(dispatch),
+                    this.sqliteService.findBy('status', this.statusRequestParams),
+                    this.sqliteService.findOneBy('type', {id: dispatch.typeId}),
                 )),
                 filter((dispatch) => Boolean(dispatch))
             )
-            .subscribe(([dispatch, statuses]: [Dispatch, Array<any>]) => {
+            .subscribe(([dispatch, statuses, type]: [Dispatch, Array<any>, any]) => {
                 this.dispatch = dispatch;
 
-                this.statuses = statuses.filter((status) => status.typeId === this.dispatch.typeId && ((this.dispatch.historyStatusesId || '').split(',').findIndex((statusId) => statusId == status.id) === -1));
+                this.statuses = statuses.filter((status) => {
+                        return (status.typeId === this.dispatch.typeId)
+                            && (Boolean(type.reusableStatuses)
+                                || !((this.dispatch.historyStatusesId || '')
+                                    .split(',')
+                                    .filter((id) => id)
+                                    .includes(`${status.id}`)));
+                    }
+                );
 
                 this.refreshLocationHeaderConfig();
                 this.refreshStatusHeaderConfig();

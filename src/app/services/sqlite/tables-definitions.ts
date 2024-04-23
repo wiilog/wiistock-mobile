@@ -503,7 +503,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'label', value: 'VARCHAR(255)'},
             {column: 'category', value: 'VARCHAR(255)'},
             {column: 'suggestedDropLocations', value: 'TEXT'},
-            {column: 'suggestedPickLocations', value: 'TEXT'}
+            {column: 'suggestedPickLocations', value: 'TEXT'},
+            {column: 'reusableStatuses', value: 'INTEGER'}
         ]
     },
     {
