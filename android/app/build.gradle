@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 def keystorePropertiesFile = file("./keystore.properties")
 def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+def APP_NAME = System.env.APP_CUSTOM_NAME ?: "Wiilog"
 
 android {
     namespace "com.wiilog.wiistock"
@@ -36,6 +37,13 @@ android {
             signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            resValue "string", "app_name", APP_NAME
+            resValue "string", "title_activity_main", APP_NAME
+        }
+
+        debug {
+            resValue "string", "app_name", APP_NAME + "(debug)"
+            resValue "string", "title_activity_main", APP_NAME + "(debug)"
         }
     }
 }

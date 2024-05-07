@@ -2,7 +2,7 @@ import {CapacitorConfig} from '@capacitor/cli';
 
 const config: CapacitorConfig = {
     appId: 'com.wiilog.wiistock',
-    appName: 'Follow GT',
+    appName: 'Wiilog',
     webDir: 'www',
     bundledWebRuntime: false,
     loggingBehavior: 'none',

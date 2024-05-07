@@ -2,7 +2,7 @@
     "name": "wiistock-mobile",
     "version": "7.14.0",
     "author": "Wiilog Team",
-    "description": "Follow your supply chain with GT Logistics.",
+    "description": "Follow your supply chain with Wiilog.",
     "homepage": "https://www.wiilog.fr/",
     "license": "proprietary",
     "scripts": {
