@@ -446,6 +446,10 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
                     this.toastService.presentToast('Préparation prête à être finalisée.');
                 } else {
                     this.toastService.presentToast('Quantité bien prélevée.');
+
+                    if (this.footerScannerComponent) {
+                        this.footerScannerComponent.fireZebraScan();
+                    }
                 }
             }));
     }
