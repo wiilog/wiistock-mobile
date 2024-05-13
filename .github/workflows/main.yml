@@ -39,6 +39,50 @@ jobs:
                     sed -i "s/keyPassword=/keyPassword=${{ secrets.KEYSTORE_PASSWORD }}/g" android/app/keystore.properties &&
                     sed -i "s/storePassword=/storePassword=${{ secrets.KEYSTORE_PASSWORD }}/g" android/app/keystore.properties
 
+            -   name: Build wiistock
+                env:
+                    APP_CUSTOM_NAME: "Wiilog"
+                run: yarn gradle:assemble
+
+            -   name: Apk copy
+                run: cp android/app/build/outputs/apk/release/app-release.apk Wiilog.apk
+
+            -   name: Upload artifact
+                uses: actions/upload-artifact@v4
+                with:
+                    name: Wiilog.apk
+                    path: Wiilog.apk
+
+            -   name: Upload on release
+                uses: svenstaro/upload-release-action@v2
+                with:
+                    repo_token: ${{ secrets.ACCESS_TOKEN }}
+                    file: Wiilog.apk
+                    asset_name: Wiilog.apk
+                    tag: ${{ github.ref }}
+
+            -   name: Build  Wiilog debug
+                env:
+                    APP_CUSTOM_NAME: "Wiilog"
+                run: yarn gradle:assemble:debug
+
+            -   name: Debug apk copy
+                run: cp android/app/build/outputs/apk/debug/app-debug.apk Wiilog-debug.apk
+
+            -   name: Upload debug artifact
+                uses: actions/upload-artifact@v4
+                with:
+                    name: Wiilog-debug.apk
+                    path: Wiilog-debug.apk
+
+            -   name: Upload debug on release
+                uses: svenstaro/upload-release-action@v2
+                with:
+                    repo_token: ${{ secrets.ACCESS_TOKEN }}
+                    file: Wiilog-debug.apk
+                    asset_name: Wiilog-debug.apk
+                    tag: ${{ github.ref }}
+
             -   name: Dependencies installation
                 run: yarn install
 
@@ -64,29 +108,7 @@ jobs:
                     asset_name: FollowGT.apk
                     tag: ${{ github.ref }}
 
-            -   name: Build wiistock
-                env:
-                    APP_CUSTOM_NAME: "Wiilog"
-                run: yarn gradle assembleRelease
-
-            -   name: Apk copy
-                run: cp android/app/build/outputs/apk/release/app-release.apk Wiilog.apk
-
-            -   name: Upload artifact
-                uses: actions/upload-artifact@v4
-                with:
-                    name: Wiilog.apk
-                    path: Wiilog.apk
-
-            -   name: Upload on release
-                uses: svenstaro/upload-release-action@v2
-                with:
-                    repo_token: ${{ secrets.ACCESS_TOKEN }}
-                    file: Wiilog.apk
-                    asset_name: Wiilog.apk
-                    tag: ${{ github.ref }}
-
-            -   name: Build debug
+            -   name: Build  Follow GT debug
                 env:
                     APP_CUSTOM_NAME: "Follow GT"
                 run: yarn gradle:assemble:debug
@@ -100,24 +122,10 @@ jobs:
                     name: FollowGT-debug.apk
                     path: FollowGT-debug.apk
 
-            -   name: Build debug
-                env:
-                    APP_CUSTOM_NAME: "Wiilog"
-                run: yarn gradle assembleDebug
-
-            -   name: Debug apk copy
-                run: cp android/app/build/outputs/apk/debug/app-debug.apk Wiilog-debug.apk
-
-            -   name: Upload debug artifact
-                uses: actions/upload-artifact@v4
-                with:
-                    name: Wiilog-debug.apk
-                    path: Wiilog-debug.apk
-
             -   name: Upload debug on release
                 uses: svenstaro/upload-release-action@v2
                 with:
                     repo_token: ${{ secrets.ACCESS_TOKEN }}
-                    file: Wiilog-debug.apk
-                    asset_name: Wiilog-debug.apk
+                    file: FollowGT-debug.apk
+                    asset_name: FollowGT-debug.apk
                     tag: ${{ github.ref }}
