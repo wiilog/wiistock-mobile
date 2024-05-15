@@ -156,7 +156,9 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                                             .map((article: ArticleLivraison) => this.registerMvt(article, deliveredQuantity || article.quantity))
                                     ).pipe(
                                         mergeMap(() => this.sqliteService.findBy('article_livraison', [`id_livraison = ${this.livraison.id}`])),
-                                        tap((articles) => this.updateList(articles)),
+                                        tap((articles) => {
+                                            this.updateList(articles);
+                                        }),
                                         map(() => this.deliveryOrderTranslation + ` commencée.`))
                                 } else {
                                     this.isValid = false;
@@ -253,9 +255,10 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                             mergeMap((mouvement: Mouvement) => this.sqliteService.insert('mouvement', mouvement)))
                 }
             } else {
-                let mouvement: Mouvement = {
+                const mouvement: Mouvement = {
                     id: null,
                     reference: article.reference,
+                    barcode: article.barcode,
                     quantity: article.quantity,
                     date_pickup: moment().format(),
                     location_from: article.location,
@@ -270,7 +273,12 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                     id_article_collecte: null,
                     id_collecte: null,
                 };
-                let articleAlready = this.articlesT.find(art => art.id_livraison === mouvement.id_livraison && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
+                const articleAlready = this.articlesT.find((art) => {
+                    return art.id_livraison === mouvement.id_livraison
+                        && art.is_ref === mouvement.is_ref
+                        && art.reference === mouvement.reference
+                        && art.barcode === mouvement.barcode;
+                });
                 if (articleAlready !== undefined) {
                     return this.sqliteService
                         .update('article_livraison', [{
