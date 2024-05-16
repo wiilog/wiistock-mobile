@@ -108,8 +108,6 @@ export class DispatchValidatePage implements ViewWillEnter, ViewWillLeave {
             .subscribe(([dispatch, statuses, type]: [Dispatch, Array<any>, any]) => {
                 this.dispatch = dispatch;
 
-                console.log(Boolean(type.reusableStatuses));
-                console.log(this.dispatch.historyStatusesId);
                 this.statuses = statuses.filter((status) => (
                     (status.typeId === this.dispatch.typeId)
                     && (
