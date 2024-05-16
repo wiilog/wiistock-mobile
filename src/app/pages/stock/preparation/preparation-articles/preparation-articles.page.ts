@@ -72,11 +72,14 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public ionViewWillEnter(): void {
-        if (this.pageAlreadyLoaded
-            || (
-                this.navService.popItem
-                && this.navService.popItem.path !== NavPathEnum.PREPARATION_ARTICLES
-            )) {
+        if (this.pageAlreadyLoaded) {
+            if (this.footerScannerComponent) {
+                this.footerScannerComponent.fireZebraScan();
+            }
+            return;
+        }
+        else if (this.navService.popItem
+            && this.navService.popItem.path !== NavPathEnum.PREPARATION_ARTICLES) {
             return;
         }
 
