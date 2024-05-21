@@ -79,11 +79,11 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                     return zip(
                         this.apiService.requestApi(ApiService.GET_TRUCK_ARRIVALS_DEFAULT_UNLOADING_LOCATION),
 
-                        this.storageService.getNumber('truckArrival.driver.onMobile'),
+                        this.storageService.getNumber('truckArrival.driver.displayedCreate'),
                         this.storageService.getNumber('truckArrival.driver.requiredCreate'),
-                        this.storageService.getNumber('truckArrival.registrationNumber.onMobile'),
+                        this.storageService.getNumber('truckArrival.registrationNumber.displayedCreate'),
                         this.storageService.getNumber('truckArrival.registrationNumber.requiredCreate'),
-                        this.storageService.getNumber('truckArrival.unloadingLocation.onMobile'),
+                        this.storageService.getNumber('truckArrival.unloadingLocation.displayedCreate'),
                         this.storageService.getNumber('truckArrival.unloadingLocation.requiredCreate'),
                     )
                 }
