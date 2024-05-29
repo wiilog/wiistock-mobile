@@ -48,7 +48,6 @@ export class HandlingValidatePage implements ViewWillEnter, ViewWillLeave {
 
     private loadingElement?: HTMLIonLoadingElement;
     private apiSubscription?: Subscription;
-    private dataSubscription?: Subscription;
 
     private beginDate: Date;
 
@@ -72,114 +71,7 @@ export class HandlingValidatePage implements ViewWillEnter, ViewWillLeave {
         this.handling = this.navService.param('handling');
         this.beginDate = new Date();
 
-        this.dataSubscription = this.dismissLoading()
-            .pipe(
-                mergeMap(() => this.loadingService.presentLoading()),
-                tap((loading) => {
-                    this.loadingElement = loading;
-                }),
-                mergeMap(() => zip(
-                    this.handling.statusId ? this.sqliteService.findOneBy('status', {id: this.handling.statusId}) : of(undefined),
-                    this.sqliteService.findBy('handling_attachment', [`handlingId = ${this.handling.id}`]),
-                    this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.HANDLING}'`]),
-                    this.translationService.get(null, `Demande`, `Services`)
-                )),
-            )
-            .subscribe(([currentStatus, handlingAttachment, freeFields, handlingsTranslations]: [Status, Array<HandlingAttachment>, Array<FreeField>, Translations]) => {
-                this.dismissLoading();
-                this.handlingsTranslations = handlingsTranslations;
-
-                this.refreshHeader(false);
-
-                let freeFieldsValues = JSON.parse(this.handling.freeFields || '{}') || {};
-
-                const sAttachmentLabel = handlingAttachment.length > 1 ? 's' : '';
-                this.detailsConfig = handlingAttachment.length > 0
-                    ? [
-                        {
-                            item: FormViewerAttachmentsComponent,
-                            config: {
-                                label: `Pièce${sAttachmentLabel} jointe${sAttachmentLabel}`,
-                                value: handlingAttachment.map(({fileName, href}) => ({
-                                    label: fileName,
-                                    href
-                                }))
-                            }
-                        }
-                    ]
-                    : [];
-
-                this.bodyConfig = [
-                    {
-                        item: FormPanelSelectComponent,
-                        config: {
-                            label: 'Statut',
-                            name: 'statusId',
-                            value: this.handling.statusId,
-                            inputConfig: {
-                                required: true,
-                                searchType: SelectItemTypeEnum.STATUS,
-                                requestParams: [
-                                    `category = 'service'`,
-                                    `state = 'treated' OR state = 'inProgress'`,
-                                    `typeId = ${this.handling.typeId}`,
-                                ],
-                                filterItem: (status) => Number(status.id) !== Number(this.handling.statusId),
-                                onChange: (statusId: any) => {
-                                    this.handling.statusId = statusId;
-                                    this.sqliteService
-                                        .findOneBy('status', {id: statusId})
-                                        .pipe(filter(() => this.pageEnter))
-                                        .subscribe((newStatus?: Status) => {
-                                            this.updateFormConfig(newStatus);
-                                        })
-                                }
-                            },
-                            errors: {
-                                required: 'Le statut de la demande est requis',
-                            }
-                        }
-                    },
-                    {
-                        item: FormPanelInputComponent,
-                        config: {
-                            label: 'Commentaire',
-                            name: 'comment',
-                            inputConfig: {
-                                type: 'text',
-                                maxLength: '255',
-                                required: !currentStatus || Boolean(currentStatus.commentNeeded)
-                            },
-                            errors: {
-                                required: 'Votre commentaire est requis',
-                                maxlength: 'Votre commentaire est trop long'
-                            }
-                        }
-                    },
-                    {
-                        item: FormPanelCameraComponent,
-                        config: {
-                            label: 'Photo(s)',
-                            name: 'photos',
-                            inputConfig: {
-                                multiple: true
-                            }
-                        }
-                    },
-
-                    ...(freeFields
-                        .filter(({typeId}) => (typeId === this.handling.typeId))
-                        .map(({id, ...freeField}) => (
-                            this.formPanelService.createConfigFromFreeField(
-                                {id, ...freeField},
-                                freeFieldsValues[id],
-                                'freeFields',
-                                'edit'
-                            )
-                        ))
-                        .filter(Boolean) as Array<FormPanelParam>)
-                ];
-            });
+        this.refreshView();
     }
 
     public ionViewWillLeave(): void {
@@ -188,6 +80,111 @@ export class HandlingValidatePage implements ViewWillEnter, ViewWillLeave {
             this.apiSubscription.unsubscribe();
             this.apiSubscription = undefined;
         }
+    }
+
+    public refreshView() {
+        this.loadingService.presentLoadingWhile({
+            event: () => zip(
+                this.handling.statusId ? this.sqliteService.findOneBy('status', {id: this.handling.statusId}) : of(undefined),
+                this.sqliteService.findBy('handling_attachment', [`handlingId = ${this.handling.id}`]),
+                this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.HANDLING}'`]),
+                this.translationService.get(null, `Demande`, `Services`),
+            ),
+        }).subscribe(([currentStatus, handlingAttachment, freeFields, handlingsTranslations]: [Status, Array<HandlingAttachment>, Array<FreeField>, Translations]) => {
+            this.dismissLoading();
+            this.handlingsTranslations = handlingsTranslations;
+
+            this.refreshHeader(false);
+
+            let freeFieldsValues = JSON.parse(this.handling.freeFields || '{}') || {};
+
+            const sAttachmentLabel = handlingAttachment.length > 1 ? 's' : '';
+            this.detailsConfig = handlingAttachment.length > 0
+                ? [
+                    {
+                        item: FormViewerAttachmentsComponent,
+                        config: {
+                            label: `Pièce${sAttachmentLabel} jointe${sAttachmentLabel}`,
+                            value: handlingAttachment.map(({fileName, href}) => ({
+                                label: fileName,
+                                href
+                            }))
+                        }
+                    }
+                ]
+                : [];
+
+            this.bodyConfig = [
+                {
+                    item: FormPanelSelectComponent,
+                    config: {
+                        label: 'Statut',
+                        name: 'statusId',
+                        value: this.handling.statusId,
+                        inputConfig: {
+                            required: true,
+                            searchType: SelectItemTypeEnum.STATUS,
+                            requestParams: [
+                                `category = 'service'`,
+                                `state = 'treated' OR state = 'inProgress'`,
+                                `typeId = ${this.handling.typeId}`,
+                            ],
+                            filterItem: (status) => Number(status.id) !== Number(this.handling.statusId),
+                            onChange: (statusId: any) => {
+                                this.handling.statusId = statusId;
+                                this.sqliteService
+                                    .findOneBy('status', {id: statusId})
+                                    .pipe(filter(() => this.pageEnter))
+                                    .subscribe((newStatus?: Status) => {
+                                        this.updateFormConfig(newStatus);
+                                    })
+                            }
+                        },
+                        errors: {
+                            required: 'Le statut de la demande est requis',
+                        }
+                    }
+                },
+                {
+                    item: FormPanelInputComponent,
+                    config: {
+                        label: 'Commentaire',
+                        name: 'comment',
+                        inputConfig: {
+                            type: 'text',
+                            maxLength: '255',
+                            required: !currentStatus || Boolean(currentStatus.commentNeeded)
+                        },
+                        errors: {
+                            required: 'Votre commentaire est requis',
+                            maxlength: 'Votre commentaire est trop long'
+                        }
+                    }
+                },
+                {
+                    item: FormPanelCameraComponent,
+                    config: {
+                        label: 'Photo(s)',
+                        name: 'photos',
+                        inputConfig: {
+                            multiple: true
+                        }
+                    }
+                },
+
+                ...(freeFields
+                    .filter(({typeId}) => (typeId === this.handling.typeId))
+                    .map(({id, ...freeField}) => (
+                        this.formPanelService.createConfigFromFreeField(
+                            {id, ...freeField},
+                            freeFieldsValues[id],
+                            'freeFields',
+                            'edit'
+                        )
+                    ))
+                    .filter(Boolean) as Array<FormPanelParam>)
+            ];
+        });
     }
 
     public async onFormSubmit() {
@@ -246,9 +243,14 @@ export class HandlingValidatePage implements ViewWillEnter, ViewWillLeave {
                                     ).pipe(map(() => res));
                                 }
                                 else {
-                                    return this.sqliteService
-                                        .update('handling', [{values: {statusId, comment, freeFields: freeFieldValues}, where: [`id = ${this.handling.id}`]}])
-                                        .pipe(map(() => res));
+                                    return zip(
+                                        this.sqliteService.update('handling', [{values: {statusId, comment, freeFields: freeFieldValues}, where: [`id = ${this.handling.id}`]}]),
+                                        ...res.addedAttachments.map(({name, href}: any) => this.sqliteService.insert(`handling_attachment`, {
+                                            fileName: name,
+                                            href,
+                                            handlingId: this.handling.id,
+                                        }))
+                                    ).pipe(map(() => res));
                                 }
                             }
                             else {
@@ -263,6 +265,7 @@ export class HandlingValidatePage implements ViewWillEnter, ViewWillLeave {
                             this.unsubscribeApi();
                             if (success) {
                                 if (state === 'inProgress') {
+                                    this.refreshView();
                                     this.toastService.presentToast("Le changement de statut a bien été pris en compte.");
                                 } else {
                                     this.navService.pop();
