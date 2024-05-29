@@ -101,7 +101,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             valueField: 'id',
             templateIndex: 'default',
             databaseTable: 'type',
-            placeholder: 'Sélectionnez un type'
+            placeholder: 'Sélectionnez un type',
         },
         [SelectItemTypeEnum.SUPPLIER]: {
             label: 'label',

@@ -331,6 +331,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
         schema: [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
             {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'active', value: 'INTEGER'},
             {column: 'to_delete', value: 'INTEGER'}
         ]
     },
@@ -494,6 +495,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
         schema: [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
             {column: 'label', value: 'VARCHAR(255)'},
+            {column: 'active', value: 'INTEGER'},
         ]
     },
     {
@@ -505,6 +507,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'suggestedDropLocations', value: 'TEXT'},
             {column: 'suggestedPickLocations', value: 'TEXT'},
             {column: 'reusableStatuses', value: 'INTEGER'},
+            {column: 'active', value: 'INTEGER'},
         ]
     },
     {

@@ -183,6 +183,7 @@ export class DispatchNewPage implements ViewWillEnter {
                         searchType: SelectItemTypeEnum.TYPE,
                         requestParams: [
                             `category = 'acheminements'`,
+                            'active = 1',
                         ],
                         onChange: (typeId: any) => {
                             this.loadingService.presentLoadingWhile({

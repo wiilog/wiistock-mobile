@@ -142,6 +142,7 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
                         searchType: SelectItemTypeEnum.TYPE,
                         requestParams: [
                             `category = 'demande livraison'`,
+                            'active = 1',
                         ],
                     },
                     errors: {
