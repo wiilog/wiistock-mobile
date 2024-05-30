@@ -27,7 +27,7 @@ import {InventoryLocationLine} from "@entities/inventory_location_line";
 export class SqliteService {
 
     private static readonly DB_PREFIX: string = 'wiistock_db';
-    private static readonly DB_VERSION: number = 20240516; // day of the last modification 2023-07-18
+    private static readonly DB_VERSION: number = 20240530; // day of the last modification 2024-05-30
 
     private static readonly DB_NAME: string = `${SqliteService.DB_PREFIX}_${SqliteService.DB_VERSION}`;
 
