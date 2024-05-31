@@ -112,6 +112,7 @@ export class DemandeLivraisonHeaderPage implements ViewWillEnter, ViewWillLeave 
                         searchType: SelectItemTypeEnum.TYPE,
                         requestParams: [
                             `category = 'demande livraison'`,
+                            'active = 1',
                         ],
                         onChange: (typeId: any) => {
                             this.createFormBodyConfig(operator, freeFields, Number(typeId))
