@@ -90,6 +90,7 @@ export class ManualCollectArticlesPage implements ViewWillLeave, ViewWillEnter {
                         searchType: SelectItemTypeEnum.TYPE,
                         requestParams: [
                             `category = 'demande collecte'`,
+                            'active = 1',
                         ],
                     },
                     errors: {
