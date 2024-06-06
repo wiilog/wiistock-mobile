@@ -26,6 +26,7 @@ export enum StorageKeyEnum {
     RIGHT_ARTICLE_UL_ASSOCIATION = 'articleUlAssociation',
     RIGHT_HANDLING = 'handling',
     RIGHT_DELIVERY_REQUEST = 'deliveryRequest',
+    RIGHT_RECEPTION = 'reception',
 
     FORCE_GROUPED_SIGNATURE = 'forceDispatchSignature',
     PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER = 'skipValidationsManualTransfer',

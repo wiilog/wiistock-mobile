@@ -464,6 +464,11 @@ const routes: Routes = [
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/manual-collect/manual-collect-article-take/manual-collect-article-take.module').then(m => m.ManualCollectArticleTakePageModule)
     },
+    {
+        path: NavPathEnum.RECEPTION_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/reception/reception-menu/reception-menu.module').then(m => m.PreparationMenuPageModule)
+    },
 ];
 
 @NgModule({

@@ -123,7 +123,8 @@ export class MainMenuPage implements ViewWillEnter, ViewWillLeave {
                                     this.storageService.getRight(StorageKeyEnum.RIGHT_TRANSFER_ORDER),
                                     this.storageService.getRight(StorageKeyEnum.RIGHT_MANUAL_TRANSFER),
                                     this.storageService.getRight(StorageKeyEnum.RIGHT_INVENTORY),
-                                    this.storageService.getRight(StorageKeyEnum.RIGHT_ARTICLE_UL_ASSOCIATION)
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_ARTICLE_UL_ASSOCIATION),
+                                    this.storageService.getRight(StorageKeyEnum.RIGHT_RECEPTION),
                                 ]),
                                 this.displayGlobalMenu([
                                     this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
