@@ -1,7 +1,7 @@
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {IonicModule} from '@ionic/angular';
-import {PreparationMenuPageRoutingModule} from './reception-menu-routing.module';
+import {ReceptionMenuPageRoutingModule} from './reception-menu-routing.module';
 import {ReceptionMenuPage} from './reception-menu.page';
 import {CommonModule as AngularCommonModule} from '@angular/common';
 import {CommonModule} from '@common/common.module';
@@ -11,7 +11,7 @@ import {CommonModule} from '@common/common.module';
         AngularCommonModule,
         FormsModule,
         IonicModule,
-        PreparationMenuPageRoutingModule,
+        ReceptionMenuPageRoutingModule,
         CommonModule
     ],
     declarations: [ReceptionMenuPage]
