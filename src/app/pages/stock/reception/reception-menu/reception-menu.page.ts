@@ -22,13 +22,11 @@ export class ReceptionMenuPage implements ViewWillEnter {
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
-        // @ts-ignore
-        this.receptions =  this
+        this
             .apiService.requestApi(ApiService.GET_RECEPTIONS, {})
             .subscribe({
                 next: (response: { success: any; data: { expectedDate: string; }[]; }) => {
                     if (response.success){
-                        console.log(response.data);
                         this.receptionsListConfig = response.data
                             .sort((a: { expectedDate: string; }, b: { expectedDate: string; }) => moment(a.expectedDate).diff(moment(b.expectedDate)))
                             .map((reception: any ) => ({
@@ -37,31 +35,62 @@ export class ReceptionMenuPage implements ViewWillEnter {
                                     value: reception.number
                                 },
                                 content: [
-                                    {
-                                        label: 'Statut',
-                                        value: reception.status
-                                    },
-                                    {
-                                        label: 'Fournisseur',
-                                        value: reception.supplier
-                                    },
-                                    {
-                                        label: 'Numéro de commande',
-                                        value: reception.orderNumber?.join(', ')
-                                    },
-                                    {
-                                        label: 'Date attendue',
-                                        value: moment(reception.expectedDate).format('DD/MM/YYYY')
-                                    }, {
-                                        label: 'Utilisateur',
-                                        value: reception.user
-                                    }, {
-                                        label: 'Transporteur',
-                                        value: reception.carrier
-                                    }, {
-                                        label: 'Emplacement',
-                                        value: reception.location
-                                    }
+                                    ...(reception.status
+                                        ? [
+                                            {
+                                                label: 'Statut',
+                                                value:reception.status
+                                            }
+                                        ]
+                                        : []),
+                                    ...(reception.supplier
+                                        ? [
+                                            {
+                                                label: 'Fournisseur',
+                                                value:reception.supplier
+                                            }
+                                        ]
+                                        : []),
+                                    ...(reception.orderNumber && reception.orderNumber.length > 0
+                                        ? [
+                                            {
+                                                label: 'Numéro de commande',
+                                                value: reception.orderNumber?.join(', ')
+                                            }
+                                        ]
+                                        : []),
+                                    ...(reception.expectedDate
+                                        ? [
+                                            {
+                                                label: 'Date attendue',
+                                                value: moment(reception.expectedDate).format('DD/MM/YYYY')
+                                            }
+                                        ]
+                                        : []),
+                                    ...(reception.user
+                                        ? [
+                                            {
+                                                label: 'Utilisateur',
+                                                value: reception.user
+                                            }
+                                        ]
+                                        : []),
+                                    ...(reception.carrier
+                                        ? [
+                                            {
+                                                label: 'Transporteur',
+                                                value: reception.carrier
+                                            }
+                                        ]
+                                        : []),
+                                    ...(reception.location
+                                        ? [
+                                            {
+                                                label: 'Emplacement',
+                                                value: reception.location
+                                            }
+                                        ]
+                                        : []),
                                 ],
                                 ...(reception.emergency
                                     ? {
