@@ -3,5 +3,9 @@
 <div *ngIf="hasLoaded"
      scroll-y="true"
      class="page-content">
-
+    <wii-card-list *ngIf="hasLoaded"
+                   [listIconName]="receptionsIconName"
+                   [color]="receptionsListColor"
+                   [config]="receptionsListConfig">
+    </wii-card-list>
 </div>

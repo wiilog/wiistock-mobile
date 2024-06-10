@@ -93,6 +93,7 @@ export class ApiService {
     public static readonly POST_RECEIPT_ASSOCIATION = {method: POST, service: '/receipt-association'};
     public static readonly CHECK_MANUAL_COLLECT_SCAN = {method: GET, service: '/check-manual-collect-scan'};
     public static readonly FINISH_MANUAL_COLLECT = {method: POST, service: '/finish-manual-collect'};
+    public static readonly GET_RECEPTIONS = {method: GET, service: '/mobile/reception/list'};
 
 
     private static readonly DEFAULT_HEADERS = {
