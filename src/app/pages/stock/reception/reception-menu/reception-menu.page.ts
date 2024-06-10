@@ -100,9 +100,8 @@ export class ReceptionMenuPage implements ViewWillEnter {
                                         }
                                     }
                                     : {}),
-                                action: () => {
-                            }
-                        }));
+                                action: () => {}
+                            }));
                     }
                 },
                 complete: () => {

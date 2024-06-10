@@ -467,7 +467,7 @@ const routes: Routes = [
     {
         path: NavPathEnum.RECEPTION_MENU,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('@pages/stock/reception/reception-menu/reception-menu.module').then(m => m.PreparationMenuPageModule)
+        loadChildren: () => import('@pages/stock/reception/reception-menu/reception-menu.module').then(m => m.ReceptionMenuPageModule)
     },
 ];
 

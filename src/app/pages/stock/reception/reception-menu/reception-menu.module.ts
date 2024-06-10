@@ -16,5 +16,5 @@ import {CommonModule} from '@common/common.module';
     ],
     declarations: [ReceptionMenuPage]
 })
-export class PreparationMenuPageModule {
+export class ReceptionMenuPageModule {
 }
