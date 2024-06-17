@@ -1,0 +1,30 @@
+<wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
+
+<ng-container *ngIf="receptionHeaderConfig">
+    <div scroll-y="true"
+         class="page-content">
+        <wii-panel-header [leftIcon]="receptionHeaderConfig.leftIcon"
+                          [title]="receptionHeaderConfig.title"
+                          [subtitle]="receptionHeaderConfig.subtitle"
+                          [info]="receptionHeaderConfig.info"
+                          [transparent]="true"
+                          class="page-header">
+        </wii-panel-header>
+
+        <wii-list-panel *ngIf="listTreatedConfig"
+                        [header]="listTreatedConfig.header"
+                        [body]="listTreatedConfig.body"
+                        [boldValues]="listBoldValues">
+        </wii-list-panel>
+
+
+
+        <wii-list-panel *ngIf="listToTreatConfig"
+                        [header]="listToTreatConfig.header"
+                        [body]="listToTreatConfig.body"
+                        [boldValues]="listBoldValues">
+        </wii-list-panel>
+
+    </div>
+</ng-container>
+

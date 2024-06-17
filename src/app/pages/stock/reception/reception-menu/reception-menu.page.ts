@@ -5,6 +5,8 @@ import {CardListColorEnum} from "@common/components/card-list/card-list-color.en
 import * as moment from 'moment';
 import {ApiService} from "@app/services/api.service";
 import {MainHeaderService} from "@app/services/main-header.service";
+import {NavPathEnum} from "@app/services/nav/nav-path.enum";
+import {NavService} from "@app/services/nav/nav.service";
 
 @Component({
     selector: 'wii-reception-menu',
@@ -20,23 +22,21 @@ export class ReceptionMenuPage implements ViewWillEnter {
 
 
     public constructor(private apiService: ApiService,
+                       private navService: NavService,
                        private mainHeaderService: MainHeaderService) {}
+
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
         this
             .apiService.requestApi(ApiService.GET_RECEPTIONS, {})
             .subscribe({
-                next: (response: { success: any; data: { expectedDate: string; }[]; }) => {
+                next: (response: { success: any; data: { expectedDate: {date: string; }; }[]; }) => {
                     if (response.success){
                         this.receptionsListConfig = response.data
-                            .sort((a: { expectedDate: string; }, b: { expectedDate: string; }) => moment(a.expectedDate).diff(moment(b.expectedDate)))
-                            .map((reception: any ) => ({
-                                title: {
-                                    label: 'Réception',
-                                    value: reception.number
-                                },
-                                content: [
+                            .sort((a: { expectedDate: { date: string; }; }, b: { expectedDate: { date: string; }; }) => moment(a.expectedDate?.date, 'YYYY-MM-DD HH:mm:ss.SSSSSS').diff(moment(b.expectedDate?.date, 'YYYY-MM-DD HH:mm:ss.SSSSSS')))
+                            .map((reception: any ) => {
+                                const content: Array<{ label: string; value: string; }> = [
                                     {
                                         label: 'Statut',
                                         value:reception.status
@@ -51,7 +51,9 @@ export class ReceptionMenuPage implements ViewWillEnter {
                                     },
                                     {
                                         label: 'Date attendue',
-                                        value: moment(reception.expectedDate).format('DD/MM/YYYY')
+                                        value: reception.expectedDate
+                                            ? moment(reception.expectedDate.date, 'YYYY-MM-DD HH:mm:ss.SSSSSS').format('DD/MM/YYYY')
+                                            : '',
                                     },
                                     {
                                         label: 'Utilisateur',
@@ -65,17 +67,33 @@ export class ReceptionMenuPage implements ViewWillEnter {
                                         label: 'Emplacement',
                                         value: reception.location
                                     },
-                                ].filter((item) => item && item.value),
-                                ...(reception.emergency
-                                    ? {
-                                        rightIcon: {
-                                            name: 'exclamation-triangle.svg',
-                                            color: 'danger'
-                                        }
+                                    {
+                                        label: 'Emplacement de stockage',
+                                        value: reception.storageLocation
                                     }
-                                    : {}),
-                                action: () => {}
-                            }));
+                                ].filter((item) => item && item.value);
+                                return ({
+                                    title: {
+                                        label: 'Réception',
+                                        value: reception.number
+                                    },
+                                    content: content,
+                                    ...(reception.emergency
+                                        ? {
+                                            rightIcon: {
+                                                name: 'exclamation-triangle.svg',
+                                                color: 'danger'
+                                            }
+                                        }
+                                        : {}),
+                                    action: () => {
+                                        this.navService.push(NavPathEnum.RECEPTION_DETAILS, {
+                                            reception,
+                                            content,
+                                        })
+                                    }
+                                });
+                            });
                     }
                 },
                 complete: () => {

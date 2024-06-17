@@ -468,6 +468,12 @@ const routes: Routes = [
         path: NavPathEnum.RECEPTION_MENU,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/reception/reception-menu/reception-menu.module').then(m => m.ReceptionMenuPageModule)
+
+    },
+    {
+        path: NavPathEnum.RECEPTION_DETAILS,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/reception/reception-details/reception-details.module').then(m => m.ReceptionDetailsPageModule)
     },
 ];
 
