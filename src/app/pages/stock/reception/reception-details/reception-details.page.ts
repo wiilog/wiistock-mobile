@@ -176,7 +176,7 @@ export class ReceptionDetailsPage implements ViewWillEnter {
                         this.listTreatedConfig = {
                             header: {
                                 title: 'Collecté',
-                                info: `${listTreatedConfigBody.length} références${listTreatedConfigBody.length > 0 ? 's' : ''}`,
+                                info: `${listTreatedConfigBody.length} référence${listTreatedConfigBody.length > 0 ? 's' : ''}`,
                                 leftIcon: {
                                     name: 'upload.svg',
                                     color: 'list-pink',
