@@ -1,16 +1,13 @@
 import {Component, ViewChild} from '@angular/core';
 import {ViewWillEnter} from "@ionic/angular";
-import {CardListConfig} from "@common/components/card-list/card-list-config";
-import {CardListColorEnum} from "@common/components/card-list/card-list-color.enum";
 import * as moment from 'moment';
 import {ApiService} from "@app/services/api.service";
 import {NavService} from "@app/services/nav/nav.service";
-import {IconConfig} from "@common/components/panel/model/icon-config";
 import {HeaderConfig} from "@common/components/panel/model/header-config";
 import {ListPanelItemConfig} from "@common/components/panel/model/list-panel/list-panel-item-config";
 import {IconColor} from "@common/components/icon/icon-color";
-import {ArticleCollecte} from "@entities/article-collecte";
 import {FormPanelComponent} from "@common/components/panel/form-panel/form-panel.component";
+import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
 
 @Component({
     selector: 'wii-reception-details',
@@ -20,6 +17,7 @@ import {FormPanelComponent} from "@common/components/panel/form-panel/form-panel
 export class ReceptionDetailsPage implements ViewWillEnter {
     public hasLoaded: boolean;
     public receptionHeaderConfig: HeaderConfig;
+    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.TOOL_SEARCH;
 
     public reception: {
         id: number,
@@ -32,7 +30,9 @@ export class ReceptionDetailsPage implements ViewWillEnter {
         comment: string,
         carrier: string,
         user: string,
-        orderDate: string,
+        orderDate: {
+            date: string,
+        },
         storageLocation: string
     };
 
@@ -58,12 +58,15 @@ export class ReceptionDetailsPage implements ViewWillEnter {
         this.receptionContent.push(
             {
                 label: 'Date de commande',
-                value: this.reception.orderDate,
+                value: this.reception.orderDate
+                    ? moment(this.reception.orderDate.date, 'YYYY-MM-DD HH:mm:ss.SSSSSS').format('DD/MM/YYYY')
+                    : '',
             },{
                 label: 'Commentaire',
                 value: this.reception.comment,
             }
         );
+        this.receptionContent.filter((item) => item && (item.value && item.value.length > 0 ));
 
 
         this.receptionHeaderConfig = {
@@ -113,6 +116,7 @@ export class ReceptionDetailsPage implements ViewWillEnter {
                                             reference: {
                                                 label: 'Référence',
                                                 value: reference.reference,
+                                                emergency: reference.emergency,
                                             },
                                             quantityToReceive: {
                                                 label: 'Quantité attendue',
@@ -124,8 +128,8 @@ export class ReceptionDetailsPage implements ViewWillEnter {
                                             name: 'up.svg',
                                             action: () => {
                                                 console.log('click ') // TODO
-                                            }
-                                        }
+                                            },
+                                        },
                                     });
                                 }
                                 if(reference.receivedQuantity > 0){
@@ -134,6 +138,7 @@ export class ReceptionDetailsPage implements ViewWillEnter {
                                             reference: {
                                                 label: 'Référence',
                                                 value: reference.reference,
+                                                emergency: reference.emergency,
                                             },
                                             quantityToReceive: {
                                                 label: 'Quantité attendue',
@@ -142,15 +147,15 @@ export class ReceptionDetailsPage implements ViewWillEnter {
                                             receivedQuantity: {
                                                 label: 'Quantité reçue',
                                                 value: reference.receivedQuantity.toString(),
-                                            }
+                                            },
                                         },
                                         rightIcon: {
                                             color: 'danger' as IconColor,
                                             name: 'trash.svg',
                                             action: () => {
                                                 console.log('click trash') // TODO
-                                            }
-                                        }
+                                            },
+                                        },
                                     });
                                 }
                             });
@@ -162,10 +167,10 @@ export class ReceptionDetailsPage implements ViewWillEnter {
                                 info: `${listToTreatConfigBody.length} références${listToTreatConfigBody.length > 0 ? 's' : ''}`,
                                 leftIcon: {
                                     name: 'download.svg',
-                                    color: 'list-orange-light' // TODO CHANGE COLOR
+                                    color: 'list-pink-light',
                                 },
                             },
-                            body: listToTreatConfigBody
+                            body: listToTreatConfigBody,
                         }
 
                         this.listTreatedConfig = {
@@ -174,10 +179,10 @@ export class ReceptionDetailsPage implements ViewWillEnter {
                                 info: `${listTreatedConfigBody.length} références${listTreatedConfigBody.length > 0 ? 's' : ''}`,
                                 leftIcon: {
                                     name: 'upload.svg',
-                                    color: 'list-orange' // TODO CHANGE COLOR
-                                }
+                                    color: 'list-pink',
+                                },
                             },
-                            body: listTreatedConfigBody
+                            body: listTreatedConfigBody,
                         };
                     }
                 },
@@ -185,4 +190,10 @@ export class ReceptionDetailsPage implements ViewWillEnter {
 
         this.hasLoaded = true;
     }
+
+    public validate(): void {
+        console.log('validate') // TODO
+    }
+
+    protected readonly console = console;
 }

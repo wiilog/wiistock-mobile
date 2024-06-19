@@ -52,6 +52,7 @@ $list-orange-light: #FF9F68;
 $list-yellow: #F4B400;
 $list-yellow-light: #F8D266;
 $list-pink: #FD6C9E;
+$list-pink-light: #FFA7C6;
 
 $list-colors: (
     "list-blue": $list-blue,
@@ -63,6 +64,7 @@ $list-colors: (
     "list-green": $list-green,
     "list-green-light": $list-green-light,
     "list-pink": $list-pink,
+    "list-pink-light": $list-pink-light,
 );
 
 $colors: map-merge(
