@@ -16,7 +16,6 @@ import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode
 })
 export class ReceptionDetailsPage implements ViewWillEnter {
     public hasLoaded: boolean;
-    public receptionHeaderConfig: HeaderConfig;
     public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.TOOL_SEARCH;
 
     public reception: {
@@ -45,6 +44,8 @@ export class ReceptionDetailsPage implements ViewWillEnter {
 
     private receptionContent: Array<{ label: string; value: string; }> = [];
 
+    public receptionHeaderConfig: HeaderConfig;
+
     public constructor(private apiService: ApiService,
                        private navService: NavService) {}
 
@@ -66,14 +67,8 @@ export class ReceptionDetailsPage implements ViewWillEnter {
                 value: this.reception.comment,
             }
         );
-        this.receptionContent.filter((item) => item && (item.value && item.value.length > 0 ));
 
-
-        this.receptionHeaderConfig = {
-            leftIcon: {name: 'reception.svg'},
-            title: `Reception ${this.reception.number}`,
-            subtitle:  this.receptionContent.map((content: { label: string; value: string; }) => `${content.label}: ${content.value}`),
-        };
+        this.refreshHeader(false);
 
         this
             .apiService.requestApi(ApiService.GET_RECEPTION_LINES, {
@@ -120,18 +115,19 @@ export class ReceptionDetailsPage implements ViewWillEnter {
                                             },
                                             quantityToReceive: {
                                                 label: 'Quantité attendue',
-                                                value: remainingQuantityToReceive.toString(),
+                                                value: `${remainingQuantityToReceive}`,
                                             },
                                         },
                                         rightIcon: {
                                             color: 'grey' as IconColor,
                                             name: 'up.svg',
                                             action: () => {
-                                                console.log('click ') // TODO
+                                                console.log('click '); // TODO
                                             },
                                         },
                                     });
                                 }
+
                                 if(reference.receivedQuantity > 0){
                                     listTreatedConfigBody.push({
                                         infos: {
@@ -142,18 +138,18 @@ export class ReceptionDetailsPage implements ViewWillEnter {
                                             },
                                             quantityToReceive: {
                                                 label: 'Quantité attendue',
-                                                value: reference.quantityToReceive.toString(),
+                                                value: `${reference.quantityToReceive}`,
                                             },
                                             receivedQuantity: {
                                                 label: 'Quantité reçue',
-                                                value: reference.receivedQuantity.toString(),
+                                                value: `${reference.receivedQuantity}`,
                                             },
                                         },
                                         rightIcon: {
                                             color: 'danger' as IconColor,
                                             name: 'trash.svg',
                                             action: () => {
-                                                console.log('click trash') // TODO
+                                                console.log('click trash'); // TODO
                                             },
                                         },
                                     });
@@ -164,7 +160,7 @@ export class ReceptionDetailsPage implements ViewWillEnter {
                         this.listToTreatConfig = {
                             header: {
                                 title: 'A Réceptionner',
-                                info: `${listToTreatConfigBody.length} références${listToTreatConfigBody.length > 0 ? 's' : ''}`,
+                                info: `${listToTreatConfigBody.length} référence${listToTreatConfigBody.length > 1 ? 's' : ''}`,
                                 leftIcon: {
                                     name: 'download.svg',
                                     color: 'list-pink-light',
@@ -176,7 +172,7 @@ export class ReceptionDetailsPage implements ViewWillEnter {
                         this.listTreatedConfig = {
                             header: {
                                 title: 'Collecté',
-                                info: `${listTreatedConfigBody.length} référence${listTreatedConfigBody.length > 0 ? 's' : ''}`,
+                                info: `${listTreatedConfigBody.length} référence${listTreatedConfigBody.length > 1 ? 's' : ''}`,
                                 leftIcon: {
                                     name: 'upload.svg',
                                     color: 'list-pink',
@@ -191,8 +187,37 @@ export class ReceptionDetailsPage implements ViewWillEnter {
         this.hasLoaded = true;
     }
 
+    public refreshHeader(opened: boolean){
+        this.receptionHeaderConfig = {
+            title: `Reception ${this.reception.number}`,
+            collapsed: true,
+            onToggle: (opened) => {
+                this.refreshHeader(opened);
+            },
+            leftIcon: {
+                name: 'reception.svg',
+            },
+            rightIcon: {
+                name: opened ? 'double-arrow-up.svg' : 'double-arrow-down.svg',
+                color: 'dark',
+                width: '26px',
+                action: () => {
+                    this.formPanelComponent.formHeaderComponent.toggleTitle();
+                }
+            },
+            subtitle: [
+                ...this.receptionContent.map((content: { label: string; value: string; }) => `${content.label}: ${content.value}`),
+                `Date de commande : ${this.reception.orderDate ? moment(this.reception.orderDate.date, 'YYYY-MM-DD HH:mm:ss.SSSSSS').format('DD/MM/YYYY') : ''}`,
+                `Commentaire : ${this.reception.comment || ''}`,
+            ].filter((item) => item) as Array<string>
+        };
+    }
     public validate(): void {
         console.log('validate') // TODO
+    }
+
+    public testIfBarcodeEquals(text: string): void {
+        console.log('testIfBarcodeEquals'); // TODO
     }
 
     protected readonly console = console;

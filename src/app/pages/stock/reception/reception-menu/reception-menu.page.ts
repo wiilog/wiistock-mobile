@@ -39,11 +39,11 @@ export class ReceptionMenuPage implements ViewWillEnter {
                                 const content: Array<{ label: string; value: string; }> = [
                                     {
                                         label: 'Statut',
-                                        value:reception.status
+                                        value: reception.status
                                     },
                                     {
                                         label: 'Fournisseur',
-                                        value:reception.supplier
+                                        value: reception.supplier
                                     },
                                     {
                                         label: 'Numéro de commande',

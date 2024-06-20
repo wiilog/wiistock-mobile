@@ -3,13 +3,10 @@
 <ng-container *ngIf="receptionHeaderConfig">
     <div scroll-y="true"
          class="page-content">
-        <wii-panel-header [leftIcon]="receptionHeaderConfig.leftIcon"
-                          [title]="receptionHeaderConfig.title"
-                          [subtitle]="receptionHeaderConfig.subtitle"
-                          [info]="receptionHeaderConfig.info"
-                          [transparent]="true"
-                          class="page-header">
-        </wii-panel-header>
+        <wii-form-panel *ngIf="receptionHeaderConfig"
+                        #formPanelComponent
+                        [header]="receptionHeaderConfig">
+        </wii-form-panel>
 
         <wii-list-panel *ngIf="listTreatedConfig"
                         [header]="listTreatedConfig.header"
@@ -29,8 +26,8 @@
             <wii-barcode-scanner #footerScannerComponent
                                  [hidden]="!listToTreatConfig || listToTreatConfig.body.length === 0"
                                  [mode]="scannerMode"
-                                 (scanAdd)="console.log('1') //testIfBarcodeEquals($event)"
-                                 (cameraAdd)="console.log('1') //testIfBarcodeEquals($event)">
+                                 (scanAdd)="testIfBarcodeEquals($event)"
+                                 (cameraAdd)="testIfBarcodeEquals($event)">
             </wii-barcode-scanner>
         </div>
     </div>
