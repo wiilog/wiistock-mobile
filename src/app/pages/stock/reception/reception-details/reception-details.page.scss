@@ -1,0 +1,13 @@
+.barcode-scanner {
+    backdrop-filter: blur(10px);
+    mask: linear-gradient(to bottom, transparent, black 35%);
+    position: sticky;
+    padding-bottom: 10px;
+    padding-top: 5px;
+    bottom: 0;
+    height: max-content;
+
+    wii-barcode-scanner {
+        margin-bottom: 0;
+    }
+}

@@ -29,12 +29,14 @@
 
         .header-title {
             text-align: center;
+            display: flex;
             .logo {
                 display: inline-block;
                 max-width: 80px;
-                padding: 3px
+                padding: 3px;
             }
             .user {
+                align-self: center;
                 font-size: 15px;
                 text-align: center;
                 font-weight: bold;

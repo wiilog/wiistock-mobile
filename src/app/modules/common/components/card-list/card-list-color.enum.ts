@@ -5,4 +5,5 @@ export enum CardListColorEnum {
     ORANGE = 'list-orange',
     YELLOW = 'list-yellow',
     TERTIARY = 'tertiary',
+    PINK = 'list-pink',
 }

@@ -70,10 +70,21 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
                 this.storageService.getRight(StorageKeyEnum.RIGHT_MANUAL_TRANSFER),
                 this.storageService.getRight(StorageKeyEnum.RIGHT_INVENTORY),
                 this.storageService.getRight(StorageKeyEnum.RIGHT_ARTICLE_UL_ASSOCIATION),
+                this.storageService.getRight(StorageKeyEnum.RIGHT_RECEPTION),
                 this.translationService.get(null, `Ordre`, `Livraison`)
             )
-        }).subscribe(([hasRightDisplayCreateArticleButton, preparation, deliveryOrder, manualDelivery, collectOrder, manualCollect, transferOrder, manualTransfer, inventory, articleUlAssociation, deliveryOrderTranslations]) => {
+        }).subscribe(([hasRightDisplayCreateArticleButton, preparation, deliveryOrder, manualDelivery, collectOrder, manualCollect, transferOrder, manualTransfer, inventory, articleUlAssociation, reception, deliveryOrderTranslations]) => {
             this.deliveryOrderTranslation = TranslationService.Translate(deliveryOrderTranslations, 'Livraison');
+
+            if(reception){
+                this.menuConfig.push({
+                    icon: 'reception.svg',
+                    label: 'Réception',
+                    action: () => {
+                        this.navService.push(NavPathEnum.RECEPTION_MENU);
+                    }
+                });
+            }
 
             if(preparation){
                 this.menuConfig.push({

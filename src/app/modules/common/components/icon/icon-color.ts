@@ -20,4 +20,6 @@ export type IconColor = 'primary'
                       | 'list-yellow-light'
                       | 'list-green'
                       | 'list-green-light'
-                      | 'purple';
+                      | 'purple'
+                      | 'list-pink'
+                      | 'list-pink-light';
