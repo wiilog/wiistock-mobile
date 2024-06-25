@@ -475,6 +475,11 @@ const routes: Routes = [
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/reception/reception-details/reception-details.module').then(m => m.ReceptionDetailsPageModule)
     },
+    {
+        path: NavPathEnum.RECEPTION_REFERENCE_TAKE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/reception/reception-reference-take/reception-reference-take.module').then(m => m.ReceptionReferenceTakePageModule)
+    },
 ];
 
 @NgModule({
