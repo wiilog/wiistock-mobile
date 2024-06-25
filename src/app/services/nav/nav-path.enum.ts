@@ -93,4 +93,5 @@ export enum NavPathEnum {
     RECEIPT_ASSOCIATION_LOGISTIC_UNIT = 'receipt-association-logistic-unit',
     RECEPTION_MENU = 'reception-menu',
     RECEPTION_DETAILS = 'reception-details',
+    RECEPTION_REFERENCE_TAKE = 'reception-reference-take',
 }

@@ -21,18 +21,16 @@
                         [body]="listToTreatConfig.body"
                         [boldValues]="listBoldValues">
         </wii-list-panel>
-
-        <div class="barcode-scanner">
-            <wii-barcode-scanner #footerScannerComponent
-                                 [hidden]="!listToTreatConfig || listToTreatConfig.body.length === 0"
-                                 [mode]="scannerMode"
-                                 (scanAdd)="testIfBarcodeEquals($event)"
-                                 (cameraAdd)="testIfBarcodeEquals($event)">
-            </wii-barcode-scanner>
-        </div>
     </div>
 
     <div class="page-footer">
+        <wii-barcode-scanner #footerScannerComponent
+                             (manualAdd)="testIfBarcodeEquals($event)"
+                             (scanAdd)="testIfBarcodeEquals($event)"
+                             (cameraAdd)="testIfBarcodeEquals($event)"
+                             [mode]="barcodeScannerMode">
+        </wii-barcode-scanner>
+
         <ion-button *ngIf="listTreatedConfig && listTreatedConfig.body.length > 0"
                     class="submit-button"
                     color="primary"

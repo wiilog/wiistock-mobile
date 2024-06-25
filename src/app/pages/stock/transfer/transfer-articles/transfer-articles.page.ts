@@ -158,7 +158,7 @@ export class TransferArticlesPage implements ViewWillEnter, ViewWillLeave {
         const pickedArticlesPlural = pickedArticlesNumber > 1 ? 's' : '';
         this.listToTreatConfig = {
             header: {
-                title: 'À tranférer',
+                title: 'À transférer',
                 info: `${pickedArticlesNumber} article${pickedArticlesPlural} à scanner`,
                 leftIcon: {
                     name: 'download.svg',
