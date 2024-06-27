@@ -9,7 +9,8 @@
 </div>
 
 <div class="page-footer persisted-page-footer">
-    <wii-barcode-scanner [mode]="scannerMode"
+    <wii-barcode-scanner #footerScannerComponent
+                         [mode]="scannerMode"
                          (manualAdd)="onRFIDTagScanned($event)"
                          (scanAdd)="onRFIDTagScanned($event)">
     </wii-barcode-scanner>

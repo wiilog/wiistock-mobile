@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {ApiService} from '@app/services/api.service';
 import {ToastService} from '@app/services/toast.service';
 import {LoadingService} from '@app/services/loading.service';
@@ -12,6 +12,7 @@ import {RfidManagerService} from "@app/services/rfid-manager.service";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {map} from "rxjs/operators";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
+import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcode-scanner.component";
 
 
 @Component({
@@ -24,6 +25,9 @@ export class ScanRfidTagPage implements ViewWillEnter, ViewWillLeave {
     private static readonly SCANNER_RFID_DELAY: number = 10000; // 10 seconds
 
     public readonly scannerMode = BarcodeScannerModeEnum.ONLY_MANUAL;
+
+    @ViewChild('footerScannerComponent', {static: false})
+    public footerScannerComponent: BarcodeScannerComponent;
 
     public loading: boolean = false;
     public alreadyLoaded: boolean = false;
@@ -61,6 +65,7 @@ export class ScanRfidTagPage implements ViewWillEnter, ViewWillLeave {
         }).subscribe({
             next: ([rfidPrefix]) => {
                 this.rfidPrefix = rfidPrefix || '';
+                this.footerScannerComponent?.fireZebraScan();
                 this.initRfidEvents();
                 this.loading = false;
                 this.alreadyLoaded = true;
@@ -76,6 +81,7 @@ export class ScanRfidTagPage implements ViewWillEnter, ViewWillLeave {
 
     public ionViewWillLeave(): void {
         this.rfidManager.removeEventListeners();
+        this.footerScannerComponent?.unsubscribeZebraScan();
     }
 
     private initRfidEvents(): void {

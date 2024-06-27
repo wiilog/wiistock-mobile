@@ -93,6 +93,7 @@ export class FormPage implements ViewWillEnter, ViewWillLeave {
     public ionViewWillEnter(): void {
         this.bodyConfig = [];
         this.rfidTag = this.navService.param<string>('rfidTag');
+        this.footerScannerComponent?.fireZebraScan();
 
         this.headerConfig = {
             leftIcon: {
@@ -120,9 +121,7 @@ export class FormPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public ionViewWillLeave(): void {
-        if (this.footerScannerComponent) {
-            this.footerScannerComponent.unsubscribeZebraScan();
-        }
+        this.footerScannerComponent?.unsubscribeZebraScan();
     }
 
     public initForm(): void {
