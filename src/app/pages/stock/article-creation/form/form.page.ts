@@ -432,8 +432,7 @@ export class FormPage implements ViewWillEnter, ViewWillLeave {
                         restrictedLocations,
                         scanMode: BarcodeScannerModeEnum.ONLY_SCAN,
                         customAction: () => {
-                            this.navService.pop()
-                                .subscribe(() => this.createArticle(params));
+                            this.createArticle(params);
                         },
                     });
                 } else {
