@@ -97,8 +97,8 @@ export class ApiService {
     public static readonly POST_RECEIPT_ASSOCIATION = {method: POST, service: `${ApiService.MOBILE_API_URL_BASE}/receipt-association`};
     public static readonly CHECK_MANUAL_COLLECT_SCAN = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/check-manual-collect-scan`};
     public static readonly FINISH_MANUAL_COLLECT = {method: POST, service: `${ApiService.MOBILE_API_URL_BASE}/finish-manual-collect`};
-    public static readonly GET_RECEPTIONS = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/mobile/reception/list`};
-    public static readonly GET_RECEPTION_LINES = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/mobile/reception-line/list/{reception}`};
+    public static readonly GET_RECEPTIONS = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/receptions`};
+    public static readonly GET_RECEPTION_LINES = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/receptions/{reception}/lines`};
 
 
     private static readonly DEFAULT_HEADERS = {

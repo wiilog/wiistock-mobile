@@ -1,9 +1,6 @@
-<wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
-
-<div *ngIf="hasLoaded"
-     scroll-y="true"
+<div scroll-y="true"
      class="page-content">
-    <wii-card-list *ngIf="hasLoaded"
+    <wii-card-list *ngIf="hasLoaded && receptionsListConfig"
                    [listIconName]="receptionsIconName"
                    [color]="receptionsListColor"
                    [config]="receptionsListConfig">

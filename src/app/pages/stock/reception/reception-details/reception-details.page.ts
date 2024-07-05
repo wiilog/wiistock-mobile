@@ -1,5 +1,4 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import * as moment from 'moment';
 import {ApiService} from "@app/services/api.service";
 import {NavService} from "@app/services/nav/nav.service";
 import {HeaderConfig} from "@common/components/panel/model/header-config";
@@ -11,6 +10,10 @@ import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {ReceptionReferenceArticle} from "@entities/reception-reference-article";
 import {ToastService} from "@app/services/toast.service";
 import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcode-scanner.component";
+import {LoadingService} from "@app/services/loading.service";
+import {ReceptionService} from "@app/services/reception.service";
+import {Reception} from "@entities/reception";
+
 
 @Component({
     selector: 'wii-reception-details',
@@ -21,25 +24,10 @@ export class ReceptionDetailsPage implements OnInit {
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
 
-    public hasLoaded: boolean;
     public readonly barcodeScannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.INVISIBLE;
 
-    public reception: {
-        id: number,
-        number: string,
-        status: string,
-        supplier: string,
-        orderNumber: Array<string>,
-        expectedDate: string,
-        location: string,
-        comment: string,
-        carrier: string,
-        user: string,
-        orderDate: {
-            date: string,
-        },
-        storageLocation: string
-    };
+    private reception: Reception;
+    private receptionReferenceArticles: Array<ReceptionReferenceArticle> = [];
 
     @ViewChild('formPanelComponent', {static: false})
     public formPanelComponent: FormPanelComponent;
@@ -48,74 +36,82 @@ export class ReceptionDetailsPage implements OnInit {
     public listTreatedConfig?: { header: HeaderConfig; body: Array<ListPanelItemConfig>; };
     public listBoldValues?: Array<string>;
 
-    public listToTreatConfigBody: Array<ListPanelItemConfig> = [];
-    public listTreatedConfigBody: Array<ListPanelItemConfig> = [];
-
-    private receptionContent: Array<{ label: string; value: string; }> = [];
-
     public receptionHeaderConfig: HeaderConfig;
 
-    public started: boolean = false;
-
-    public receptionReferenceArticles: Array<ReceptionReferenceArticle> = [];
-    public constructor(private apiService:   ApiService,
+    public constructor(private apiService: ApiService,
+                       private receptionService: ReceptionService,
+                       private loadingService: LoadingService,
                        private toastService: ToastService,
-                       private navService:   NavService) {}
+                       private navService: NavService) {
+    }
 
     public ngOnInit(): void {
-        this.hasLoaded = false;
         this.reception = this.navService.param('reception');
-        this.receptionContent = this.navService.param('content');
 
         this.listBoldValues = ['reference', 'quantityToReceive', 'receivedQuantity'];
 
         this.refreshHeader(false);
 
-        this
-            .apiService.requestApi(ApiService.GET_RECEPTION_LINES, {
-                pathParams: {
-                    reception: this.reception.id
-                }
-            })
+        this.loadingService.presentLoadingWhile({
+            event: () => (
+                this.apiService
+                    .requestApi(ApiService.GET_RECEPTION_LINES, {
+                        pathParams: {
+                            reception: this.reception.id
+                        }
+                    })
+            )
+        })
             .subscribe({
                 next: (response: {
                     success: any;
-                    data: {
-                        total: number;
-                        data: Array<{
-                            id: number;
-                            pack: number;
-                            references: Array<ReceptionReferenceArticle>;
-                        }>
-                    }
+                    total: number;
+                    data: Array<{
+                        id: number;
+                        pack: number;
+                        references: Array<ReceptionReferenceArticle>;
+                    }>;
                 }) => {
                     if (response.success) {
-                        this.listToTreatConfigBody = [];
-                        this.listTreatedConfigBody = [];
-                        response.data.data?.forEach((line) => {
-                            this.receptionReferenceArticles = line.references;
-                            line.references?.forEach((reference) => {
-                                this.updateViewLists(reference);
-                            });
-                        });
+                        this.receptionReferenceArticles = response.data
+                            ?.flatMap(({references}) => references)
+                            ?.map(({receivedQuantity, quantityToReceive, ...reference}) => ({
+                                ...reference,
+                                quantityToReceive,
+                                receivedQuantity,
+                                remainingQuantity: (quantityToReceive - (receivedQuantity || 0)),
+                            })) || [];
 
-                        if (this.listTreatedConfigBody.length > 0) {
-                            this.started = true;
-                        }
-
-                        this.updateListsCounter();
+                        this.updateViewLists();
                     }
-                    this.hasLoaded = true;
+
+                    if (this.footerScannerComponent) {
+                        this.footerScannerComponent.fireZebraScan();
+                    }
                 },
             });
 
-        if (this.footerScannerComponent) {
-            this.footerScannerComponent.fireZebraScan();
-        }
     }
 
 
     public refreshHeader(opened: boolean){
+        const serializedReception = this.receptionService.serializeReception(this.reception);
+        const receptionContent = Object.entries(serializedReception)
+            .filter(([key, item]) => {
+                let textValue;
+                if (key === 'comment' && item?.value) {
+                    // strip html tags
+                    const div = document.createElement('div');
+                    div.innerHTML = item?.value;
+                    textValue = div.textContent;
+                }
+                else {
+                    textValue = item?.value?.trim();
+                }
+                return textValue;
+            })
+            .map(([_, {label, value}]) => `${label}: ${value}`);
+
         this.receptionHeaderConfig = {
             title: `Reception ${this.reception.number}`,
             collapsed: true,
@@ -133,38 +129,50 @@ export class ReceptionDetailsPage implements OnInit {
                     this.formPanelComponent.formHeaderComponent.toggleTitle();
                 }
             },
-            subtitle: [
-                ...this.receptionContent.map((content: { label: string; value: string; }) => `${content.label}: ${content.value}`),
-                `Date de commande : ${this.reception.orderDate ? moment(this.reception.orderDate.date, 'YYYY-MM-DD HH:mm:ss.SSSSSS').format('DD/MM/YYYY') : ''}`,
-                `Commentaire : ${this.reception.comment || ''}`,
-            ].filter((item) => item) as Array<string>
+            subtitle: receptionContent
         };
     }
     public validate(): void {
         console.log('validate') // TODO
     }
 
-    public testIfBarcodeEquals(text: string): void {
-        const selectedLineTake = this.receptionReferenceArticles.findIndex((reference) => reference.barCode === text);
+    public testIfBarcodeEquals(scanned: string): void {
+        const selectedLineTake = this.receptionReferenceArticles.findIndex((reference) => reference.barCode === scanned);
 
-        if(selectedLineTake === -1){
-            this.toastService.presentToast('Le code barre scanné ne correspond à aucune référence présente dans cette réception.');
-        } else {
+        if(selectedLineTake > -1) {
             this.takeReferenceArticleQuantity(this.receptionReferenceArticles[selectedLineTake]);
         }
-
+        else {
+            this.toastService.presentToast('Le code barre scanné ne correspond à aucune référence présente dans cette réception.');
+        }
     }
 
-    public updateViewLists(reference: ReceptionReferenceArticle): void{
-        this.toTreatList(reference);
-        this.treatedList(reference);
+    public updateViewLists(): void {
+        this.updateToTreatList(this.receptionReferenceArticles.filter(({remainingQuantity}) => (remainingQuantity > 0)));
+        this.updateTreatedList(this.receptionReferenceArticles.filter(({receivedQuantity}) => (receivedQuantity > 0)));
     }
 
 
-    public toTreatList(reference: ReceptionReferenceArticle): void{
-        const remainingQuantityToReceive: number = reference.quantityToReceive - (reference.receivedQuantity || 0);
-        if(remainingQuantityToReceive > 0) {
-            this.listToTreatConfigBody.push({
+    public updateToTreatList(toTreatReferences: Array<ReceptionReferenceArticle>): void {
+        this.listToTreatConfig = {
+            header: {
+                title: 'A Réceptionner',
+                info: `${toTreatReferences.length} référence${toTreatReferences.length > 1 ? 's' : ''}`,
+                leftIcon: {
+                    name: 'download.svg',
+                    color: 'list-pink-light',
+                },
+                rightIcon: [
+                    {
+                        color: 'primary',
+                        name: 'scan-photo.svg',
+                        action: () => {
+                            this.footerScannerComponent.scan();
+                        }
+                    },
+                ]
+            },
+            body: toTreatReferences.map((reference) => ({
                 infos: {
                     reference: {
                         label: 'Référence',
@@ -173,7 +181,7 @@ export class ReceptionDetailsPage implements OnInit {
                     },
                     quantityToReceive: {
                         label: 'Quantité attendue',
-                        value: `${remainingQuantityToReceive}`,
+                        value: `${reference.remainingQuantity || 0}`,
                     },
                 },
                 rightIcon: {
@@ -183,15 +191,21 @@ export class ReceptionDetailsPage implements OnInit {
                         this.takeReferenceArticleQuantity(reference);
                     },
                 },
-            });
-        } else {
-            this.moveReference(reference, this.listToTreatConfigBody);
-        }
+            })),
+        };
     }
 
-    public treatedList(reference: ReceptionReferenceArticle): void{
-        if(reference.receivedQuantity > 0){
-            this.listTreatedConfigBody.push({
+    public updateTreatedList(treatedReferences: Array<ReceptionReferenceArticle>): void {
+        this.listTreatedConfig = {
+            header: {
+                title: 'Réceptionné',
+                info: `${treatedReferences.length} référence${treatedReferences.length > 1 ? 's' : ''}`,
+                leftIcon: {
+                    name: 'upload.svg',
+                    color: 'list-pink',
+                },
+            },
+            body: treatedReferences.map((reference) => ({
                 infos: {
                     reference: {
                         label: 'Référence',
@@ -211,71 +225,28 @@ export class ReceptionDetailsPage implements OnInit {
                     color: 'danger' as IconColor,
                     name: 'trash.svg',
                     action: () => {
-                        reference.receivedQuantity = 0;
-                        this.updateViewLists(reference);
-                        this.updateListsCounter();
+                        this.removeTreatedReferences(reference);
+                        this.updateViewLists();
                     },
                 },
-            });
-        } else {
-            this.moveReference(reference, this.listTreatedConfigBody);
-        }
-    }
-
-    public moveReference(reference: ReceptionReferenceArticle, listToUpdate: Array<ListPanelItemConfig>): void{
-        const selectedLinesToDelete = listToUpdate.findIndex((line) => line?.infos?.reference?.value === reference.reference);
-        listToUpdate.splice(selectedLinesToDelete, 1);
-    }
-
-
-    public updateListsCounter(): void {
-        this.listToTreatConfig = {
-            header: {
-                title: 'A Réceptionner',
-                info: `${this.listToTreatConfigBody.length} référence${this.listToTreatConfigBody.length > 1 ? 's' : ''}`,
-                leftIcon: {
-                    name: 'download.svg',
-                    color: 'list-pink-light',
-                },
-                rightIcon: [
-                    {
-                        color: 'primary',
-                        name: 'scan-photo.svg',
-                        action: () => {
-                            this.footerScannerComponent.scan();
-                        }
-                    },
-                ]
-            },
-            body: this.listToTreatConfigBody,
-        }
-
-        this.listTreatedConfig = {
-            header: {
-                title: 'Collecté',
-                info: `${this.listTreatedConfigBody.length} référence${this.listTreatedConfigBody.length > 1 ? 's' : ''}`,
-                leftIcon: {
-                    name: 'upload.svg',
-                    color: 'list-pink',
-                },
-            },
-            body: this.listTreatedConfigBody,
+            })),
         };
+    }
+
+    private removeTreatedReferences(reference: ReceptionReferenceArticle): void {
+        reference.receivedQuantity = 0;
+        reference.remainingQuantity = reference.quantityToReceive;
     }
 
     public takeReferenceArticleQuantity(reference: ReceptionReferenceArticle){
         //TODO faire ce traitement uniquement si reference scannée est dans la liste A Receptionner
         this.navService.push(NavPathEnum.RECEPTION_REFERENCE_TAKE, {
             reference,
-            started: this.started,
             selectReference: (selectedQuantity: number) => {
                 reference.receivedQuantity = selectedQuantity;
-                this.moveReference(reference, this.listToTreatConfigBody);
-                this.updateViewLists(reference);
-                this.updateListsCounter();
+                reference.remainingQuantity = (reference.quantityToReceive - reference.receivedQuantity);
+                this.updateViewLists();
             },
         });
     }
-
-    protected readonly console = console;
 }

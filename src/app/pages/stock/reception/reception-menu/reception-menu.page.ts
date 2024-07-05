@@ -7,6 +7,10 @@ import {ApiService} from "@app/services/api.service";
 import {MainHeaderService} from "@app/services/main-header.service";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {NavService} from "@app/services/nav/nav.service";
+import {LoadingService} from "@app/services/loading.service";
+import {Reception} from "@entities/reception";
+import {ReceptionService} from "@app/services/reception.service";
+import {Livraison} from "@entities/livraison";
 
 @Component({
     selector: 'wii-reception-menu',
@@ -23,84 +27,72 @@ export class ReceptionMenuPage implements ViewWillEnter {
 
     public constructor(private apiService: ApiService,
                        private navService: NavService,
+                       private receptionService: ReceptionService,
+                       private loadingService: LoadingService,
                        private mainHeaderService: MainHeaderService) {}
 
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
-        this
-            .apiService.requestApi(ApiService.GET_RECEPTIONS, {})
+
+        this.loadingService.presentLoadingWhile({
+            event: () => this.apiService.requestApi(ApiService.GET_RECEPTIONS)
+        })
             .subscribe({
-                next: (response: { success: any; data: { expectedDate: {date: string; }; }[]; }) => {
+                next: (response: { success: boolean; data: Array<Reception>; }) => {
+                    this.hasLoaded = true;
                     if (response.success){
-                        this.receptionsListConfig = response.data
-                            .sort((a: { expectedDate: { date: string; }; }, b: { expectedDate: { date: string; }; }) => moment(a.expectedDate?.date, 'YYYY-MM-DD HH:mm:ss.SSSSSS').diff(moment(b.expectedDate?.date, 'YYYY-MM-DD HH:mm:ss.SSSSSS')))
-                            .map((reception: any ) => {
-                                const content: Array<{ label: string; value: string; }> = [
-                                    {
-                                        label: 'Statut',
-                                        value: reception.status
-                                    },
-                                    {
-                                        label: 'Fournisseur',
-                                        value: reception.supplier
-                                    },
-                                    {
-                                        label: 'Numéro de commande',
-                                        value: reception.orderNumber?.join(', ')
-                                    },
-                                    {
-                                        label: 'Date attendue',
-                                        value: reception.expectedDate
-                                            ? moment(reception.expectedDate.date, 'YYYY-MM-DD HH:mm:ss.SSSSSS').format('DD/MM/YYYY')
-                                            : '',
-                                    },
-                                    {
-                                        label: 'Utilisateur',
-                                        value: reception.user
-                                    },
-                                    {
-                                        label: 'Transporteur',
-                                        value: reception.carrier
-                                    },
-                                    {
-                                        label: 'Emplacement',
-                                        value: reception.location
-                                    },
-                                    {
-                                        label: 'Emplacement de stockage',
-                                        value: reception.storageLocation
-                                    }
-                                ].filter((item) => item && item.value);
-                                return ({
-                                    title: {
-                                        label: 'Réception',
-                                        value: reception.number
-                                    },
-                                    content: content,
-                                    ...(reception.emergency
-                                        ? {
-                                            rightIcon: {
-                                                name: 'exclamation-triangle.svg',
-                                                color: 'danger'
-                                            }
-                                        }
-                                        : {}),
-                                    action: () => {
-                                        this.navService.push(NavPathEnum.RECEPTION_DETAILS, {
-                                            reception,
-                                            content,
-                                        })
-                                    }
-                                });
-                            });
+                        this.updateViewList(response.data);
+
+                        const receptionsLength: number = this.receptionsListConfig.length;
+                        this.mainHeaderService.emitSubTitle(`${receptionsLength === 0 ? 'Aucune' : receptionsLength} réception${receptionsLength > 1 ? 's' : ''}`);
                     }
                 },
-                complete: () => {
+                error: () => {
                     this.hasLoaded = true;
-                    const receptionsLength: number = this.receptionsListConfig.length;
-                    this.mainHeaderService.emitSubTitle(`${receptionsLength === 0 ? 'Aucune' : receptionsLength} Reception${receptionsLength > 1 ? 's' : ''}`);
+                    this.updateViewList([]);
                 }
             });
+    }
+
+    public updateViewList(receptions: Array<Reception>) {
+        this.receptionsListConfig = receptions
+            .sort((reception1, reception2) => (
+                moment(reception1.expectedDate?.date, 'YYYY-MM-DD HH:mm:ss.SSSSSS').diff(
+                    moment(reception2.expectedDate?.date, 'YYYY-MM-DD HH:mm:ss.SSSSSS')
+                )
+            ))
+            .map((reception: any ) => {
+                const serializedReception = this.receptionService.serializeReception(reception);
+                const content = Object.entries(serializedReception)
+                    .filter(([key, item]) => (
+                        ['status', 'supplier', 'orderNumber', 'expectedDate', 'user', 'carrier', 'location', 'storageLocation'].includes(key)
+                        && item?.value
+                    ))
+                    .map(([_, item]) => item);
+                return ({
+                    title: {
+                        label: 'Réception',
+                        value: reception.number
+                    },
+                    content,
+                    ...(reception.emergency
+                        ? {
+                            rightIcon: {
+                                name: 'exclamation-triangle.svg',
+                                color: 'danger'
+                            }
+                        }
+                        : {}),
+                    action: () => {
+                        this.navService.push(NavPathEnum.RECEPTION_DETAILS, {
+                            reception,
+                        })
+                    }
+                });
+            });
+
+        const length = receptions.length;
+        this.mainHeaderService.emitSubTitle(`${length === 0 ? 'Aucune' : length} réception${length > 1 ? 's' : ''}`)
     }
 }
