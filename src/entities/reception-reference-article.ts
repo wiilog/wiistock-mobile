@@ -4,6 +4,7 @@ export interface ReceptionReferenceArticle {
     emergency: boolean;
     id: number;
     orderNumber: string;
+    remainingQuantity: number;
     quantityToReceive: number;
     receivedQuantity: number;
     reference: string;

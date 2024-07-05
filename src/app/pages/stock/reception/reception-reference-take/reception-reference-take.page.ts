@@ -36,28 +36,29 @@ export class ReceptionReferenceTakePage implements ViewWillEnter {
                 ...(this.refArticle ? [{label: 'Référence', value: this.refArticle.reference}] : []),
                 {label: 'Libellé', value: this.refArticle.label || ''},
                 {label: 'Code barre référence', value: `${this.refArticle.barCode}`},
+                {label: 'Quantité attendue restante', value: `${this.refArticle.remainingQuantity}`},
             ],
             fields: [
                 {
                     label: 'Quantité réceptionnée',
                     name: 'quantity',
                     type: 'number',
-                    value: this.refArticle.receivedQuantity,
+                    value: this.refArticle.remainingQuantity,
                 }
             ]
         }
     }
 
-    public addArticle(data: any): void {
-        const {quantity} = data;
-        const maxQuantityAvailable = this.refArticle.quantityToReceive;
-
-        if (!quantity || (quantity > maxQuantityAvailable) || quantity <= 0) {
+    public addArticle({quantity}: {quantity?: string}): void {
+        const selectedQuantity = Number(quantity);
+        if (!selectedQuantity
+            || (selectedQuantity > this.refArticle.remainingQuantity)
+            || selectedQuantity <= 0) {
             this.toastService.presentToast('Veuillez sélectionner une quantité valide.');
         }
         else {
             this.navService.pop({path: NavPathEnum.RECEPTION_DETAILS}).subscribe(() => {
-                this.selectReference(quantity);
+                this.selectReference(selectedQuantity);
             });
         }
     }
