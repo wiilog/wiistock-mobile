@@ -79,6 +79,7 @@ export class StockMenuPage implements ViewWillEnter, ViewWillLeave {
             if(reception){
                 this.menuConfig.push({
                     icon: 'reception.svg',
+                    iconColor: 'list-pink',
                     label: 'Réception',
                     action: () => {
                         this.navService.push(NavPathEnum.RECEPTION_MENU);
