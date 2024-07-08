@@ -239,13 +239,18 @@ export class ReceptionDetailsPage implements OnInit {
     }
 
     public takeReferenceArticleQuantity(reference: ReceptionReferenceArticle){
-        //TODO faire ce traitement uniquement si reference scannée est dans la liste A Receptionner
         this.navService.push(NavPathEnum.RECEPTION_REFERENCE_TAKE, {
             reference,
             selectReference: (selectedQuantity: number) => {
-                reference.receivedQuantity = selectedQuantity;
-                reference.remainingQuantity = (reference.quantityToReceive - reference.receivedQuantity);
-                this.updateViewLists();
+                const newReceivedQuantity = (reference.receivedQuantity || 0) + selectedQuantity;
+                if (newReceivedQuantity <= reference.quantityToReceive) {
+                    reference.receivedQuantity = selectedQuantity;
+                    reference.remainingQuantity = (reference.quantityToReceive - newReceivedQuantity);
+                    this.updateViewLists();
+                }
+                else {
+                    this.toastService.presentToast(`La quantité attendue pour cette référence est de ${reference.quantityToReceive}`);
+                }
             },
         });
     }
