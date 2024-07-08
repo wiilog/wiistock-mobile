@@ -6,7 +6,7 @@ git clone git@github.com:wiilog/wiistock-mobile.git
 ```
 ## Keystore
 * Copier le fichier `android/app/keystore.properties.dist` -> `android/app/keystore.properties`
-* Modifier le fichier créer en les deux valeurs pour les passwords `DEV // APK mobile keystore password`
+* Modifier les deux mots de passe du fichier keystore.properties par la valeur contenue dans : `DEV // APK mobile keystore password` ***(trouvable dans notre gestionnaire de mot de passe)***
 * Décrypter le fichier `android/app/keystore.jks.asc` avec la commande ***(KEYSTORE_JKS_PASSPHRASE est trouvable dans notre gestionnaire de mot de passe)***
 ```sh
 touch android/app/keystore.jks && gpg -d --passphrase KEYSTORE_JKS_PASSPHRASE --batch android/app/keystore.jks.asc > android/app/keystore.jks
