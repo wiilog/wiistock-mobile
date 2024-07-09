@@ -13,6 +13,7 @@ import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcod
 import {LoadingService} from "@app/services/loading.service";
 import {ReceptionService} from "@app/services/reception.service";
 import {Reception} from "@entities/reception";
+import {AlertService} from "@app/services/alert.service";
 
 
 @Component({
@@ -42,7 +43,8 @@ export class ReceptionDetailsPage implements OnInit {
                        private receptionService: ReceptionService,
                        private loadingService: LoadingService,
                        private toastService: ToastService,
-                       private navService: NavService) {
+                       private navService: NavService,
+                       private alertService: AlertService) {
     }
 
     public ngOnInit(): void {
@@ -132,26 +134,76 @@ export class ReceptionDetailsPage implements OnInit {
             subtitle: receptionContent
         };
     }
+
     public validate(): void {
-        console.log('validate') // TODO
+        const isPartialModal = this.receptionReferenceArticles.some(({remainingQuantity}) => (remainingQuantity > 0));
+
+        const handleConfirmation = () => {
+            this.loadingService.presentLoadingWhile({
+                event: () => this.apiService
+                    .requestApi(ApiService.POST_RECEPTIONS, {
+                        params: {
+                            receptionId: this.reception.id,
+                            receptionReferenceArticles: this.treatedLines,
+                        }
+                    }),
+            }).subscribe(
+                {
+                    next: (data) => {
+                        if (data.success) {
+                            this.navService.pop();
+                        } else {
+                            this.toastService.presentToast(data.msg || 'Une erreur est survenue lors de la validation de la réception.');
+                        }
+                    },
+                }
+            )
+        };
+
+        if (isPartialModal) {
+            this.alertService.show({
+                header: `Vous êtes sur le point de faire une réception partielle, souhaitez-vous continuer ?`,
+                backdropDismiss: false,
+                buttons: [
+                    {
+                        text: 'Annuler',
+                        role: 'cancel',
+                    },
+                    {
+                        text: 'Confirmer',
+                        handler: handleConfirmation,
+                        cssClass: 'alert-success'
+                    }
+                ]
+            });
+        } else {
+            handleConfirmation();
+        }
     }
+
 
     public testIfBarcodeEquals(scanned: string): void {
         const selectedLineTake = this.receptionReferenceArticles.findIndex((reference) => reference.barCode === scanned);
 
-        if(selectedLineTake > -1) {
+        if (selectedLineTake > -1) {
             this.takeReferenceArticleQuantity(this.receptionReferenceArticles[selectedLineTake]);
-        }
-        else {
+        } else {
             this.toastService.presentToast('Le code barre scanné ne correspond à aucune référence présente dans cette réception.');
         }
     }
 
     public updateViewLists(): void {
-        this.updateToTreatList(this.receptionReferenceArticles.filter(({remainingQuantity}) => (remainingQuantity > 0)));
-        this.updateTreatedList(this.receptionReferenceArticles.filter(({receivedQuantity}) => (receivedQuantity > 0)));
+        this.updateToTreatList(this.toTreatLines);
+        this.updateTreatedList(this.treatedLines);
     }
 
+    private get treatedLines(): Array<ReceptionReferenceArticle> {
+        return this.receptionReferenceArticles.filter(({receivedQuantity}) => (receivedQuantity > 0));
+    }
+
+    private get toTreatLines(): Array<ReceptionReferenceArticle> {
+        return this.receptionReferenceArticles.filter(({remainingQuantity}) => (remainingQuantity > 0));
+    }
 
     public updateToTreatList(toTreatReferences: Array<ReceptionReferenceArticle>): void {
         this.listToTreatConfig = {
