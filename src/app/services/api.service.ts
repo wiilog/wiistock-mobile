@@ -12,6 +12,7 @@ import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 const GET = 'get';
 const POST = 'post';
 const DELETE = 'delete';
+const PATCH = 'patch';
 
 @Injectable({
     providedIn: 'root'
@@ -99,7 +100,7 @@ export class ApiService {
     public static readonly FINISH_MANUAL_COLLECT = {method: POST, service: `${ApiService.MOBILE_API_URL_BASE}/finish-manual-collect`};
     public static readonly GET_RECEPTIONS = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/receptions`};
     public static readonly GET_RECEPTION_LINES = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/receptions/{reception}/lines`};
-    public static readonly POST_RECEPTIONS = {method: POST, service: `${ApiService.MOBILE_API_URL_BASE}/receptions`};
+    public static readonly PATCH_RECEPTIONS = {method: PATCH, service: `${ApiService.MOBILE_API_URL_BASE}/receptions/{reception}`};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'
