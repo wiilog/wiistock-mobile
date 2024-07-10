@@ -141,10 +141,12 @@ export class ReceptionDetailsPage implements OnInit {
         const handleConfirmation = () => {
             this.loadingService.presentLoadingWhile({
                 event: () => this.apiService
-                    .requestApi(ApiService.POST_RECEPTIONS, {
+                    .requestApi(ApiService.PATCH_RECEPTIONS, {
                         params: {
-                            receptionId: this.reception.id,
                             receptionReferenceArticles: this.treatedLines,
+                        },
+                        pathParams: {
+                            reception: this.reception.id,
                         }
                     }),
             }).subscribe(
@@ -153,7 +155,7 @@ export class ReceptionDetailsPage implements OnInit {
                         if (data.success) {
                             this.navService.pop();
                         } else {
-                            this.toastService.presentToast(data.msg || 'Une erreur est survenue lors de la validation de la réception.');
+                            this.toastService.presentToast(data.message || 'Une erreur est survenue lors de la validation de la réception.');
                         }
                     },
                 }
