@@ -290,6 +290,7 @@ export class ReceptionDetailsPage implements OnInit {
     private removeTreatedReferences(reference: ReceptionReferenceArticle): void {
         reference.receivedQuantity = 0;
         reference.remainingQuantity = reference.quantityToReceive;
+
     }
 
     public takeReferenceArticleQuantity(reference: ReceptionReferenceArticle){
@@ -298,7 +299,7 @@ export class ReceptionDetailsPage implements OnInit {
             selectReference: (selectedQuantity: number) => {
                 const newReceivedQuantity = (reference.receivedQuantity || 0) + selectedQuantity;
                 if (newReceivedQuantity <= reference.quantityToReceive) {
-                    reference.receivedQuantity = selectedQuantity;
+                    reference.receivedQuantity = newReceivedQuantity;
                     reference.remainingQuantity = (reference.quantityToReceive - newReceivedQuantity);
                     this.updateViewLists();
                 }
