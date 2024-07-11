@@ -4,16 +4,21 @@ import {HeaderConfig} from '@common/components/panel/model/header-config';
 import {Emplacement} from '@entities/emplacement';
 import {ToastService} from '@app/services/toast.service';
 import {NavService} from '@app/services/nav/nav.service';
-import {ActivatedRoute} from '@angular/router';
 import {SelectItemTypeEnum} from '@common/components/select-item/select-item-type.enum';
 import {FreeField, FreeFieldType} from '@entities/free-field';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {FormPanelService} from '@app/services/form-panel.service';
 import {FormPanelParam} from '@common/directives/form-panel/form-panel-param';
 import {FormPanelInputComponent} from '@common/components/panel/form-panel/form-panel-input/form-panel-input.component';
-import {FormPanelSelectComponent} from '@common/components/panel/form-panel/form-panel-select/form-panel-select.component';
-import {FormPanelSigningComponent} from '@common/components/panel/form-panel/form-panel-signing/form-panel-signing.component';
-import {FormPanelCameraComponent} from '@common/components/panel/form-panel/form-panel-camera/form-panel-camera.component';
+import {
+    FormPanelSelectComponent
+} from '@common/components/panel/form-panel/form-panel-select/form-panel-select.component';
+import {
+    FormPanelSigningComponent
+} from '@common/components/panel/form-panel/form-panel-signing/form-panel-signing.component';
+import {
+    FormPanelCameraComponent
+} from '@common/components/panel/form-panel/form-panel-camera/form-panel-camera.component';
 import {Nature} from '@entities/nature';
 import {zip} from 'rxjs';
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
@@ -21,6 +26,9 @@ import {IconColor} from '@common/components/icon/icon-color';
 import {ListPanelItemConfig} from '@common/components/panel/model/list-panel/list-panel-item-config';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {ViewWillEnter} from "@ionic/angular";
+import {Translations} from "@entities/translation";
+import {TranslationService} from "@app/services/translations.service";
+import {LoadingService} from "@app/services/loading.service";
 
 enum Page {
     EDIT,
@@ -55,9 +63,17 @@ export class MovementConfirmPage implements ViewWillEnter {
     public readonly Page = Page;
     public currentPage: Page = Page.EDIT;
 
-    private savedNatureId: string|null;
+    private savedNatureId: string | null;
     private location: Emplacement;
-    private validate: (values: {quantity: string; comment: string; signature: string; photo: string; natureId: number, freeFields: string, subPacks?: any}) => void;
+    private validate: (values: {
+        quantity: string;
+        comment: string;
+        signature: string;
+        photo: string;
+        natureId: number,
+        freeFields: string,
+        subPacks?: any
+    }) => void;
 
     public isGroup: boolean;
     public subPacks: Array<MouvementTraca>;
@@ -67,10 +83,11 @@ export class MovementConfirmPage implements ViewWillEnter {
     public movementType: MovementConfirmType;
     private group?: any;
 
-    public constructor(private activatedRoute: ActivatedRoute,
-                       private toastService: ToastService,
+    public constructor(private toastService: ToastService,
                        private sqliteService: SqliteService,
                        private formPanelService: FormPanelService,
+                       private translationService: TranslationService,
+                       private loadingService: LoadingService,
                        private navService: NavService) {
         this.savedNatureId = null;
         this.subPacksConfig = [];
@@ -87,7 +104,14 @@ export class MovementConfirmPage implements ViewWillEnter {
 
         const barCode = this.navService.param('barCode');
         const fromStock = this.navService.param('fromStock');
-        const {quantity, comment, signature, photo, natureId, freeFields: freeFieldsValuesStr} = this.navService.param('values');
+        const {
+            quantity,
+            comment,
+            signature,
+            photo,
+            natureId,
+            freeFields: freeFieldsValuesStr
+        } = this.navService.param('values');
         const freeFieldsValues = freeFieldsValuesStr ? JSON.parse(freeFieldsValuesStr) : {};
         const chosenIcon = MovementConfirmPage.PageIcon[this.movementType];
         const chosenTitle = MovementConfirmPage.PageTitle[this.movementType];
@@ -105,11 +129,16 @@ export class MovementConfirmPage implements ViewWillEnter {
             }
         };
 
-        zip(
-            this.sqliteService.findAll('nature'),
-            this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.TRACKING}'`])
-        )
-            .subscribe(([natures, freeFields]: [Array<Nature>, Array<FreeField>]) => {
+        this.loadingService
+            .presentLoadingWhile({
+                event: () => zip(
+                    this.sqliteService.findAll('nature'),
+                    this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.TRACKING}'`]),
+                    this.translationService.get(null, `Traçabilité`, `Général`),
+                ),
+                message: 'Chargement...'
+            })
+            .subscribe(([natures, freeFields, natureTranslation]: [Array<Nature>, Array<FreeField>, Translations]) => {
                 const needsToShowNatures = natures.filter(nature => nature.hide !== 1).length > 0;
 
                 this.natureIdToNature = natures.reduce((acc, nature) => ({
@@ -117,12 +146,14 @@ export class MovementConfirmPage implements ViewWillEnter {
                     [Number(nature.id)]: nature
                 }), {})
 
+                this.natureTranslationLabel = natureTranslation.Nature;
 
                 const selectedNature = (needsToShowNatures && natureId)
                     ? this.natureIdToNature[Number(natureId)]
                     : null;
                 this.savedNatureId = selectedNature ? String(selectedNature.id) : null;
                 this.bodyConfig = [];
+
                 if (selectedNature) {
                     this.bodyConfig.push({
                         item: FormPanelInputComponent,
