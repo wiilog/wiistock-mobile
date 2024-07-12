@@ -1,12 +1,11 @@
 import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
-import {Observable, of, Subscription, zip} from 'rxjs';
+import {Observable, of, zip} from 'rxjs';
 import {NavService} from '@app/services/nav/nav.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {LoadingService} from '@app/services/loading.service';
 import {filter, map, mergeMap, tap} from 'rxjs/operators';
 import {Dispatch} from '@entities/dispatch';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
-import {MainHeaderService} from '@app/services/main-header.service';
 import {IconConfig} from '@common/components/panel/model/icon-config';
 import {DispatchPack} from '@entities/dispatch-pack';
 import {HeaderConfig} from '@common/components/panel/model/header-config';
@@ -20,7 +19,6 @@ import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {TranslationService} from "@app/services/translations.service";
 import {ApiService} from "@app/services/api.service";
-import {FileService} from "@app/services/file.service";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {StorageService} from "@app/services/storage/storage.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
@@ -78,9 +76,6 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
     private natureIdsToLabels: {[natureId: number]: string};
     private natureTranslations: Translations;
 
-    private loadingSubscription?: Subscription;
-    private loadingElement?: HTMLIonLoadingElement;
-
     private fieldParams: {
         displayCarrierTrackingNumber: Array<string>,
         needsCarrierTrackingNumber: Array<string>,
@@ -119,11 +114,9 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
-                       private mainHeaderService: MainHeaderService,
                        private toastService: ToastService,
                        private translationService: TranslationService,
                        private apiService: ApiService,
-                       private fileService: FileService,
                        private changeDetectorRef: ChangeDetectorRef,
                        private storage: StorageService,
                        private storageService: StorageService,
@@ -142,16 +135,13 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
 
         if (!this.packsToTreatListConfig || !this.packsTreatedListConfig) {
             this.loading = true;
-            this.unsubscribeLoading();
             const localDispatchId = this.navService.param('localDispatchId');
             const dispatchId = this.navService.param('dispatchId');
 
-            this.loadingSubscription = (this.loadingService.presentLoading()
-                .pipe(
-                    tap((loader) => {
-                        this.loadingElement = loader;
-                    }),
-                    mergeMap(() => zip(
+            this.loadingService.presentLoadingWhile({
+                event: () => of(undefined)
+                    .pipe(
+                        mergeMap(() => zip(
                             localDispatchId
                                 ? this.sqliteService.findOneBy('dispatch', {localId: localDispatchId})
                                 : this.sqliteService.findOneBy('dispatch', {id: dispatchId}),
@@ -183,28 +173,35 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
 
                                 this.storageService.getItem('acheminements.receiver.displayedCreate'),
                                 this.storageService.getItem('acheminements.receiver.requiredCreate'),
-                            ),
-                        ).pipe(
-                            mergeMap((data) => this.sqliteService
-                                .findBy('status', [`category = 'acheminement'`, `state = 'partial'`, `typeId = ${data[0].typeId}`])
-                                .pipe(map((partialStatuses) => ([
-                                    ...data,
-                                    partialStatuses
-                                ])))),
-                            mergeMap((data) => (
-                                data[1].length > 0
-                                    ? this.sqliteService
-                                        .findBy('dispatch_reference', [`localDispatchPackId IN (${data[1].map(({localId}: DispatchPack) => localId).join(',')})`])
-                                        .pipe(map((dispatchReferences) => ([
-                                            ...data,
-                                            dispatchReferences
-                                        ])))
-                                    : of([...data, []])
-                            ))
-                        )
-                    ),
-                    filter(([dispatch]) => Boolean(dispatch))
-                ) as Observable<[Dispatch, Array<DispatchPack>, any, Array<Nature>, Translations, boolean, string, Array<any>, Array<any>, Array<DispatchReference>]>)
+                            )
+                        )),
+                        tap(([dispatch]) => {
+                            if (!dispatch) {
+                                this.navService.pop({path: NavPathEnum.DISPATCH_MENU});
+                                this.toastService.presentToast(`Vous n'avez pas accès à cet acheminement`);
+                                throw new Error("Invalid dispatch id");
+                            }
+                        }),
+                        mergeMap(([dispatch, ...data]) => this.sqliteService
+                            .findBy('status', [`category = 'acheminement'`, `state = 'partial'`, `typeId = ${dispatch.typeId}`])
+                            .pipe(map((partialStatuses) => ([
+                                dispatch,
+                                ...data,
+                                partialStatuses
+                            ])))),
+                        mergeMap((data) => (
+                            data[1].length > 0
+                                ? this.sqliteService
+                                    .findBy('dispatch_reference', [`localDispatchPackId IN (${data[1].map(({localId}: DispatchPack) => localId).join(',')})`])
+                                    .pipe(map((dispatchReferences) => ([
+                                        ...data,
+                                        dispatchReferences
+                                    ])))
+                                : of([...data, []])
+                        )),
+                        filter(([dispatch]) => Boolean(dispatch))
+                    )
+            })
                 .subscribe(([dispatch, packs, dispatchWaybill, natures, natureTranslations, dispatchOfflineMode, waybillDefaultData, fieldParams, partialStatuses, dispatchReferences]) => {
                     const [
                         displayCarrierTrackingNumber,
@@ -246,17 +243,17 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
 
                     this.dispatchOfflineMode = dispatchOfflineMode;
                     this.typeHasNoPartialStatuses = partialStatuses.length === 0;
-                    this.natureIdsToColors = natures.reduce((acc, {id, color}) => ({
+                    this.natureIdsToColors = natures.reduce((acc: {[id: number]: string}, {id, color}: Nature) => ({
                         ...acc,
                         [Number(id)]: color
                     }), {});
-                    this.natureIdsToLabels = natures.reduce((acc, {id, label}) => ({
+                    this.natureIdsToLabels = natures.reduce((acc: {[id: number]: string}, {id, label}: Nature) => ({
                         ...acc,
                         [Number(id)]: label
                     }), {});
                     this.natureTranslations = natureTranslations;
                     this.dispatchReferences = dispatchReferences;
-                    this.dispatchPacks = packs.map((pack) => ({
+                    this.dispatchPacks = packs.map((pack: DispatchPack) => ({
                         ...pack,
                         treated: !this.fromCreate ? 0 : 1,
                     }));
@@ -268,7 +265,6 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                     this.refreshListTreatedConfig();
                     this.refreshHeaderPanelConfigFromDispatch();
 
-                    this.unsubscribeLoading();
                     this.loading = false;
                     if (this.footerScannerComponent) {
                         this.footerScannerComponent.fireZebraScan();
@@ -284,7 +280,6 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
     }
 
     public ionViewWillLeave(): void {
-        this.unsubscribeLoading();
         if (this.footerScannerComponent) {
             this.footerScannerComponent.unsubscribeZebraScan();
         }
@@ -315,18 +310,6 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
             else {
                 this.toastService.presentToast(`Ce colis n'est pas dans cet acheminement.`);
             }
-        }
-    }
-
-    private unsubscribeLoading(): void {
-        if (this.loadingSubscription) {
-            this.loadingSubscription.unsubscribe();
-            this.loadingSubscription = undefined;
-        }
-
-        if (this.loadingElement) {
-            this.loadingElement.dismiss();
-            this.loadingElement = undefined;
         }
     }
 
