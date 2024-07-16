@@ -399,7 +399,11 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     }
 
     private dropAll() {
-        this.colisPrise.filter(({hidden}) => !hidden).forEach(({ref_article}) => this.testColisDepose(ref_article, true));
+        this.colisPrise
+            .filter(({hidden}) => !hidden)
+            .forEach(({ref_article}) => {
+                this.testColisDepose(ref_article, true)
+            });
     }
 
     private refreshDeposeListComponent(): void {
