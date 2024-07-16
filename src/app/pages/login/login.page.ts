@@ -207,11 +207,15 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
             take(1),
             filter(Boolean),
             mergeMap((operator) => zip(
-                this.apiService.requestApi(ApiService.GET_PREVIOUS_OPERATOR_MOVEMENTS, {params: {operator}}),
+                this.apiService.requestApi(ApiService.GET_PREVIOUS_OPERATOR_MOVEMENTS, {
+                    pathParams: {
+                        user: operator
+                    }
+                }),
                 this.sqliteService.findBy('mouvement_traca', [`type LIKE 'prise'`, `finished = 0`])
             ))
         ).subscribe(([apiData, localData]) => {
-            this.pendingDropTrackingMovements = apiData.movements.length > 0 || localData.length > 0;
+            this.pendingDropTrackingMovements = apiData.counter > 0 || localData.length > 0;
         });
     }
 

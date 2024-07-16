@@ -39,7 +39,7 @@ export class ApiService {
     public static readonly POST_STOCK_MOVEMENTS = {method: POST, service: `${ApiService.MOBILE_API_URL_BASE}/stock-movements`};
     public static readonly POST_HANDLING = {method: POST, service: `${ApiService.MOBILE_API_URL_BASE}/handlings`};
     public static readonly GET_DATA = {method: POST, service: `${ApiService.MOBILE_API_URL_BASE}/getData`};
-    public static readonly GET_PREVIOUS_OPERATOR_MOVEMENTS = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/previous-operator-movements`};
+    public static readonly GET_PREVIOUS_OPERATOR_MOVEMENTS = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/users/{user}/previous-picking-counter`};
     public static readonly NEW_EMP = {method: POST, service: `${ApiService.MOBILE_API_URL_BASE}/emplacement`};
     public static readonly GET_ARTICLES = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/articles`};
     public static readonly DROP_IN_LU = {method: POST, service: `${ApiService.MOBILE_API_URL_BASE}/drop-in-lu`};
