@@ -598,7 +598,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                         })
                         .pipe(
                             mergeMap(({nature, group, isPack, isGroup, location, existing}) => (
-                                nature
+                                nature && !this.natureIdsToConfig[nature.id]
                                     ? this.sqliteService.importNaturesData({natures: [nature]}, false)
                                         .pipe(
                                             map(() => ({nature, group, isPack, isGroup, location, existing}))
@@ -639,6 +639,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                         ]
                                     });
                                 } else {
+                                    console.log("ON PASSE ICI ", {isGroup, isPack, barCode, group, nature})
                                     this.processLogisticUnitTaking(isGroup, isPack, barCode, group, nature)
                                 }
                             },
