@@ -99,7 +99,6 @@ export class MovementConfirmPage implements ViewWillEnter {
         this.validate = this.navService.param('validate');
         this.isGroup = this.navService.param('isGroup');
         this.subPacks = this.navService.param('subPacks');
-        this.natureTranslationLabel = this.navService.param('natureTranslationLabel');
         this.movementType = this.navService.param('movementType');
 
         const barCode = this.navService.param('barCode');
@@ -146,7 +145,7 @@ export class MovementConfirmPage implements ViewWillEnter {
                     [Number(nature.id)]: nature
                 }), {})
 
-                this.natureTranslationLabel = natureTranslation.Nature;
+                this.natureTranslationLabel = TranslationService.Translate(natureTranslation, 'Nature');
 
                 const selectedNature = (needsToShowNatures && natureId)
                     ? this.natureIdToNature[Number(natureId)]
