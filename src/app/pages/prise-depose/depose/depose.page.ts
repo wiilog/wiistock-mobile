@@ -443,7 +443,6 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                     this.updatePicking(barCode, values);
                                 },
                                 movementType: MovementConfirmType.DROP,
-                                natureTranslationLabel: natureLabel
                             });
                         }
                     }

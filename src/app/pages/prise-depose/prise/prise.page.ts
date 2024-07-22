@@ -395,7 +395,6 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                     this.updatePicking(barCode, values);
                                 },
                                 movementType: MovementConfirmType.TAKE,
-                                natureTranslationLabel: natureLabel,
                             });
                         }
                     }
