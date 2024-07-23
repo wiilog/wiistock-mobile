@@ -1,46 +1,48 @@
 <div class="simple-form-wrapper">
-    <div *ngIf="iconInfo" class="simple-form-icon-container">
-        <wii-icon class="simple-form-title-icon"
-                  [name]="iconInfo.name"
-                  [color]="iconInfo.color"
-                  [customColor]="iconInfo.customColor">
-        </wii-icon>
-    </div>
-    <div class="simple-form-title" *ngIf="title">{{ title }}</div>
+    <div>
+        <div *ngIf="iconInfo" class="simple-form-icon-container">
+            <wii-icon class="simple-form-title-icon"
+                      [name]="iconInfo.name"
+                      [color]="iconInfo.color"
+                      [customColor]="iconInfo.customColor">
+            </wii-icon>
+        </div>
+        <div class="simple-form-title" *ngIf="title">{{ title }}</div>
 
-    <div scroll-y="true" class="simple-form-content">
-        <div class="simple-form-content-wrapper">
-            <div class="simple-form-info"
-                 *ngIf="info && info.length > 0">
-                <div class="simple-form-info-item" *ngFor="let infoConfig of info">
-                    {{ infoConfig.label }} : <span class="simple-form-info-item-value">{{ infoConfig.value }}</span>
+        <div scroll-y="true" class="simple-form-content">
+            <div class="simple-form-content-wrapper">
+                <div class="simple-form-info"
+                     *ngIf="info && info.length > 0">
+                    <div class="simple-form-info-item" *ngFor="let infoConfig of info">
+                        {{ infoConfig.label }} : <span class="simple-form-info-item-value">{{ infoConfig.value }}</span>
+                    </div>
                 </div>
-            </div>
 
-            <ng-container *ngFor="let fieldConfig of fields">
-                <div *ngIf="fieldConfig.displayValidate"
-                     class="simple-form-item-wrapper">
-                    <ng-container *ngTemplateOutlet="ionItem; context: fieldConfig"></ng-container>
-                    <wii-icon name="check.svg"
-                              color="success"
-                              class="validate-icon"
-                              (action)="onFormSubmit()">
-                    </wii-icon>
-                </div>
-                <ng-container *ngIf="!fieldConfig.displayValidate">
-                    <ng-container *ngTemplateOutlet="ionItem; context: fieldConfig"></ng-container>
+                <ng-container *ngFor="let fieldConfig of fields">
+                    <div *ngIf="fieldConfig.displayValidate"
+                         class="simple-form-item-wrapper">
+                        <ng-container *ngTemplateOutlet="ionItem; context: fieldConfig"></ng-container>
+                        <wii-icon name="check.svg"
+                                  color="success"
+                                  class="validate-icon"
+                                  (action)="onFormSubmit()">
+                        </wii-icon>
+                    </div>
+                    <ng-container *ngIf="!fieldConfig.displayValidate">
+                        <ng-container *ngTemplateOutlet="ionItem; context: fieldConfig"></ng-container>
+                    </ng-container>
                 </ng-container>
-            </ng-container>
 
-            <ng-template #ionItem>
-                <ion-item class="simple-form-item" *ngFor="let fieldConfig of fields">
-                    <ion-label color="medium">{{ fieldConfig.label }}</ion-label>
-                    <ion-input (change)="onInputChange(fieldConfig.name, fieldConfig.type || 'text', $event.target)"
-                               [type]="fieldConfig.type || 'text'"
-                               [value]="fieldConfig.value">
-                    </ion-input>
-                </ion-item>
-            </ng-template>
+                <ng-template #ionItem>
+                    <ion-item class="simple-form-item" *ngFor="let fieldConfig of fields">
+                        <ion-label color="medium">{{ fieldConfig.label }}</ion-label>
+                        <ion-input (change)="onInputChange(fieldConfig.name, fieldConfig.type || 'text', $event.target)"
+                                   [type]="fieldConfig.type || 'text'"
+                                   [value]="fieldConfig.value">
+                        </ion-input>
+                    </ion-item>
+                </ng-template>
+            </div>
         </div>
     </div>
 
