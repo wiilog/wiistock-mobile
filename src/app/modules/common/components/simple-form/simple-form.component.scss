@@ -20,6 +20,8 @@
         flex: 1;
         display: flex;
         flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
 
         .simple-form-title {
             margin: 0 2px;
