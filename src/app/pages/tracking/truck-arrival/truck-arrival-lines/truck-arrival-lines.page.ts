@@ -15,6 +15,7 @@ import {AlertService} from "@app/services/alert.service";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {Carrier} from "@entities/carrier";
 import {ViewWillEnter} from "@ionic/angular";
+import {zip} from "rxjs";
 
 @Component({
     selector: 'wii-truck-arrival-lines',
@@ -58,7 +59,16 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
         }
     }> = [];
 
+    private fieldParams: {
+        displayTrackingNumber: boolean,
+        needsTrackingNumber: boolean,
+    } = {
+        displayTrackingNumber: false,
+        needsTrackingNumber: false,
+    };
+
     private loaded: boolean = false;
+    public popOnBack: boolean = false;
 
     public constructor(private navService: NavService,
                        public sqliteService: SqliteService,
@@ -71,23 +81,47 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
     }
 
     public ionViewWillEnter(): void {
+        if(this.popOnBack) {
+            this.popOnBack = false;
+            this.navService.pop();
+        } else {
+            if(!this.loaded) {
+                this.carrier = this.navService.param('carrier') ?? null;
+                this.driver = this.navService.param('driver') ?? null;
+                this.truckArrivalUnloadingLocation = this.navService.param('truckArrivalUnloadingLocation') ?? [];
+                this.registrationNumber = this.navService.param('registrationNumber') ?? null;
+            }
 
-        // if first initialisation
-        if(!this.loaded) {
-            this.carrier = this.navService.param('carrier') ?? null;
-            this.driver = this.navService.param('driver') ?? null;
-            this.truckArrivalUnloadingLocation = this.navService.param('truckArrivalUnloadingLocation') ?? [];
-            this.registrationNumber = this.navService.param('registrationNumber') ?? null;
+            this.loadingService.presentLoadingWhile({
+                event: () => {
+                    return zip(
+                        this.apiService.requestApi(ApiService.GET_TRUCK_ARRIVALS_LINES_NUMBER, {}),
+                        this.storageService.getNumber('truckArrival.carrierTrackingNumber.displayedCreate'),
+                        this.storageService.getNumber('truckArrival.carrierTrackingNumber.requiredCreate'),
+                    )
+                }
+            }).subscribe(([truckArrivalLineNumbers, ...fieldParams]) => {
+                const [
+                    displayTrackingNumber,
+                    needsTrackingNumber,
+                ] = fieldParams;
+
+                if(!displayTrackingNumber){
+                    this.popOnBack = true;
+                    this.next();
+                }
+
+                this.fieldParams = {
+                    displayTrackingNumber: Boolean(displayTrackingNumber),
+                    needsTrackingNumber: Boolean(needsTrackingNumber),
+                };
+
+                this.loading = false;
+                this.loaded = true;
+                this.truckArrivalLinesNumber = truckArrivalLineNumbers;
+                this.refreshTruckArrivalLinesCards();
+            });
         }
-
-        this.loadingService.presentLoadingWhile({
-            event: () => this.apiService.requestApi(ApiService.GET_TRUCK_ARRIVALS_LINES_NUMBER, {})
-        }).subscribe((truckArrivalLineNumbers) => {
-            this.loading = false;
-            this.loaded = true;
-            this.truckArrivalLinesNumber = truckArrivalLineNumbers;
-            this.refreshTruckArrivalLinesCards();
-        });
     }
 
     public refreshTruckArrivalLinesCards() {
@@ -212,18 +246,16 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
     }
 
     public next() {
-        if (this.truckArrivalLines) {
-            if (this.truckArrivalLines.length > 0) {
-                this.navService.push(NavPathEnum.TRUCK_ARRIVAL_RESERVES, {
-                    truckArrivalUnloadingLocation: this.truckArrivalUnloadingLocation,
-                    driver: this.driver,
-                    carrier: this.carrier,
-                    registrationNumber: this.registrationNumber,
-                    truckArrivalLines: this.truckArrivalLines,
-                });
-            } else {
-                this.toastService.presentToast('Veuillez renseigner au moins un numéro de tracking transporteur.');
-            }
+        if ((this.truckArrivalLines && this.truckArrivalLines.length > 0) || !this.fieldParams.needsTrackingNumber || !this.fieldParams.displayTrackingNumber) {
+            this.navService.push(NavPathEnum.TRUCK_ARRIVAL_RESERVES, {
+                truckArrivalUnloadingLocation: this.truckArrivalUnloadingLocation,
+                driver: this.driver,
+                carrier: this.carrier,
+                registrationNumber: this.registrationNumber,
+                truckArrivalLines: this.truckArrivalLines ?? [],
+            });
+        } else {
+            this.toastService.presentToast('Veuillez renseigner au moins un numéro de tracking transporteur.');
         }
     }
 }
