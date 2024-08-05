@@ -352,6 +352,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
         name: 'free_field',
         schema: [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
+            {column: 'freeFieldId', value: 'INTEGER'},
             {column: 'label', value: 'VARCHAR(255)'},
             {column: 'typeId', value: 'INTEGER'},
             {column: 'categoryType', value: 'VARCHAR(255)'},

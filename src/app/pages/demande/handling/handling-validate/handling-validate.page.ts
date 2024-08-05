@@ -177,7 +177,7 @@ export class HandlingValidatePage implements ViewWillEnter, ViewWillLeave {
                     .map(({id, ...freeField}) => (
                         this.formPanelService.createConfigFromFreeField(
                             {id, ...freeField},
-                            freeFieldsValues[id],
+                            freeFieldsValues[freeField.freeFieldId],
                             'freeFields',
                             'edit'
                         )

@@ -143,7 +143,7 @@ export class DemandeLivraisonHeaderPage implements ViewWillEnter, ViewWillLeave 
                 .map(({id, ...freeField}) => (
                     this.formPanelService.createConfigFromFreeField(
                         {id, ...freeField},
-                        freeFieldsValues[id],
+                        freeFieldsValues[freeField.freeFieldId],
                         'free_fields',
                         'create'
                     )
