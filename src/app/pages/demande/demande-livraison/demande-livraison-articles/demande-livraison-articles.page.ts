@@ -155,7 +155,7 @@ export class DemandeLivraisonArticlesPage implements ViewWillEnter, ViewWillLeav
             `Type : ${type ? type.label : ''}`,
             ...freeFields
                 .filter(({typeId}) => (demandeLivraison.type_id == typeId))
-                .map((freeField: FreeField) => this.formPanelService.formatFreeField(freeField, freeFieldsValues[freeField.id]))
+                .map((freeField: FreeField) => this.formPanelService.formatFreeField(freeField, freeFieldsValues[freeField.freeFieldId]))
         ];
 
         if (demandeLivraison.comment) {

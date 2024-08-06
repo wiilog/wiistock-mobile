@@ -18,7 +18,7 @@ export class FormPanelService {
                                      mode: 'create'|'edit'): FormPanelParam|undefined {
         const common = {
             label: freeField.label,
-            name: freeField.id,
+            name: freeField.freeFieldId,
             group: formPanelItemGroup,
             ignoreEmpty: true,
             errors: {

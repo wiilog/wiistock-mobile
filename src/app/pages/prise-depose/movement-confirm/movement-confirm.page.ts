@@ -241,7 +241,7 @@ export class MovementConfirmPage implements ViewWillEnter {
                         .map(({id, ...freeField}) => (
                             this.formPanelService.createConfigFromFreeField(
                                 {id, ...freeField},
-                                freeFieldsValues[id],
+                                freeFieldsValues[freeField.freeFieldId],
                                 'freeFields',
                                 'create'
                             )

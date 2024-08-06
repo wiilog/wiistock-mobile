@@ -1,5 +1,6 @@
 export interface FreeField {
     id: number;
+    freeFieldId: number;
     label: string;
     typeId: number;
     categoryType: string;
