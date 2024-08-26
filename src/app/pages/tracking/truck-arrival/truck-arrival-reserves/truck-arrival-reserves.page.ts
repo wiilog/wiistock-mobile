@@ -72,7 +72,9 @@ export class TruckArrivalReservesPage implements ViewWillEnter {
     }
 
     public ionViewWillEnter(): void {
-        if(this.truckArrivalLines && this.truckArrivalLines.length === 0){
+        const hasGeneralReserve = this.reserves ? this.reserves.some((reserve) => reserve.kind === 'general') : false;
+        const hasQuantityReserve = this.reserves ? this.reserves.some((reserve) => reserve.kind === 'quantity') : false;
+        if(this.truckArrivalLines && this.truckArrivalLines.length === 0 && !hasGeneralReserve && !hasQuantityReserve){
             this.loading = false;
             this.carrier = this.navService.param('carrier') ?? [];
             this.driver = this.navService.param('driver') ?? {};
