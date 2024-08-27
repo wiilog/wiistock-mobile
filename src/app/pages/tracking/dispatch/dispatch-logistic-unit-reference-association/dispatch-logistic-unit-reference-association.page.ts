@@ -457,8 +457,13 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                             name: 'associatedDocumentTypes',
                             value: associatedDocumentTypes || this.reference.associatedDocumentTypes
                                 ? (
-                                    Array.isArray(associatedDocumentTypes)
-                                        ? associatedDocumentTypes
+                                    associatedDocumentTypes
+                                        ? (Array.isArray(associatedDocumentTypes)
+                                            ? associatedDocumentTypes
+                                            : associatedDocumentTypes.split(';').map((label: string) => ({
+                                                id: label,
+                                                label
+                                            })))
                                         : (this.reference.associatedDocumentTypes
                                             ? this.reference.associatedDocumentTypes
                                             : this.associatedDocumentTypeElements.map(({label}) => ({
