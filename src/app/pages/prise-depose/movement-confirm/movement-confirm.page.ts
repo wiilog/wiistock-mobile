@@ -153,35 +153,21 @@ export class MovementConfirmPage implements ViewWillEnter {
                 this.savedNatureId = selectedNature ? String(selectedNature.id) : null;
                 this.bodyConfig = [];
 
-                if (selectedNature) {
-                    this.bodyConfig.push({
-                        item: FormPanelInputComponent,
-                        config: {
-                            label: this.natureTranslationLabel,
-                            name: 'natureId',
-                            value: selectedNature.label,
-                            inputConfig: {
-                                type: 'text',
-                                disabled: true
-                            }
+
+                this.bodyConfig.push({
+                    item: FormPanelSelectComponent,
+                    config: {
+                        label: this.natureTranslationLabel,
+                        name: 'natureId',
+                        value: selectedNature ? selectedNature.id : natureId,
+                        inputConfig: {
+                            required: false,
+                            searchType: SelectItemTypeEnum.TRACKING_NATURES,
+                            filterItem: (nature: Nature) => (!nature.hide)
                         }
-                    });
-                }
-                else if (needsToShowNatures) {
-                    this.bodyConfig.push({
-                        item: FormPanelSelectComponent,
-                        config: {
-                            label: this.natureTranslationLabel,
-                            name: 'natureId',
-                            value: natureId,
-                            inputConfig: {
-                                required: false,
-                                searchType: SelectItemTypeEnum.TRACKING_NATURES,
-                                filterItem: (nature: Nature) => (!nature.hide)
-                            }
-                        }
-                    });
-                }
+                    }
+                });
+
 
                 if (!fromStock && !this.isGroup) {
                     this.bodyConfig.push({
@@ -262,7 +248,6 @@ export class MovementConfirmPage implements ViewWillEnter {
         }
         else {
             let {quantity, comment, signature, photo, natureId, freeFields} = this.formPanelComponent.values;
-            natureId = this.savedNatureId ? this.savedNatureId : natureId
             if (freeFields) {
                 Object.keys(freeFields).forEach((freeFieldId) => {
                     let freeField = freeFields[freeFieldId];
