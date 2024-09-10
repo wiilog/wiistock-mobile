@@ -119,7 +119,7 @@ export class TrackingMenuPage implements ViewWillEnter {
                 if (receiptAssociation) {
                     this.menuConfig.push({
                         icon: 'receipt-association.svg',
-                        label: 'Association BR',
+                        label: 'Association',
                         action: async () => {
                             const hasNetwork = await this.networkService.hasNetwork();
                             if (!hasNetwork) {
