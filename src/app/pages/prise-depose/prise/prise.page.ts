@@ -43,7 +43,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     public footerScannerComponent: BarcodeScannerComponent;
 
     public emplacement: Emplacement;
-    public colisPrise: Array<MouvementTraca & {loading?: boolean; subPacks?: Array<MouvementTraca>; articles: Array<string>;}>;
+    public colisPrise: Array<MouvementTraca & {loading?: boolean; subPacks?: Array<MouvementTraca>; articles: Array<string>; trackingDelayData?: Array<string>;}>;
     public currentPacksOnLocation: Array<MouvementTraca&{hidden?: boolean}>;
     public colisPriseAlreadySaved: Array<MouvementTraca>;
 
@@ -94,7 +94,9 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             'quantity',
             'articlesCount',
             'date',
-            'nature'
+            'nature',
+            'trackingDelay',
+            'limitTreatmentDate',
         ];
     }
 
@@ -337,7 +339,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         this.refreshListComponent();
     }
 
-    private updateTrackingMovementNature(barCode: string, natureId?: number, groupData?: any): void {
+    private updateTrackingMovementNature(barCode: string, natureId?: number, groupData?: any, trackingDelayData?: Array<string>): void {
         const indexesToUpdate = this.findTakingIndexes(barCode);
         for(const index of indexesToUpdate) {
             this.colisPrise[index].nature_id = natureId;
@@ -346,6 +348,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                 this.colisPrise[index].isGroup = 1;
                 this.colisPrise[index].subPacks = groupData.packs;
             }
+            this.colisPrise[index].trackingDelayData = trackingDelayData;
         }
         this.refreshListComponent();
         this.footerScannerComponent.fireZebraScan();
@@ -596,13 +599,13 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                             }
                         })
                         .pipe(
-                            mergeMap(({nature, group, isPack, isGroup, location, existing}) => (
+                            mergeMap(({nature, group, isPack, isGroup, location, existing, trackingDelayData}) => (
                                 nature && !this.natureIdsToConfig[nature.id]
                                     ? this.sqliteService.importNaturesData({natures: [nature]}, false)
                                         .pipe(
-                                            map(() => ({nature, group, isPack, isGroup, location, existing}))
+                                            map(() => ({nature, group, isPack, isGroup, location, existing, trackingDelayData}))
                                         )
-                                    : of({nature, group, isPack, isGroup, location, existing})
+                                    : of({nature, group, isPack, isGroup, location, existing, trackingDelayData})
                             )),
                             tap(({nature}) => {
                                 if (nature) {
@@ -613,7 +616,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                             filter(() => this.viewEntered)
                         )
                         .subscribe({
-                            next: ({nature, group, isPack, isGroup, location, existing}) => {
+                            next: ({nature, group, isPack, isGroup, location, existing, trackingDelayData}) => {
                                 if (this.displayWarningWrongLocation && ((location && this.emplacement.id !== location) || !existing)) {
                                     this.alertService.show({
                                         header: `Confirmation`,
@@ -624,7 +627,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                                 text: 'Confirmer',
                                                 cssClass: 'alert-success',
                                                 handler: () => {
-                                                    this.processLogisticUnitTaking(isGroup, isPack, barCode, group, nature);
+                                                    this.processLogisticUnitTaking(isGroup, isPack, barCode, group, nature, trackingDelayData);
                                                 },
                                             },
                                             {
@@ -638,8 +641,8 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                         ]
                                     });
                                 } else {
-                                    console.log("ON PASSE ICI ", {isGroup, isPack, barCode, group, nature})
-                                    this.processLogisticUnitTaking(isGroup, isPack, barCode, group, nature)
+                                    console.log("ON PASSE ICI ", {isGroup, isPack, barCode, group, nature});
+                                    this.processLogisticUnitTaking(isGroup, isPack, barCode, group, nature, trackingDelayData);
                                 }
                             },
                             error: () => {
@@ -674,7 +677,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             : of(undefined);
     }
 
-    private processLogisticUnitTaking(isGroup: boolean, isPack: boolean, barCode: string, group: any, nature: Nature): void {
+    private processLogisticUnitTaking(isGroup: boolean, isPack: boolean, barCode: string, group: any, nature: Nature, trackingDelayData: Array<string>): void {
         if(this.fromStock && isGroup) {
             const cancelPicking = this.cancelPickingAction();
             cancelPicking({object: {value: barCode, label: barCode}});
@@ -725,7 +728,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                 });
             }
             else {
-                this.updateTrackingMovementNature(barCode, nature && nature.id);
+                this.updateTrackingMovementNature(barCode, nature && nature.id, undefined, trackingDelayData);
             }
         }
         else { // isGroup === true

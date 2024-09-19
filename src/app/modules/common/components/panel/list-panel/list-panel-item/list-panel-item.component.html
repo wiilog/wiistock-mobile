@@ -38,6 +38,7 @@
                  *ngFor="let line of infosArray">
                 <ng-container *ngIf="line.label">{{line.label}} :</ng-container>
                 <span class="element-value"
+                      [style.color]="line.color"
                       [class.element-value-bold]="!boldValues || boldValues.indexOf(line.key) > -1">
                     {{ line.value }}
                     <wii-icon *ngIf="line.emergency"

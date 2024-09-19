@@ -104,7 +104,7 @@ export class TrackingListFactoryService {
         }
     }
 
-    public createListConfig(articles: Array<MouvementTraca & {loading?: boolean; isGroup?: number|boolean; subPacks?: Array<MouvementTraca>;}>,
+    public createListConfig(articles: Array<MouvementTraca & {loading?: boolean; isGroup?: number|boolean; subPacks?: Array<MouvementTraca>; trackingDelayData?: Array<string>;}>,
                             listType: number,
                             {location, objectLabel,  validate, rightIcon, confirmItem, natureIdsToConfig, natureTranslation, headerRightIcon, pressAction}: {
                                 location?: Emplacement;
@@ -175,7 +175,7 @@ export class TrackingListFactoryService {
                         : {}
                 )
             },
-            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, articles, loading, isGroup, subPacks, fromStock, containsArticle}) => {
+            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, articles, loading, isGroup, subPacks, trackingDelayData, fromStock, containsArticle}) => {
                 const natureConfig = (natureIdsToConfig && nature_id && natureIdsToConfig[nature_id]);
 
                 let quantityRow = {};
@@ -215,10 +215,28 @@ export class TrackingListFactoryService {
                     },
                     ...quantityRow,
                     ...articlesCount,
-                    date: {
-                        label: 'Date / Heure',
-                        value: moment(date, moment.defaultFormat).format('DD/MM/YYYY HH:mm:ss')
-                    },
+                    ...(
+                        trackingDelayData && trackingDelayData.delay
+                            ? (
+                                {
+                                    trackingDelay: {
+                                        label: 'Délai de traitement restant',
+                                        value: trackingDelayData.delay,
+                                        color: trackingDelayData.color,
+                                    },
+                                    limitTreatmentDate: {
+                                        label: 'Date limite de traitement',
+                                        value: trackingDelayData.limitTreatmentDate,
+                                    }
+                                }
+                            )
+                            : {
+                                date: {
+                                        label: 'Date / Heure',
+                                        value: moment(date, moment.defaultFormat).format('DD/MM/YYYY HH:mm:ss')
+                                    }
+                            }
+                    ),
                     ...(
                         natureConfig
                             ? {
