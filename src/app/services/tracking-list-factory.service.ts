@@ -104,7 +104,7 @@ export class TrackingListFactoryService {
         }
     }
 
-    public createListConfig(articles: Array<MouvementTraca & {loading?: boolean; isGroup?: number|boolean; subPacks?: Array<MouvementTraca>; trackingDelayData?: Array<string>;}>,
+    public createListConfig(articles: Array<MouvementTraca & {loading?: boolean; isGroup?: number|boolean; subPacks?: Array<MouvementTraca>; trackingDelayData?: any;}>,
                             listType: number,
                             {location, objectLabel,  validate, rightIcon, confirmItem, natureIdsToConfig, natureTranslation, headerRightIcon, pressAction}: {
                                 location?: Emplacement;

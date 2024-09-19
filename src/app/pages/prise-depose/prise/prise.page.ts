@@ -339,7 +339,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         this.refreshListComponent();
     }
 
-    private updateTrackingMovementNature(barCode: string, natureId?: number, groupData?: any, trackingDelayData?: Array<string>): void {
+    private updateTrackingMovementNature(barCode: string, natureId?: number, groupData?: any, trackingDelayData?: any): void {
         const indexesToUpdate = this.findTakingIndexes(barCode);
         for(const index of indexesToUpdate) {
             this.colisPrise[index].nature_id = natureId;
@@ -677,7 +677,12 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             : of(undefined);
     }
 
-    private processLogisticUnitTaking(isGroup: boolean, isPack: boolean, barCode: string, group: any, nature: Nature, trackingDelayData: Array<string>): void {
+    private processLogisticUnitTaking(isGroup: boolean,
+                                      isPack: boolean,
+                                      barCode: string,
+                                      group: any,
+                                      nature: Nature,
+                                      trackingDelayData: any): void {
         if(this.fromStock && isGroup) {
             const cancelPicking = this.cancelPickingAction();
             cancelPicking({object: {value: barCode, label: barCode}});
