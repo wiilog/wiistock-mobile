@@ -163,8 +163,9 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             else {
                 const multiPrise = (this.colisPrise.length > 1);
                 if (!this.saveSubscription) {
-                    const movementsToSave = this.colisPrise.filter(({isGroup}) => !isGroup);
-                    const groupingMovements = this.colisPrise.filter(({isGroup}) => isGroup);
+                    const copyPickingPack = this.colisPrise.map(({trackingDelayData, ...tracking}) => tracking);
+                    const movementsToSave = copyPickingPack.filter(({isGroup}) => !isGroup);
+                    const groupingMovements = copyPickingPack.filter(({isGroup}) => isGroup);
 
                     const online = await this.networkService.hasNetwork();
                     if (!this.fromStock
