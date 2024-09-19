@@ -8,6 +8,7 @@ export interface ListPanelItemConfig {
             label?: string;
             value?: string;
             emergency?: boolean;
+            color?: string;
         };
     };
     loading?: boolean;

@@ -16,6 +16,7 @@ export class ListPanelItemComponent {
             label?: string;
             value?: string;
             emergency?: boolean;
+            color?: string;
         };
     };
 
@@ -81,7 +82,7 @@ export class ListPanelItemComponent {
 
     public constructor(private elementRef: ElementRef) {}
 
-    public get infosArray(): Array<{label?: string; value?: string; key: string;emergency?: boolean;}> {
+    public get infosArray(): Array<{label?: string; value?: string; key: string;emergency?: boolean;color?: string;}> {
         return Object.keys(this.infos).map((key) => ({
             key,
             ...(this.infos[key])
