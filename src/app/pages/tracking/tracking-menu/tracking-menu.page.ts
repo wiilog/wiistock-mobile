@@ -43,12 +43,13 @@ export class TrackingMenuPage implements ViewWillEnter {
             this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
             this.storageService.getRight(StorageKeyEnum.RIGHT_MOVEMENT),
             this.storageService.getRight(StorageKeyEnum.RIGHT_DISPATCH),
+            this.storageService.getRight(StorageKeyEnum.RIGHT_READING_MENU),
             this.storageService.getCounter(StorageKeyEnum.COUNTERS_DISPATCHES_TREATED),
             this.sqliteService.count('dispatch', ['treatedStatusId IS NULL OR partial = 1']),
 
             this.translationService.get(`Demande`, `Acheminements`, `Général`)
         ).subscribe(
-            ([group, ungroup, truckArrival, forceSignature, dispatchOfflineMode, movement, dispatch, treatedDispatches, toTreatDispatches, translations]) => {
+            ([group, ungroup, truckArrival, forceSignature, dispatchOfflineMode, movement, dispatch, readingMenu, treatedDispatches, toTreatDispatches, translations]) => {
                 if (!dispatchOfflineMode && dispatch) {
                     this.menuConfig.push(
                         {
@@ -110,6 +111,21 @@ export class TrackingMenuPage implements ViewWillEnter {
                                 this.navService.push(NavPathEnum.UNGROUP_SCAN_LOCATION);
                             } else {
                                 this.toastService.presentToast('Une connexion internet est requise pour accéder à cette fonctionnalité.');
+                            }
+                        }
+                    });
+                }
+
+                if(readingMenu) {
+                    this.menuConfig.push({
+                        icon: '',
+                        label: 'Lecture',
+                        action: async() => {
+                            const hasNetwork = await this.networkService.hasNetwork();
+                            if(hasNetwork) {
+                                this.navService.push(NavPathEnum.READING_SCAN);
+                            } else {
+                                this.toastService.presentToast('Une connexion internet est requise pour accéder à cette fonctionnalité.')
                             }
                         }
                     });
