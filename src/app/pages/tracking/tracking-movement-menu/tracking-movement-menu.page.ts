@@ -52,10 +52,9 @@ export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
             this.loadingService.presentLoading(),
             this.sqliteService.findAll('mouvement_traca'),
             this.storageService.getRight(StorageKeyEnum.RIGHT_EMPTY_ROUND),
-            this.storageService.getRight(StorageKeyEnum.RIGHT_READING_MENU),
             this.storageService.getRight(StorageKeyEnum.RIGHT_RECEIPT_ASSOCIATION),
         )
-            .subscribe(([loading, mouvementTraca, emptyRound, readingMenu, receiptAssociation]: [HTMLIonLoadingElement, Array<MouvementTraca>, boolean, boolean, boolean]) => {
+            .subscribe(([loading, mouvementTraca, emptyRound, receiptAssociation]: [HTMLIonLoadingElement, Array<MouvementTraca>, boolean, boolean]) => {
                 this.menuConfig = [
                     {
                         icon: 'upload.svg',
