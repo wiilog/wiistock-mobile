@@ -13,6 +13,7 @@ import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {StorageService} from '@app/services/storage/storage.service';
 import {ViewWillEnter} from "@ionic/angular";
+import {NetworkService} from "@app/services/network.service";
 
 
 @Component({
@@ -22,48 +23,21 @@ import {ViewWillEnter} from "@ionic/angular";
 })
 export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
 
-    public nbDrop: number;
+    public nbDrop: number = 0;
     public statsSlidersData: Array<StatsSlidersData>;
-    public readonly menuConfig: Array<MenuConfig>;
+    public menuConfig: Array<MenuConfig> = [];
 
-    private canLeave: boolean;
-    private deposeAlreadyNavigate: boolean;
+    private canLeave: boolean = true;
+    private deposeAlreadyNavigate: boolean = false;
 
     public constructor(private loadingService: LoadingService,
                        private sqliteService: SqliteService,
                        private activatedRoute: ActivatedRoute,
                        private toastService: ToastService,
+                       private networkService: NetworkService,
                        private storageService: StorageService,
                        private navService: NavService) {
-        this.nbDrop = 0;
         this.statsSlidersData = this.createStatsSlidersData(this.nbDrop);
-        this.canLeave = true;
-        this.deposeAlreadyNavigate = false;
-
-        this.menuConfig = [
-            {
-                icon: 'upload.svg',
-                label: 'Prise',
-                action: () => this.goToPrise()
-            },
-            {
-                icon: 'download.svg',
-                label: 'Dépose',
-                action: () => this.goToDrop()
-            }
-        ];
-
-        this.storageService.getRight(StorageKeyEnum.RIGHT_EMPTY_ROUND).subscribe((emptyRound) => {
-            if(emptyRound) {
-                this.menuConfig.push({
-                    icon: 'empty-round.svg',
-                    label: 'Passage à vide',
-                    action: () => {
-                        this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {fromEmptyRound: true});
-                    }
-                });
-            }
-        });
     }
 
     public wiiCanLeave(): boolean {
@@ -76,9 +50,51 @@ export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
 
         zip(
             this.loadingService.presentLoading(),
-            this.sqliteService.findAll('mouvement_traca')
+            this.sqliteService.findAll('mouvement_traca'),
+            this.storageService.getRight(StorageKeyEnum.RIGHT_EMPTY_ROUND),
+            this.storageService.getRight(StorageKeyEnum.RIGHT_READING_MENU),
+            this.storageService.getRight(StorageKeyEnum.RIGHT_RECEIPT_ASSOCIATION),
         )
-            .subscribe(([loading, mouvementTraca]: [HTMLIonLoadingElement, Array<MouvementTraca>]) => {
+            .subscribe(([loading, mouvementTraca, emptyRound, readingMenu, receiptAssociation]: [HTMLIonLoadingElement, Array<MouvementTraca>, boolean, boolean, boolean]) => {
+                this.menuConfig = [
+                    {
+                        icon: 'upload.svg',
+                        label: 'Prise',
+                        action: () => this.goToPrise()
+                    },
+                    {
+                        icon: 'download.svg',
+                        label: 'Dépose',
+                        action: () => this.goToDrop()
+                    }
+                ];
+
+                if(emptyRound) {
+                    this.menuConfig.push({
+                        icon: 'empty-round.svg',
+                        label: 'Passage à vide',
+                        action: () => {
+                            this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {fromEmptyRound: true});
+                        }
+                    });
+                }
+
+                if (receiptAssociation) {
+                    this.menuConfig.push({
+                        icon: 'receipt-association.svg',
+                        label: 'Association',
+                        action: async () => {
+                            const hasNetwork = await this.networkService.hasNetwork();
+                            if (!hasNetwork) {
+                                this.toastService.presentToast(NetworkService.DEFAULT_HAS_NETWORK_MESSAGE);
+                                return;
+                            }
+
+                            this.navService.push(NavPathEnum.RECEIPT_ASSOCIATION_MENU);
+                        }
+                    });
+                }
+
                 this.nbDrop = mouvementTraca
                     .filter(({finished, type, fromStock, packParent}) => (
                         type === 'prise' &&
@@ -88,7 +104,6 @@ export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
                     .length;
 
                 this.statsSlidersData = this.createStatsSlidersData(this.nbDrop);
-
                 loading.dismiss();
                 this.canLeave = true;
 
