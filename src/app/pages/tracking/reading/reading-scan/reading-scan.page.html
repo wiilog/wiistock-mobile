@@ -1,0 +1,14 @@
+<div class="page-content" scroll-y="true" *ngIf="headerConfig">
+    <wii-panel-header [leftIcon]="headerConfig.leftIcon"
+                      [title]="headerConfig.title"
+                      class="page-header">
+    </wii-panel-header>
+</div>
+
+<div class="page-footer persisted-page-footer">
+    <wii-barcode-scanner #footerScannerComponent
+                         [mode]="scannerModeManual"
+                         (scanAdd)="scan($event)"
+                         (manualAdd)="scan($event)">
+    </wii-barcode-scanner>
+</div>

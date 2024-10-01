@@ -118,7 +118,7 @@ export class TrackingMenuPage implements ViewWillEnter {
 
                 if(readingMenu) {
                     this.menuConfig.push({
-                        icon: '',
+                        icon: 'reading.svg',
                         label: 'Lecture',
                         action: async() => {
                             const hasNetwork = await this.networkService.hasNetwork();

@@ -1,0 +1,40 @@
+@import "theme/variables";
+
+.page-content {
+    padding: $spacer;
+}
+
+.references-container, .movements-container {
+    background-color: $white;
+    border-radius: 5px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+    margin-top: 10px;
+    padding: 15px;
+
+    &.no-references, &.no-movements {
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .reference-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        margin-top: 5px;
+
+        .reference-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        &.emergency {
+            background-color: #EDC3CC;
+        }
+
+        img {
+            width: 30px;
+            margin-right: 5px;
+        }
+    }
+}

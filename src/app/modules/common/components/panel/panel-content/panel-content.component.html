@@ -1,0 +1,15 @@
+<div>
+    <div class="line" *ngFor="let field of content">
+        <span>{{ field.label }}</span>
+        <ng-container *ngIf="field.value">
+            <span>&nbsp;:&nbsp;</span>
+            <span (click)="field.value.action"
+                  [style.font-weight]="field.value.bold ? 'bold' : ''"
+                  [style.text-decoration]="field.value.underline ? 'underline' : ''"
+                  [style.color]="field.value.color || '#000000'"
+            >
+                {{ field.value.text }}
+            </span>
+        </ng-container>
+    </div>
+</div>

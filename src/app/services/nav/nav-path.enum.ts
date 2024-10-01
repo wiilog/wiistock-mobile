@@ -94,4 +94,6 @@ export enum NavPathEnum {
     RECEPTION_MENU = 'reception-menu',
     RECEPTION_DETAILS = 'reception-details',
     RECEPTION_REFERENCE_TAKE = 'reception-reference-take',
+    READING_SCAN = 'reading-scan',
+    READING_DETAILS = 'reading-details',
 }

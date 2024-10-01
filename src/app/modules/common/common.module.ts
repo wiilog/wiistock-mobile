@@ -61,6 +61,7 @@ import {PackCountComponent} from "@common/components/pack-count/pack-count.compo
 import {SimpleCardComponent} from "@common/components/simple-card/simple-card.component";
 import {LeafletMapComponent} from "@common/components/leaflet-map/leaflet-map.component";
 import {TransportCardComponent} from "@common/components/transport-card/transport-card.component";
+import {PanelContentComponent} from "@common/components/panel/panel-content/panel-content.component"
 
 @NgModule({
     imports: [
@@ -110,6 +111,7 @@ import {TransportCardComponent} from "@common/components/transport-card/transpor
         SimpleCardComponent,
         LeafletMapComponent,
         TransportCardComponent,
+        PanelContentComponent,
     ],
     exports: [
         IconComponent,
@@ -135,6 +137,7 @@ import {TransportCardComponent} from "@common/components/transport-card/transpor
         SimpleCardComponent,
         LeafletMapComponent,
         TransportCardComponent,
+        PanelContentComponent,
     ]
 })
 export class CommonModule {
