@@ -1,0 +1,20 @@
+@import "theme/variables";
+
+.page-content {
+    padding: $spacer;
+}
+
+.page-title-container {
+    display: flex;
+    align-items: center;
+
+    .page-title-icon {
+        width: 55px;
+        margin-right: calc($spacer / 2);
+    }
+
+    .page-title {
+        font-weight: bold;
+        margin-left: calc($spacer / 2);
+    }
+}

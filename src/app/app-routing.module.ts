@@ -480,6 +480,16 @@ const routes: Routes = [
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/reception/reception-reference-take/reception-reference-take.module').then(m => m.ReceptionReferenceTakePageModule)
     },
+    {
+        path: NavPathEnum.READING_SCAN,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/reading/reading-scan/reading-scan.module').then(m => m.ReadingScanModule)
+    },
+    {
+        path: NavPathEnum.READING_DETAILS,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/reading/reading-details/reading-details.module').then(m => m.ReadingDetailsModule)
+    }
 ];
 
 @NgModule({

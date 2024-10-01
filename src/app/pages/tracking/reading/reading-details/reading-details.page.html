@@ -1,0 +1,41 @@
+<div class="page-content" *ngIf="values && values.logisticUnit && headerConfig && contentConfig" scroll-y="true">
+    <wii-panel-header [leftIcon]="headerConfig.leftIcon"
+                      [title]="headerConfig.title"
+                      class="page-header">
+    </wii-panel-header>
+
+    <wii-panel-content [content]="contentConfig"></wii-panel-content>
+
+    <div class="references-container" *ngIf="values.references && values.references.length > 0 else noReferences">
+        <strong>Références contenu :</strong>
+        <div *ngFor="let reference of values.references">
+            <div class="reference-wrapper" [class.emergency]="reference.emergency">
+                <div class="reference-details">
+                    <span>Référence : <strong>{{ reference.reference }}</strong></span>
+                    <span>Libellé : <strong>{{ reference.label }}</strong></span>
+                </div>
+                <img src="{{ values.types[reference.typeId] }}" alt="Icône type" *ngIf="reference.typeId && values.types[reference.typeId]">
+            </div>
+        </div>
+    </div>
+
+    <wii-card-list *ngIf="values.movements && values.movements.length > 0 else noMovements"
+                   [config]="movementsListConfig">
+    </wii-card-list>
+</div>
+
+<ng-template #noReferences>
+    <div *ngIf="!values.movements" class="references-container no-references">Aucune référence</div>
+</ng-template>
+<ng-template #noMovements>
+    <div *ngIf="!values.references" class="movements-container no-movements">Aucun mouvement</div>
+</ng-template>
+<div class="page-footer">
+    <ion-button class="larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="back()">
+        Retour
+    </ion-button>
+</div>
