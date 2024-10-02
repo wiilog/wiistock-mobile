@@ -7,7 +7,6 @@ import {TranslationService} from '@app/services/translations.service';
 import {zip} from 'rxjs';
 import {IconConfig} from "@common/components/panel/model/icon-config";
 import {CardListConfig} from "@common/components/card-list/card-list-config";
-import {move} from "ionicons/icons";
 
 @Component({
     selector: 'wii-reading-details',
