@@ -9,6 +9,7 @@
     <wii-barcode-scanner #footerScannerComponent
                          [mode]="scannerModeManual"
                          (scanAdd)="scan($event)"
+                         (cameraAdd)="scan($event)"
                          (manualAdd)="scan($event)">
     </wii-barcode-scanner>
 </div>
