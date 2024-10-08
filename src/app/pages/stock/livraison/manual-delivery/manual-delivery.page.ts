@@ -58,7 +58,7 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
         natureCode?: string;
         natureColor?: string;
         articles?: string;
-        lastTrackingDate?: string;
+        lastActionDate?: string;
         project?: string;
         articlesCount?: number;
     }> = [];
@@ -90,7 +90,7 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
     }
 
     public ngOnInit() {
-        this.listBoldValues = ['reference', 'label', 'barCode', 'location', 'quantity', 'lastTrackingDate', 'nature'];
+        this.listBoldValues = ['reference', 'label', 'barCode', 'location', 'quantity', 'lastActionDate', 'nature'];
 
         this.headerConfig = this.createHeaderConfig();
         this.listConfig = this.createBodyConfig();
@@ -341,10 +341,10 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
                     label: article.is_lu ? 'Objet' : 'Code barre',
                     value: article.barCode
                 },
-                ...(article.is_lu && article.lastTrackingDate ? ({
-                    lastTrackingDate: {
+                ...(article.is_lu && article.lastActionDate ? ({
+                    lastActionDate: {
                         label: 'Date/Heure',
-                        value: article.lastTrackingDate
+                        value: article.lastActionDate
                     }
                 }) : {}),
                 ...(!article.is_lu && article.location
