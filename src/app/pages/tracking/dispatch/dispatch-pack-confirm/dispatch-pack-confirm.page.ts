@@ -1,13 +1,9 @@
 import {Component, ViewChild} from '@angular/core';
 import {NavService} from '@app/services/nav/nav.service';
-import {SqliteService} from '@app/services/sqlite/sqlite.service';
-import {LoadingService} from '@app/services/loading.service';
 import {Dispatch} from '@entities/dispatch';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
-import {MainHeaderService} from '@app/services/main-header.service';
 import {ToastService} from '@app/services/toast.service';
 import {SelectItemTypeEnum} from '@common/components/select-item/select-item-type.enum';
-import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {DispatchPack} from '@entities/dispatch-pack';
 import {FormPanelSelectComponent} from '@common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 import {HeaderConfig} from '@common/components/panel/model/header-config';
@@ -40,11 +36,7 @@ export class DispatchPackConfirmPage implements ViewWillEnter {
     private pack: DispatchPack;
     public detailsConfig: Array<FormViewerParam>;
 
-    public constructor(private sqliteService: SqliteService,
-                       private loadingService: LoadingService,
-                       private mainHeaderService: MainHeaderService,
-                       private localDataManagerService: LocalDataManagerService,
-                       private toastService: ToastService,
+    public constructor(private toastService: ToastService,
                        private navService: NavService) {
     }
 

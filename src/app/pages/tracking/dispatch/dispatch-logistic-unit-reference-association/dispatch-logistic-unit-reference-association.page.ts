@@ -2,9 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 import {NavService} from '@app/services/nav/nav.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {LoadingService} from '@app/services/loading.service';
-import {MainHeaderService} from '@app/services/main-header.service';
 import {ToastService} from '@app/services/toast.service';
-import {TranslationService} from "@app/services/translations.service";
 import {FormPanelComponent} from "@common/components/panel/form-panel/form-panel.component";
 import {FormPanelParam} from "@common/directives/form-panel/form-panel-param";
 import {
@@ -73,9 +71,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
     public constructor(private storageService: StorageService,
                        private sqliteService: SqliteService,
                        private loadingService: LoadingService,
-                       private mainHeaderService: MainHeaderService,
                        private toastService: ToastService,
-                       private translationService: TranslationService,
                        private apiService: ApiService,
                        private navService: NavService) {
     }
@@ -118,7 +114,8 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                             dispatch: this.dispatch.id as number
                         }
                     })
-                    : this.viewMode ? (this.sqliteService.findOneBy('dispatch_pack', {
+                    : this.viewMode
+                        ? (this.sqliteService.findOneBy('dispatch_pack', {
                             code: this.logisticUnit,
                             localDispatchId: this.dispatch.localId
                         })
@@ -161,7 +158,6 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                 volume,
                 weight,
                 adr,
-                associatedDocumentTypes,
                 comment,
                 photos,
                 exists,
@@ -169,6 +165,8 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                 packWeight,
                 packVolume,
             } = data;
+
+            const associatedDocumentTypes = data.associatedDocumentTypes || this.reference.associatedDocumentTypes;
 
             if (this.viewMode) {
                 if (length && width && height) {
@@ -455,21 +453,20 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                         config: {
                             label: 'Types de documents associés',
                             name: 'associatedDocumentTypes',
-                            value: associatedDocumentTypes || this.reference.associatedDocumentTypes
+                            value: associatedDocumentTypes
                                 ? (
                                     associatedDocumentTypes
-                                        ? (Array.isArray(associatedDocumentTypes)
-                                            ? associatedDocumentTypes
-                                            : associatedDocumentTypes.split(';').map((label: string) => ({
+                                        ? associatedDocumentTypes
+                                            .split(',')
+                                            .filter((label: string) => label)
+                                            .map((label: string) => ({
                                                 id: label,
                                                 label
-                                            })))
-                                        : (this.reference.associatedDocumentTypes
-                                            ? this.reference.associatedDocumentTypes
-                                            : this.associatedDocumentTypeElements.map(({label}) => ({
-                                                id: label,
-                                                label
-                                            })))
+                                            }))
+                                        : this.associatedDocumentTypeElements.map(({label}) => ({
+                                            id: label,
+                                            label
+                                        }))
                                 ) : null,
                             inputConfig: {
                                 required: true,

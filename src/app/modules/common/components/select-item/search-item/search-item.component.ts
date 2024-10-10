@@ -257,7 +257,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
                 || !item
                 || item.label !== this._item.label
             )) {
-            if (this.isMultiple) {
+            if (this.isMultiple && item && !Array.isArray(item)) {
                 item = [item];
             }
             this._item = item;

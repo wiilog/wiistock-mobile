@@ -83,8 +83,18 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
 
         setTimeout(() => {
             if (this.searchComponent) {
-                const item = this.value
-                    ? this.searchComponent.findItem(this.value, this.searchComponent.config[this.searchComponent.smartType]['valueField'])
+                let selected: string|undefined|Array<string> = this.value;
+                if (this.inputConfig.isMultiple && typeof selected === "string") {
+                    selected = selected
+                        .split(FormPanelSelectComponent.MULTIPLE_SEPARATOR)
+                        .filter((value) => value)
+                }
+
+                const item = selected
+                    ? (Array.isArray(selected)
+                        ? selected.map((value) => this.searchComponent.findItem(value, this.searchComponent.config[this.searchComponent.smartType]['valueField']))
+                        : this.searchComponent.findItem(selected, this.searchComponent.config[this.searchComponent.smartType]['valueField'])
+                    )
                     : undefined;
                 if (item) {
                     this.searchComponent.item = item;
