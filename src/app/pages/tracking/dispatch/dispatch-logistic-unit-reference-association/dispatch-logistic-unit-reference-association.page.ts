@@ -306,7 +306,7 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                             name: 'serialNumber',
                             value: serialNumber || null,
                             inputConfig: {
-                                required: false,
+                                required: true,
                                 type: 'text',
                                 disabled: this.viewMode
                             },
@@ -358,7 +358,6 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                             name: 'manufacturerCode',
                             value: manufacturerCode || null,
                             inputConfig: {
-                                required: true,
                                 type: 'text',
                                 disabled: this.viewMode
                             },
