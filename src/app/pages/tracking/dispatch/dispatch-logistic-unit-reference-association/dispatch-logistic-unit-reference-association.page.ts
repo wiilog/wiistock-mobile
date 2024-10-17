@@ -310,6 +310,9 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                                 type: 'text',
                                 disabled: this.viewMode
                             },
+                            errors: {
+                                required: 'Vous devez renseigner un numéro de série.'
+                            },
                         }
                     },
                     {
@@ -361,9 +364,6 @@ export class DispatchLogisticUnitReferenceAssociationPage implements ViewWillEnt
                                 type: 'text',
                                 disabled: this.viewMode
                             },
-                            errors: {
-                                required: 'Vous devez renseigner un code fabriquant.'
-                            }
                         }
                     },
                     {
