@@ -104,7 +104,7 @@ export class TrackingListFactoryService {
         }
     }
 
-    public createListConfig(articles: Array<MouvementTraca & {loading?: boolean; isGroup?: number|boolean; subPacks?: Array<MouvementTraca>; trackingDelayData?: any;}>,
+    public createListConfig(articles: Array<MouvementTraca & {loading?: boolean; isGroup?: number|boolean; subPacks?: Array<MouvementTraca>;}>,
                             listType: number,
                             {location, objectLabel,  validate, rightIcon, confirmItem, natureIdsToConfig, natureTranslation, headerRightIcon, pressAction}: {
                                 location?: Emplacement;
@@ -120,7 +120,7 @@ export class TrackingListFactoryService {
                                 natureTranslation?: string;
                                 pressAction?: (barCode: string) => void
                             }): ListConfig {
-
+        console.log(articles);
         const notDuplicateArticles = articles.reduce(
             (acc: Array<any>, movement) => {
                 const alreadyIndex = acc.findIndex(({ref_article}) => (movement.ref_article === ref_article));
@@ -175,7 +175,7 @@ export class TrackingListFactoryService {
                         : {}
                 )
             },
-            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, articles, loading, isGroup, subPacks, trackingDelayData, fromStock, containsArticle}) => {
+            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, articles, loading, isGroup, subPacks, trackingDelay, trackingDelayColor, limitTreatmentDate, fromStock, containsArticle}) => {
                 const natureConfig = (natureIdsToConfig && nature_id && natureIdsToConfig[nature_id]);
 
                 let quantityRow = {};
@@ -216,17 +216,17 @@ export class TrackingListFactoryService {
                     ...quantityRow,
                     ...articlesCount,
                     ...(
-                        trackingDelayData && trackingDelayData.delay
+                        trackingDelay
                             ? (
                                 {
                                     trackingDelay: {
                                         label: 'Délai de traitement restant',
-                                        value: trackingDelayData.delay,
-                                        color: trackingDelayData.color,
+                                        value: trackingDelay,
+                                        color: trackingDelayColor,
                                     },
                                     limitTreatmentDate: {
                                         label: 'Date limite de traitement',
-                                        value: trackingDelayData.limitTreatmentDate,
+                                        value: limitTreatmentDate,
                                     }
                                 }
                             )

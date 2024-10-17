@@ -43,8 +43,8 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     public footerScannerComponent: BarcodeScannerComponent;
 
     public emplacement: Emplacement;
-    public colisPrise: Array<MouvementTraca&{hidden?: boolean; subPacks: any;}>;
-    public colisDepose: Array<MouvementTraca&{subPacks?: any;}>;
+    public colisPrise: Array<MouvementTraca&{hidden?: boolean; subPacks: any; trackingDelayData?: Array<string>;}>;
+    public colisDepose: Array<MouvementTraca&{subPacks?: any; trackingDelayData?: Array<string>;}>;
 
     public priseListConfig: {
         header: HeaderConfig;
@@ -96,7 +96,9 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             'quantity',
             'articlesCount',
             'date',
-            'nature'
+            'nature',
+            'trackingDelay',
+            'limitTreatmentDate',
         ];
     }
 
@@ -146,6 +148,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                         return;
                     }
 
+                    console.log(this.colisDepose);
                     this.saveSubscription = this.loadingService
                         .presentLoadingWhile({
                             message: multiDepose ? 'Envoi des déposes en cours...' : 'Envoi de la dépose en cours...',
@@ -366,6 +369,8 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
 
     private refreshPriseListComponent(): void {
         const natureLabel = TranslationService.Translate(this.natureTranslations, 'Nature');
+        console.log(this.colisPrise);
+        console.log(this.colisPrise.filter(({hidden, packParent}) => (!hidden && !packParent)));
         this.priseListConfig = this.trackingListFactory.createListConfig(
             this.colisPrise.filter(({hidden, packParent}) => (!hidden && !packParent)),
             TrackingListFactoryService.LIST_TYPE_DROP_SUB,
@@ -483,6 +488,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                     ...tracking,
                     subPacks: subPacks ? JSON.parse(subPacks) : []
                 }));
+                console.log(this.colisPrise);
 
                 this.operator = operator;
                 this.skipValidation = skipValidation && this.fromStock;
