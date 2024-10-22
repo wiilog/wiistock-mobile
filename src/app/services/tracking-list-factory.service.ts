@@ -179,7 +179,7 @@ export class TrackingListFactoryService {
                 const natureConfig = (natureIdsToConfig && nature_id && natureIdsToConfig[nature_id]);
 
                 let quantityRow = {};
-                articles = typeof articles === 'string' ? JSON.parse(articles) : articles;
+                articles = typeof articles === 'string' && articles.length > 0 ? JSON.parse(articles) : articles;
                 if (!articles && !loading) {
                     quantityRow = isGroup
                         ? {
