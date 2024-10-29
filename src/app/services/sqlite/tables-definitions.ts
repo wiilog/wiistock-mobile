@@ -64,6 +64,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'articles', value: 'JSON'},
             {column: 'containsArticle', value: 'INTEGER'},
             {column: 'projectId', value: 'INTEGER'},
+            {column: 'manualDelayStart', value: 'VARCHAR(255)'}
         ]
     },
     {

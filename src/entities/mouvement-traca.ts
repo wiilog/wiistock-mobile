@@ -28,4 +28,6 @@ export interface MouvementTraca<FileType = string> {
     subPacks?: string;
     packParent?: string;
     isGroup?: number;
+
+    manualDelayStart?: string;
 }
