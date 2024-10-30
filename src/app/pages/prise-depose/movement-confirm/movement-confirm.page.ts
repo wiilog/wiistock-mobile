@@ -29,6 +29,10 @@ import {ViewWillEnter} from "@ionic/angular";
 import {Translations} from "@entities/translation";
 import {TranslationService} from "@app/services/translations.service";
 import {LoadingService} from "@app/services/loading.service";
+import {
+    FormPanelCalendarComponent
+} from "@common/components/panel/form-panel/form-panel-calendar/form-panel-calendar.component";
+import {FormPanelCalendarMode} from "@common/components/panel/form-panel/form-panel-calendar/form-panel-calendar-mode";
 
 enum Page {
     EDIT,
@@ -72,7 +76,8 @@ export class MovementConfirmPage implements ViewWillEnter {
         photo: string;
         natureId: number,
         freeFields: string,
-        subPacks?: any
+        subPacks?: any,
+        manualDelayStart?: string,
     }) => void;
 
     public isGroup: boolean;
@@ -109,7 +114,8 @@ export class MovementConfirmPage implements ViewWillEnter {
             signature,
             photo,
             natureId,
-            freeFields: freeFieldsValuesStr
+            freeFields: freeFieldsValuesStr,
+            manualDelayStart,
         } = this.navService.param('values');
         const freeFieldsValues = freeFieldsValuesStr ? JSON.parse(freeFieldsValuesStr) : {};
         const chosenIcon = MovementConfirmPage.PageIcon[this.movementType];
@@ -190,6 +196,17 @@ export class MovementConfirmPage implements ViewWillEnter {
 
                 this.bodyConfig = this.bodyConfig.concat([
                     {
+                      item: FormPanelCalendarComponent,
+                        config: {
+                            label: 'Début de délai manuel',
+                            value: manualDelayStart ?? null,
+                            name: 'manualDelayStart',
+                            inputConfig: {
+                                mode: FormPanelCalendarMode.DATETIME,
+                            },
+                        }
+                    },
+                    {
                         item: FormPanelInputComponent,
                         config: {
                             label: 'Commentaire',
@@ -247,7 +264,7 @@ export class MovementConfirmPage implements ViewWillEnter {
             this.toastService.presentToast(formError);
         }
         else {
-            let {quantity, comment, signature, photo, natureId, freeFields} = this.formPanelComponent.values;
+            let {quantity, comment, signature, photo, natureId, freeFields, manualDelayStart} = this.formPanelComponent.values;
             if (freeFields) {
                 Object.keys(freeFields).forEach((freeFieldId) => {
                     let freeField = freeFields[freeFieldId];
@@ -268,7 +285,8 @@ export class MovementConfirmPage implements ViewWillEnter {
                 photo,
                 natureId,
                 freeFields: JSON.stringify(freeFields),
-                subPacks: this.subPacks
+                subPacks: this.subPacks,
+                manualDelayStart,
             });
             this.navService.pop();
         }

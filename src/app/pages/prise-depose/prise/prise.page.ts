@@ -384,7 +384,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                         // we get first
                         const [dropIndex] = this.findTakingIndexes(barCode);
                         if (dropIndex !== undefined) {
-                            const {quantity, comment, signature, photo, nature_id: natureId, freeFields, isGroup, subPacks} = this.colisPrise[dropIndex];
+                            const {quantity, comment, signature, photo, nature_id: natureId, freeFields, isGroup, subPacks, manualDelayStart} = this.colisPrise[dropIndex];
                             this.trackingListFactory.disableActions();
                             this.navService.push(NavPathEnum.MOVEMENT_CONFIRM, {
                                 fromStock: this.fromStock,
@@ -398,7 +398,8 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                     signature,
                                     natureId,
                                     photo,
-                                    freeFields
+                                    freeFields,
+                                    manualDelayStart,
                                 },
                                 validate: (values: any) => {
                                     this.updatePicking(barCode, values);
@@ -490,7 +491,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     }
 
     private updatePicking(barCode: string|undefined,
-                          {quantity, comment, signature, photo, projectId, natureId, freeFields, subPacks}: {quantity?: number; comment?: string; signature?: string; photo?: string; projectId?: number; natureId: number; freeFields: string; subPacks: any;}): void {
+                          {quantity, comment, signature, photo, projectId, natureId, freeFields, subPacks, manualDelayStart}: {quantity?: number; comment?: string; signature?: string; photo?: string; projectId?: number; natureId: number; freeFields: string; subPacks: any; manualDelayStart?: string;}): void {
         const dropIndexes = this.findTakingIndexes(barCode);
         if (dropIndexes.length > 0) {
             for(const dropIndex of dropIndexes) {
@@ -504,6 +505,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                 this.colisPrise[dropIndex].nature_id = natureId;
                 this.colisPrise[dropIndex].freeFields = freeFields;
                 this.colisPrise[dropIndex].subPacks = subPacks;
+                this.colisPrise[dropIndex].manualDelayStart = manualDelayStart;
             }
             this.refreshListComponent();
         }

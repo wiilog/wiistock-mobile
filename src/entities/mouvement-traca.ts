@@ -32,4 +32,6 @@ export interface MouvementTraca<FileType = string> {
     trackingDelayColor?: string;
     trackingDelay?: string;
     limitTreatmentDate?: string;
+
+    manualDelayStart?: string;
 }
