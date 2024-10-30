@@ -43,8 +43,8 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     public footerScannerComponent: BarcodeScannerComponent;
 
     public emplacement: Emplacement;
-    public colisPrise: Array<MouvementTraca&{hidden?: boolean; subPacks: any;}>;
-    public colisDepose: Array<MouvementTraca&{subPacks?: any;}>;
+    public colisPrise: Array<MouvementTraca&{hidden?: boolean; subPacks: any; trackingDelayData?: Array<string>;}>;
+    public colisDepose: Array<MouvementTraca&{subPacks?: any; trackingDelayData?: Array<string>;}>;
 
     public priseListConfig: {
         header: HeaderConfig;
@@ -96,7 +96,9 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             'quantity',
             'articlesCount',
             'date',
-            'nature'
+            'nature',
+            'trackingDelay',
+            'limitTreatmentDate',
         ];
     }
 

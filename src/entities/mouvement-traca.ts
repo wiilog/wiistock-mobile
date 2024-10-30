@@ -29,5 +29,9 @@ export interface MouvementTraca<FileType = string> {
     packParent?: string;
     isGroup?: number;
 
+    trackingDelayColor?: string;
+    trackingDelay?: string;
+    limitTreatmentDate?: string;
+
     manualDelayStart?: string;
 }

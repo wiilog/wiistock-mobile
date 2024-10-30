@@ -64,6 +64,9 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'articles', value: 'JSON'},
             {column: 'containsArticle', value: 'INTEGER'},
             {column: 'projectId', value: 'INTEGER'},
+            {column: 'trackingDelayColor', value: 'VARCHAR(255)'},
+            {column: 'trackingDelay', value: 'VARCHAR(255)'},
+            {column: 'limitTreatmentDate', value: 'VARCHAR(255)'},
             {column: 'manualDelayStart', value: 'VARCHAR(255)'}
         ]
     },

@@ -43,7 +43,11 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     public footerScannerComponent: BarcodeScannerComponent;
 
     public emplacement: Emplacement;
-    public colisPrise: Array<MouvementTraca & {loading?: boolean; subPacks?: Array<MouvementTraca>; articles: Array<string>; trackingDelayData?: Array<string>;}>;
+    public colisPrise: Array<MouvementTraca & {
+        loading?: boolean;
+        subPacks?: Array<MouvementTraca>;
+        articles: Array<string>;
+    }>;
     public currentPacksOnLocation: Array<MouvementTraca&{hidden?: boolean}>;
     public colisPriseAlreadySaved: Array<MouvementTraca>;
 
@@ -163,9 +167,8 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             else {
                 const multiPrise = (this.colisPrise.length > 1);
                 if (!this.saveSubscription) {
-                    const copyPickingPack = this.colisPrise.map(({trackingDelayData, ...tracking}) => tracking);
-                    const movementsToSave = copyPickingPack.filter(({isGroup}) => !isGroup);
-                    const groupingMovements = copyPickingPack.filter(({isGroup}) => isGroup);
+                    const movementsToSave = this.colisPrise.filter(({isGroup}) => !isGroup);
+                    const groupingMovements = this.colisPrise.filter(({isGroup}) => isGroup);
 
                     const online = await this.networkService.hasNetwork();
                     if (!this.fromStock
@@ -349,7 +352,9 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                 this.colisPrise[index].isGroup = 1;
                 this.colisPrise[index].subPacks = groupData.packs;
             }
-            this.colisPrise[index].trackingDelayData = trackingDelayData;
+            this.colisPrise[index].trackingDelay = trackingDelayData?.delay;
+            this.colisPrise[index].trackingDelayColor = trackingDelayData?.color;
+            this.colisPrise[index].limitTreatmentDate = trackingDelayData?.limitTreatmentDate;
         }
         this.refreshListComponent();
         this.footerScannerComponent.fireZebraScan();
