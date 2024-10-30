@@ -120,7 +120,6 @@ export class TrackingListFactoryService {
                                 natureTranslation?: string;
                                 pressAction?: (barCode: string) => void
                             }): ListConfig {
-        console.log(articles);
         const notDuplicateArticles = articles.reduce(
             (acc: Array<any>, movement) => {
                 const alreadyIndex = acc.findIndex(({ref_article}) => (movement.ref_article === ref_article));

@@ -178,12 +178,10 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                         return;
                     }
 
-                    console.log('je teste les prises');
                     this.saveSubscription = this.loadingService
                         .presentLoadingWhile({
                             message: multiPrise ? 'Envoi des prises en cours...' : 'Envoi de la prise en cours...',
                             event: () => {
-                                console.log(movementsToSave);
                                 return this.localDataManager
                                     .saveTrackingMovements(movementsToSave.map(({loading, ...tracking}) => tracking))
                                     .pipe(
