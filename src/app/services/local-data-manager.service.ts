@@ -507,7 +507,10 @@ export class LocalDataManagerService {
                                 groupedSignatureHistory,
                             }
                         })
-                        : of(undefined)
+                        : of({
+                            success: false,
+                            errors: [],
+                        })
                 )),
                 map(({success, errors}) => {
                     return !success && errors.length > 0
