@@ -33,6 +33,8 @@ import {
     FormPanelCalendarComponent
 } from "@common/components/panel/form-panel/form-panel-calendar/form-panel-calendar.component";
 import {FormPanelCalendarMode} from "@common/components/panel/form-panel/form-panel-calendar/form-panel-calendar-mode";
+import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
+import {StorageService} from "@app/services/storage/storage.service";
 
 enum Page {
     EDIT,
@@ -92,6 +94,7 @@ export class MovementConfirmPage implements ViewWillEnter {
                        private sqliteService: SqliteService,
                        private formPanelService: FormPanelService,
                        private translationService: TranslationService,
+                       private storageService: StorageService,
                        private loadingService: LoadingService,
                        private navService: NavService) {
         this.savedNatureId = null;
@@ -140,10 +143,11 @@ export class MovementConfirmPage implements ViewWillEnter {
                     this.sqliteService.findAll('nature'),
                     this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.TRACKING}'`]),
                     this.translationService.get(null, `Traçabilité`, `Général`),
+                    this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_MANUAL_DELAY_START)
                 ),
                 message: 'Chargement...'
             })
-            .subscribe(([natures, freeFields, natureTranslation]: [Array<Nature>, Array<FreeField>, Translations]) => {
+            .subscribe(([natures, freeFields, natureTranslation, displayManualDelayStart]: [Array<Nature>, Array<FreeField>, Translations, boolean]) => {
                 const needsToShowNatures = natures.filter(nature => nature.hide !== 1).length > 0;
 
                 this.natureIdToNature = natures.reduce((acc, nature) => ({
@@ -194,9 +198,9 @@ export class MovementConfirmPage implements ViewWillEnter {
                     });
                 }
 
-                this.bodyConfig = this.bodyConfig.concat([
-                    {
-                      item: FormPanelCalendarComponent,
+                if(displayManualDelayStart) {
+                    this.bodyConfig.push({
+                        item: FormPanelCalendarComponent,
                         config: {
                             label: 'Début de délai manuel',
                             value: manualDelayStart ?? null,
@@ -205,7 +209,10 @@ export class MovementConfirmPage implements ViewWillEnter {
                                 mode: FormPanelCalendarMode.DATETIME,
                             },
                         }
-                    },
+                    });
+                }
+
+                this.bodyConfig = this.bodyConfig.concat([
                     {
                         item: FormPanelInputComponent,
                         config: {
