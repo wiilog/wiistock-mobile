@@ -82,7 +82,7 @@ export class FormPanelService {
                     value: (freeField.typing === FreeFieldTyping.LIST)
                         ? (value || freeField.defaultValue)
                         : (value || freeField.defaultValue || '')
-                            .split(',')
+                            .split(';')
                             .filter((id: any) => id)
                             .map((id: any) => ({id, label: id})),
                     inputConfig: {
