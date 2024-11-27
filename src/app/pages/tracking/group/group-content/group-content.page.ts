@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {HeaderConfig} from "@common/components/panel/model/header-config";
 import * as moment from "moment";
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
@@ -38,6 +38,7 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
 
     public constructor(private apiService: ApiService,
                        private toastService: ToastService,
+                       private changeDetector: ChangeDetectorRef,
                        private loadingService: LoadingService,
                        private sqlService: SqliteService,
                        private navService: NavService) {
@@ -73,46 +74,48 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public onPackScan(code: string): void {
-        if (this.apiPacksInProgress.indexOf(code) === -1) {
-            const selectedIndex = this.group.newPacks.findIndex(({code: savedCode}: {code: string}) => (savedCode === code));
-            const options = {
-                params: {code}
-            };
-
-            if (selectedIndex > -1) {
-                this.toastService.presentToast(`Le colis <b>${code}</b> est déjà présent dans le groupe`);
-            }
-            else {
-                this.apiPacksInProgress.push(code);
-                this.apiService.requestApi(ApiService.PACKS_GROUPS, options)
-                    .subscribe(
-                        (response) => {
-                            if (response.packGroup) {
-                                this.treatPacks(code);
-                                this.toastService.presentToast(`Le colis <b>${code}</b> est un groupe`);
-                            } else if (response.isSubPack) {
-                                this.treatPacks(code);
-                                this.toastService.presentToast(`Le colis <b>${code}</b> est déjà présent dans un groupe`);
-                            } else {
-                                const pack = response.pack || {
-                                    code,
-                                    nature_id: null,
-                                };
-
-                                pack.quantity = pack.quantity || 1;
-                                pack.date = moment().format('DD/MM/YYYY HH:mm:ss');
-
-                                this.group.newPacks.push(pack);
-                                this.treatPacks(code);
-                                this.refreshBodyConfig();
-                                this.refreshHeaderConfig();
-                            }
-                        },
-                        () => {
-                            this.treatPacks(code);
-                        });
-            }
+        if (this.apiPacksInProgress.indexOf(code) > -1) {
+            return;
         }
+
+        const selectedIndex = this.group.newPacks.findIndex(({code: savedCode}: {code: string}) => (savedCode === code));
+
+        if (selectedIndex > -1) {
+            this.toastService.presentToast(`Le colis <b>${code}</b> est déjà présent dans le groupe`);
+            return;
+        }
+
+        this.apiPacksInProgress.push(code);
+        this.listConfig.header.info = this.headerGroupInfo;
+        this.changeDetector.detectChanges();
+
+        this.apiService.requestApi(ApiService.PACKS_GROUPS, {params: {code}})
+            .subscribe({
+                next: (response) => {
+                    if (response.packGroup) {
+                        this.toastService.presentToast(`Le colis <b>${code}</b> est un groupe`);
+                    } else if (response.isSubPack) {
+                        this.toastService.presentToast(`Le colis <b>${code}</b> est déjà présent dans un groupe`);
+                    } else {
+                        const pack = response.pack || {
+                            code,
+                            nature_id: null,
+                        };
+
+                        pack.quantity = pack.quantity || 1;
+                        pack.date = moment().format('DD/MM/YYYY HH:mm:ss');
+
+                        this.group.newPacks.push(pack);
+                        this.refreshBodyConfig();
+                    }
+                    this.updateInProgressPack(code);
+                    this.refreshHeaderConfig();
+                },
+                error: () => {
+                    this.updateInProgressPack(code);
+                    this.refreshHeaderConfig();
+                }
+            });
     }
 
     private refreshBodyConfig() {
@@ -127,11 +130,10 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
 
     private async createHeaderConfig(group: any): Promise<HeaderConfig> {
         const nature = await this.sqlService.findOneById(`nature`, group.natureId).toPromise();
-        const sScanned = this.group.newPacks.length > 1 ? 's' : '';
 
         return {
-            title: `GROUPAGE`,
-            info: `${this.group.newPacks.length} objet${sScanned} scanné${sScanned}`,
+            title: `Groupage`,
+            info: this.headerGroupInfo,
             item: {
                 infos: {
                     object: {
@@ -219,6 +221,7 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                     color: 'danger' as IconColor,
                     action: () => {
                         this.group.newPacks.splice(this.group.newPacks.indexOf(pack), 1);
+
                         this.refreshBodyConfig();
                         this.refreshHeaderConfig();
                     }
@@ -228,35 +231,47 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public onSubmit() {
-        if (!this.loadingSubscription) {
-            const options = {
-                params: {
-                    id: this.group.id,
-                    code: this.group.code,
-                    date: this.groupDate,
-                    packs: this.group.newPacks,
-                }
-            };
-
-            this.loadingSubscription = this.loadingService
-                .presentLoadingWhile({
-                    event: () => this.apiService.requestApi(ApiService.GROUP, options)
-                })
-                .subscribe(
-                    (response) => {
-                        this.unsubscribeLoading();
-                        if (response.success) {
-                            this.toastService.presentToast(response.msg);
-                            this.navService.pop().subscribe(() => this.navService.pop());
-                        } else {
-                            this.toastService.presentToast(`Erreur lors de la synchronisation du dégroupage`);
-                        }
-                    },
-                    () => {
-                        this.unsubscribeLoading();
-                    }
-                );
+        if (this.loadingSubscription) {
+            return;
         }
+
+        if (this.apiPacksInProgress.length > 0) {
+            const errorMessage = this.apiPacksInProgress.length > 1
+                ? `${this.apiPacksInProgress.length} unités logistiques sont en cours de synchronisation`
+                : `une unité logistique est en cours de synchronisation`;
+
+            this.toastService.presentToast(`Veuillez patienter, ${errorMessage}`);
+            return;
+        }
+
+        const options = {
+            params: {
+                id: this.group.id,
+                code: this.group.code,
+                date: this.groupDate,
+                packs: this.group.newPacks,
+            }
+        };
+
+        this.loadingSubscription = this.loadingService
+            .presentLoadingWhile({
+                event: () => this.apiService.requestApi(ApiService.GROUP, options)
+            })
+            .subscribe({
+                next: (response) => {
+                    this.unsubscribeLoading();
+                    if (response.success) {
+                        this.toastService.presentToast(response.msg);
+                        this.navService.pop().subscribe(() => this.navService.pop());
+                    } else {
+                        this.toastService.presentToast(`Erreur lors de la synchronisation du dégroupage`);
+                    }
+                },
+                error: () => {
+                    this.unsubscribeLoading();
+                },
+            });
+
     }
 
     private unsubscribeLoading() {
@@ -266,11 +281,17 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
         }
     }
 
-    private treatPacks(code: string): void {
+    private updateInProgressPack(code: string): void {
         const index = this.apiPacksInProgress.indexOf(code);
         if (index > -1) {
             this.apiPacksInProgress.splice(index, 1);
         }
+    }
+
+    private get headerGroupInfo(): string {
+        const newPackCount = this.group.newPacks.length + this.apiPacksInProgress.length;
+        const sScanned = newPackCount > 1 ? 's' : '';
+        return `${newPackCount} objet${sScanned} scanné${sScanned}`;
     }
 
 }
