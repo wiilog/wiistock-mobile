@@ -95,10 +95,10 @@ export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
                 }
 
                 this.nbDrop = mouvementTraca
-                    .filter(({finished, type, fromStock, packParent}) => (
+                    .filter(({finished, type, fromStock, packGroup}) => (
                         type === 'prise' &&
                         !finished &&
-                        !fromStock && !packParent
+                        !fromStock && !packGroup
                     ))
                     .length;
 

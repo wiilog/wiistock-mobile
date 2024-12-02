@@ -858,7 +858,7 @@ export class LocalDataManagerService {
                 (type === 'depose')
             ))
             .map(({id}: any) => id);
-        return this.sqliteService.findBy('mouvement_traca', [`id IN (${mouvementTracaToDelete.join(',')}) AND packParent IS NOT NULL`])
+        return this.sqliteService.findBy('mouvement_traca', [`id IN (${mouvementTracaToDelete.join(',')}) AND packGroup IS NOT NULL`])
             .pipe(
                 mergeMap((trackingToDelete: Array<MouvementTraca>) => {
                     const subPacksToDelete = trackingToDelete.map(({ref_article}) => ref_article);

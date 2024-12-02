@@ -241,7 +241,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     public get displayPrisesList(): boolean {
         return (
             this.colisPrise
-            && this.colisPrise.filter(({hidden, packParent}) => !hidden && !packParent).length > 0
+            && this.colisPrise.filter(({hidden, packGroup}) => !hidden && !packGroup).length > 0
         );
     }
 
@@ -263,7 +263,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             if (allowedMovement) {
                 for (const pickingIndex of pickingIndexes) {
                     const picking = this.colisPrise[pickingIndex];
-                    if (!picking.packParent || this.findDropIndexes(picking.packParent).length === 0) {
+                    if (!picking.packGroup || this.findDropIndexes(picking.packGroup).length === 0) {
                         let quantity = picking.quantity;
                         picking.hidden = true;
 
@@ -283,7 +283,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                             ref_emplacement: this.emplacement.label,
                             date: moment().format(),
                             freeFields: picking.freeFields,
-                            packParent: picking.packParent,
+                            packGroup: picking.packGroup,
                             containsArticle: picking.containsArticle
                         });
 
@@ -309,7 +309,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                         this.footerScannerComponent.fireZebraScan();
                     }
                     else {
-                        this.toastService.presentToast(`Cet objet est déjà dans le groupe <b>${picking.packParent}</b>`);
+                        this.toastService.presentToast(`Cet objet est déjà dans le groupe <b>${picking.packGroup}</b>`);
                         break;
                     }
                 }
@@ -338,7 +338,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     }
 
     private pickingIsOver(): boolean {
-        return this.colisPrise.filter(({hidden, packParent}) => (!hidden && !packParent)).length === 0;
+        return this.colisPrise.filter(({hidden, packGroup}) => (!hidden && !packGroup)).length === 0;
     }
 
     private updatePicking(barCode: string|undefined,
@@ -369,7 +369,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     private refreshPriseListComponent(): void {
         const natureLabel = TranslationService.Translate(this.natureTranslations, 'Nature');
         this.priseListConfig = this.trackingListFactory.createListConfig(
-            this.colisPrise.filter(({hidden, packParent}) => (!hidden && !packParent)),
+            this.colisPrise.filter(({hidden, packGroup}) => (!hidden && !packGroup)),
             TrackingListFactoryService.LIST_TYPE_DROP_SUB,
             {
                 headerRightIcon: [

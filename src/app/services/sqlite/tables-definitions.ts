@@ -60,7 +60,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'nature_id', value: 'INTEGER'},
             {column: 'isGroup', value: 'INTEGER'},
             {column: 'subPacks', value: 'TEXT'},
-            {column: 'packParent', value: 'VARCHAR(255)'},
+            {column: 'packGroup', value: 'VARCHAR(255)'},
             {column: 'articles', value: 'JSON'},
             {column: 'containsArticle', value: 'INTEGER'},
             {column: 'projectId', value: 'INTEGER'},
