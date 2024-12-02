@@ -26,7 +26,7 @@ export interface MouvementTraca<FileType = string> {
 
     // grouping
     subPacks?: string;
-    packParent?: string;
+    packGroup?: string;
     isGroup?: number;
 
     trackingDelayColor?: string;
