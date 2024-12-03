@@ -36,7 +36,11 @@ export class UngroupConfirmPage implements ViewWillEnter, ViewWillLeave {
                        private navService: NavService) {
         this.ungroupDate = moment().format('DD/MM/YYYY HH:mm:ss');
         this.listBoldValues = [
-            'code'
+            'code',
+            'quantity',
+            'delay',
+            'limitTreatmentDate',
+            'nature',
         ];
     }
 
@@ -87,6 +91,19 @@ export class UngroupConfirmPage implements ViewWillEnter, ViewWillLeave {
                         label: 'Quantité',
                         value: pack.quantity
                     },
+                    ...(pack.delay
+                            ? {
+                                delay: {
+                                    label: 'Délai de traitement restant',
+                                    value: pack.delay,
+                                    color: pack.color,
+                                },
+                                limitTreatmentDate: {
+                                    label: 'Date limite de traitement',
+                                    value: pack.limitTreatmentDate,
+                                }
+                            }
+                            : {}),
                     ...(nature ? {
                         nature: {
                             label: `Nature`,

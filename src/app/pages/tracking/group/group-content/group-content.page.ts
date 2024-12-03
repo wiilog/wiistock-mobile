@@ -44,7 +44,12 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                        private navService: NavService) {
         this.groupDate = moment().format('DD/MM/YYYY HH:mm:ss');
         this.listBoldValues = [
-            'code'
+            'code',
+            'quantity',
+            'date',
+            'delay',
+            'limitTreatmentDate',
+            'nature',
         ];
         this.apiPacksInProgress = [];
     }
@@ -98,7 +103,7 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
             }
         })
             .subscribe({
-                next: ({isGroup, group, pack, nature}) => {
+                next: ({isGroup, group, pack, nature, trackingDelayData}) => {
                     if (isGroup) {
                         this.toastService.presentToast(`Le colis <b>${code}</b> est un groupe`);
                     } else if (group && group.code !== pack.code) { // pack is already a child in another group
@@ -113,7 +118,7 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                         newPack.date = moment().format('DD/MM/YYYY HH:mm:ss');
                         newPack.nature_id = nature && nature.id;
 
-                        this.group.newPacks.push(pack);
+                        this.group.newPacks.push({...pack, ...trackingDelayData});
                         this.refreshBodyConfig();
                     }
                     this.updateInProgressPack(code);
@@ -187,10 +192,25 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                         label: 'Quantité',
                         value: pack.quantity
                     },
-                    date: {
-                        label: 'Date/Heure',
-                        value: pack.date
-                    },
+                    ...(pack.delay
+                        ? {
+                            delay: {
+                                label: 'Délai de traitement restant',
+                                value: pack.delay,
+                                color: pack.color,
+                            },
+                            limitTreatmentDate: {
+                                label: 'Date limite de traitement',
+                                value: pack.limitTreatmentDate,
+                            }
+                        }
+                        : {
+                            date: {
+                                label: 'Date/Heure',
+                                value: pack.date
+                            },
+                        }
+                    ),
                     ...(nature ? {
                         nature: {
                             label: `Nature`,
