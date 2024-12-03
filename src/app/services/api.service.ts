@@ -50,7 +50,6 @@ export class ApiService {
     public static readonly GET_PACK_DATA = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/packs`};
     public static readonly PATCH_DISPATCH = {method: POST, service: `${ApiService.MOBILE_API_URL_BASE}/dispatches`};
     public static readonly GET_SERVER_IMAGES = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/server-images`};
-    public static readonly PACKS_GROUPS = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/pack-groups`};
     public static readonly GROUP = {method: POST, service: `${ApiService.MOBILE_API_URL_BASE}/group`};
     public static readonly UNGROUP = {method: POST, service: `${ApiService.MOBILE_API_URL_BASE}/ungroup`};
     public static readonly POST_GROUP_TRACKINGS = {method: POST, service: `${ApiService.MOBILE_API_URL_BASE}/group-trackings/{mode}`};

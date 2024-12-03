@@ -44,19 +44,22 @@ export class GroupScanGroupPage implements ViewWillEnter, ViewWillLeave {
 
     public onGroupScan(code: string): void {
         if (!this.loadingSubscription) {
-            const options = {
-                params: {code}
-            };
-
             this.loadingSubscription = this.loadingService
-                .presentLoadingWhile({event: () => this.apiService.requestApi(ApiService.PACKS_GROUPS, options)})
+                .presentLoadingWhile({
+                    event: () => this.apiService.requestApi(ApiService.GET_PACK_DATA, {
+                        params: {
+                            code,
+                            group: 1,
+                        },
+                    })
+                })
                 .subscribe({
                     next: (response) => {
                         this.unsubscribeLoading();
                         if (response.isPack) {
                             this.toastService.presentToast(`Le colis ${code} n'est pas un groupe`);
                         } else {
-                            let group = response.packGroup || {
+                            let group = response.group || {
                                 code,
                                 natureId: null,
                                 packs: [],
