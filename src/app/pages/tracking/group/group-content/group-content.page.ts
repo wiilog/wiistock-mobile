@@ -89,21 +89,29 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
         this.listConfig.header.info = this.headerGroupInfo;
         this.changeDetector.detectChanges();
 
-        this.apiService.requestApi(ApiService.PACKS_GROUPS, {params: {code}})
+        this.apiService.requestApi(ApiService.GET_PACK_DATA, {
+            params: {
+                code,
+                group: 1,
+                pack: 1,
+                nature: 1
+            }
+        })
             .subscribe({
-                next: (response) => {
-                    if (response.packGroup) {
+                next: ({isGroup, group, pack, nature}) => {
+                    if (isGroup) {
                         this.toastService.presentToast(`Le colis <b>${code}</b> est un groupe`);
-                    } else if (response.isSubPack) {
+                    } else if (group && group.code !== pack.code) { // pack is already a child in another group
                         this.toastService.presentToast(`Le colis <b>${code}</b> est déjà présent dans un groupe`);
                     } else {
-                        const pack = response.pack || {
+                        const newPack = pack || {
                             code,
                             nature_id: null,
                         };
 
-                        pack.quantity = pack.quantity || 1;
-                        pack.date = moment().format('DD/MM/YYYY HH:mm:ss');
+                        newPack.quantity = newPack.quantity || 1;
+                        newPack.date = moment().format('DD/MM/YYYY HH:mm:ss');
+                        newPack.nature_id = nature && nature.id;
 
                         this.group.newPacks.push(pack);
                         this.refreshBodyConfig();

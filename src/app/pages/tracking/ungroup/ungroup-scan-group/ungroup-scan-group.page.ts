@@ -23,7 +23,7 @@ export class UngroupScanGroupPage implements ViewWillEnter, ViewWillLeave {
 
     private loadingSubscription?: Subscription;
 
-    public constructor(private api: ApiService,
+    public constructor(private apiService: ApiService,
                        private loadingService: LoadingService,
                        private toastService: ToastService,
                        private navService: NavService) {
@@ -44,23 +44,26 @@ export class UngroupScanGroupPage implements ViewWillEnter, ViewWillLeave {
 
     public onGroupScan(code: string): void {
         if (!this.loadingSubscription) {
-            const options = {
-                params: {code}
-            };
-
             this.loadingSubscription = this.loadingService
-                .presentLoadingWhile({event: () => this.api.requestApi(ApiService.PACKS_GROUPS, options)})
+                .presentLoadingWhile({
+                    event: () => this.apiService.requestApi(ApiService.GET_PACK_DATA, {
+                        params: {
+                            code,
+                            group: 1
+                        }
+                    })
+                })
                 .subscribe({
                     next: (response) => {
                         this.unsubscribeLoading();
                         if (response.isPack) {
                             this.toastService.presentToast(`Le colis ${code} n'est pas un groupe`);
-                        } else if (response.packGroup && !response.packGroup.packs.length) {
+                        } else if (response.group && !response.group.packs.length) {
                             this.toastService.presentToast(`Le groupe ${code} ne contient aucun colis`);
-                        } else if (response.packGroup) {
+                        } else if (response.group) {
                             this.navService.push(NavPathEnum.UNGROUP_CONFIRM, {
                                 location: this.navService.param(`location`),
-                                group: response.packGroup
+                                group: response.group
                             });
                         } else {
                             this.toastService.presentToast(`Le groupe ${code} n'existe pas`)
