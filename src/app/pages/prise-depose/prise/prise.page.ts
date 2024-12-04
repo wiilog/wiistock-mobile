@@ -649,7 +649,6 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                         ]
                                     });
                                 } else {
-                                    console.log("ON PASSE ICI ", {isGroup, isPack, barCode, group, nature});
                                     this.processLogisticUnitTaking(isGroup, isPack, barCode, group, nature, trackingDelayData);
                                 }
                             },

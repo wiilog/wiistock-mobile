@@ -91,12 +91,12 @@ export class UngroupConfirmPage implements ViewWillEnter, ViewWillLeave {
                         label: 'Quantité',
                         value: pack.quantity
                     },
-                    ...(pack.delay
+                    ...(pack.trackingDelay
                             ? {
                                 delay: {
                                     label: 'Délai de traitement restant',
-                                    value: pack.delay,
-                                    color: pack.color,
+                                    value: pack.trackingDelay,
+                                    color: pack.trackingDelayColor,
                                 },
                                 limitTreatmentDate: {
                                     label: 'Date limite de traitement',

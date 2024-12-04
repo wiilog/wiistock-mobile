@@ -118,7 +118,11 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                         newPack.date = moment().format('DD/MM/YYYY HH:mm:ss');
                         newPack.nature_id = nature && nature.id;
 
-                        this.group.newPacks.push({...pack, ...trackingDelayData});
+                        this.group.newPacks.push({
+                            ...pack,
+                            trackingDelay: trackingDelayData['delay'] || null,
+                            trackingDelayColor: trackingDelayData['color'] || null,
+                        });
                         this.refreshBodyConfig();
                     }
                     this.updateInProgressPack(code);
@@ -192,12 +196,12 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                         label: 'Quantité',
                         value: pack.quantity
                     },
-                    ...(pack.delay
+                    ...(pack.trackingDelay
                         ? {
                             delay: {
                                 label: 'Délai de traitement restant',
-                                value: pack.delay,
-                                color: pack.color,
+                                value: pack.trackingDelay,
+                                color: pack.trackingDelayColor,
                             },
                             limitTreatmentDate: {
                                 label: 'Date limite de traitement',
