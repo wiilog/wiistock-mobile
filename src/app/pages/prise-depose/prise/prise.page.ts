@@ -351,6 +351,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             if (groupData) {
                 this.colisPrise[index].isGroup = 1;
                 this.colisPrise[index].subPacks = groupData.packs;
+                this.colisPrise[index].packGroup = groupData.code;
             }
             this.colisPrise[index].trackingDelay = trackingDelayData?.delay;
             this.colisPrise[index].trackingDelayColor = trackingDelayData?.color;
@@ -718,23 +719,32 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                     cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
                     message: `
                         Le colis ${barCode} est contenu dans le groupe ${group.code}.
-                        <br>Confirmer la prise l'enlèvera du groupe.
+                        <br>Voulez-vous prendre le groupe entier, l'Ul seule ou annuler ?
                     `,
                     buttons: [
                         {
-                            text: 'Confirmer',
-                            cssClass: 'alert-success',
+                            text: 'Prise du groupe',
+                            cssClass: 'alert-success full-width margin-right',
+                            handler: () => {
+                                this.updateTrackingMovementNature(barCode, nature && nature.id, group);
+                            }
+                        },
+                        {
+                            text: "Prise de l'UL",
+                            cssClass: 'alert-danger full-width margin-right',
+                            role: 'cancel',
                             handler: () => {
                                 this.updateTrackingMovementNature(barCode, nature && nature.id);
                             }
                         },
                         {
                             text: 'Annuler',
-                            cssClass: 'alert-danger',
+                            cssClass: 'alert-danger full-width margin-right',
                             role: 'cancel',
                             handler: () => {
                                 const cancelPicking = this.cancelPickingAction();
-                                cancelPicking({object: {value: barCode, label: barCode}});
+                                const value = isGroup && group ? group.code : barCode;
+                                cancelPicking({object: {value: value, label: value}});
                             }
                         }
                     ]
