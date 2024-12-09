@@ -174,7 +174,7 @@ export class TrackingListFactoryService {
                         : {}
                 )
             },
-            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, articles, loading, isGroup, subPacks, trackingDelay, trackingDelayColor, limitTreatmentDate, fromStock, containsArticle}) => {
+            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, articles, loading, isGroup, subPacks, trackingDelay, trackingDelayColor, limitTreatmentDate, fromStock, containsArticle, packGroup}) => {
                 const natureConfig = (natureIdsToConfig && nature_id && natureIdsToConfig[nature_id]);
 
                 let quantityRow = {};
@@ -210,7 +210,7 @@ export class TrackingListFactoryService {
                 const infos = {
                     [TrackingListFactoryService.TRACKING_IDENTIFIER_NAME]: {
                         label: 'Objet',
-                        value: ref_article
+                        value: isGroup ? packGroup : ref_article
                     },
                     ...quantityRow,
                     ...articlesCount,
