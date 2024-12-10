@@ -102,15 +102,15 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                 group: 1,
                 pack: 1,
                 nature: 1,
-                grouping: 1,
+                splitCount: 1,
             }
         })
             .subscribe({
-                next: ({isGroup, group, pack, nature, trackingDelayData, targetsNumber}) => {
+                next: ({isGroup, group, pack, nature, trackingDelayData, splitCount}) => {
                     if (isGroup) {
                         this.toastService.presentToast(`Le colis <b>${code}</b> est un groupe`);
                     } else if (group && group.code !== pack.code) { // pack is already a child in another group
-                        this.showPackSplitModal(code, group, pack, nature, trackingDelayData, targetsNumber);
+                        this.showPackSplitModal(code, group, pack, nature, trackingDelayData, splitCount);
                     } else {
                         this.addPackToBody(code, nature, trackingDelayData, pack);
                     }
@@ -315,7 +315,7 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
         return `${newPackCount} objet${sScanned} scanné${sScanned}`;
     }
 
-    private showPackSplitModal(code: string, group: any, pack: any, nature: any, targetsNumber: number, trackingDelayData?: any){
+    private showPackSplitModal(code: string, group: any, pack: any, nature: any, splitCount: number, trackingDelayData?: any){
         this.alertService.show({
             header: "Confirmation d'action",
             backdropDismiss: false,
@@ -330,7 +330,7 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                     cssClass: 'alert-success',
                     handler: () => {
                         const packSplitNumber = this.group.newPacks.filter((newPack: any) => newPack.splitFromId && newPack.splitFromId === pack.id).length;
-                        const newBarCode = `${code}.${targetsNumber + packSplitNumber + 1}`;
+                        const newBarCode = `${code}.${splitCount + packSplitNumber + 1}`;
                         this.addPackToBody(newBarCode, nature, trackingDelayData, null, pack);
                     }
                 },
