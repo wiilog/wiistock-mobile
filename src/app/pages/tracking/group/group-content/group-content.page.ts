@@ -14,6 +14,7 @@ import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {LoadingService} from '@app/services/loading.service';
 import {Subscription} from 'rxjs';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {AlertService} from "@app/services/alert.service";
 
 @Component({
     selector: 'wii-group-content',
@@ -41,6 +42,7 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                        private changeDetector: ChangeDetectorRef,
                        private loadingService: LoadingService,
                        private sqlService: SqliteService,
+                       private alertService: AlertService,
                        private navService: NavService) {
         this.groupDate = moment().format('DD/MM/YYYY HH:mm:ss');
         this.listBoldValues = [
@@ -99,31 +101,43 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                 code,
                 group: 1,
                 pack: 1,
-                nature: 1
+                nature: 1,
+                grouping: 1,
             }
         })
             .subscribe({
-                next: ({isGroup, group, pack, nature, trackingDelayData}) => {
+                next: ({isGroup, group, pack, nature, trackingDelayData, targetsNumber}) => {
                     if (isGroup) {
                         this.toastService.presentToast(`Le colis <b>${code}</b> est un groupe`);
                     } else if (group && group.code !== pack.code) { // pack is already a child in another group
-                        this.toastService.presentToast(`Le colis <b>${code}</b> est déjà présent dans un groupe`);
-                    } else {
-                        const newPack = pack || {
-                            code,
-                            nature_id: null,
-                        };
-
-                        newPack.quantity = newPack.quantity || 1;
-                        newPack.date = moment().format('DD/MM/YYYY HH:mm:ss');
-                        newPack.nature_id = nature && nature.id;
-
-                        this.group.newPacks.push({
-                            ...pack,
-                            trackingDelay: trackingDelayData['delay'] || null,
-                            trackingDelayColor: trackingDelayData['color'] || null,
+                        this.alertService.show({
+                            header: "Confirmation d'action",
+                            backdropDismiss: false,
+                            cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+                            message: `
+                                Le colis <b>${code}</b> est contenu dans le groupe ${group.code}.
+                                <br>Voulez-vous diviser votre colis ?
+                            `,
+                            buttons: [
+                                {
+                                    text: 'Diviser votre colis',
+                                    cssClass: 'alert-success',
+                                    handler: () => {
+                                        const packSplitNumber = this.group.newPacks.filter((newPack: any) => newPack.splitFromId && newPack.splitFromId === pack.id).length;
+                                        const newBarCode = code + '.' + (targetsNumber + packSplitNumber + 1);
+                                        this.addPackToBody(newBarCode, nature, trackingDelayData, null, pack);
+                                    }
+                                },
+                                {
+                                    text: 'Annuler',
+                                    cssClass: 'alert-danger',
+                                    role: 'cancel',
+                                    handler: () => {}
+                                }
+                            ]
                         });
-                        this.refreshBodyConfig();
+                    } else {
+                        this.addPackToBody(code, nature, trackingDelayData, pack);
                     }
                     this.updateInProgressPack(code);
                     this.refreshHeaderConfig();
@@ -326,4 +340,23 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
         return `${newPackCount} objet${sScanned} scanné${sScanned}`;
     }
 
+    private addPackToBody(barCode: string, nature: any, trackingDelayData?: any, pack?: any, splitFrom?: any){
+        const newPack = pack || {
+            code: barCode,
+            nature_id: null,
+            ...(splitFrom
+                ? {
+                    splitFromId: splitFrom.id,
+                }
+                : {}
+            ),
+        };
+
+        newPack.quantity = newPack.quantity || 1;
+        newPack.date = moment().format('DD/MM/YYYY HH:mm:ss');
+        newPack.nature_id = nature && nature.id;
+
+        this.group.newPacks.push({...newPack, ...trackingDelayData});
+        this.refreshBodyConfig();
+    }
 }
