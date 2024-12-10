@@ -110,32 +110,7 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                     if (isGroup) {
                         this.toastService.presentToast(`Le colis <b>${code}</b> est un groupe`);
                     } else if (group && group.code !== pack.code) { // pack is already a child in another group
-                        this.alertService.show({
-                            header: "Confirmation d'action",
-                            backdropDismiss: false,
-                            cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
-                            message: `
-                                Le colis <b>${code}</b> est contenu dans le groupe ${group.code}.
-                                <br>Voulez-vous diviser votre colis ?
-                            `,
-                            buttons: [
-                                {
-                                    text: 'Diviser votre colis',
-                                    cssClass: 'alert-success',
-                                    handler: () => {
-                                        const packSplitNumber = this.group.newPacks.filter((newPack: any) => newPack.splitFromId && newPack.splitFromId === pack.id).length;
-                                        const newBarCode = code + '.' + (targetsNumber + packSplitNumber + 1);
-                                        this.addPackToBody(newBarCode, nature, trackingDelayData, null, pack);
-                                    }
-                                },
-                                {
-                                    text: 'Annuler',
-                                    cssClass: 'alert-danger',
-                                    role: 'cancel',
-                                    handler: () => {}
-                                }
-                            ]
-                        });
+                        this.showPackSplitModal(code, group, pack, nature, trackingDelayData, targetsNumber);
                     } else {
                         this.addPackToBody(code, nature, trackingDelayData, pack);
                     }
@@ -340,6 +315,35 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
         return `${newPackCount} objet${sScanned} scanné${sScanned}`;
     }
 
+    private showPackSplitModal(code: string, group: any, pack: any, nature: any, targetsNumber: number, trackingDelayData?: any){
+        this.alertService.show({
+            header: "Confirmation d'action",
+            backdropDismiss: false,
+            cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+            message: `
+                Le colis <b>${code}</b> est contenu dans le groupe ${group.code}.
+                <br>Voulez-vous diviser votre colis ?
+            `,
+            buttons: [
+                {
+                    text: 'Diviser votre colis',
+                    cssClass: 'alert-success',
+                    handler: () => {
+                        const packSplitNumber = this.group.newPacks.filter((newPack: any) => newPack.splitFromId && newPack.splitFromId === pack.id).length;
+                        const newBarCode = `${code}.${targetsNumber + packSplitNumber + 1}`;
+                        this.addPackToBody(newBarCode, nature, trackingDelayData, null, pack);
+                    }
+                },
+                {
+                    text: 'Annuler',
+                    cssClass: 'alert-danger',
+                    role: 'cancel',
+                    handler: () => {}
+                }
+            ]
+        });
+    }
+
     private addPackToBody(barCode: string, nature: any, trackingDelayData?: any, pack?: any, splitFrom?: any){
         const newPack = pack || {
             code: barCode,
@@ -356,7 +360,12 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
         newPack.date = moment().format('DD/MM/YYYY HH:mm:ss');
         newPack.nature_id = nature && nature.id;
 
-        this.group.newPacks.push({...newPack, ...trackingDelayData});
+        if(trackingDelayData) {
+            newPack.trackingDelay = trackingDelayData['delay'] || null;
+            newPack.trackingDelayColor = trackingDelayData['color'] || null;
+        }
+
+        this.group.newPacks.push(newPack);
         this.refreshBodyConfig();
     }
 }
