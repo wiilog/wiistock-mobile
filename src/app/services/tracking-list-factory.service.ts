@@ -210,7 +210,7 @@ export class TrackingListFactoryService {
                 const infos = {
                     [TrackingListFactoryService.TRACKING_IDENTIFIER_NAME]: {
                         label: 'Objet',
-                        value: isGroup ? packGroup : ref_article
+                        value: ref_article
                     },
                     ...quantityRow,
                     ...articlesCount,

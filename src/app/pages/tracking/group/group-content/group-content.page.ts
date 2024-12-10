@@ -109,13 +109,13 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                 next: ({isGroup, group, pack, nature, trackingDelayData, splitCount}) => {
                     if (isGroup) {
                         this.toastService.presentToast(`Le colis <b>${code}</b> est un groupe`);
+                        this.refreshHeaderConfig();
+                        this.updateInProgressPack(code);
                     } else if (group && group.code !== pack.code) { // pack is already a child in another group
                         this.showPackSplitModal(code, group, pack, nature, trackingDelayData, splitCount);
                     } else {
                         this.addPackToBody(code, nature, trackingDelayData, pack);
                     }
-                    this.updateInProgressPack(code);
-                    this.refreshHeaderConfig();
                 },
                 error: () => {
                     this.updateInProgressPack(code);
@@ -330,15 +330,23 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                     cssClass: 'alert-success',
                     handler: () => {
                         const packSplitNumber = this.group.newPacks.filter((newPack: any) => newPack.splitFromId && newPack.splitFromId === pack.id).length;
-                        const newBarCode = `${code}.${splitCount + packSplitNumber + 1}`;
+                        const codeSuffix = (
+                            (Number(splitCount) || 0)
+                            + (Number(packSplitNumber) || 0)
+                            + 1
+                        );
+                        const newBarCode = `${code}.${codeSuffix}`;
                         this.addPackToBody(newBarCode, nature, trackingDelayData, null, pack);
+                        this.updateInProgressPack(code);
                     }
                 },
                 {
                     text: 'Annuler',
                     cssClass: 'alert-danger',
                     role: 'cancel',
-                    handler: () => {}
+                    handler: () => {
+                        this.updateInProgressPack(code);
+                    }
                 }
             ]
         });
@@ -366,6 +374,9 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
         }
 
         this.group.newPacks.push(newPack);
+
+        this.refreshHeaderConfig();
         this.refreshBodyConfig();
+        this.updateInProgressPack(barCode);
     }
 }

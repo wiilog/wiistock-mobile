@@ -346,17 +346,23 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     private updateTrackingMovementNature(barCode: string, natureId?: number, groupData?: any, trackingDelayData?: any): void {
         const indexesToUpdate = this.findTakingIndexes(barCode);
         for(const index of indexesToUpdate) {
-            this.colisPrise[index].nature_id = natureId;
             this.colisPrise[index].loading = false;
+
             if (groupData) {
                 this.colisPrise[index].isGroup = 1;
                 this.colisPrise[index].subPacks = groupData.packs;
-                this.colisPrise[index].packGroup = groupData.code;
+                this.colisPrise[index].ref_article = groupData.code;
+                this.colisPrise[index].nature_id = groupData.natureId;
             }
+            else {
+                this.colisPrise[index].nature_id = natureId;
+            }
+
             this.colisPrise[index].trackingDelay = trackingDelayData?.delay;
             this.colisPrise[index].trackingDelayColor = trackingDelayData?.color;
             this.colisPrise[index].limitTreatmentDate = trackingDelayData?.limitTreatmentDate;
         }
+
         this.refreshListComponent();
         this.footerScannerComponent.fireZebraScan();
     }
