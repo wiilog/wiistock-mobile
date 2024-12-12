@@ -102,6 +102,7 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                 group: 1,
                 pack: 1,
                 nature: 1,
+                trackingDelayData: 1,
                 splitCount: 1,
             }
         })

@@ -606,6 +606,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                 code: barCode,
                                 nature: 1,
                                 group: 1,
+                                trackingDelayData: 1,
                                 ...this.displayWarningWrongLocation
                                     ? {
                                         location: 1,
@@ -760,7 +761,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             }
         }
         else { // isGroup === true
-            this.updateTrackingMovementNature(barCode, nature && nature.id, group);
+            this.updateTrackingMovementNature(barCode, nature && nature.id, group, trackingDelayData);
         }
     }
 

@@ -51,6 +51,7 @@ export class ReadingScanPage implements ViewWillEnter, ViewWillLeave {
                         nature: 1,
                         pack: 1,
                         movements: 1,
+                        trackingDelayData: 1,
                     }
                 })
             })

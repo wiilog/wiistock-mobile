@@ -284,7 +284,10 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                             date: moment().format(),
                             freeFields: picking.freeFields,
                             packGroup: picking.packGroup,
-                            containsArticle: picking.containsArticle
+                            containsArticle: picking.containsArticle,
+                            limitTreatmentDate: picking.limitTreatmentDate,
+                            trackingDelay: picking.trackingDelay,
+                            trackingDelayColor: picking.trackingDelayColor,
                         });
 
                         const remover = TrackingListFactoryService.CreateRemoveItemFromListHandler(
@@ -368,6 +371,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
 
     private refreshPriseListComponent(): void {
         const natureLabel = TranslationService.Translate(this.natureTranslations, 'Nature');
+
         this.priseListConfig = this.trackingListFactory.createListConfig(
             this.colisPrise.filter(({hidden, packGroup}) => (!hidden && !packGroup)),
             TrackingListFactoryService.LIST_TYPE_DROP_SUB,
