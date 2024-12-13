@@ -333,7 +333,7 @@ export class CollecteArticlesPage implements CanLeave, ViewWillEnter, ViewWillLe
                 this.toastService.presentToast('Collecte commencée en mode hors ligne');
             }
 
-            this.registerMvt(article, quantity);
+            this.registerMvt(article, quantity, pickedArticle);
         }
     }
 
