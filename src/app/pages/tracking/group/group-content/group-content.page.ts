@@ -12,9 +12,11 @@ import {MovementConfirmType} from "@pages/prise-depose/movement-confirm/movement
 import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcode-scanner.component";
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {LoadingService} from '@app/services/loading.service';
-import {Subscription} from 'rxjs';
+import {Subscription, zip} from 'rxjs';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {AlertService} from "@app/services/alert.service";
+import {TranslationService} from "@app/services/translations.service";
+import {Translations} from "@entities/translation";
 
 @Component({
     selector: 'wii-group-content',
@@ -37,10 +39,13 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
 
     private apiPacksInProgress: Array<string>;
 
+    private packTranslations: Translations;
+
     public constructor(private apiService: ApiService,
                        private toastService: ToastService,
                        private changeDetector: ChangeDetectorRef,
                        private loadingService: LoadingService,
+                       private translationService: TranslationService,
                        private sqlService: SqliteService,
                        private alertService: AlertService,
                        private navService: NavService) {
@@ -57,20 +62,26 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public async ionViewWillEnter() {
-        this.apiPacksInProgress = [];
-        if (this.footerScannerComponent) {
-            this.footerScannerComponent.fireZebraScan();
-        }
+        zip(
+            this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`)
+        ).subscribe(async ([packTranslations]) => {
+            this.packTranslations = packTranslations;
 
-        if(!this.group) {
-            this.group = this.navService.param(`group`);
-            this.group.newPacks = [];
-        }
+            this.apiPacksInProgress = [];
+            if (this.footerScannerComponent) {
+                this.footerScannerComponent.fireZebraScan();
+            }
 
-        this.listConfig = {
-            header: await this.createHeaderConfig(this.group),
-            body: await this.createBodyConfig(this.group.newPacks),
-        };
+            if(!this.group) {
+                this.group = this.navService.param(`group`);
+                this.group.newPacks = [];
+            }
+
+            this.listConfig = {
+                header: await this.createHeaderConfig(this.group),
+                body: await this.createBodyConfig(this.group.newPacks),
+            };
+        });
     }
 
     public ionViewWillLeave(): void {
@@ -175,6 +186,8 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
         return await Promise.all(packs.map(async (pack: any) => {
             const nature = await this.sqlService.findOneById(`nature`, pack.nature_id).toPromise();
 
+            const processingTimeLabel = TranslationService.Translate(this.packTranslations, 'Délai de traitement');
+
             return {
                 color: nature ? nature.color : undefined,
                 infos: {
@@ -189,7 +202,7 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                     ...(pack.trackingDelay
                         ? {
                             delay: {
-                                label: 'Délai de traitement restant',
+                                label: processingTimeLabel,
                                 value: pack.trackingDelay,
                                 color: pack.trackingDelayColor,
                             },
