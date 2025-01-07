@@ -56,32 +56,27 @@ export class ReadingScanPage implements ViewWillEnter, ViewWillLeave {
                 })
             })
             .subscribe((data) => {
-                if (data.existing) {
-                    if (data.isPack && data.pack) {
-                        this.navService.push(NavPathEnum.READING_DETAILS, {
-                            values: {
-                                logisticUnit: {
-                                    code: data.pack.code,
-                                    nature: data.pack.nature,
-                                    location: data.pack.location,
-                                    date: data.pack.date,
-                                    quantity: data.pack.quantity,
-                                },
-                                movements: data.movements,
-                                references: data.references,
-                                types: data.types,
-                                orderNumbers: data.orderNumbers,
-                                suppliers: data.suppliers,
-                                creatingDispatch: data.creatingDispatch,
-                                inProgressDispatch: data.inProgressDispatch,
-                                creatingOperationNumber: data.creatingOperationNumber,
-                                trackingDelayData: data.trackingDelayData,
+                if (data.existing && data.pack) {
+                    this.navService.push(NavPathEnum.READING_DETAILS, {
+                        values: {
+                            logisticUnit: {
+                                code: data.pack.code,
+                                nature: data.pack.nature,
+                                location: data.pack.location,
+                                date: data.pack.date,
+                                quantity: data.pack.quantity,
                             },
-                        });
-                    }
-                    else {
-                        this.toastService.presentToast(`Impossible de procéder à la lecture de cet objet`);
-                    }
+                            movements: data.movements,
+                            references: data.references,
+                            types: data.types,
+                            orderNumbers: data.orderNumbers,
+                            suppliers: data.suppliers,
+                            creatingDispatch: data.creatingDispatch,
+                            inProgressDispatch: data.inProgressDispatch,
+                            creatingOperationNumber: data.creatingOperationNumber,
+                            trackingDelayData: data.trackingDelayData,
+                        },
+                    });
                 } else {
                     this.toastService.presentToast(`L'objet renseigné n'existe pas dans la base.`);
                 }
