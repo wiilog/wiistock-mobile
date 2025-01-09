@@ -6,10 +6,12 @@ import {NavService} from "@app/services/nav/nav.service";
 import {ListPanelItemConfig} from "@common/components/panel/model/list-panel/list-panel-item-config";
 import {ApiService} from "@app/services/api.service";
 import {ToastService} from "@app/services/toast.service";
-import {Subscription} from 'rxjs';
+import {Subscription, zip} from 'rxjs';
 import {ViewWillEnter, ViewWillLeave} from '@ionic/angular';
 import {LoadingService} from '@app/services/loading.service';
 import {mergeMap, map} from 'rxjs/operators';
+import {Translations} from "@entities/translation";
+import {TranslationService} from "@app/services/translations.service";
 
 @Component({
     selector: 'wii-ungroup-confirm',
@@ -29,9 +31,12 @@ export class UngroupConfirmPage implements ViewWillEnter, ViewWillLeave {
 
     private loadingSubscription?: Subscription;
 
+    private packTranslations: Translations;
+
     public constructor(private apiService: ApiService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
+                       private translationService : TranslationService,
                        private sqliteService: SqliteService,
                        private navService: NavService) {
         this.ungroupDate = moment().format('DD/MM/YYYY HH:mm:ss');
@@ -45,12 +50,22 @@ export class UngroupConfirmPage implements ViewWillEnter, ViewWillLeave {
     }
 
     async ionViewWillEnter() {
-        this.group = this.navService.param(`group`);
+        this.loadingService
+            .presentLoadingWhile({
+                event: () => zip(
+                    this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`)
+                )
+            })
+            .subscribe(async ([packTranslations]) => {
+                this.packTranslations = packTranslations;
 
-        this.listConfig = {
-            header: await this.createHeaderConfig(this.group),
-            body: await this.createBodyConfig(this.group.packs),
-        };
+                this.group = this.navService.param(`group`);
+
+                this.listConfig = {
+                    header: await this.createHeaderConfig(this.group),
+                    body: await this.createBodyConfig(this.group.packs),
+                };
+            });
     }
 
     public ionViewWillLeave() {
@@ -79,6 +94,7 @@ export class UngroupConfirmPage implements ViewWillEnter, ViewWillLeave {
     private async createBodyConfig(packs: any): Promise<Array<ListPanelItemConfig>> {
         return await Promise.all(packs.map(async (pack: any) => {
             const nature = await this.sqliteService.findOneById(`nature`, pack.nature_id).toPromise();
+            const processingTimeLabel = TranslationService.Translate(this.packTranslations, 'Délai de traitement');
 
             return {
                 color: nature ? nature.color : '',
@@ -94,7 +110,7 @@ export class UngroupConfirmPage implements ViewWillEnter, ViewWillLeave {
                     ...(pack.trackingDelay
                             ? {
                                 delay: {
-                                    label: 'Délai de traitement restant',
+                                    label: processingTimeLabel,
                                     value: pack.trackingDelay,
                                     color: pack.trackingDelayColor,
                                 },

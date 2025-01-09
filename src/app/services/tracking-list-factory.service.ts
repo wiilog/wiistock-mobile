@@ -106,7 +106,7 @@ export class TrackingListFactoryService {
 
     public createListConfig(articles: Array<MouvementTraca & {loading?: boolean; isGroup?: number|boolean; subPacks?: Array<MouvementTraca>;}>,
                             listType: number,
-                            {location, objectLabel,  validate, rightIcon, confirmItem, natureIdsToConfig, natureTranslation, headerRightIcon, pressAction}: {
+                            {location, objectLabel,  validate, rightIcon, confirmItem, natureIdsToConfig, natureTranslation, trackingDelayTranslation, headerRightIcon, pressAction}: {
                                 location?: Emplacement;
                                 natureIdsToConfig?: {[id: number]: { label: string; color?: string; }};
                                 validate?: () => void;
@@ -118,6 +118,7 @@ export class TrackingListFactoryService {
                                 confirmItem?: (info: { [name: string]: { label?: string; value?: string; } }) => void;
                                 objectLabel: string;
                                 natureTranslation?: string;
+                                trackingDelayTranslation?: string;
                                 pressAction?: (barCode: string) => void
                             }): ListConfig {
         const notDuplicateArticles = articles.reduce(
@@ -219,7 +220,7 @@ export class TrackingListFactoryService {
                             ? (
                                 {
                                     trackingDelay: {
-                                        label: 'Délai de traitement restant',
+                                        label: `${trackingDelayTranslation} restant`,
                                         value: trackingDelay,
                                         color: trackingDelayColor,
                                     },

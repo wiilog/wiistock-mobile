@@ -74,6 +74,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     private finishAction: () => void;
     private operator: string;
     private natureTranslations: Translations;
+    private logisticUnitTranslations: Translations;
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
 
@@ -85,10 +86,8 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                        private alertService: AlertService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
-                       private changeDetectorRef: ChangeDetectorRef,
                        private localDataManager: LocalDataManagerService,
                        private trackingListFactory: TrackingListFactoryService,
-                       private activatedRoute: ActivatedRoute,
                        private storageService: StorageService,
                        private translationService: TranslationService,
                        private navService: NavService) {
@@ -113,22 +112,27 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
 
         const hasNetwork = await this.networkService.hasNetwork();
 
-        zip(
-            this.storageService.getString(StorageKeyEnum.OPERATOR) as Observable<string>,
-            this.sqliteService.getPrises(this.fromStock),
-            (hasNetwork && this.emplacement && !this.fromStock
-                ? this.apiService.requestApi(ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})
-                : of({trackingDrops: []})),
-            this.sqliteService.findAll('nature'),
-            this.translationService.get(null, `Traçabilité`, `Général`),
-            this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_WARNING_WRONG_LOCATION)
-        )
-            .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures, natureTranslations, displayWarningWrongLocation]) => {
+        this.loadingService
+            .presentLoadingWhile({
+                event: () => zip(
+                    this.storageService.getString(StorageKeyEnum.OPERATOR) as Observable<string>,
+                    this.sqliteService.getPrises(this.fromStock),
+                    (hasNetwork && this.emplacement && !this.fromStock
+                        ? this.apiService.requestApi(ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})
+                        : of({trackingDrops: []})),
+                    this.sqliteService.findAll('nature'),
+                    this.translationService.get(null, `Traçabilité`, `Général`),
+                    this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`),
+                    this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_WARNING_WRONG_LOCATION)
+                )
+            })
+            .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures, natureTranslations, logisticUnitTranslations, displayWarningWrongLocation]) => {
                 this.operator = operator;
                 this.colisPriseAlreadySaved = colisPriseAlreadySaved;
                 this.currentPacksOnLocation = trackingDrops;
                 this.footerScannerComponent.fireZebraScan();
                 this.natureTranslations = natureTranslations;
+                this.logisticUnitTranslations = logisticUnitTranslations;
                 this.displayWarningWrongLocation = displayWarningWrongLocation;
 
                 if (natures) {
@@ -368,14 +372,14 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     }
 
     private refreshListComponent(): void {
-        const natureLabel = TranslationService.Translate(this.natureTranslations, 'Nature');
         const {header: listTakingHeader, body: listTakingBody} = this.trackingListFactory.createListConfig(
             this.colisPrise,
             TrackingListFactoryService.LIST_TYPE_TAKING_MAIN,
             {
                 objectLabel: this.objectLabel,
                 natureIdsToConfig: this.natureIdsToConfig,
-                natureTranslation: natureLabel,
+                natureTranslation: TranslationService.Translate(this.natureTranslations, 'Nature'),
+                trackingDelayTranslation: TranslationService.Translate(this.logisticUnitTranslations, 'Délai de traitement'),
                 location: this.emplacement,
                 headerRightIcon: {
                     color: 'primary',
@@ -460,6 +464,9 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                     },
                 },
                 objectLabel: this.objectLabel,
+                natureIdsToConfig: this.natureIdsToConfig,
+                natureTranslation: TranslationService.Translate(this.natureTranslations, 'Nature'),
+                trackingDelayTranslation: TranslationService.Translate(this.logisticUnitTranslations, 'Délai de traitement'),
                 rightIcon: {
                     mode: 'upload',
                     action: ({object}) => {
