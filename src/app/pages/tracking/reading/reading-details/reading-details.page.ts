@@ -7,6 +7,7 @@ import {TranslationService} from '@app/services/translations.service';
 import {zip} from 'rxjs';
 import {IconConfig} from "@common/components/panel/model/icon-config";
 import {CardListConfig} from "@common/components/card-list/card-list-config";
+import {LoadingService} from "@app/services/loading.service";
 
 @Component({
     selector: 'wii-reading-details',
@@ -71,25 +72,31 @@ export class ReadingDetailsPage implements ViewWillEnter {
 
     public movementsListConfig: Array<CardListConfig>;
 
-    public constructor(private navService: NavService, private translationService: TranslationService) {
+    public constructor(private loadingService: LoadingService,
+                       private navService: NavService,
+                       private translationService: TranslationService) {
     }
 
     public ionViewWillEnter(): void {
         this.values = this.navService.param(`values`);
 
-        zip(
-            this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`),
-            this.translationService.get(null, `Traçabilité`, `Général`),
-            this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`)
-        ).subscribe(([dispatchTranslations, natureTranslations, packTranslations]: [Translations, Translations, Translations]) => {
-            this.dispatchTranslations = dispatchTranslations;
-            this.natureTranslations = natureTranslations;
-            this.packTranslations = packTranslations;
+        this.loadingService
+            .presentLoadingWhile({
+                event: () => zip(
+                    this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`),
+                    this.translationService.get(null, `Traçabilité`, `Général`),
+                    this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`)
+                )
+            })
+            .subscribe(([dispatchTranslations, natureTranslations, packTranslations]: [Translations, Translations, Translations]) => {
+                this.dispatchTranslations = dispatchTranslations;
+                this.natureTranslations = natureTranslations;
+                this.packTranslations = packTranslations;
 
-            this.refreshHeaderConfig();
-            this.refreshContentConfig();
-            this.refreshMovementsList();
-        });
+                this.refreshHeaderConfig();
+                this.refreshContentConfig();
+                this.refreshMovementsList();
+            });
     }
 
     public redirectToCreatingDispatch(): void {

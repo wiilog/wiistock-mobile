@@ -50,18 +50,22 @@ export class UngroupConfirmPage implements ViewWillEnter, ViewWillLeave {
     }
 
     async ionViewWillEnter() {
-        zip(
-            this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`)
-        ).subscribe(async ([packTranslations]) => {
-            this.packTranslations = packTranslations;
+        this.loadingService
+            .presentLoadingWhile({
+                event: () => zip(
+                    this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`)
+                )
+            })
+            .subscribe(async ([packTranslations]) => {
+                this.packTranslations = packTranslations;
 
-            this.group = this.navService.param(`group`);
+                this.group = this.navService.param(`group`);
 
-            this.listConfig = {
-                header: await this.createHeaderConfig(this.group),
-                body: await this.createBodyConfig(this.group.packs),
-            };
-        });
+                this.listConfig = {
+                    header: await this.createHeaderConfig(this.group),
+                    body: await this.createBodyConfig(this.group.packs),
+                };
+            });
     }
 
     public ionViewWillLeave() {

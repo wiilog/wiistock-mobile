@@ -62,26 +62,30 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public async ionViewWillEnter() {
-        zip(
-            this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`)
-        ).subscribe(async ([packTranslations]) => {
-            this.packTranslations = packTranslations;
+        this.loadingService
+            .presentLoadingWhile({
+                event: () => zip(
+                    this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`)
+                )
+            })
+            .subscribe(async ([packTranslations]) => {
+                this.packTranslations = packTranslations;
 
-            this.apiPacksInProgress = [];
-            if (this.footerScannerComponent) {
-                this.footerScannerComponent.fireZebraScan();
-            }
+                this.apiPacksInProgress = [];
+                if (this.footerScannerComponent) {
+                    this.footerScannerComponent.fireZebraScan();
+                }
 
-            if(!this.group) {
-                this.group = this.navService.param(`group`);
-                this.group.newPacks = [];
-            }
+                if(!this.group) {
+                    this.group = this.navService.param(`group`);
+                    this.group.newPacks = [];
+                }
 
-            this.listConfig = {
-                header: await this.createHeaderConfig(this.group),
-                body: await this.createBodyConfig(this.group.newPacks),
-            };
-        });
+                this.listConfig = {
+                    header: await this.createHeaderConfig(this.group),
+                    body: await this.createBodyConfig(this.group.newPacks),
+                };
+            });
     }
 
     public ionViewWillLeave(): void {
