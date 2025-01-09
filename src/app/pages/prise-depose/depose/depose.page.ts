@@ -74,6 +74,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     private skipValidation: boolean;
 
     private natureTranslations: Translations;
+    private logisticUnitTranslations: Translations;
     private allowedNatureIdsForLocation: Array<number>;
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
@@ -370,8 +371,6 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     }
 
     private refreshPriseListComponent(): void {
-        const natureLabel = TranslationService.Translate(this.natureTranslations, 'Nature');
-
         this.priseListConfig = this.trackingListFactory.createListConfig(
             this.colisPrise.filter(({hidden, packGroup}) => (!hidden && !packGroup)),
             TrackingListFactoryService.LIST_TYPE_DROP_SUB,
@@ -399,7 +398,8 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                     }
                 },
                 natureIdsToConfig: this.natureIdsToConfig,
-                natureTranslation: natureLabel
+                natureTranslation: TranslationService.Translate(this.natureTranslations, 'Nature'),
+                trackingDelayTranslation: TranslationService.Translate(this.logisticUnitTranslations, 'Délai de traitement'),
             }
         );
     }
@@ -413,13 +413,13 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     }
 
     private refreshDeposeListComponent(): void {
-        const natureLabel = TranslationService.Translate(this.natureTranslations, 'Nature');
         this.deposeListConfig = this.trackingListFactory.createListConfig(
             this.colisDepose,
             TrackingListFactoryService.LIST_TYPE_DROP_MAIN,
             {
                 natureIdsToConfig: this.natureIdsToConfig,
-                natureTranslation: natureLabel,
+                natureTranslation: TranslationService.Translate(this.natureTranslations, 'Nature'),
+                trackingDelayTranslation: TranslationService.Translate(this.logisticUnitTranslations, 'Délai de traitement'),
                 objectLabel: this.objectLabel,
                 location: this.emplacement,
                 confirmItem: !this.fromStock
@@ -469,22 +469,26 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     }
 
     public initData() {
-        zip(
-            this.sqliteService.findBy(
-                'mouvement_traca',
-                [
-                    `type LIKE 'prise'`,
-                    `finished = 0`,
-                    `fromStock = ${Number(this.fromStock)}`
-                ]
-            ),
-            this.storageService.getString(StorageKeyEnum.OPERATOR) as Observable<string>,
-            this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER),
-            this.sqliteService.findAll('nature'),
-            this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + this.emplacement.id]),
-            this.translationService.get(null, `Traçabilité`, `Général`)
-        )
-            .subscribe(([colisPrise, operator, skipValidation, natures, allowedNatureLocationArray, natureTranslations]) => {
+        this.loadingService
+            .presentLoadingWhile({
+                event: () => zip(
+                    this.sqliteService.findBy(
+                        'mouvement_traca',
+                        [
+                            `type LIKE 'prise'`,
+                            `finished = 0`,
+                            `fromStock = ${Number(this.fromStock)}`
+                        ]
+                    ),
+                    this.storageService.getString(StorageKeyEnum.OPERATOR) as Observable<string>,
+                    this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER),
+                    this.sqliteService.findAll('nature'),
+                    this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + this.emplacement.id]),
+                    this.translationService.get(null, `Traçabilité`, `Général`),
+                    this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`),
+                )
+            })
+            .subscribe(([colisPrise, operator, skipValidation, natures, allowedNatureLocationArray, natureTranslations, logisticUnitTranslations]) => {
                 this.colisPrise = this.navService.param('articlesList') || colisPrise.map(({subPacks, ...tracking}) => ({
                     ...tracking,
                     subPacks: subPacks ? JSON.parse(subPacks) : []
@@ -493,6 +497,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                 this.operator = operator;
                 this.skipValidation = skipValidation && this.fromStock;
                 this.natureTranslations = natureTranslations;
+                this.logisticUnitTranslations = logisticUnitTranslations;
                 this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
                     [id]: {label, color},
                     ...acc
