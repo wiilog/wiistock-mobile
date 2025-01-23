@@ -604,8 +604,9 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             else {
                 const hasNetwork = await this.networkService.hasNetwork();
                 const needNatureChecks = hasNetwork && (!article || article.is_lu);
+                console.log(this.colisPrise);
                 this.saveTrackingMovement(barCode, quantity, needNatureChecks, article ? article.articles : null, article ? article.is_lu : false);
-
+                console.log(this.colisPrise);
                 if (needNatureChecks) {
                     this.apiService
                         .requestApi(ApiService.GET_PACK_DATA, {
@@ -747,7 +748,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                             cssClass: 'alert-danger full-width margin-right',
                             role: 'cancel',
                             handler: () => {
-                                this.updateTrackingMovementNature(barCode, nature && nature.id);
+                                this.updateTrackingMovementNature(barCode, nature && nature.id, null, trackingDelayData);
                             }
                         },
                         {
@@ -758,7 +759,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                 const cancelPicking = this.cancelPickingAction();
                                 const value = isGroup && group ? group.code : barCode;
                                 cancelPicking({object: {value: value, label: value}});
-                            }
+                            },
                         }
                     ]
                 });
