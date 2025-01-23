@@ -604,9 +604,9 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             else {
                 const hasNetwork = await this.networkService.hasNetwork();
                 const needNatureChecks = hasNetwork && (!article || article.is_lu);
-                console.log(this.colisPrise);
+
                 this.saveTrackingMovement(barCode, quantity, needNatureChecks, article ? article.articles : null, article ? article.is_lu : false);
-                console.log(this.colisPrise);
+
                 if (needNatureChecks) {
                     this.apiService
                         .requestApi(ApiService.GET_PACK_DATA, {
