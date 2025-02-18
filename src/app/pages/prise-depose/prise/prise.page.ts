@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {BarcodeScannerComponent} from '@common/components/barcode-scanner/barcode-scanner.component';
 import {Emplacement} from '@entities/emplacement';
 import {MouvementTraca} from '@entities/mouvement-traca';
@@ -15,7 +15,6 @@ import {TrackingListFactoryService} from '@app/services/tracking-list-factory.se
 import {StorageService} from '@app/services/storage/storage.service';
 import {filter, mergeMap, map, tap} from 'rxjs/operators';
 import * as moment from 'moment';
-import {ActivatedRoute} from '@angular/router';
 import {NavService} from '@app/services/nav/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
@@ -28,6 +27,7 @@ import {AlertService} from '@app/services/alert.service';
 import {NetworkService} from '@app/services/network.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {HttpErrorResponse} from "@angular/common/http";
+import {RfidManagerService} from "@app/services/rfid-manager.service";
 
 
 @Component({
@@ -82,6 +82,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
 
     public constructor(private networkService: NetworkService,
                        private apiService: ApiService,
+                       private rfidManager: RfidManagerService,
                        private sqliteService: SqliteService,
                        private alertService: AlertService,
                        private toastService: ToastService,
@@ -123,17 +124,20 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                     this.sqliteService.findAll('nature'),
                     this.translationService.get(null, `Traçabilité`, `Général`),
                     this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`),
-                    this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_WARNING_WRONG_LOCATION)
+                    this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_WARNING_WRONG_LOCATION),
+                    this.ensureRfidScannerConnection(), // return void
                 )
             })
             .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures, natureTranslations, logisticUnitTranslations, displayWarningWrongLocation]) => {
                 this.operator = operator;
                 this.colisPriseAlreadySaved = colisPriseAlreadySaved;
                 this.currentPacksOnLocation = trackingDrops;
-                this.footerScannerComponent.fireZebraScan();
                 this.natureTranslations = natureTranslations;
                 this.logisticUnitTranslations = logisticUnitTranslations;
                 this.displayWarningWrongLocation = displayWarningWrongLocation;
+
+                this.footerScannerComponent.fireZebraScan();
+                this.launchRfidEventListeners();
 
                 if (natures) {
                     this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
@@ -157,6 +161,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             this.barcodeCheckSubscription = undefined;
         }
         this.unsubscribeSaveSubscription();
+        this.removeRfidEventListeners();
     }
 
     public wiiCanLeave(): boolean {
@@ -280,11 +285,15 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                         buttons: [{
                                             text: 'Annuler',
                                             role: 'cancel',
-                                            handler: () => this.barcodeCheckLoading = false,
+                                            handler: () => {
+                                                this.barcodeCheckLoading = false;
+                                            },
                                         }, {
                                             text: 'Confirmer',
                                             cssClass: 'alert-success',
-                                            handler: () => this.processTackingBarCode(barCode, isManualAdd, quantity, article),
+                                            handler: () => {
+                                                this.processTackingBarCode(barCode, isManualAdd, quantity, article);
+                                            },
                                         }]
                                     });
                                 } else {
@@ -619,7 +628,8 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                     ? {
                                         location: 1,
                                         existing: 1,
-                                    } : {},
+                                    }
+                                    : {},
                             }
                         })
                         .pipe(
@@ -777,6 +787,31 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         if (this.saveSubscription && !this.saveSubscription.closed) {
             this.saveSubscription.unsubscribe();
             this.saveSubscription = undefined;
+        }
+    }
+
+    private ensureRfidScannerConnection(): Observable<void> {
+        return !this.fromStock
+            ? this.rfidManager.ensureScannerConnection().pipe(map(() => undefined))
+            : of(undefined);
+    }
+
+    private launchRfidEventListeners(): void {
+        this.rfidManager.launchEventListeners();
+
+        // unsubscribed in rfidManager.removeEventListeners() in ionViewWillLeave
+        this.rfidManager.tagsRead$
+            .subscribe(({tags}) => {
+                const [firstTag] = tags || [];
+                if (firstTag) {
+                    this.testIfBarcodeEquals(firstTag);
+                }
+            })
+    }
+
+    private removeRfidEventListeners(): void {
+        if (!this.fromStock) {
+            this.rfidManager.removeEventListeners();
         }
     }
 }

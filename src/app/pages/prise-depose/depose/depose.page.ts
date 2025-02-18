@@ -27,6 +27,7 @@ import {AlertService} from '@app/services/alert.service';
 import {NetworkService} from '@app/services/network.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {HttpErrorResponse} from "@angular/common/http";
+import {RfidManagerService} from "@app/services/rfid-manager.service";
 
 @Component({
     selector: 'wii-depose',
@@ -80,6 +81,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
 
     public constructor(private networkService: NetworkService,
+                       private rfidManager: RfidManagerService,
                        private alertService: AlertService,
                        private apiService: ApiService,
                        private toastService: ToastService,
@@ -118,11 +120,11 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         }
     }
 
-
     public ionViewWillLeave(): void {
         this.trackingListFactory.disableActions();
         this.footerScannerComponent.unsubscribeZebraScan();
         this.unsubscribeSaveSubscription();
+        this.removeRfidEventListeners();
     }
 
     public wiiCanLeave(): boolean {
@@ -486,6 +488,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                     this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + this.emplacement.id]),
                     this.translationService.get(null, `Traçabilité`, `Général`),
                     this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`),
+                    this.ensureRfidScannerConnection(), // return void
                 )
             })
             .subscribe(([colisPrise, operator, skipValidation, natures, allowedNatureLocationArray, natureTranslations, logisticUnitTranslations]) => {
@@ -505,6 +508,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
 
                 this.allowedNatureIdsForLocation = allowedNatureLocationArray.map(({nature_id}) => nature_id);
                 this.footerScannerComponent.fireZebraScan();
+                this.launchRfidEventListeners();
 
                 this.refreshDeposeListComponent();
                 this.refreshPriseListComponent();
@@ -621,6 +625,31 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         if (this.saveSubscription && !this.saveSubscription.closed) {
             this.saveSubscription.unsubscribe();
             this.saveSubscription = undefined;
+        }
+    }
+
+    private ensureRfidScannerConnection(): Observable<void> {
+        return !this.fromStock
+            ? this.rfidManager.ensureScannerConnection().pipe(map(() => undefined))
+            : of(undefined);
+    }
+
+    private launchRfidEventListeners(): void {
+        this.rfidManager.launchEventListeners();
+
+        // unsubscribed in rfidManager.removeEventListeners() in ionViewWillLeave
+        this.rfidManager.tagsRead$
+            .subscribe(({tags}) => {
+                const [firstTag] = tags || [];
+                if (firstTag) {
+                    this.testColisDepose(firstTag);
+                }
+            })
+    }
+
+    private removeRfidEventListeners(): void {
+        if (!this.fromStock) {
+            this.rfidManager.removeEventListeners();
         }
     }
 }
