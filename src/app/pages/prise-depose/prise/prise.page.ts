@@ -1,11 +1,11 @@
-import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {BarcodeScannerComponent} from '@common/components/barcode-scanner/barcode-scanner.component';
 import {Emplacement} from '@entities/emplacement';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {HeaderConfig} from '@common/components/panel/model/header-config';
 import {ListPanelItemConfig} from '@common/components/panel/model/list-panel/list-panel-item-config';
 import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode-scanner-mode.enum';
-import {from, Observable, of, Subscription, zip} from 'rxjs';
+import {flatMap, from, Observable, of, Subscription, zip} from 'rxjs';
 import {ApiService} from '@app/services/api.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {ToastService} from '@app/services/toast.service';
@@ -15,7 +15,6 @@ import {TrackingListFactoryService} from '@app/services/tracking-list-factory.se
 import {StorageService} from '@app/services/storage/storage.service';
 import {filter, mergeMap, map, tap} from 'rxjs/operators';
 import * as moment from 'moment';
-import {ActivatedRoute} from '@angular/router';
 import {NavService} from '@app/services/nav/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
@@ -28,6 +27,7 @@ import {AlertService} from '@app/services/alert.service';
 import {NetworkService} from '@app/services/network.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {HttpErrorResponse} from "@angular/common/http";
+import {RfidManagerService} from "@app/services/rfid-manager.service";
 
 
 @Component({
@@ -80,8 +80,11 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
 
     private viewEntered: boolean;
 
+    private lengthArrivalNumber: number = 0;
+
     public constructor(private networkService: NetworkService,
                        private apiService: ApiService,
+                       private rfidManager: RfidManagerService,
                        private sqliteService: SqliteService,
                        private alertService: AlertService,
                        private toastService: ToastService,
@@ -123,17 +126,22 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                     this.sqliteService.findAll('nature'),
                     this.translationService.get(null, `Traçabilité`, `Général`),
                     this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`),
-                    this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_WARNING_WRONG_LOCATION)
+                    this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_WARNING_WRONG_LOCATION),
+                    this.storageService.getString(StorageKeyEnum.ARRIVAL_NUMBER_FORMAT),
+                    this.ensureRfidScannerConnection(), // return void
                 )
             })
-            .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures, natureTranslations, logisticUnitTranslations, displayWarningWrongLocation]) => {
+            .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures, natureTranslations, logisticUnitTranslations, displayWarningWrongLocation, formatArrivalNumber]) => {
                 this.operator = operator;
                 this.colisPriseAlreadySaved = colisPriseAlreadySaved;
                 this.currentPacksOnLocation = trackingDrops;
-                this.footerScannerComponent.fireZebraScan();
                 this.natureTranslations = natureTranslations;
                 this.logisticUnitTranslations = logisticUnitTranslations;
                 this.displayWarningWrongLocation = displayWarningWrongLocation;
+                this.lengthArrivalNumber = (formatArrivalNumber || '').length;
+
+                this.footerScannerComponent.fireZebraScan();
+                this.launchRfidEventListeners();
 
                 if (natures) {
                     this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
@@ -157,6 +165,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             this.barcodeCheckSubscription = undefined;
         }
         this.unsubscribeSaveSubscription();
+        this.removeRfidEventListeners();
     }
 
     public wiiCanLeave(): boolean {
@@ -280,11 +289,15 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                         buttons: [{
                                             text: 'Annuler',
                                             role: 'cancel',
-                                            handler: () => this.barcodeCheckLoading = false,
+                                            handler: () => {
+                                                this.barcodeCheckLoading = false;
+                                            },
                                         }, {
                                             text: 'Confirmer',
                                             cssClass: 'alert-success',
-                                            handler: () => this.processTackingBarCode(barCode, isManualAdd, quantity, article),
+                                            handler: () => {
+                                                this.processTackingBarCode(barCode, isManualAdd, quantity, article);
+                                            },
                                         }]
                                     });
                                 } else {
@@ -619,7 +632,8 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                     ? {
                                         location: 1,
                                         existing: 1,
-                                    } : {},
+                                    }
+                                    : {},
                             }
                         })
                         .pipe(
@@ -778,5 +792,43 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             this.saveSubscription.unsubscribe();
             this.saveSubscription = undefined;
         }
+    }
+
+    private ensureRfidScannerConnection(): Observable<void> {
+        return !this.fromStock
+            ? this.storageService.getRight(StorageKeyEnum.RFID_ON_MOBILE_TRACKING_MOVEMENTS)
+                .pipe(
+                    mergeMap((rfidOnMobileTrackingMovements) => rfidOnMobileTrackingMovements ? this.rfidManager.ensureScannerConnection() : of(undefined)),
+                    map(() => undefined)
+                )
+            : of(undefined);
+    }
+
+    private launchRfidEventListeners(): void {
+        this.rfidManager.launchEventListeners();
+
+        // unsubscribed in rfidManager.removeEventListeners() in ionViewWillLeave
+        this.rfidManager.onTagRead()
+            .subscribe(({tags}) => {
+                const [firstTag] = tags || [];
+                if (firstTag) {
+                    const packCode = this.mapRfidPackCode(firstTag);
+                    this.testIfBarcodeEquals(packCode);
+                }
+            })
+    }
+
+    private removeRfidEventListeners(): void {
+        if (!this.fromStock) {
+            this.rfidManager.removeEventListeners();
+        }
+    }
+
+    // TODO WIIS-12476: same in depose.page.ts, clean it
+    private mapRfidPackCode(rfidCode: string): string {
+        const packWithoutPrefix = rfidCode.length > 8 ? rfidCode.substring(8) : rfidCode;
+        return this.lengthArrivalNumber > 0
+            ? packWithoutPrefix.substring(0, this.lengthArrivalNumber + 3)
+            : packWithoutPrefix;
     }
 }
