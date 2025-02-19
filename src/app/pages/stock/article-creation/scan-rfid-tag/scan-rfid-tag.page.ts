@@ -88,7 +88,7 @@ export class ScanRfidTagPage implements ViewWillEnter, ViewWillLeave {
         this.rfidManager.launchEventListeners();
 
         // unsubscribed in rfidManager.removeEventListeners() in ionViewWillLeave
-        this.rfidManager.tagsRead$
+        this.rfidManager.onTagRead('hex')
             .pipe(
                 map(({tags, ...remaining}) => ({
                     ...remaining,

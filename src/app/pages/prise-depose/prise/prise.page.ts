@@ -5,7 +5,7 @@ import {MouvementTraca} from '@entities/mouvement-traca';
 import {HeaderConfig} from '@common/components/panel/model/header-config';
 import {ListPanelItemConfig} from '@common/components/panel/model/list-panel/list-panel-item-config';
 import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode-scanner-mode.enum';
-import {from, Observable, of, Subscription, zip} from 'rxjs';
+import {flatMap, from, Observable, of, Subscription, zip} from 'rxjs';
 import {ApiService} from '@app/services/api.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {ToastService} from '@app/services/toast.service';
@@ -80,6 +80,8 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
 
     private viewEntered: boolean;
 
+    private lengthArrivalNumber: number = 0;
+
     public constructor(private networkService: NetworkService,
                        private apiService: ApiService,
                        private rfidManager: RfidManagerService,
@@ -125,16 +127,18 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                     this.translationService.get(null, `Traçabilité`, `Général`),
                     this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`),
                     this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_WARNING_WRONG_LOCATION),
+                    this.storageService.getString(StorageKeyEnum.ARRIVAL_NUMBER_FORMAT),
                     this.ensureRfidScannerConnection(), // return void
                 )
             })
-            .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures, natureTranslations, logisticUnitTranslations, displayWarningWrongLocation]) => {
+            .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures, natureTranslations, logisticUnitTranslations, displayWarningWrongLocation, formatArrivalNumber]) => {
                 this.operator = operator;
                 this.colisPriseAlreadySaved = colisPriseAlreadySaved;
                 this.currentPacksOnLocation = trackingDrops;
                 this.natureTranslations = natureTranslations;
                 this.logisticUnitTranslations = logisticUnitTranslations;
                 this.displayWarningWrongLocation = displayWarningWrongLocation;
+                this.lengthArrivalNumber = (formatArrivalNumber || '').length;
 
                 this.footerScannerComponent.fireZebraScan();
                 this.launchRfidEventListeners();
@@ -792,7 +796,11 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
 
     private ensureRfidScannerConnection(): Observable<void> {
         return !this.fromStock
-            ? this.rfidManager.ensureScannerConnection().pipe(map(() => undefined))
+            ? this.storageService.getRight(StorageKeyEnum.RFID_ON_MOBILE_TRACKING_MOVEMENTS)
+                .pipe(
+                    mergeMap((rfidOnMobileTrackingMovements) => rfidOnMobileTrackingMovements ? this.rfidManager.ensureScannerConnection() : of(undefined)),
+                    map(() => undefined)
+                )
             : of(undefined);
     }
 
@@ -800,11 +808,12 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         this.rfidManager.launchEventListeners();
 
         // unsubscribed in rfidManager.removeEventListeners() in ionViewWillLeave
-        this.rfidManager.tagsRead$
+        this.rfidManager.onTagRead()
             .subscribe(({tags}) => {
                 const [firstTag] = tags || [];
                 if (firstTag) {
-                    this.testIfBarcodeEquals(firstTag);
+                    const packCode = this.mapRfidPackCode(firstTag);
+                    this.testIfBarcodeEquals(packCode);
                 }
             })
     }
@@ -813,5 +822,13 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         if (!this.fromStock) {
             this.rfidManager.removeEventListeners();
         }
+    }
+
+    // TODO: same in depose.page.ts, clean it
+    private mapRfidPackCode(rfidCode: string): string {
+        const packWithoutPrefix = rfidCode.length > 8 ? rfidCode.substring(8) : rfidCode;
+        return this.lengthArrivalNumber > 0
+            ? packWithoutPrefix.substring(0, this.lengthArrivalNumber + 3)
+            : packWithoutPrefix;
     }
 }
