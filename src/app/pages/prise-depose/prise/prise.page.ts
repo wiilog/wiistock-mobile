@@ -496,7 +496,9 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     }
 
     private takeAll() {
-        this.toTakeOngoingPacks.forEach(({ref_article}) => this.testIfBarcodeEquals(ref_article, true));
+        this.toTakeOngoingPacks.forEach(({ref_article}) => {
+            this.testIfBarcodeEquals(ref_article, true);
+        });
     }
 
     private cancelPickingAction(): (info: { [name: string]: { label?: string; value?: string; } }) => void {
@@ -752,22 +754,21 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                     buttons: [
                         {
                             text: 'Prise du groupe',
-                            cssClass: 'alert-success full-width margin-right',
+                            cssClass: 'full-width margin-right',
                             handler: () => {
                                 this.updateTrackingMovementNature(barCode, nature && nature.id, group);
                             }
                         },
                         {
                             text: "Prise de l'UL",
-                            cssClass: 'alert-danger full-width margin-right',
-                            role: 'cancel',
+                            cssClass: 'alert-button-role-cancel full-width margin-right',
                             handler: () => {
                                 this.updateTrackingMovementNature(barCode, nature && nature.id, null, trackingDelayData);
                             }
                         },
                         {
                             text: 'Annuler',
-                            cssClass: 'alert-danger full-width margin-right',
+                            cssClass: 'alert-button-role-cancel full-width margin-right',
                             role: 'cancel',
                             handler: () => {
                                 const cancelPicking = this.cancelPickingAction();
