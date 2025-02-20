@@ -140,7 +140,7 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
 
     private initRfidEvents(): void {
         this.rfidManager.launchEventListeners();
-        this.rfidManager.tagsRead$
+        this.rfidManager.onTagRead('hex')
             .pipe(
                 filter(() => Boolean(this.rfidScanMode)),
                 map(({tags, ...remaining}) => ({

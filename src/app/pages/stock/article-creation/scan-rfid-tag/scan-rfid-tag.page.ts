@@ -51,7 +51,7 @@ export class ScanRfidTagPage implements ViewWillEnter, ViewWillLeave {
             event: () => from(this.networkService.hasNetwork()).pipe(
                 tap((hasNetwork) => {
                     if (!hasNetwork) {
-                        throw new Error('no-network')
+                        throw new Error('no-network');
                     }
                 }),
                 mergeMap(() => this.alreadyLoaded
@@ -88,7 +88,7 @@ export class ScanRfidTagPage implements ViewWillEnter, ViewWillLeave {
         this.rfidManager.launchEventListeners();
 
         // unsubscribed in rfidManager.removeEventListeners() in ionViewWillLeave
-        this.rfidManager.tagsRead$
+        this.rfidManager.onTagRead('hex')
             .pipe(
                 map(({tags, ...remaining}) => ({
                     ...remaining,
@@ -100,7 +100,7 @@ export class ScanRfidTagPage implements ViewWillEnter, ViewWillLeave {
                 if (firstTag) {
                     this.onRFIDTagScanned(firstTag);
                 }
-            })
+            });
     }
 
     public onRFIDButtonClicked(): void {

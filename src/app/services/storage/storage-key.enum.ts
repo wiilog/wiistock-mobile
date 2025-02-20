@@ -48,6 +48,8 @@ export enum StorageKeyEnum {
     PARAMETER_DISPLAY_MANUAL_DELAY_START = 'displayManualDelayStart',
     PARAMETER_RFID_PREFIX = 'rfidPrefix',
     DISPATCH_OFFLINE_MODE = 'dispatchOfflineMode',
+    ARRIVAL_NUMBER_FORMAT = 'arrivalNumberFormat',
+    RFID_ON_MOBILE_TRACKING_MOVEMENTS = 'rfidOnMobileTrackingMovements',
 
     API_KEY = 'api-key',
     OPERATOR = 'operator',
@@ -71,4 +73,5 @@ export enum StorageKeyEnum {
     ARTICLE_CREATION_DEFAULT_VALUES = 'article_creation_default_values',
 
     DISPATCH_DEFAULT_WAYBILL = 'dispatch_default_waybill',
+
 }

@@ -19,12 +19,16 @@ export class RfidManagerService {
                        private toastService: ToastService) {
     }
 
-    public get tagsRead$(): Observable<TagsReadData> {
+    public onTagRead(from?: 'hex'): Observable<TagsReadData> {
         return this.plugin.tagsRead$.pipe(
             map((value) => ({
                 ...value,
-                tags: (value?.tags || []).map((tag) => this.getAsciiFromHex(tag))
-            }))
+                tags: (value?.tags || []).map((tag) => (
+                    from === 'hex'
+                        ? this.getAsciiFromHex(tag)
+                        : tag
+                ))
+            })),
         );
     }
 

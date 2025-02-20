@@ -27,6 +27,7 @@ import {AlertService} from '@app/services/alert.service';
 import {NetworkService} from '@app/services/network.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {HttpErrorResponse} from "@angular/common/http";
+import {RfidManagerService} from "@app/services/rfid-manager.service";
 
 @Component({
     selector: 'wii-depose',
@@ -79,7 +80,10 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
 
+    private lengthArrivalNumber: number = 0;
+
     public constructor(private networkService: NetworkService,
+                       private rfidManager: RfidManagerService,
                        private alertService: AlertService,
                        private apiService: ApiService,
                        private toastService: ToastService,
@@ -118,11 +122,11 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         }
     }
 
-
     public ionViewWillLeave(): void {
         this.trackingListFactory.disableActions();
         this.footerScannerComponent.unsubscribeZebraScan();
         this.unsubscribeSaveSubscription();
+        this.removeRfidEventListeners();
     }
 
     public wiiCanLeave(): boolean {
@@ -486,9 +490,11 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                     this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + this.emplacement.id]),
                     this.translationService.get(null, `Traçabilité`, `Général`),
                     this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`),
+                    this.storageService.getString(StorageKeyEnum.ARRIVAL_NUMBER_FORMAT),
+                    this.ensureRfidScannerConnection(), // return void
                 )
             })
-            .subscribe(([colisPrise, operator, skipValidation, natures, allowedNatureLocationArray, natureTranslations, logisticUnitTranslations]) => {
+            .subscribe(([colisPrise, operator, skipValidation, natures, allowedNatureLocationArray, natureTranslations, logisticUnitTranslations, formatArrivalNumber]) => {
                 this.colisPrise = this.navService.param('articlesList') || colisPrise.map(({subPacks, ...tracking}) => ({
                     ...tracking,
                     subPacks: subPacks ? JSON.parse(subPacks) : []
@@ -504,7 +510,10 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                 }), {});
 
                 this.allowedNatureIdsForLocation = allowedNatureLocationArray.map(({nature_id}) => nature_id);
+                this.lengthArrivalNumber = (formatArrivalNumber || '').length;
+
                 this.footerScannerComponent.fireZebraScan();
+                this.launchRfidEventListeners();
 
                 this.refreshDeposeListComponent();
                 this.refreshPriseListComponent();
@@ -622,5 +631,43 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             this.saveSubscription.unsubscribe();
             this.saveSubscription = undefined;
         }
+    }
+
+    private ensureRfidScannerConnection(): Observable<void> {
+        return !this.fromStock
+            ? this.storageService.getRight(StorageKeyEnum.RFID_ON_MOBILE_TRACKING_MOVEMENTS)
+                .pipe(
+                    mergeMap((rfidOnMobileTrackingMovements) => rfidOnMobileTrackingMovements ? this.rfidManager.ensureScannerConnection() : of(undefined)),
+                    map(() => undefined)
+                )
+            : of(undefined);
+    }
+
+    private launchRfidEventListeners(): void {
+        this.rfidManager.launchEventListeners();
+
+        // unsubscribed in rfidManager.removeEventListeners() in ionViewWillLeave
+        this.rfidManager.onTagRead()
+            .subscribe(({tags}) => {
+                const [firstTag] = tags || [];
+                if (firstTag) {
+                    const packCode = this.mapRfidPackCode(firstTag);
+                    this.testColisDepose(packCode);
+                }
+            })
+    }
+
+    private removeRfidEventListeners(): void {
+        if (!this.fromStock) {
+            this.rfidManager.removeEventListeners();
+        }
+    }
+
+    // TODO WIIS-12476: same in prise.page.ts, clean it
+    private mapRfidPackCode(rfidCode: string): string {
+        const packWithoutPrefix = rfidCode.length > 8 ? rfidCode.substring(8) : rfidCode;
+        return this.lengthArrivalNumber > 0
+            ? packWithoutPrefix.substring(0, this.lengthArrivalNumber + 3)
+            : packWithoutPrefix;
     }
 }
