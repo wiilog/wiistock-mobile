@@ -85,17 +85,19 @@ export class HandlingValidatePage implements ViewWillEnter, ViewWillLeave {
     public refreshView() {
         this.loadingService.presentLoadingWhile({
             event: () => zip(
+                this.sqliteService.findOneBy('handling', {id: this.handling.id}),
                 this.handling.statusId ? this.sqliteService.findOneBy('status', {id: this.handling.statusId}) : of(undefined),
                 this.sqliteService.findBy('handling_attachment', [`handlingId = ${this.handling.id}`]),
                 this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.HANDLING}'`]),
                 this.translationService.get(null, `Demande`, `Services`),
             ),
-        }).subscribe(([currentStatus, handlingAttachment, freeFields, handlingsTranslations]: [Status, Array<HandlingAttachment>, Array<FreeField>, Translations]) => {
+        }).subscribe(([handling, currentStatus, handlingAttachment, freeFields, handlingsTranslations]: [Handling, Status, Array<HandlingAttachment>, Array<FreeField>, Translations]) => {
             this.dismissLoading();
             this.handlingsTranslations = handlingsTranslations;
 
             this.refreshHeader(false);
 
+            this.handling = handling;
             let freeFieldsValues = JSON.parse(this.handling.freeFields || '{}') || {};
 
             const sAttachmentLabel = handlingAttachment.length > 1 ? 's' : '';
