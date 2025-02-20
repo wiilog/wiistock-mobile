@@ -5,7 +5,7 @@ import {MouvementTraca} from '@entities/mouvement-traca';
 import {HeaderConfig} from '@common/components/panel/model/header-config';
 import {ListPanelItemConfig} from '@common/components/panel/model/list-panel/list-panel-item-config';
 import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode-scanner-mode.enum';
-import {flatMap, from, Observable, of, Subscription, zip} from 'rxjs';
+import {from, Observable, of, Subscription, zip} from 'rxjs';
 import {ApiService} from '@app/services/api.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {ToastService} from '@app/services/toast.service';
