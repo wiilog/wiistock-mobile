@@ -578,8 +578,12 @@ export class LocalDataManagerService {
             .map((mouvement) => ({
                 id: null,
                 ...mouvement,
-                date: mouvement.date + '_' + Math.random().toString(36).substr(2, 9)
+                date: mouvement.date + '_' + Math.random().toString(36).substr(2, 9),
+                articles: mouvement.articles
+                    ? (Array.isArray(mouvement.articles) ? mouvement.articles.join(';') : mouvement.articles)
+                    : null
             }));
+
         return zip(
             this.sqliteService.insert('mouvement_traca', movements),
             this.sqliteService.finishPrises(prisesToFinish)
