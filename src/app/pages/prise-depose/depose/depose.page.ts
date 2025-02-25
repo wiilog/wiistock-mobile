@@ -665,9 +665,8 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
 
     // TODO WIIS-12476: same in prise.page.ts, clean it
     private mapRfidPackCode(rfidCode: string): string {
-        const packWithoutPrefix = rfidCode.length > 8 ? rfidCode.substring(8) : rfidCode;
         return this.lengthArrivalNumber > 0
-            ? packWithoutPrefix.substring(0, this.lengthArrivalNumber + 3)
-            : packWithoutPrefix;
+            ? rfidCode.substring(0, this.lengthArrivalNumber + 3)
+            : rfidCode;
     }
 }
