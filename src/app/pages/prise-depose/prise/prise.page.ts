@@ -357,7 +357,6 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             containsArticle
         });
         this.setPackOnLocationHidden(barCode, true);
-        this.refreshListComponent();
     }
 
     private updateTrackingMovementNature(barCode: string, natureId?: number, groupData?: any, trackingDelayData?: any): void {
@@ -617,10 +616,15 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                 this.toastService.presentToast('Cette prise a déjà été effectuée', {audio: true});
             }
             else {
+                this.saveTrackingMovement(barCode, quantity, false, article ? article.articles : null, article ? article.is_lu : false);
+
                 const hasNetwork = await this.networkService.hasNetwork();
                 const needNatureChecks = hasNetwork && (!article || article.is_lu);
-
-                this.saveTrackingMovement(barCode, quantity, needNatureChecks, article ? article.articles : null, article ? article.is_lu : false);
+                const [currentBarcodeIndex] = this.findTakingIndexes(barCode);
+                if (currentBarcodeIndex !== undefined && currentBarcodeIndex > -1) {
+                    this.colisPrise[currentBarcodeIndex].loading = needNatureChecks;
+                }
+                this.refreshListComponent();
 
                 if (needNatureChecks) {
                     this.apiService
