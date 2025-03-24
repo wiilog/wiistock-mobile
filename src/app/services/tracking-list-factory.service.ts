@@ -179,8 +179,13 @@ export class TrackingListFactoryService {
                 const natureConfig = (natureIdsToConfig && nature_id && natureIdsToConfig[nature_id]);
 
                 let quantityRow = {};
-                articles = typeof articles === 'string' ? articles.split(';').filter(Boolean) : articles;
-                if (!articles && !loading) {
+                if(articles.length === 0) {
+                    articles = null;
+                } else {
+                    articles = typeof articles === 'string' ? articles.split(';').filter(Boolean) : articles;
+                }
+
+                if (!loading) {
                     quantityRow = isGroup
                         ? {
                             quantity: {
