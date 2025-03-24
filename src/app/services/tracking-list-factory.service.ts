@@ -179,13 +179,10 @@ export class TrackingListFactoryService {
                 const natureConfig = (natureIdsToConfig && nature_id && natureIdsToConfig[nature_id]);
 
                 let quantityRow = {};
-                if(articles.length === 0) {
-                    articles = null;
-                } else {
-                    articles = typeof articles === 'string' ? articles.split(';').filter(Boolean) : articles;
-                }
 
-                if (!loading) {
+                articles = (typeof articles === 'string' ? articles.split(';').filter(Boolean) : articles) || [];
+
+                if (!loading && articles.length === 0) {
                     quantityRow = isGroup
                         ? {
                             quantity: {
