@@ -180,9 +180,14 @@ export class TrackingListFactoryService {
 
                 let quantityRow = {};
 
-                articles = (typeof articles === 'string' ? articles.split(';').filter(Boolean) : articles) || [];
+                let articlesCount = {};
 
-                if (!loading && articles.length === 0) {
+                articles = typeof articles === 'string' && articles.length > 0
+                    ? articles.split(';').filter(Boolean)
+                    : articles;
+                articles = articles || null;
+
+                if (!loading && !articles) {
                     quantityRow = isGroup
                         ? {
                             quantity: {
@@ -199,9 +204,7 @@ export class TrackingListFactoryService {
                             }
                             : {}));
                 }
-
-                let articlesCount = {};
-                if(articles) {
+                else if(articles) {
                     articlesCount = {
                         articlesCount: {
                             label: `Nombre d'articles`,
