@@ -179,8 +179,15 @@ export class TrackingListFactoryService {
                 const natureConfig = (natureIdsToConfig && nature_id && natureIdsToConfig[nature_id]);
 
                 let quantityRow = {};
-                articles = typeof articles === 'string' ? articles.split(';').filter(Boolean) : articles;
-                if (!articles && !loading) {
+
+                let articlesCount = {};
+
+                articles = typeof articles === 'string' && articles.length > 0
+                    ? articles.split(';').filter(Boolean)
+                    : articles;
+                articles = articles || null;
+
+                if (!loading && !articles) {
                     quantityRow = isGroup
                         ? {
                             quantity: {
@@ -197,9 +204,7 @@ export class TrackingListFactoryService {
                             }
                             : {}));
                 }
-
-                let articlesCount = {};
-                if(articles) {
+                else if(articles) {
                     articlesCount = {
                         articlesCount: {
                             label: `Nombre d'articles`,
