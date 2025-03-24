@@ -548,21 +548,13 @@ export class LocalDataManagerService {
                                         const refArticlesErrors = Object.keys((apiResponse && apiResponse.data && apiResponse.data.errors) || {});
                                         return (
                                             (apiResponse && apiResponse.success)
-                                                ? of(undefined)
-                                                    .pipe(
-                                                        // we delete succeed mouvement
-                                                        mergeMap(() => this.updateSucceedTracking(refArticlesErrors, mouvements)),
-                                                        mergeMap(() => (
-                                                            // we reset failed mouvement
-                                                            this.sqliteService
-                                                                .resetMouvementsTraca(
-                                                                    refArticlesErrors,
-                                                                    'prise',
-                                                                    sendFromStock
-                                                                )
-                                                        )),
-                                                        map(() => apiResponse)
-                                                    )
+                                                ? zip(
+                                                    this.sqliteService.importMouvementTraca({
+                                                        trackingTaking: apiResponse.data.persistedMovements || []
+                                                    }),
+                                                    this.updateSucceedTracking(refArticlesErrors, mouvements),
+                                                    this.sqliteService.resetMouvementsTraca(refArticlesErrors, 'prise', sendFromStock)
+                                                ).pipe(map(() => apiResponse))
                                                 : of(undefined)
                                         );
                                     })

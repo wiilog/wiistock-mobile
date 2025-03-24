@@ -448,7 +448,7 @@ export class SqliteService {
                                     : this.update(
                                         'mouvement_traca',
                                         [{
-                                            values: {subPacks: (apiPicking.subPacks || [])},
+                                            values: {subPacks: (apiPicking.subPacks || []), nature_id: apiPicking.nature_id},
                                             where: [`ref_article = '${apiPicking.ref_article}'`]
                                         }]
                                     )
