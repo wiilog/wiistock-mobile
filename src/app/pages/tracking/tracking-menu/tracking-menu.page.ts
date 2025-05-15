@@ -36,8 +36,6 @@ export class TrackingMenuPage implements ViewWillEnter {
         this.mainHeaderService.emitSubTitle('');
         this.menuConfig = [];
         zip(
-            this.storageService.getRight(StorageKeyEnum.RIGHT_GROUP),
-            this.storageService.getRight(StorageKeyEnum.RIGHT_UNGROUP),
             this.storageService.getRight(StorageKeyEnum.TRUCK_ARRIVAL),
             this.storageService.getRight(StorageKeyEnum.FORCE_GROUPED_SIGNATURE),
             this.storageService.getRight(StorageKeyEnum.DISPATCH_OFFLINE_MODE),
@@ -49,7 +47,7 @@ export class TrackingMenuPage implements ViewWillEnter {
 
             this.translationService.get(`Demande`, `Acheminements`, `Général`)
         ).subscribe(
-            ([group, ungroup, truckArrival, forceSignature, dispatchOfflineMode, movement, dispatch, readingMenu, treatedDispatches, toTreatDispatches, translations]) => {
+            ([truckArrival, forceSignature, dispatchOfflineMode, movement, dispatch, readingMenu, treatedDispatches, toTreatDispatches, translations]) => {
                 if (!dispatchOfflineMode && dispatch) {
                     this.menuConfig.push(
                         {
@@ -84,36 +82,6 @@ export class TrackingMenuPage implements ViewWillEnter {
                             this.navService.push(NavPathEnum.TRUCK_ARRIVAL_CARRIER);
                         }
                     },)
-                }
-                if(group) {
-                    this.menuConfig.push({
-                        icon: 'group.svg',
-                        label: 'Groupage',
-                        action: async () => {
-                            const hasNetwork = await this.networkService.hasNetwork();
-                            if(hasNetwork) {
-                                this.navService.push(NavPathEnum.UNGROUP_SCAN_LOCATION);
-                                this.navService.push(NavPathEnum.GROUP_SCAN_GROUP);
-                            } else {
-                                this.toastService.presentToast('Une connexion internet est requise pour accéder à cette fonctionnalité.');
-                            }
-                        }
-                    });
-                }
-                if(ungroup) {
-                    this.menuConfig.push({
-                        icon: 'ungroup.svg',
-                        label: 'Dégroupage',
-                        action: async () => {
-                            const hasNetwork = await this.networkService.hasNetwork();
-                            if(hasNetwork) {
-                                this.navService.push(NavPathEnum.UNGROUP_SCAN_LOCATION);
-                                this.navService.push(NavPathEnum.UNGROUP_SCAN_LOCATION);
-                            } else {
-                                this.toastService.presentToast('Une connexion internet est requise pour accéder à cette fonctionnalité.');
-                            }
-                        }
-                    });
                 }
 
                 if(readingMenu) {
