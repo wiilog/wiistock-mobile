@@ -393,25 +393,6 @@ export class ScanLocationsPage implements ViewWillEnter {
                                       group: any,
                                       nature: Nature,
                                       trackingDelayData: any): void {
-        // if(isGroup) {
-        //     const cancelPicking = this.cancelPickingAction();
-        //     cancelPicking({object: {value: barCode, label: barCode}});
-        //
-        //     this.alertService.show({
-        //         header: 'Transfert impossible',
-        //         backdropDismiss: false,
-        //         cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
-        //         message: `Vous ne pouvez pas transférer l'unité logistique ${barCode} car c'est un groupe`,
-        //         buttons: [
-        //             {
-        //                 text: 'Annuler',
-        //                 cssClass: 'alert-danger',
-        //                 role: 'cancel',
-        //             }
-        //         ]
-        //     });
-        // }
-
         if (isPack || !isGroup) {
             if (group) {
                 this.alertService.show({
