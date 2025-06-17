@@ -489,6 +489,11 @@ const routes: Routes = [
         path: NavPathEnum.READING_DETAILS,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/tracking/reading/reading-details/reading-details.module').then(m => m.ReadingDetailsModule)
+    },
+    {
+        path: NavPathEnum.SCAN_LOCATIONS,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/pick-and-drop/scan-locations/scan-locations.module').then(m => m.ScanLocationsModule)
     }
 ];
 

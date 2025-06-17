@@ -1,0 +1,35 @@
+<div class="page-content" scroll-y="true">
+    <wii-form-panel #formPanelComponent
+                    [body]="bodyConfig">
+    </wii-form-panel>
+
+    <wii-list-panel *ngIf="listPacksToTakeHeader && listPacksToTakeBody"
+                    [header]="listPacksToTakeHeader"
+                    [body]="listPacksToTakeBody"
+                    [identifierName]="listIdentifierName"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+</div>
+
+<div class="page-footer">
+    <wii-barcode-scanner #footerScannerComponent
+                         [hidden]="loading"
+                         [mode]="scannerModeManual"
+                         (cameraAdd)="testIfBarcodeEquals($event, false)"
+                         (manualAdd)="testIfBarcodeEquals($event, true)"
+                         (scanAdd)="testIfBarcodeEquals($event, false)">
+    </wii-barcode-scanner>
+
+    <ion-button class="submit-button"
+                color="primary"
+                size="large"
+                expand="full"
+                [hidden]="false"
+                (click)="validate()">
+        Valider
+        <wii-icon name="check.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
+</div>

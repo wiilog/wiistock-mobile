@@ -55,8 +55,9 @@ export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
             this.storageService.getRight(StorageKeyEnum.RIGHT_RECEIPT_ASSOCIATION),
             this.storageService.getRight(StorageKeyEnum.RIGHT_GROUP),
             this.storageService.getRight(StorageKeyEnum.RIGHT_UNGROUP),
+            this.storageService.getRight(StorageKeyEnum.RIGHT_PICK_AND_DROP_MENU),
         )
-            .subscribe(([loading, mouvementTraca, emptyRound, receiptAssociation, group, ungroup]: [HTMLIonLoadingElement, Array<MouvementTraca>, boolean, boolean, boolean, boolean]) => {
+            .subscribe(([loading, mouvementTraca, emptyRound, receiptAssociation, group, ungroup, pickAndDrop]: [HTMLIonLoadingElement, Array<MouvementTraca>, boolean, boolean, boolean, boolean, boolean]) => {
                 this.menuConfig = [
                     {
                         icon: 'upload.svg',
@@ -69,6 +70,16 @@ export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
                         action: () => this.goToDrop()
                     }
                 ];
+
+                if(pickAndDrop) {
+                    this.menuConfig.push({
+                        icon: 'pick-and-drop.svg',
+                        label: 'Prise et dépose',
+                        action: () => {
+                            this.navService.push(NavPathEnum.SCAN_LOCATIONS);
+                        }
+                    });
+                }
 
                 if(emptyRound) {
                     this.menuConfig.push({
