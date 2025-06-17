@@ -767,16 +767,23 @@ export class LocalDataManagerService {
                 );
     }
 
-    public mapTrackingMovements(movements: Array<MouvementTraca & {subPacks?: any}>) {
+    public mapTrackingMovements(movements: Array<MouvementTraca & {subPacks?: any}>, indexAttachments: boolean = false) {
         return movements
-            .map(({signature, photo, ...mouvement}) => ({
+            .sort(({date: dateStr1}, {date: dateStr2}) => {
+                const date1 = new Date(dateStr1.split('_')[0]);
+                const date2 = new Date(dateStr2.split('_')[0]);
+                return date1.getTime() <= date2.getTime()
+                    ? -1
+                    : 1;
+            })
+            .map(({signature, photo, ...mouvement}, index) => ({
                 ...mouvement,
                 signature: signature
                     ? this.fileService.createFile(
                         signature,
                         FileService.SIGNATURE_IMAGE_EXTENSION,
                         FileService.SIGNATURE_IMAGE_TYPE,
-                        'signature'
+                        `signature${indexAttachments ? `_${index}` : ''}`
                     )
                     : undefined,
                 photo: photo
@@ -784,17 +791,10 @@ export class LocalDataManagerService {
                         photo,
                         FileService.SIGNATURE_IMAGE_EXTENSION,
                         FileService.SIGNATURE_IMAGE_TYPE,
-                        'photo'
+                        `photo${indexAttachments ? `_${index}` : ''}`
                     )
                     : undefined
-            }) as MouvementTraca<File>)
-            .sort(({date: dateStr1}, {date: dateStr2}) => {
-                const date1 = new Date(dateStr1.split('_')[0]);
-                const date2 = new Date(dateStr2.split('_')[0]);
-                return date1.getTime() <= date2.getTime()
-                    ? -1
-                    : 1;
-            });
+            }) as MouvementTraca<File>);
     }
 
     public mapDispatchPacks(packs: Array<DispatchPack>) {

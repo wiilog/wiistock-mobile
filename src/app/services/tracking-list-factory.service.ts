@@ -24,6 +24,7 @@ export class TrackingListFactoryService {
     public static readonly LIST_TYPE_TAKING_SUB = 1;
     public static readonly LIST_TYPE_DROP_MAIN = 2;
     public static readonly LIST_TYPE_DROP_SUB = 3;
+    public static readonly LIST_TYPE_PICK_AND_DROP = 4;
     private static readonly LIST_TYPE_CONFIG = {
         [TrackingListFactoryService.LIST_TYPE_TAKING_MAIN]: {
             title: 'PRISE',
@@ -47,6 +48,12 @@ export class TrackingListFactoryService {
             title: 'PRISE',
             hasScanLabel: false,
             iconName: 'upload.svg',
+            iconColor: 'primary' as IconColor,
+        },
+        [TrackingListFactoryService.LIST_TYPE_PICK_AND_DROP]: {
+            title: 'PRISE ET DEPOSE',
+            hasScanLabel: true,
+            iconName: 'pick-and-drop.svg',
             iconColor: 'primary' as IconColor,
         },
     };

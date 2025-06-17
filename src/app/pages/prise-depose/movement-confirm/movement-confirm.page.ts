@@ -52,11 +52,13 @@ export class MovementConfirmPage implements ViewWillEnter {
         [MovementConfirmType.DROP]: {icon: 'download.svg', color: 'success' as IconColor},
         [MovementConfirmType.TAKE]: {icon: 'upload.svg', color: 'primary' as IconColor},
         [MovementConfirmType.GROUP]: {icon: 'group.svg', color: 'primary' as IconColor},
+        [MovementConfirmType.PICK_AND_DROP]: {icon: 'pick-and-drop.svg', color: 'primary' as IconColor},
     }
     private static readonly PageTitle = {
         [MovementConfirmType.DROP]: 'Dépose',
         [MovementConfirmType.TAKE]: 'Prise',
         [MovementConfirmType.GROUP]: 'Groupage',
+        [MovementConfirmType.PICK_AND_DROP]: 'Prise et dépose',
     }
 
     @ViewChild('formPanelComponent', {static: false})

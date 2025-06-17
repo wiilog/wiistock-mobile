@@ -11,6 +11,7 @@ export enum StorageKeyEnum {
     TRUCK_ARRIVAL = 'truckArrival',
     RIGHT_GROUPED_SIGNATURE = 'groupedSignature',
     RIGHT_CREATE_ARTICLE_FROM_NOMADE = 'createArticleFromNomade',
+    RIGHT_PICK_AND_DROP_MENU = 'pickAndDrop',
     DEMO_MODE = 'demoMode',
     RIGHT_MOVEMENT = 'movement',
     RIGHT_DISPATCH = 'dispatch',
