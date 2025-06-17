@@ -354,7 +354,6 @@ export class ScanLocationsPage implements ViewWillEnter {
                           {quantity, comment, signature, photo, projectId, natureId, freeFields, subPacks, manualDelayStart}: {quantity?: number; comment?: string; signature?: string; photo?: string; projectId?: number; natureId: number; freeFields: string; subPacks: any; manualDelayStart?: string;}): void {
         const dropIndexes = this.findTakingIndexes(barCode);
         if (dropIndexes.length > 0) {
-            console.log(quantity, comment, signature, photo, projectId, natureId, freeFields, subPacks, manualDelayStart);
             for(const dropIndex of dropIndexes) {
                 if (quantity && quantity > 0) {
                     this.colisPrise[dropIndex].quantity = quantity;
@@ -394,24 +393,24 @@ export class ScanLocationsPage implements ViewWillEnter {
                                       group: any,
                                       nature: Nature,
                                       trackingDelayData: any): void {
-        if(isGroup) {
-            const cancelPicking = this.cancelPickingAction();
-            cancelPicking({object: {value: barCode, label: barCode}});
-
-            this.alertService.show({
-                header: 'Transfert impossible',
-                backdropDismiss: false,
-                cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
-                message: `Vous ne pouvez pas transférer l'unité logistique ${barCode} car c'est un groupe`,
-                buttons: [
-                    {
-                        text: 'Annuler',
-                        cssClass: 'alert-danger',
-                        role: 'cancel',
-                    }
-                ]
-            });
-        }
+        // if(isGroup) {
+        //     const cancelPicking = this.cancelPickingAction();
+        //     cancelPicking({object: {value: barCode, label: barCode}});
+        //
+        //     this.alertService.show({
+        //         header: 'Transfert impossible',
+        //         backdropDismiss: false,
+        //         cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+        //         message: `Vous ne pouvez pas transférer l'unité logistique ${barCode} car c'est un groupe`,
+        //         buttons: [
+        //             {
+        //                 text: 'Annuler',
+        //                 cssClass: 'alert-danger',
+        //                 role: 'cancel',
+        //             }
+        //         ]
+        //     });
+        // }
 
         if (isPack || !isGroup) {
             if (group) {
