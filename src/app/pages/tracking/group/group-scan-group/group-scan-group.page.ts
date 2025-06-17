@@ -8,6 +8,7 @@ import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcod
 import {LoadingService} from '@app/services/loading.service';
 import {Subscription} from 'rxjs';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
+import {AlertService} from "@app/services/alert.service";
 
 @Component({
     selector: 'wii-group-scan-group',
@@ -25,6 +26,7 @@ export class GroupScanGroupPage implements ViewWillEnter, ViewWillLeave {
 
     public constructor(private apiService: ApiService,
                        private loadingService: LoadingService,
+                       private alertService: AlertService,
                        private toastService: ToastService,
                        private navService: NavService) {
     }
@@ -57,7 +59,34 @@ export class GroupScanGroupPage implements ViewWillEnter, ViewWillLeave {
                     next: (response) => {
                         this.unsubscribeLoading();
                         if (response.isPack) {
-                            this.toastService.presentToast(`Le colis ${code} n'est pas un groupe`);
+                            if(response.packCanBeGroup) {
+                                this.alertService.show({
+                                    header: 'Confirmation',
+                                    backdropDismiss: false,
+                                    cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+                                    message: `Cet élément est une UL, voulez-vous la transformer en groupe ?`,
+                                    buttons: [
+                                        {
+                                            text: 'Annuler',
+                                            role: 'cancel',
+                                        },
+                                        {
+                                            text: 'Confirmer',
+                                            handler: () => {
+                                                let group = {
+                                                    code,
+                                                    natureId: null,
+                                                    packs: [],
+                                                };
+                                                this.navService.push(NavPathEnum.GROUP_CONTENT, {group});
+                                            },
+                                            cssClass: 'alert-success'
+                                        }
+                                    ]
+                                });
+                            } else {
+                                this.toastService.presentToast(`Le colis ${code} n'est pas un groupe`);
+                            }
                         } else {
                             let group = response.group || {
                                 code,
