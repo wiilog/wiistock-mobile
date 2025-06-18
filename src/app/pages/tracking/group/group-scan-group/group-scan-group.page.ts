@@ -59,7 +59,7 @@ export class GroupScanGroupPage implements ViewWillEnter, ViewWillLeave {
                     next: (response) => {
                         this.unsubscribeLoading();
                         if (response.isPack) {
-                            if(response.packCanBeGroup) {
+                            if(response.isGroupCandidate) {
                                 this.alertService.show({
                                     header: 'Confirmation',
                                     backdropDismiss: false,
