@@ -22,6 +22,10 @@
                 top: -10px;
             }
         }
+
+        &.all-width {
+            justify-content: space-between;
+        }
     }
 
     wii-barcode-scanner {

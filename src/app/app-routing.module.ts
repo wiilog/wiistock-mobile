@@ -493,7 +493,7 @@ const routes: Routes = [
     {
         path: NavPathEnum.SCAN_LOCATIONS,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('@pages/tracking/pick-and-drop/scan-locations/scan-locations.module').then(m => m.ScanLocationsModule)
+        loadChildren: () => import('@pages/tracking/pick-and-drop/pick-and-drop.module').then(m => m.PickAndDropPageModule)
     }
 ];
 

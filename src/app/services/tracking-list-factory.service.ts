@@ -54,7 +54,7 @@ export class TrackingListFactoryService {
             title: 'PRISE ET DEPOSE',
             hasScanLabel: true,
             iconName: 'pick-and-drop.svg',
-            iconColor: 'primary' as IconColor,
+            iconColor: 'medium' as IconColor,
         },
     };
 

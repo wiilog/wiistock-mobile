@@ -1,5 +1,6 @@
 <ion-item lines="none" [disabled]="disabled">
     <ion-label color="medium"
+               *ngIf="label"
                [position]="inline === false ? 'stacked' : undefined">
         {{label}}
         <ng-container *ngIf="required">*</ng-container>
