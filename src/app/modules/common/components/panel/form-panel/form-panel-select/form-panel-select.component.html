@@ -2,7 +2,10 @@
                 [required]="inputConfig.required"
                 [inline]="inline"
                 [disabled]="inputConfig.disabled">
-    <div class="wrapper" [class.field-blocked]="inline === false" field>
+    <div class="wrapper"
+         [class.field-blocked]="inline === false"
+         [class.all-width]="!label"
+         field>
         <wii-search-item #searchComponent
                          [type]="inputConfig.searchType"
                          (itemChange)="onItemSelect($event)"

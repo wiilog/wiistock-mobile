@@ -1,8 +1,8 @@
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {IonicModule} from '@ionic/angular';
-import {ScanLocationsPageRoutingModule} from './scan-locations-routing.module';
-import {ScanLocationsPage} from './scan-locations.page';
+import {PickAndDropPageRoutingModule} from './pick-and-drop-routing.module';
+import {PickAndDropPage} from './pick-and-drop.page';
 import {CommonModule as AngularCommonModule} from '@angular/common';
 import {CommonModule} from '@common/common.module';
 
@@ -11,10 +11,10 @@ import {CommonModule} from '@common/common.module';
         AngularCommonModule,
         FormsModule,
         IonicModule,
-        ScanLocationsPageRoutingModule,
+        PickAndDropPageRoutingModule,
         CommonModule
     ],
-    declarations: [ScanLocationsPage]
+    declarations: [PickAndDropPage]
 })
-export class ScanLocationsModule {
+export class PickAndDropPageModule {
 }

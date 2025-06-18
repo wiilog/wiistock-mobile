@@ -30,11 +30,11 @@ import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {LocalDataManagerService} from "@app/services/local-data-manager.service";
 
 @Component({
-    selector: 'wii-scan-locations',
-    templateUrl: './scan-locations.page.html',
-    styleUrls: ['./scan-locations.page.scss'],
+    selector: 'wii-pick-and-drop',
+    templateUrl: './pick-and-drop.page.html',
+    styleUrls: ['./pick-and-drop.page.scss'],
 })
-export class ScanLocationsPage implements ViewWillEnter {
+export class PickAndDropPage implements ViewWillEnter {
     static readonly PICK_AND_DROP_TRACKING_MOVEMENT = 'pickAndDrop';
 
     @ViewChild('formPanelComponent', {static: false})
@@ -183,7 +183,6 @@ export class ScanLocationsPage implements ViewWillEnter {
             {
                 item: FormPanelSelectComponent,
                 config: {
-                    label: 'Emplacement',
                     name: 'pickLocation',
                     value: this.pickLocationId ?? null,
                     inputConfig: {
@@ -205,7 +204,6 @@ export class ScanLocationsPage implements ViewWillEnter {
             {
                 item: FormPanelSelectComponent,
                 config: {
-                    label: 'Emplacement',
                     name: 'dropLocation',
                     value: this.dropLocationId ?? null,
                     inputConfig: {
@@ -375,7 +373,7 @@ export class ScanLocationsPage implements ViewWillEnter {
     private saveTrackingMovement(barCode: string, quantity: number, loading: boolean = false, containsArticle?: boolean): void {
         this.colisPrise.unshift({
             ref_article: barCode,
-            type: ScanLocationsPage.PICK_AND_DROP_TRACKING_MOVEMENT,
+            type: PickAndDropPage.PICK_AND_DROP_TRACKING_MOVEMENT,
             operateur: this.operator,
             ref_emplacement: this.pickLocationId.toString(),
             finished: 0,

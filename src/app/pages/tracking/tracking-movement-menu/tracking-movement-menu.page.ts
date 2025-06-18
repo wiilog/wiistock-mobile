@@ -32,7 +32,6 @@ export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
 
     public constructor(private loadingService: LoadingService,
                        private sqliteService: SqliteService,
-                       private activatedRoute: ActivatedRoute,
                        private toastService: ToastService,
                        private networkService: NetworkService,
                        private storageService: StorageService,
@@ -74,6 +73,7 @@ export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
                 if(pickAndDrop) {
                     this.menuConfig.push({
                         icon: 'pick-and-drop.svg',
+                        iconColor: 'medium',
                         label: 'Prise et dépose',
                         action: () => {
                             this.navService.push(NavPathEnum.SCAN_LOCATIONS);
