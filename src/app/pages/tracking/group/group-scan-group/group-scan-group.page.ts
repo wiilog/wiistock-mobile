@@ -85,7 +85,7 @@ export class GroupScanGroupPage implements ViewWillEnter, ViewWillLeave {
                                     ]
                                 });
                             } else {
-                                this.toastService.presentToast(`Le colis ${code} n'est pas un groupe`);
+                                this.toastService.presentToast(`L'unité logistique' ${code} n'est pas un groupe`);
                             }
                         } else {
                             let group = response.group || {
