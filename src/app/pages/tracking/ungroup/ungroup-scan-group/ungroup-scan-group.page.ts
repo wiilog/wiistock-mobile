@@ -57,9 +57,9 @@ export class UngroupScanGroupPage implements ViewWillEnter, ViewWillLeave {
                     next: (response) => {
                         this.unsubscribeLoading();
                         if (response.isPack) {
-                            this.toastService.presentToast(`Le colis ${code} n'est pas un groupe`);
+                            this.toastService.presentToast(`L'unité logistique' ${code} n'est pas un groupe`);
                         } else if (response.group && !response.group.packs.length) {
-                            this.toastService.presentToast(`Le groupe ${code} ne contient aucun colis`);
+                            this.toastService.presentToast(`Le groupe ${code} ne contient aucune unité logistique`);
                         } else if (response.group) {
                             this.navService.push(NavPathEnum.UNGROUP_CONFIRM, {
                                 location: this.navService.param(`location`),
