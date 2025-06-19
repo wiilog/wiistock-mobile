@@ -62,6 +62,7 @@ export class PickAndDropPage implements ViewWillEnter {
 
     public listPacksToTakeHeader: HeaderConfig;
     public listPacksToTakeBody: Array<ListPanelItemConfig>;
+    public displayWarningWrongLocation: boolean;
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
 
@@ -99,9 +100,10 @@ export class PickAndDropPage implements ViewWillEnter {
                     this.sqliteService.findAll('nature'),
                     this.translationService.get(null, `Traçabilité`, `Général`),
                     this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`),
+                    this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_WARNING_WRONG_LOCATION),
                 )
             })
-            .subscribe(([operator, natures, natureTranslations, logisticUnitTranslations,]) => {
+            .subscribe(([operator, natures, natureTranslations, logisticUnitTranslations, displayWarningWrongLocation]) => {
                 if (natures) {
                     this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
                         [id]: {label, color},
@@ -110,6 +112,7 @@ export class PickAndDropPage implements ViewWillEnter {
                 }
 
                 this.operator = operator;
+                this.displayWarningWrongLocation = displayWarningWrongLocation;
                 this.natureTranslations = natureTranslations;
                 this.logisticUnitTranslations = logisticUnitTranslations;
                 this.trackingListFactory.enableActions();
@@ -295,7 +298,7 @@ export class PickAndDropPage implements ViewWillEnter {
                     )
                     .subscribe({
                         next: ({nature, group, isPack, isGroup, location, existing, trackingDelayData}) => {
-                            if ((location && `${this.pickLocationId}` !== `${location}`) || !existing) {
+                            if (this.displayWarningWrongLocation && ((location && `${this.pickLocationId}` !== `${location}`) || !existing)) {
                                 this.alertService.show({
                                     header: `Confirmation`,
                                     message: `Êtes-vous sûr que cet élément est présent sur cet emplacement ?`,
