@@ -152,7 +152,7 @@ export class EmplacementScanPage implements ViewWillEnter, ViewWillLeave {
                     if (this.customAction) {
                         this.navService.pop().subscribe(() => {
                             if (this.customAction) {
-                                this.customAction(location)
+                                this.customAction(location);
                             }
                         });
                     } else {
