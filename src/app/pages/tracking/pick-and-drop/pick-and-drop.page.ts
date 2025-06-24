@@ -1,16 +1,14 @@
 import {Component, ViewChild} from '@angular/core';
-import {SelectItemTypeEnum} from '@common/components/select-item/select-item-type.enum';
 import {ToastService} from '@app/services/toast.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {StorageService} from '@app/services/storage/storage.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
-import {ViewWillEnter} from "@ionic/angular";
+import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
 import {LoadingService} from "@app/services/loading.service";
 import {FormPanelComponent} from "@common/components/panel/form-panel/form-panel.component";
 import {FormPanelParam} from "@common/directives/form-panel/form-panel-param";
 import {ApiService} from "@app/services/api.service";
-import {FormPanelSelectComponent} from "@common/components/panel/form-panel/form-panel-select/form-panel-select.component";
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcode-scanner.component";
 import {TrackingListFactoryService} from "@app/services/tracking-list-factory.service";
@@ -28,13 +26,18 @@ import {AlertService} from "@app/services/alert.service";
 import * as moment from "moment/moment";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {LocalDataManagerService} from "@app/services/local-data-manager.service";
+import {Emplacement} from "@entities/emplacement";
+import {
+    FormPanelSelectComponent
+} from "@common/components/panel/form-panel/form-panel-select/form-panel-select.component";
+import {SelectItemTypeEnum} from "@common/components/select-item/select-item-type.enum";
 
 @Component({
     selector: 'wii-pick-and-drop',
     templateUrl: './pick-and-drop.page.html',
     styleUrls: ['./pick-and-drop.page.scss'],
 })
-export class PickAndDropPage implements ViewWillEnter {
+export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
     static readonly PICK_AND_DROP_TRACKING_MOVEMENT = 'pickAndDrop';
 
     @ViewChild('formPanelComponent', {static: false})
@@ -111,16 +114,23 @@ export class PickAndDropPage implements ViewWillEnter {
                     }), {})
                 }
 
+                this.pickLocationId = this.navService.param('pickLocationId');
+                this.dropLocationId = this.navService.param('dropLocationId');
                 this.operator = operator;
                 this.displayWarningWrongLocation = displayWarningWrongLocation;
                 this.natureTranslations = natureTranslations;
                 this.logisticUnitTranslations = logisticUnitTranslations;
                 this.trackingListFactory.enableActions();
+                this.footerScannerComponent.fireZebraScan();
                 this.generateForm();
                 this.refreshListComponent();
             });
 
 
+    }
+
+    public ionViewWillLeave() {
+        this.footerScannerComponent.unsubscribeZebraScan();
     }
 
     private refreshListComponent(): void {

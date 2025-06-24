@@ -148,7 +148,7 @@ export class TrackingListFactoryService {
         const pickedArticlesNumber = notDuplicateArticles.length;
         const plural = pickedArticlesNumber > 1 ? 's' : '';
 
-        const config = TrackingListFactoryService.LIST_TYPE_CONFIG[listType as 0|1|2|3];
+        const config = TrackingListFactoryService.LIST_TYPE_CONFIG[listType as 0|1|2|3|4];
 
         if (!config) {
             throw new Error(`The parameter listType ${listType} is invalid`);

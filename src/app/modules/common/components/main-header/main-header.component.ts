@@ -239,6 +239,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.RECEPTION_MENU, label: 'Réception'},
             {pagePath: NavPathEnum.RECEPTION_DETAILS, label: 'Détails'},
             {pagePath: NavPathEnum.READING_SCAN, label: 'Lecture'},
+            {pagePath: NavPathEnum.PICK_AND_DROP, label: 'Prise et dépose'}
         ];
     }
 
