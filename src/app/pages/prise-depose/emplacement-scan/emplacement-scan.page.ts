@@ -27,6 +27,7 @@ export class EmplacementScanPage implements ViewWillEnter, ViewWillLeave {
 
     public readonly selectItemType = SelectItemTypeEnum.LOCATION;
 
+    public label: string;
     public fromDepose: boolean;
     public fromStock: boolean;
     public fromEmptyRound: boolean;
@@ -58,6 +59,7 @@ export class EmplacementScanPage implements ViewWillEnter, ViewWillLeave {
         this.loading = true;
         this.livraisonToRedirect = this.navService.param('livraisonToRedirect') || null;
         this.storageService.getRight(StorageKeyEnum.DEMO_MODE).subscribe((isDemoMode) => {
+            this.label = this.navService.param('customLabel') ?? 'Sélectionner emplacement';
             this.fromDepose = Boolean(this.navService.param('fromDepose'));
             this.fromStock = Boolean(this.navService.param('fromStock'));
             this.fromEmptyRound = Boolean(this.navService.param('fromEmptyRound'));

@@ -7,13 +7,14 @@ import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {StatsSlidersData} from '@common/components/stats-sliders/stats-sliders-data';
 import {NavService} from '@app/services/nav/nav.service';
-import {ActivatedRoute} from '@angular/router';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {StorageService} from '@app/services/storage/storage.service';
 import {ViewWillEnter} from "@ionic/angular";
 import {NetworkService} from "@app/services/network.service";
+import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
+import {Emplacement} from "@entities/emplacement";
 
 
 @Component({
@@ -76,7 +77,22 @@ export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
                         iconColor: 'medium',
                         label: 'Prise et dépose',
                         action: () => {
-                            this.navService.push(NavPathEnum.SCAN_LOCATIONS);
+                            this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
+                                scanMode: BarcodeScannerModeEnum.TOOL_SEARCH,
+                                customLabel: 'Sélectionner emplacement de prise',
+                                customAction: (pickLocation: Emplacement) => {
+                                    this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
+                                        scanMode: BarcodeScannerModeEnum.TOOL_SEARCH,
+                                        customLabel: 'Sélectionner emplacement de dépose',
+                                        customAction: (dropLocation: Emplacement) => {
+                                            this.navService.push(NavPathEnum.PICK_AND_DROP, {
+                                                pickLocationId: pickLocation.id,
+                                                dropLocationId: dropLocation.id,
+                                            })
+                                        },
+                                    });
+                                },
+                            });
                         }
                     });
                 }

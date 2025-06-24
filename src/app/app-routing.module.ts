@@ -491,7 +491,7 @@ const routes: Routes = [
         loadChildren: () => import('@pages/tracking/reading/reading-details/reading-details.module').then(m => m.ReadingDetailsModule)
     },
     {
-        path: NavPathEnum.SCAN_LOCATIONS,
+        path: NavPathEnum.PICK_AND_DROP,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/tracking/pick-and-drop/pick-and-drop.module').then(m => m.PickAndDropPageModule)
     }

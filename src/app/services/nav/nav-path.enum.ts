@@ -96,5 +96,5 @@ export enum NavPathEnum {
     RECEPTION_REFERENCE_TAKE = 'reception-reference-take',
     READING_SCAN = 'reading-scan',
     READING_DETAILS = 'reading-details',
-    SCAN_LOCATIONS = 'scan-locations',
+    PICK_AND_DROP = 'pick_and_drop',
 }
