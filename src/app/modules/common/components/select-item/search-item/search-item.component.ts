@@ -6,6 +6,7 @@ import {map, take, tap} from 'rxjs/operators';
 import {ArticleInventaire} from '@entities/article-inventaire';
 import {Observable, of, ReplaySubject, Subscription} from 'rxjs';
 import {TableName} from '@app/services/sqlite/table-definition';
+import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
 
 
 @Component({
@@ -196,7 +197,8 @@ export class SearchItemComponent implements OnInit, OnDestroy {
     }
 
     public constructor(private sqliteService: SqliteService,
-                       private changeDetector: ChangeDetectorRef) {
+                       private changeDetector: ChangeDetectorRef,
+                       private barcodeScannerManager: BarcodeScannerManagerService) {
         this.itemChange = new EventEmitter<any>();
         this.itemsLoaded = new EventEmitter<void>();
         this.dbItemsForList = [];
@@ -433,5 +435,19 @@ export class SearchItemComponent implements OnInit, OnDestroy {
                 )
             ))
             : this.dbItems;
+    }
+
+    public open() {
+        this.itemComponent.open().then(() => {
+           this.onOpen();
+        });
+    }
+
+    public onOpen() {
+        this.barcodeScannerManager.scanEnabled = false;
+    }
+
+    public onClose() {
+        this.barcodeScannerManager.scanEnabled = true;
     }
 }

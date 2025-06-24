@@ -3,6 +3,7 @@ import {mergeMap, Observable, of, Subject, throwError} from 'rxjs';
 import {CordovaIntentShimService} from "@plugins/cordova-intent-shim/cordova-intent-shim.service";
 import {CordovaBarcodeScannerService} from "@plugins/cordova-barcode-scanner/cordova-barcode-scanner.service";
 import {BarcodeScanResult} from "@plugins/cordova-barcode-scanner/definitions";
+import {filter} from "rxjs/operators";
 
 
 @Injectable({
@@ -13,6 +14,8 @@ export class BarcodeScannerManagerService {
     private readonly _datawedgeScan$: Subject<string>;
 
     private ngZone: NgZone;
+
+    private _scanEnabled: boolean = true;
 
     private zebraBroadcastReceiverAlreadyReceived: boolean;
 
@@ -40,7 +43,13 @@ export class BarcodeScannerManagerService {
      * @return An observable fired when the zebra scanner is used. The param is the string barcode.
      */
     public get datawedgeScan$(): Observable<string> {
-        return this._datawedgeScan$;
+        return this._datawedgeScan$.pipe(
+            filter(() => this._scanEnabled)
+        );
+    }
+
+    public set scanEnabled(scanEnabled: boolean) {
+        this._scanEnabled = scanEnabled;
     }
 
     public scan(): Observable<string> {

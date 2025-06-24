@@ -157,7 +157,7 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
     }
 
     public onSearchClick() {
-        this.searchComponent.itemComponent.open();
+        this.searchComponent.open();
     }
 
     public onBarcodeScanned(barcode: string): void {
@@ -198,9 +198,5 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
                 this.value = undefined;
             }
         }
-    }
-
-    public onScanButtonClicked(): void {
-        this.barcodeScanner.scan();
     }
 }
