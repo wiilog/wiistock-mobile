@@ -13,6 +13,8 @@ import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {StorageService} from '@app/services/storage/storage.service';
 import {NetworkService} from '@app/services/network.service';
 import {ViewWillEnter} from "@ionic/angular";
+import {EmplacementScanModeEnum} from "@pages/prise-depose/emplacement-scan/emplacement-scan-mode.enum";
+import {Emplacement} from "@entities/emplacement";
 
 
 @Component({
@@ -92,9 +94,16 @@ export class StockMovementMenuPage implements ViewWillEnter, CanLeave {
         const hasNetwork = await this.networkService.hasNetwork();
         if (hasNetwork) {
             this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
-                fromDepose: false,
-                fromStock: true,
-                finishAction: () => this.navService.pop()
+                pageMode: EmplacementScanModeEnum.STOCK_PICK,
+                onLocationSelected: (location: Emplacement) => {
+                    this.navService.push(NavPathEnum.DEPOSE, {
+                        emplacement: location,
+                        fromStock: true,
+                        finishAction: () => {
+                            this.navService.pop();
+                        },
+                    });
+                },
             });
         }
         else {
@@ -107,9 +116,16 @@ export class StockMovementMenuPage implements ViewWillEnter, CanLeave {
         if (hasNetwork) {
             if (this.canNavigateToDepose) {
                 this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
-                    fromDepose: true,
-                    fromStock: true,
-                    finishAction: () => this.navService.pop()
+                    pageMode: EmplacementScanModeEnum.STOCK_DROP,
+                    onLocationSelected: (location: Emplacement) => {
+                        this.navService.push(NavPathEnum.DEPOSE, {
+                            emplacement: location,
+                            fromStock: true,
+                            finishAction: () => {
+                                this.navService.pop();
+                            },
+                        });
+                    },
                 });
             }
             else {

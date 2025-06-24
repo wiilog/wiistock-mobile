@@ -28,6 +28,7 @@ import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {Emplacement} from "@entities/emplacement";
+import {EmplacementScanModeEnum} from "@pages/prise-depose/emplacement-scan/emplacement-scan-mode.enum";
 
 
 @Component({
@@ -427,12 +428,13 @@ export class FormPage implements ViewWillEnter, ViewWillLeave {
             }).subscribe((restrictedLocations: Array<Emplacement>|undefined) => {
                 if (restrictedLocations) {
                     this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
-                        fromDepose: false,
-                        fromStock: true,
-                        restrictedLocations,
+                        pageMode: EmplacementScanModeEnum.ARTICLE_CREATION,
                         scanMode: BarcodeScannerModeEnum.ONLY_SCAN,
-                        customAction: () => {
-                            this.createArticle(params);
+                        restrictedLocations,
+                        onLocationSelected: () => {
+                            this.navService.pop().subscribe(() => {
+                                this.createArticle(params);
+                            });
                         },
                     });
                 } else {

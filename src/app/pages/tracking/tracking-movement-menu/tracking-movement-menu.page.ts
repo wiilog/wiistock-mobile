@@ -15,6 +15,7 @@ import {ViewWillEnter} from "@ionic/angular";
 import {NetworkService} from "@app/services/network.service";
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {Emplacement} from "@entities/emplacement";
+import {EmplacementScanModeEnum} from "@pages/prise-depose/emplacement-scan/emplacement-scan-mode.enum";
 
 
 @Component({
@@ -62,12 +63,12 @@ export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
                     {
                         icon: 'upload.svg',
                         label: 'Prise',
-                        action: () => this.goToPrise()
+                        action: () => this.goToPicking(),
                     },
                     {
                         icon: 'download.svg',
                         label: 'Dépose',
-                        action: () => this.goToDrop()
+                        action: () => this.goToDrop(),
                     }
                 ];
 
@@ -76,24 +77,7 @@ export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
                         icon: 'pick-and-drop.svg',
                         iconColor: 'medium',
                         label: 'Prise et dépose',
-                        action: () => {
-                            this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
-                                scanMode: BarcodeScannerModeEnum.TOOL_SEARCH,
-                                customLabel: 'Sélectionner emplacement de prise',
-                                customAction: (pickLocation: Emplacement) => {
-                                    this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
-                                        scanMode: BarcodeScannerModeEnum.TOOL_SEARCH,
-                                        customLabel: 'Sélectionner emplacement de dépose',
-                                        customAction: (dropLocation: Emplacement) => {
-                                            this.navService.push(NavPathEnum.PICK_AND_DROP, {
-                                                pickLocationId: pickLocation.id,
-                                                dropLocationId: dropLocation.id,
-                                            })
-                                        },
-                                    });
-                                },
-                            });
-                        }
+                        action: () => this.goToPickAndDrop(),
                     });
                 }
 
@@ -101,9 +85,7 @@ export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
                     this.menuConfig.push({
                         icon: 'empty-round.svg',
                         label: 'Passage à vide',
-                        action: () => {
-                            this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {fromEmptyRound: true});
-                        }
+                        action: () => this.goToEmptyRound(),
                     });
                 }
 
@@ -173,23 +155,82 @@ export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
             });
     }
 
-    public goToPrise(): void {
+    public goToPicking(): void {
         this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
-            fromDepose: false,
-            fromStock: false
+            pageMode: EmplacementScanModeEnum.TRACKING_PICK,
+            onLocationSelected: (location: Emplacement) => {
+                this.navService.push(NavPathEnum.PRISE, {
+                    emplacement: location,
+                    fromStock: false,
+                    finishAction: () => {
+                        this.navService.pop();
+                    },
+                });
+            }
+        });
+    }
+
+    public goToEmptyRound(): void {
+        this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
+            pageMode: EmplacementScanModeEnum.TRACKING_EMPTY_ROUND,
+            onLocationSelected: (location: Emplacement) => {
+                this.navService.push(NavPathEnum.EMPTY_ROUND, {
+                    emplacement: location,
+                    finishAction: () => {
+                        this.navService.pop();
+                    },
+                });
+            }
         });
     }
 
     public goToDrop(): void {
         if (this.canNavigateToDepose) {
             this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
-                fromDepose: true,
-                fromStock: false
+                pageMode: EmplacementScanModeEnum.TRACKING_DROP,
+                onLocationSelected: (location: Emplacement) => {
+                    this.navService.push(NavPathEnum.DEPOSE, {
+                        emplacement: location,
+                        fromStock: false,
+                        finishAction: () => {
+                            this.navService.pop();
+                        },
+                    });
+                }
             });
         }
         else {
             this.toastService.presentToast('Aucune prise n\'a été enregistrée');
         }
+    }
+
+    public goToPickAndDrop(): void {
+        this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
+            scanMode: BarcodeScannerModeEnum.TOOL_SEARCH,
+            pageMode: EmplacementScanModeEnum.TRACKING_PICK_AND_DROP,
+            customLabel: 'Sélectionner emplacement de prise',
+            onLocationSelected: (pickLocation: Emplacement) => {
+                console.log('onLocationSelected 1');
+                this.navService.pop().subscribe(() => {
+                    this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
+                        scanMode: BarcodeScannerModeEnum.TOOL_SEARCH,
+                        pageMode: EmplacementScanModeEnum.TRACKING_PICK_AND_DROP,
+                        customLabel: 'Sélectionner emplacement de dépose',
+                        onLocationSelected: (dropLocation: Emplacement) => {
+                            this.navService.pop().subscribe(() => {
+                                this.navService.push(NavPathEnum.PICK_AND_DROP, {
+                                    pickLocationId: pickLocation.id,
+                                    dropLocationId: dropLocation.id,
+                                    onValidate: () => {
+                                        this.navService.pop({path: NavPathEnum.TRACKING_MOVEMENT_MENU});
+                                    }
+                                });
+                            });
+                        },
+                    });
+                });
+            },
+        });
     }
 
     private get canNavigateToDepose(): boolean {

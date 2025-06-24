@@ -6,6 +6,7 @@ import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {Emplacement} from "@entities/emplacement";
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
+import {EmplacementScanModeEnum} from "@pages/prise-depose/emplacement-scan/emplacement-scan-mode.enum";
 
 @Component({
     selector: 'wii-manual-collect-article-take',
@@ -77,16 +78,17 @@ export class ManualCollectArticleTakePage implements ViewWillEnter{
             this.sqliteService.findBy('emplacement', [`label = '${this.selectedReference.location}'`])
                 .subscribe((restrictedLocations) => {
                     this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
+                        pageMode: EmplacementScanModeEnum.COLLECT_MANUAL,
                         scanMode: BarcodeScannerModeEnum.TOOL_SEARCH,
-                        customAction: (location: Emplacement) => {
+                        onLocationSelected: (location: Emplacement) => {
                             this.navService.pop({path: NavPathEnum.MANUAL_COLLECT_ARTICLES})
                                 .subscribe(() => {
                                     this.selectArticle(quantity, this.selectedReference, location);
                                 });
                         },
-                        ...(this.selectedReference.quantityType === 'reference' && restrictedLocations.length > 0? {
-                            restrictedLocations
-                        } :  {}),
+                        ...(this.selectedReference.quantityType === 'reference' && restrictedLocations.length > 0
+                            ? {restrictedLocations}
+                            :  {}),
                     });
                 });
         }
