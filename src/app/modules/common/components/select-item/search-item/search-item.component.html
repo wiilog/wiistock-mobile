@@ -15,6 +15,8 @@
                 [hasInfiniteScroll]="true"
                 (onSearch)="onItemSearch($event)"
                 (onChange)="onItemChange($event)"
+                (onOpen)="onOpen()"
+                (onClose)="onClose()"
                 (onInfiniteScroll)="onInfiniteScroll()">
                 <ng-template ionicSelectableSearchFailTemplate>
                 </ng-template>

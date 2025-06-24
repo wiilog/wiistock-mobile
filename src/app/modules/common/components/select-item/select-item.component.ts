@@ -152,7 +152,7 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
                 && this.searchComponent.itemComponent
                 && !this.searchComponent.itemComponent.isOpened
                 && this.searchComponent.itemComponent.isEnabled) {
-                this.searchComponent.itemComponent.open();
+                this.searchComponent.open();
             }
         });
     }
