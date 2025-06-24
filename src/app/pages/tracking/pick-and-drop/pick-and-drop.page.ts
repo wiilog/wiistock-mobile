@@ -72,6 +72,8 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
     private natureTranslations: Translations;
     private logisticUnitTranslations: Translations;
 
+    private onValidate: () => void;
+
     public constructor(private navService: NavService,
                        public sqliteService: SqliteService,
                        public apiService: ApiService,
@@ -116,6 +118,7 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
 
                 this.pickLocationId = this.navService.param('pickLocationId');
                 this.dropLocationId = this.navService.param('dropLocationId');
+                this.onValidate = this.navService.param('onValidate');
                 this.operator = operator;
                 this.displayWarningWrongLocation = displayWarningWrongLocation;
                 this.natureTranslations = natureTranslations;
@@ -257,7 +260,7 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
                 }),
             }).subscribe((res) => {
                 if(res.success) {
-                    this.navService.pop();
+                    this.onValidate();
                 }
             });
         }

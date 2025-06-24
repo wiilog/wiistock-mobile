@@ -109,7 +109,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
 
     public ionViewWillEnter(): void {
         this.trackingListFactory.enableActions();
-        this.createTakeAndDrop = this.navService.param('createTakeAndDrop');
+        this.createTakeAndDrop = this.navService.param('createTakeAndDrop') || false;
         if (!this.operator) {
             this.init();
             this.emplacement = this.navService.param('emplacement');

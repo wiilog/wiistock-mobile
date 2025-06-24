@@ -15,6 +15,7 @@ import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {CardListConfig} from "@common/components/card-list/card-list-config";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {Emplacement} from "@entities/emplacement";
+import {EmplacementScanModeEnum} from "@pages/prise-depose/emplacement-scan/emplacement-scan-mode.enum";
 
 type ArticleAssociation = {
     barCode: string,
@@ -109,9 +110,12 @@ export class AssociationPage implements ViewWillEnter, ViewWillLeave {
         } else {
             if (needsLocationPicking) {
                 this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
-                    fromDepose: false,
-                    fromStock: true,
-                    customAction: (location: Emplacement) => this.locationSelectCallback(location.label)
+                    pageMode: EmplacementScanModeEnum.STOCK_ASSOCIATION,
+                    onLocationSelected: (location: Emplacement) => {
+                        this.navService.pop().subscribe(() => {
+                            this.locationSelectCallback(location.label);
+                        });
+                    },
                 });
             } else {
                 this.doAPICall(logisticUnit);

@@ -9,12 +9,12 @@ import {StorageService} from '@app/services/storage/storage.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {NetworkService} from '@app/services/network.service';
-import {Livraison} from "@entities/livraison";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
 import {LoadingService} from "@app/services/loading.service";
 import {AlertService} from "@app/services/alert.service";
 import {mergeMap, Observable, of, Subject, tap} from "rxjs";
+import {EmplacementScanModeEnum} from "@pages/prise-depose/emplacement-scan/emplacement-scan-mode.enum";
 
 @Component({
     selector: 'wii-emplacement-scan',
@@ -28,12 +28,10 @@ export class EmplacementScanPage implements ViewWillEnter, ViewWillLeave {
     public readonly selectItemType = SelectItemTypeEnum.LOCATION;
 
     public label: string;
-    public fromDepose: boolean;
-    public fromStock: boolean;
-    public fromEmptyRound: boolean;
-    public restrictedLocations: Array<Emplacement> = [];
 
-    private livraisonToRedirect?: Livraison;
+    private pageMode: EmplacementScanModeEnum;
+
+    public restrictedLocations: Array<Emplacement> = [];
 
     public barcodeScannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.TOOL_SEARCH;
 
@@ -41,8 +39,7 @@ export class EmplacementScanPage implements ViewWillEnter, ViewWillLeave {
 
     public loading: boolean;
     public isDemoMode: boolean;
-    public customAction?: (location: Emplacement) => void;
-    public finishAction?: () => void;
+    public onLocationSelected?: (location: Emplacement) => void;
 
     public constructor(private networkService: NetworkService,
                        private toastService: ToastService,
@@ -57,15 +54,12 @@ export class EmplacementScanPage implements ViewWillEnter, ViewWillLeave {
 
     public ionViewWillEnter(): void {
         this.loading = true;
-        this.livraisonToRedirect = this.navService.param('livraisonToRedirect') || null;
+        this.label = this.navService.param('customLabel') ?? 'Sélectionner emplacement';
+        this.restrictedLocations = this.navService.param('restrictedLocations');
+        this.onLocationSelected = this.navService.param('onLocationSelected');
+        this.pageMode = this.navService.param('pageMode');
+
         this.storageService.getRight(StorageKeyEnum.DEMO_MODE).subscribe((isDemoMode) => {
-            this.label = this.navService.param('customLabel') ?? 'Sélectionner emplacement';
-            this.fromDepose = Boolean(this.navService.param('fromDepose'));
-            this.fromStock = Boolean(this.navService.param('fromStock'));
-            this.fromEmptyRound = Boolean(this.navService.param('fromEmptyRound'));
-            this.restrictedLocations = this.navService.param('restrictedLocations');
-            this.customAction = this.navService.param('customAction');
-            this.finishAction = this.navService.param('finishAction');
             this.loading = false;
             this.isDemoMode = isDemoMode;
             this.barcodeScannerMode = this.navService.param(`scanMode`) || (this.fromStock || !isDemoMode
@@ -90,7 +84,6 @@ export class EmplacementScanPage implements ViewWillEnter, ViewWillLeave {
     public createEmp(): void {
         this.testNetwork(() => {
             this.navService.push(NavPathEnum.NEW_EMPLACEMENT, {
-                fromDepose: this.fromDepose,
                 createNewEmp: (emplacement: Emplacement) => {
                     this.selectLocation(emplacement)
                 }
@@ -149,29 +142,9 @@ export class EmplacementScanPage implements ViewWillEnter, ViewWillLeave {
         this.checkRestrictions(location).subscribe((noRestrictions: boolean) => {
             if(noRestrictions) {
                 this.testNetwork(() => {
-                    if (this.customAction) {
-                        this.navService.pop().subscribe(() => {
-                            if (this.customAction) {
-                                this.customAction(location);
-                            }
-                        });
-                    } else {
-                        const nextPagePath = this.fromDepose
-                            ? NavPathEnum.DEPOSE
-                            : (this.fromEmptyRound
-                                ? NavPathEnum.EMPTY_ROUND
-                                : NavPathEnum.PRISE);
-                        this.navService.push(nextPagePath, {
-                            emplacement: location,
-                            articlesList: this.navService.param('articlesList'),
-                            fromStockLivraison: Boolean(this.navService.param('articlesList')),
-                            livraisonToRedirect: this.livraisonToRedirect,
-                            fromStock: this.fromStock,
-                            createTakeAndDrop: this.navService.param('createTakeAndDrop') || false,
-                            finishAction: this.finishAction || (() => {
-                                this.navService.pop();
-                            })
-                        });
+                    console.log()
+                    if (this.onLocationSelected) {
+                        this.onLocationSelected(location);
                     }
                 });
             }
@@ -186,5 +159,14 @@ export class EmplacementScanPage implements ViewWillEnter, ViewWillLeave {
         else {
             this.toastService.presentToast('Vous devez être connecté à internet pour valider un transfert de stock');
         }
+    }
+
+    public get fromStock(): boolean {
+        return [
+            EmplacementScanModeEnum.STOCK_PICK,
+            EmplacementScanModeEnum.STOCK_DROP,
+            EmplacementScanModeEnum.STOCK_ASSOCIATION,
+            EmplacementScanModeEnum.ARTICLE_CREATION,
+        ].includes(this.pageMode);
     }
 }

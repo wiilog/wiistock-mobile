@@ -18,6 +18,7 @@ import {Translations} from '@entities/translation';
 import {TranslationService} from '@app/services/translations.service';
 import {ApiService} from "@app/services/api.service";
 import {LoadingService} from "@app/services/loading.service";
+import {EmplacementScanModeEnum} from "@pages/prise-depose/emplacement-scan/emplacement-scan-mode.enum";
 
 @Component({
     selector: 'wii-main-header',
@@ -141,26 +142,13 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.ARTICLE_CREATION_SCAN_RFID_TAG, label: 'Créer article'},
             {
                 pagePath: NavPathEnum.EMPLACEMENT_SCAN,
-                label: 'Association UL - Articles',
-                filter: (params) => (
-                    params.customAction
-                )
-            },
-            {
-                pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Prise',
-                filter: (params) => (
-                    (typeof params.fromDepose === 'boolean') &&
-                    !params.fromDepose && !params.customAction
-                )
+                filter: ({pageMode}) => pageMode === EmplacementScanModeEnum.TRACKING_PICK,
             },
             {
                 pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Dépose',
-                filter: (params) => (
-                    (typeof params.fromDepose === 'boolean') &&
-                    params.fromDepose && !params.customAction
-                )
+                filter: ({pageMode}) => pageMode === EmplacementScanModeEnum.TRACKING_DROP,
             },
             {pagePath: NavPathEnum.STOCK_MOVEMENT_MENU, label: 'Transfert manuel'},
             {pagePath: NavPathEnum.PREPARATION_MENU, label: 'Préparation'},
@@ -230,16 +218,19 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {
                 pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Passage à vide',
-                filter: (params) => (
-                    params.fromEmptyRound
-                )
+                filter: ({pageMode}) => pageMode === EmplacementScanModeEnum.TRACKING_EMPTY_ROUND,
             },
             {pagePath: NavPathEnum.TRUCK_ARRIVAL_CARRIER, label: 'Arrivage camion'},
             {pagePath: NavPathEnum.RECEIPT_ASSOCIATION_MENU, label: 'Association'},
             {pagePath: NavPathEnum.RECEPTION_MENU, label: 'Réception'},
             {pagePath: NavPathEnum.RECEPTION_DETAILS, label: 'Détails'},
             {pagePath: NavPathEnum.READING_SCAN, label: 'Lecture'},
-            {pagePath: NavPathEnum.PICK_AND_DROP, label: 'Prise et dépose'}
+            {pagePath: NavPathEnum.PICK_AND_DROP, label: 'Prise et dépose'},
+            {
+                pagePath: NavPathEnum.EMPLACEMENT_SCAN,
+                label: 'Prise et dépose',
+                filter: ({pageMode}) => pageMode === EmplacementScanModeEnum.TRACKING_PICK_AND_DROP,
+            },
         ];
     }
 
@@ -468,9 +459,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     }
 
     private findTitleConfig(path: string, paramsId: number): TitleConfig|undefined {
-        this.titlesConfig = this.titlesConfig.filter((config, index) =>
-            this.titlesConfig.findIndex(({label}) => label === config.label) === index
-        );
         const currentNavParams = this.navService.params(paramsId);
         return this.titlesConfig.find(({pagePath, filter}) => (
             (pagePath === path)

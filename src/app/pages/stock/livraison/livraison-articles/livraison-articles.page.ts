@@ -25,6 +25,8 @@ import {LoadingService} from "@app/services/loading.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {TranslationService} from "@app/services/translations.service";
 import {Translations} from "@entities/translation";
+import {Emplacement} from "@entities/emplacement";
+import {EmplacementScanModeEnum} from "@pages/prise-depose/emplacement-scan/emplacement-scan-mode.enum";
 
 
 @Component({
@@ -313,42 +315,6 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                 }
             });
         }
-    }
-
-    public redirectToDeposeOrUlAssociation(redirectionRoute: NavPathEnum,
-                                           livraisonToRedirect: Livraison,
-                                           articles: Array<{barcode: string; reference: string; label: string; quantity: number; location: string; currentLogisticUnitCode: string}>): void {
-        let articlesList: any = [];
-        const date = moment().format();
-        if (redirectionRoute === NavPathEnum.EMPLACEMENT_SCAN){
-            articlesList = articles.map((article) => ({
-                ref_article: article.barcode,
-                quantity: article.quantity,
-                date,
-            }));
-        } else if(redirectionRoute === NavPathEnum.ASSOCIATION) {
-            articlesList = articles.map((article) => ({
-                barCode: article.barcode,
-                label: article.label,
-                quantity: article.quantity,
-                location: article.location,
-                reference: article.reference,
-                ref_article: article.reference,
-                currentLogisticUnitCode: article.currentLogisticUnitCode,
-                is_lu: false,
-                date
-            }));
-        }
-        this.navService.pop().subscribe(() => {
-            this.navService.push(redirectionRoute, {
-                articlesList,
-                livraisonToRedirect,
-                fromStock: false,
-                fromStockLivraison: true,
-                fromDepose: true,
-                createTakeAndDrop: true
-            });
-        });
     }
 
     public testIfBarcodeEquals(text: any, fromText: boolean = true): void {
@@ -748,12 +714,78 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
             buttons: [{
                 text: 'Faire une dépose',
                 cssClass: 'full-width',
-                handler: () => this.redirectToDeposeOrUlAssociation(NavPathEnum.EMPLACEMENT_SCAN, this.livraison, articles),
+                handler: () => this.goToDrop(this.livraison, articles),
             }, {
                 text: 'Faire une association UL',
                 cssClass: 'full-width',
-                handler: () => this.redirectToDeposeOrUlAssociation(NavPathEnum.ASSOCIATION, this.livraison, articles),
+                handler: () => this.goToLogisticUnitAssociation(this.livraison, articles),
             }]
+        });
+    }
+
+    private goToDrop(livraisonToRedirect: Livraison,
+                     articles: Array<{
+                         barcode: string;
+                         reference: string;
+                         label: string;
+                         quantity: number;
+                         location: string;
+                         currentLogisticUnitCode: string
+                     }>) {
+        const date = moment().format();
+        this.navService.pop().subscribe(() => {
+            this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
+                pageMode: EmplacementScanModeEnum.DELIVERY_LOCATION,
+                onLocationSelected: (location: Emplacement) => {
+                    this.navService.push(NavPathEnum.DEPOSE, {
+                        emplacement: location,
+                        articlesList: articles.map((article) => ({
+                            ref_article: article.barcode,
+                            quantity: article.quantity,
+                            date,
+                        })),
+                        fromStockLivraison: true,
+                        livraisonToRedirect,
+                        fromStock: false,
+                        createTakeAndDrop: true,
+                        finishAction: () => {
+                            this.navService.pop();
+                        },
+                    });
+                },
+            });
+        });
+    }
+
+    private goToLogisticUnitAssociation(livraisonToRedirect: Livraison,
+                                        articles: Array<{
+                                            barcode: string;
+                                            reference: string;
+                                            label: string;
+                                            quantity: number;
+                                            location: string;
+                                            currentLogisticUnitCode: string
+                                        }>) {
+        const date = moment().format();
+        this.navService.pop().subscribe(() => {
+            this.navService.push(NavPathEnum.ASSOCIATION, {
+                articlesList: articles.map((article) => ({
+                    barCode: article.barcode,
+                    label: article.label,
+                    quantity: article.quantity,
+                    location: article.location,
+                    reference: article.reference,
+                    ref_article: article.reference,
+                    currentLogisticUnitCode: article.currentLogisticUnitCode,
+                    is_lu: false,
+                    date
+                })),
+                livraisonToRedirect,
+                fromStock: false,
+                fromStockLivraison: true,
+                fromDepose: true,
+                createTakeAndDrop: true
+            });
         });
     }
 }
