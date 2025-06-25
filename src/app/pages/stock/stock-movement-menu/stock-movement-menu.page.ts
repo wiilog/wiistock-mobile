@@ -96,7 +96,7 @@ export class StockMovementMenuPage implements ViewWillEnter, CanLeave {
             this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
                 pageMode: EmplacementScanModeEnum.STOCK_PICK,
                 onLocationSelected: (location: Emplacement) => {
-                    this.navService.push(NavPathEnum.DEPOSE, {
+                    this.navService.push(NavPathEnum.PRISE, {
                         emplacement: location,
                         fromStock: true,
                         finishAction: () => {
