@@ -245,8 +245,6 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
         const firstError = this.formPanelComponent.firstError;
         if(firstError){
             this.toastService.presentToast(firstError);
-        } else if(this.pickLocationId === this.dropLocationId) {
-            this.toastService.presentToast('Vous ne pouvez pas sélectionner deux fois le même emplacement.')
         } else if (this.colisPrise.length === 0) {
             this.toastService.presentToast('Vous devez renseigner au moins une unité logistique.')
         } else {
@@ -260,6 +258,7 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
                 }),
             }).subscribe((res) => {
                 if(res.success) {
+                    this.toastService.presentToast('Les prises et déposes ont bien été sauvegardées');
                     this.onValidate();
                 }
             });
