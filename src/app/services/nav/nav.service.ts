@@ -112,6 +112,7 @@ export class NavService {
     }
 
     public param<T = any>(key: string): T {
+        console.log(this.stack);
         const stackIndex = this.stack.length - 1;
         return this.stack[stackIndex].params[key];
     }

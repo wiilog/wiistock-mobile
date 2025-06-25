@@ -28,6 +28,7 @@ import {NetworkService} from '@app/services/network.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {HttpErrorResponse} from "@angular/common/http";
 import {RfidManagerService} from "@app/services/rfid-manager.service";
+import {Livraison} from "@entities/livraison";
 
 @Component({
     selector: 'wii-depose',
@@ -65,6 +66,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
 
     public fromStock: boolean;
     private createTakeAndDrop: boolean = false;
+    private livraisonToRedirect: Livraison|null = null;
 
     private saveSubscription?: Subscription;
 
@@ -110,6 +112,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     public ionViewWillEnter(): void {
         this.trackingListFactory.enableActions();
         this.createTakeAndDrop = this.navService.param('createTakeAndDrop') || false;
+        this.livraisonToRedirect = this.navService.param('livraisonToRedirect');
         if (!this.operator) {
             this.init();
             this.emplacement = this.navService.param('emplacement');
@@ -217,7 +220,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                 .subscribe(() => {
                     if(articlesList){
                         this.navService.push(NavPathEnum.LIVRAISON_ARTICLES, {
-                            livraison: this.navService.param('livraisonToRedirect')
+                            livraison: this.livraisonToRedirect,
                         });
                     } else {
                         this.finishAction();

@@ -98,7 +98,8 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                 message: 'Récupération des données en cours...' ,
                 event: () => {
                     return this.apiService.requestApi(ApiService.CHECK_DELIVERY_LOGISTIC_UNIT_CONTENT, {params: {livraisonId: this.livraison.id}})
-            }}
+                }
+            }
         ).subscribe((data) => {
             this.numberArticlesInLU = data.numberArticlesInLU;
             zip(
@@ -714,17 +715,16 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
             buttons: [{
                 text: 'Faire une dépose',
                 cssClass: 'full-width',
-                handler: () => this.goToDrop(this.livraison, articles),
+                handler: () => this.goToDrop(articles),
             }, {
                 text: 'Faire une association UL',
                 cssClass: 'full-width',
-                handler: () => this.goToLogisticUnitAssociation(this.livraison, articles),
+                handler: () => this.goToLogisticUnitAssociation(articles),
             }]
         });
     }
 
-    private goToDrop(livraisonToRedirect: Livraison,
-                     articles: Array<{
+    private goToDrop(articles: Array<{
                          barcode: string;
                          reference: string;
                          label: string;
@@ -745,7 +745,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                             date,
                         })),
                         fromStockLivraison: true,
-                        livraisonToRedirect,
+                        livraisonToRedirect: this.livraison,
                         fromStock: false,
                         createTakeAndDrop: true,
                         finishAction: () => {
@@ -757,8 +757,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
         });
     }
 
-    private goToLogisticUnitAssociation(livraisonToRedirect: Livraison,
-                                        articles: Array<{
+    private goToLogisticUnitAssociation(articles: Array<{
                                             barcode: string;
                                             reference: string;
                                             label: string;
@@ -780,7 +779,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                     is_lu: false,
                     date
                 })),
-                livraisonToRedirect,
+                livraisonToRedirect: this.livraison,
                 fromStock: false,
                 fromStockLivraison: true,
                 fromDepose: true,
