@@ -204,27 +204,23 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                                 ? this.localDataManager
                                                     .sendMouvementTraca(this.fromStock)
                                                     .pipe(
-                                                        mergeMap(() => this.postGroupingMovements(groupingMovements)),
-                                                        map(() => hasNetwork)
+                                                        mergeMap((apiResponse) => {
+                                                            this.postGroupingMovements(groupingMovements);
+                                                            return of(apiResponse);
+                                                        }),
+                                                        map((apiResponse) => ({hasNetwork, apiResponse}))
                                                     )
                                                 : of(hasNetwork)
                                         )),
                                         // we display toast
-                                        mergeMap((send: boolean) => {
-                                            const message = send
-                                                ? 'Les prises ont bien été sauvegardées'
-                                                : (multiPrise
-                                                    ? 'Prises sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
-                                                    : 'Prise sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
-                                            return this.toastService.presentToast(message);
-                                        })
+                                        mergeMap((res) => res ? this.treatApiResponse(res.hasNetwork, res.apiResponse, multiPrise) : of(0))
                                     )
                             }
                         })
                         .subscribe({
-                            next: () => {
+                            next: (nbErrors: number) => {
                                 this.unsubscribeSaveSubscription();
-                                this.redirectAfterTake();
+                                this.redirectAfterTake(nbErrors > 0);
                             },
                             error: (error) => {
                                 this.unsubscribeSaveSubscription();
@@ -244,12 +240,33 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         }
     }
 
-    public redirectAfterTake(): void {
-        this.navService
-            .pop()
-            .subscribe(() => {
-                this.finishAction();
-            });
+    private treatApiResponse(online: any, apiResponse: any, multiPrise: any) {
+        const errorsObject = ((apiResponse && apiResponse.data && apiResponse.data.errors) || {});
+        const errorsValues = Object.keys(errorsObject).map((key) => errorsObject[key]);
+        const errorsMessage = errorsValues.join('\n');
+
+        const message = online
+            ? (errorsMessage.length > 0
+                ? errorsMessage
+                : 'Les prises ont bien été sauvegardées')
+            : (multiPrise
+                ? 'Prises sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
+                : 'Prise sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+        return this.toastService
+            .presentToast(`${message}`, { duration: ToastService.LONG_DURATION })
+            .pipe(
+                map(() => errorsValues.length)
+            );
+    }
+
+    public redirectAfterTake(hasErrors: boolean = false): void {
+        if (!hasErrors) {
+            this.navService
+                .pop()
+                .subscribe(() => {
+                    this.finishAction();
+                });
+        }
     }
 
     public async testIfBarcodeEquals(barCode: string, isManualAdd: boolean = false) {
