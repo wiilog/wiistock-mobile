@@ -128,7 +128,7 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                         this.refreshHeaderConfig();
                         this.updateInProgressPack(code);
                     } else if (group && group.code !== pack.code) { // pack is already a child in another group
-                        this.showPackSplitModal(code, group, pack, nature, trackingDelayData, splitCount);
+                        this.showPackSplitModal(code, group, pack, nature, splitCount, trackingDelayData);
                     } else {
                         this.addPackToBody(code, nature, trackingDelayData, pack);
                     }
