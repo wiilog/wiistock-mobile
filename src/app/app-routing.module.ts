@@ -140,6 +140,11 @@ const routes: Routes = [
         loadChildren: () => import('@pages/prise-depose/emplacement-scan/emplacement-scan.module').then(m => m.EmplacementScanPageModule)
     },
     {
+        path: NavPathEnum.EMPLACEMENT_SCAN_MULTIPLE_PUSH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/prise-depose/emplacement-scan/emplacement-scan.module').then(m => m.EmplacementScanPageModule)
+    },
+    {
         path: NavPathEnum.MOVEMENT_CONFIRM,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/prise-depose/movement-confirm/movement-confirm.module').then(m => m.MovementConfirmPageModule)

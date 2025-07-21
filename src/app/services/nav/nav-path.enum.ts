@@ -48,6 +48,7 @@ export enum NavPathEnum {
     TRACKING_MOVEMENT_MENU = 'tracking-movement-menu',
     LOGIN = 'login',
     EMPLACEMENT_SCAN = 'emplacement-scan',
+    EMPLACEMENT_SCAN_MULTIPLE_PUSH = 'emplacement-scan/:step',
     TRANSFER_VALIDATE = 'transfer-validate',
     TRANSFER_ARTICLES = 'transfer-articles',
     TRANSFER_LIST = 'transfer-list',
