@@ -13,9 +13,9 @@ import {App} from "@capacitor/app";
 })
 export class NavService {
 
-    private stack: Array<{ path: NavPathEnum, params: NavParams }> = [];
-    private _popItem?: { path: NavPathEnum, params: NavParams };
-    private _nextPopItem?: { path: NavPathEnum, params: NavParams };
+    private stack: Array<{ path: NavPathEnum, params: NavParams, pathParams: NavParams }> = [];
+    private _popItem?: { path: NavPathEnum, params: NavParams, pathParams: NavParams };
+    private _nextPopItem?: { path: NavPathEnum, params: NavParams, pathParams: NavParams };
 
     private justNavigated: boolean;
 
@@ -38,13 +38,20 @@ export class NavService {
         });
     }
 
-    public push(path: NavPathEnum, params: NavParams = {}): Observable<boolean> {
+    public push(path: NavPathEnum,
+                params: NavParams = {},
+                pathParams: NavParams = {}): Observable<boolean> {
         this.justNavigated = true;
-        this.stack.push({path, params});
+        this.stack.push({path, params, pathParams});
         this._popItem = undefined;
         this._nextPopItem = undefined;
 
-        return from(this.navController.navigateForward(path));
+        let pathToNavigate: string = path;
+        for (const [key, value] of Object.entries(pathParams)) {
+            pathToNavigate = pathToNavigate.replace(`:${key}`, value);
+        }
+
+        return from(this.navController.navigateForward(pathToNavigate));
     }
 
     public pop(options?: { path: NavPathEnum, params?: NavParams} | {number: number}): Observable<void> {
@@ -71,7 +78,8 @@ export class NavService {
 
             this._popItem = {
                 path,
-                params: params || nextPopItem || {}
+                params: params || nextPopItem || {},
+                pathParams: this.stack[this.stack.length - 1] || {},
             };
             this._nextPopItem = undefined;
 
@@ -95,9 +103,11 @@ export class NavService {
         }
     }
 
-    public setRoot(path: NavPathEnum, params: NavParams = {}): Observable<boolean> {
+    public setRoot(path: NavPathEnum,
+                   params: NavParams = {},
+                   pathParams: NavParams = {}): Observable<boolean> {
         this.justNavigated = true;
-        this.stack = [{path, params}];
+        this.stack = [{path, params, pathParams}];
         this._popItem = undefined;
         this._nextPopItem = undefined;
 
@@ -112,7 +122,6 @@ export class NavService {
     }
 
     public param<T = any>(key: string): T {
-        console.log(this.stack);
         const stackIndex = this.stack.length - 1;
         return this.stack[stackIndex].params[key];
     }
@@ -121,8 +130,19 @@ export class NavService {
         return this._popItem;
     }
 
-    public set nextPopItem(nextPopItem: { path: NavPathEnum, params: NavParams }|undefined) {
-        this._nextPopItem = nextPopItem;
+    public set nextPopItem( nextPopItem: { path: NavPathEnum, params: NavParams, pathParams?: NavParams }|undefined) {
+        if (nextPopItem) {
+            const {path, params, pathParams} = nextPopItem;
+            this._nextPopItem = {
+                path,
+                params,
+                pathParams: pathParams || {},
+            };
+        }
+        else {
+            this._nextPopItem = undefined;
+        }
+
     }
 
     public currentPath(stackId?: number): NavPathEnum|undefined {
@@ -132,38 +152,20 @@ export class NavService {
         return this.stack[stackIndex].path;
     }
 
-    /**
-     * Trigger on :
-     *  * Action from header (pop or breadcrumb action)
-     *  * OR back button action
-     */
-    public userHasPopManually(path: NavPathEnum): Observable<NavParams|undefined> {
-        return merge(
-            this.mainHeaderService.navigationChange$,
-            this.platform.backButton
-        )
-            .pipe(
-                map(() => (
-                    (this.popItem?.path === path)
-                        ? this.popItem.params
-                        : undefined
-                )),
-                tap(() => {
-                    this._popItem = undefined;
-                })
-            );
-    }
-
     private syncPopItem(): void {
         // synchronise with the real page
         const destinationItem = this.stack[this.stack.length - 1];
         if (destinationItem) {
-            const nextPopItem = this._nextPopItem?.path === destinationItem.path
+            const nextPopItemParams = this._nextPopItem?.path === destinationItem.path
+                ? this._nextPopItem?.params
+                : undefined;
+            const nextPopItemPathParams = this._nextPopItem?.path === destinationItem.path
                 ? this._nextPopItem?.params
                 : undefined;
             this._popItem = {
                 path: destinationItem.path,
-                params: nextPopItem || {}
+                params: nextPopItemParams || {},
+                pathParams: nextPopItemPathParams || {},
             };
         }
         else {

@@ -134,7 +134,10 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
                     this.refreshListComponent();
                 });
         }
-
+        else {
+            this.trackingListFactory.enableActions();
+            this.refreshListComponent();
+        }
     }
 
     public ionViewWillLeave() {

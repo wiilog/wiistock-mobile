@@ -205,19 +205,20 @@ export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
     }
 
     public goToPickAndDrop(): void {
-        this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
-            scanMode: BarcodeScannerModeEnum.TOOL_SEARCH,
-            pageMode: EmplacementScanModeEnum.TRACKING_PICK_AND_DROP,
-            customLabel: 'Sélectionner emplacement de prise',
-            onLocationSelected: (pickLocation: Emplacement) => {
-                console.log('onLocationSelected 1');
-                this.navService.pop().subscribe(() => {
-                    this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
-                        scanMode: BarcodeScannerModeEnum.TOOL_SEARCH,
-                        pageMode: EmplacementScanModeEnum.TRACKING_PICK_AND_DROP,
-                        customLabel: 'Sélectionner emplacement de dépose',
-                        onLocationSelected: (dropLocation: Emplacement) => {
-                            this.navService.pop().subscribe(() => {
+        this.navService.push(
+            NavPathEnum.EMPLACEMENT_SCAN_MULTIPLE_PUSH,
+            {
+                scanMode: BarcodeScannerModeEnum.TOOL_SEARCH,
+                pageMode: EmplacementScanModeEnum.TRACKING_PICK_AND_DROP,
+                customLabel: 'Sélectionner emplacement de prise',
+                onLocationSelected: (pickLocation: Emplacement) => {
+                    this.navService.push(
+                        NavPathEnum.EMPLACEMENT_SCAN_MULTIPLE_PUSH,
+                        {
+                            scanMode: BarcodeScannerModeEnum.TOOL_SEARCH,
+                            pageMode: EmplacementScanModeEnum.TRACKING_PICK_AND_DROP,
+                            customLabel: 'Sélectionner emplacement de dépose',
+                            onLocationSelected: (dropLocation: Emplacement) => {
                                 this.navService.push(NavPathEnum.PICK_AND_DROP, {
                                     pickLocationId: pickLocation.id,
                                     dropLocationId: dropLocation.id,
@@ -225,12 +226,14 @@ export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
                                         this.navService.pop({path: NavPathEnum.TRACKING_MOVEMENT_MENU});
                                     }
                                 });
-                            });
+                            },
                         },
-                    });
-                });
+                        {step: 'pick-and-drop-drop'}
+                    );
+                },
             },
-        });
+            {step: 'pick-and-drop-picking'}
+        );
     }
 
     private get canNavigateToDepose(): boolean {
