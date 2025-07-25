@@ -50,6 +50,11 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
         needsRegistrationNumber: boolean,
         displayUnloadingLocation: boolean,
         needsUnloadingLocation: boolean,
+        displaySupplier: boolean,
+        needsSupplier: boolean,
+        displayOrderNumber: boolean,
+        needsOrderNumber: boolean
+
     } = {
         displayDriver: false,
         needsDriver: false,
@@ -57,6 +62,10 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
         needsRegistrationNumber: false,
         displayUnloadingLocation: false,
         needsUnloadingLocation: false,
+        displaySupplier: false,
+        needsSupplier: false,
+        displayOrderNumber: false,
+        needsOrderNumber: false
     };
 
     public constructor(private navService: NavService,
@@ -85,6 +94,10 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                         this.storageService.getNumber('truckArrival.registrationNumber.requiredCreate'),
                         this.storageService.getNumber('truckArrival.unloadingLocation.displayedCreate'),
                         this.storageService.getNumber('truckArrival.unloadingLocation.requiredCreate'),
+                        this.storageService.getNumber('truckArrival.supplier.displayedCreate'),
+                        this.storageService.getNumber('truckArrival.supplier.requiredCreate'),
+                        this.storageService.getNumber('truckArrival.orderNumber.displayedCreate'),
+                        this.storageService.getNumber('truckArrival.orderNumber.requiredCreate'),
                     )
                 }
             }).subscribe(([defaultUnloadingLocationId, ...fieldParams]) => {
@@ -95,11 +108,15 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                     needsRegistrationNumber,
                     displayUnloadingLocation,
                     needsUnloadingLocation,
+                    displaySupplier,
+                    needsSupplier,
+                    displayOrderNumber,
+                    needsOrderNumber
                 ] = fieldParams;
 
                 this.truckArrivalDefaultUnloadingLocationId = defaultUnloadingLocationId;
 
-                if(!displayDriver && !displayUnloadingLocation && !displayRegistrationNumber){
+                if(!displayDriver && !displayUnloadingLocation && !displayRegistrationNumber && !displaySupplier && !displayOrderNumber){
                     this.popOnBack = true;
                     this.next();
                 }
@@ -111,6 +128,10 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                     needsRegistrationNumber: Boolean(needsRegistrationNumber),
                     displayUnloadingLocation: Boolean(displayUnloadingLocation),
                     needsUnloadingLocation: Boolean(needsUnloadingLocation),
+                    displaySupplier: Boolean(displaySupplier),
+                    needsSupplier: Boolean(needsSupplier),
+                    displayOrderNumber: Boolean(displayOrderNumber),
+                    needsOrderNumber: Boolean(needsOrderNumber)
                 };
 
                 this.generateForm();
@@ -185,6 +206,47 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                         }
                     }
                 }]
+                : []),
+            ...(this.fieldParams.displaySupplier
+                ? [{
+                    item: FormPanelSelectComponent,
+                    config: {
+                        label: 'Fournisseur',
+                        name: 'supplier',
+                        inputConfig: {
+                            searchType: SelectItemTypeEnum.SUPPLIER,
+                            onChange: (supplierId: any) => {
+                                this.sqliteService
+                                    .findOneBy('supplier', {id: supplierId})
+                                    .subscribe((selectedSupplier?: any) => {
+                                        // this.supplier = selectedSupplier;
+                                    })
+                            },
+                            required: Boolean(this.fieldParams.needsSupplier),
+                        },
+                        errors: {
+                            required: 'Vous devez sélectionner un fournisseur.'
+                        }
+                    }
+                }]
+                : []),
+            ...(this.fieldParams.displayOrderNumber
+                ? [
+                    {
+                        item: FormPanelInputComponent,
+                        config: {
+                            label: 'N° de commande',
+                            name: 'orderNumber',
+                            inputConfig: {
+                                type: 'text',
+                                required: Boolean(this.fieldParams.needsOrderNumber)
+                            },
+                            errors: {
+                                required: 'Veuillez renseigner un N° de commande.',
+                            }
+                        }
+                    }
+                ]
                 : []),
         ];
     }
