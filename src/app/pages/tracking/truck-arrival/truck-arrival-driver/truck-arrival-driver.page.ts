@@ -256,7 +256,7 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
         if(firstError){
             this.toastService.presentToast(firstError);
         } else {
-            const {registrationNumber} = this.formPanelComponent.values;
+            const {registrationNumber, supplier, orderNumber} = this.formPanelComponent.values;
             this.sqliteService.findOneById('emplacement', this.truckArrivalUnloadingLocationId || this.truckArrivalDefaultUnloadingLocationId).subscribe((unloadingLocation) => {
                 this.truckArrivalUnloadingLocation = unloadingLocation;
                 this.navService.push(NavPathEnum.TRUCK_ARRIVAL_LINES, {
@@ -264,6 +264,8 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                     driver: this.driver,
                     carrier: this.carrier,
                     registrationNumber,
+                    supplier,
+                    orderNumber
                 });
             });
         }

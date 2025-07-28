@@ -61,6 +61,9 @@ export class TruckArrivalReservesPage implements ViewWillEnter {
         }
     }> = [];
 
+    public supplier?: number;
+    public orderNumber?: string;
+
     public constructor(private navService: NavService,
                        public sqliteService: SqliteService,
                        public apiService: ApiService,
@@ -81,6 +84,8 @@ export class TruckArrivalReservesPage implements ViewWillEnter {
             this.truckArrivalUnloadingLocation = this.navService.param('truckArrivalUnloadingLocation') ?? [];
             this.registrationNumber = this.navService.param('registrationNumber') ?? null;
             this.truckArrivalLines = this.navService.param('truckArrivalLines') ?? [];
+            this.supplier = this.navService.param('supplier') ?? null;
+            this.orderNumber = this.navService.param('orderNumber') ?? null;
 
             this.refreshFormReserves(false, false);
         }
@@ -219,6 +224,8 @@ export class TruckArrivalReservesPage implements ViewWillEnter {
                         truckArrivalReserves: this.reserves,
                         truckArrivalLines: this.truckArrivalLines,
                         signatures,
+                        supplier: this.supplier,
+                        orderNumber: this.orderNumber,
                     }
                 })
             }).subscribe((response) => {
