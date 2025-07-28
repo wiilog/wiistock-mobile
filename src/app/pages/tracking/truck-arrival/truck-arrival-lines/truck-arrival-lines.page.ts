@@ -70,6 +70,9 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
     private loaded: boolean = false;
     public popOnBack: boolean = false;
 
+    public supplier?: number;
+    public orderNumber?: string;
+
     public constructor(private navService: NavService,
                        public sqliteService: SqliteService,
                        public apiService: ApiService,
@@ -90,6 +93,8 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
                 this.driver = this.navService.param('driver') ?? null;
                 this.truckArrivalUnloadingLocation = this.navService.param('truckArrivalUnloadingLocation') ?? [];
                 this.registrationNumber = this.navService.param('registrationNumber') ?? null;
+                this.supplier = this.navService.param('supplier') ?? null;
+                this.orderNumber = this.navService.param('orderNumber') ?? null;
             }
 
             this.loadingService.presentLoadingWhile({
@@ -253,6 +258,8 @@ export class TruckArrivalLinesPage implements ViewWillEnter {
                 carrier: this.carrier,
                 registrationNumber: this.registrationNumber,
                 truckArrivalLines: this.truckArrivalLines ?? [],
+                supplier: this.supplier,
+                orderNumber: this.orderNumber
             });
         } else {
             this.toastService.presentToast('Veuillez renseigner au moins un numéro de tracking transporteur.');
