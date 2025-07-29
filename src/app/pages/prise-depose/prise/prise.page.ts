@@ -241,13 +241,13 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     }
 
     private treatApiResponse(online: any, apiResponse: any, multiPrise: any) {
-        const errorsObject = ((apiResponse && apiResponse.data && apiResponse.data.errors) || {});
-        const errorsValues = Object.keys(errorsObject).map((key) => errorsObject[key]);
-        const errorsMessage = errorsValues.join('\n');
+        const errors = ((apiResponse && apiResponse.data && apiResponse.data.errors) || {});
+        const errorValues = Object.keys(errors).map((key) => errors[key]);
+        const errorMessagesStr = errorValues.join('\n');
 
         const message = online
-            ? (errorsMessage.length > 0
-                ? errorsMessage
+            ? (errorMessagesStr.length > 0
+                ? errorMessagesStr
                 : 'Les prises ont bien été sauvegardées')
             : (multiPrise
                 ? 'Prises sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
@@ -255,7 +255,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         return this.toastService
             .presentToast(`${message}`, { duration: ToastService.LONG_DURATION })
             .pipe(
-                map(() => errorsValues.length)
+                map(() => errorValues.length)
             );
     }
 
