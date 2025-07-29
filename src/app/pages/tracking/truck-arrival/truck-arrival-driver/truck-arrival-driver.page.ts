@@ -36,6 +36,7 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
     public truckArrivalDefaultUnloadingLocationId: number;
 
     public truckArrivalUnloadingLocationId: number;
+    public supplierId?: number;
 
     public truckArrivalUnloadingLocation: Emplacement;
 
@@ -147,6 +148,7 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                     config: {
                         label: 'Chauffeur',
                         name: 'driver',
+                        value: this.driver,
                         inputConfig: {
                             searchType: SelectItemTypeEnum.DRIVER,
                             requestParams: [`id_transporteur = ${this.carrier.id}`],
@@ -213,16 +215,13 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                     config: {
                         label: 'Fournisseur',
                         name: 'supplier',
+                        value: this.supplierId,
                         inputConfig: {
                             searchType: SelectItemTypeEnum.SUPPLIER,
-                            onChange: (supplierId: any) => {
-                                this.sqliteService
-                                    .findOneBy('supplier', {id: supplierId})
-                                    .subscribe((selectedSupplier?: any) => {
-                                        // this.supplier = selectedSupplier;
-                                    })
-                            },
                             required: Boolean(this.fieldParams.needsSupplier),
+                            onChange: (supplierId: any) => {
+                                this.supplierId = supplierId;
+                            }
                         },
                         errors: {
                             required: 'Vous devez sélectionner un fournisseur.'
@@ -239,7 +238,7 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
                             name: 'orderNumber',
                             inputConfig: {
                                 type: 'text',
-                                required: Boolean(this.fieldParams.needsOrderNumber)
+                                required: Boolean(this.fieldParams.needsOrderNumber),
                             },
                             errors: {
                                 required: 'Veuillez renseigner un N° de commande.',
@@ -256,16 +255,16 @@ export class TruckArrivalDriverPage implements ViewWillEnter {
         if(firstError){
             this.toastService.presentToast(firstError);
         } else {
-            const {registrationNumber, supplier, orderNumber} = this.formPanelComponent.values;
+            const {registrationNumber, orderNumber} = this.formPanelComponent.values;
             this.sqliteService.findOneById('emplacement', this.truckArrivalUnloadingLocationId || this.truckArrivalDefaultUnloadingLocationId).subscribe((unloadingLocation) => {
                 this.truckArrivalUnloadingLocation = unloadingLocation;
                 this.navService.push(NavPathEnum.TRUCK_ARRIVAL_LINES, {
                     truckArrivalUnloadingLocation: this.truckArrivalUnloadingLocation,
                     driver: this.driver,
                     carrier: this.carrier,
+                    supplier: this.supplierId,
                     registrationNumber,
-                    supplier,
-                    orderNumber
+                    orderNumber,
                 });
             });
         }
