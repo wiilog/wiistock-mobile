@@ -220,8 +220,8 @@ export class TrackingMovementMenuPage implements ViewWillEnter, CanLeave {
                             customLabel: 'Sélectionner emplacement de dépose',
                             onLocationSelected: (dropLocation: Emplacement) => {
                                 this.navService.push(NavPathEnum.PICK_AND_DROP, {
-                                    pickLocationId: pickLocation.id,
-                                    dropLocationId: dropLocation.id,
+                                    pickLocation: pickLocation,
+                                    dropLocation: dropLocation,
                                     onValidate: () => {
                                         this.navService.pop({path: NavPathEnum.TRACKING_MOVEMENT_MENU});
                                     }

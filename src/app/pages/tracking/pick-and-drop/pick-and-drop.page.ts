@@ -48,8 +48,8 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
 
     public bodyConfig: Array<FormPanelParam> | any;
 
-    public pickLocationId: number;
-    public dropLocationId: number;
+    public pickLocation: Emplacement;
+    public dropLocation: Emplacement;
 
     public colisPrise: Array<MouvementTraca & {
         loading?: boolean;
@@ -66,6 +66,11 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
     public listPacksToTakeHeader: HeaderConfig;
     public listPacksToTakeBody: Array<ListPanelItemConfig>;
     public displayWarningWrongLocation: boolean;
+
+    public listPacksOnLocationHeader: HeaderConfig;
+    public listPacksOnLocationBody: Array<ListPanelItemConfig>;
+
+    public currentPacksOnLocation: Array<MouvementTraca&{hidden?: boolean}>;
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
 
@@ -99,10 +104,14 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
         this.colisPrise = [];
     }
 
-    public ionViewWillEnter(): void {
+    public async ionViewWillEnter() {
         if (!this.alreadyInitialized) {
             // prevent reload page and reload initial locations
             this.alreadyInitialized = true;
+            this.pickLocation = this.navService.param('pickLocation');
+            this.dropLocation = this.navService.param('dropLocation');
+            const hasNetwork = await this.networkService.hasNetwork();
+
             this.loadingService
                 .presentLoadingWhile({
                     event: () => zip(
@@ -111,9 +120,12 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
                         this.translationService.get(null, `Traçabilité`, `Général`),
                         this.translationService.get(`Traçabilité`, `Unités logistiques`, `Divers`),
                         this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_WARNING_WRONG_LOCATION),
+                        (hasNetwork && this.pickLocation
+                            ? this.apiService.requestApi(ApiService.GET_TRACKING_DROPS, {params: {location: this.pickLocation.label}})
+                            : of({trackingDrops: []})),
                     )
                 })
-                .subscribe(([operator, natures, natureTranslations, logisticUnitTranslations, displayWarningWrongLocation]) => {
+                .subscribe(([operator, natures, natureTranslations, logisticUnitTranslations, displayWarningWrongLocation, {trackingDrops}]) => {
                     if (natures) {
                         this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
                             [id]: {label, color},
@@ -121,13 +133,12 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
                         }), {})
                     }
 
-                    this.pickLocationId = this.navService.param('pickLocationId');
-                    this.dropLocationId = this.navService.param('dropLocationId');
                     this.onValidate = this.navService.param('onValidate');
                     this.operator = operator;
                     this.displayWarningWrongLocation = displayWarningWrongLocation;
                     this.natureTranslations = natureTranslations;
                     this.logisticUnitTranslations = logisticUnitTranslations;
+                    this.currentPacksOnLocation = trackingDrops;
                     this.trackingListFactory.enableActions();
                     this.footerScannerComponent.fireZebraScan();
                     this.generateForm();
@@ -200,6 +211,34 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
 
         this.listPacksToTakeHeader = listPacksToTakeHeader;
         this.listPacksToTakeBody = listPacksToTakeBody;
+
+        const {header: listPacksOnLocationHeader, body: listPacksOnLocationBody} = this.trackingListFactory.createListConfig(
+            this.toTakeOngoingPacks,
+            TrackingListFactoryService.LIST_TYPE_TAKING_SUB,
+            {
+                headerRightIcon: {
+                    name: 'up.svg',
+                    action: () => {
+                        this.takeAll()
+                    },
+                },
+                objectLabel: 'objet',
+                natureIdsToConfig: this.natureIdsToConfig,
+                natureTranslation: TranslationService.Translate(this.natureTranslations, 'Nature'),
+                trackingDelayTranslation: TranslationService.Translate(this.logisticUnitTranslations, 'Délai de traitement'),
+                rightIcon: {
+                    mode: 'upload',
+                    action: ({object}) => {
+                        if (object.value) {
+                            this.testIfBarcodeEquals(object.value, true);
+                        }
+                    }
+                }
+            }
+        );
+
+        this.listPacksOnLocationHeader = listPacksOnLocationHeader;
+        this.listPacksOnLocationBody = listPacksOnLocationBody;
     }
 
     public generateForm() {
@@ -208,12 +247,17 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
                 item: FormPanelSelectComponent,
                 config: {
                     name: 'pickLocation',
-                    value: this.pickLocationId ?? null,
+                    value: this.pickLocation.id ?? null,
                     inputConfig: {
                         required: true,
+                        disabled: true,
                         searchType: SelectItemTypeEnum.LOCATION,
                         onChange: (pickLocationId: any) => {
-                            this.pickLocationId = pickLocationId;
+                            this.sqliteService.findOneById('emplacement', pickLocationId)
+                                .subscribe((pickLocation: Emplacement) => {
+                                    this.pickLocation = pickLocation
+                                }
+                            );
                         }
                     },
                     section: {
@@ -229,12 +273,17 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
                 item: FormPanelSelectComponent,
                 config: {
                     name: 'dropLocation',
-                    value: this.dropLocationId ?? null,
+                    value: this.dropLocation.id ?? null,
                     inputConfig: {
                         required: true,
                         searchType: SelectItemTypeEnum.LOCATION,
                         onChange: (dropLocationId: any) => {
-                            this.dropLocationId = dropLocationId;
+                            this.sqliteService.findOneById('emplacement', dropLocationId)
+                                .subscribe((dropLocation: Emplacement) => {
+                                    this.dropLocation = dropLocation;
+                                }
+                            );
+
                         }
                     },
                     section: {
@@ -259,8 +308,8 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
             this.loadingService.presentLoadingWhile({
                 event: () => this.apiService.requestApi(ApiService.POST_PICK_AND_DROP_TRACKING_MOVEMENTS, {
                     params: {
-                        pickLocation: this.pickLocationId,
-                        dropLocation: this.dropLocationId,
+                        pickLocation: this.pickLocation.id,
+                        dropLocation: this.dropLocation.id,
                         ...(this.localDataManagerService.extractTrackingMovementFiles(this.localDataManagerService.mapTrackingMovements(this.colisPrise, true), true)),
                     }
                 }),
@@ -274,7 +323,7 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
     }
 
     public async testIfBarcodeEquals(barCode: string, isManualAdd: boolean = false) {
-        if(!this.pickLocationId || !this.dropLocationId) {
+        if(!this.pickLocation || !this.dropLocation) {
             this.toastService.presentToast("Veuillez d'abord renseigner les emplacements de prise et dépose")
         } else if (this.colisPrise && this.colisPrise.some((colis) => ((colis.ref_article || '').toLocaleLowerCase() === (barCode || '').toLocaleLowerCase()))) {
             this.toastService.presentToast('Cette prise a déjà été effectuée', {audio: true});
@@ -318,7 +367,7 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
                     )
                     .subscribe({
                         next: ({nature, group, isPack, isGroup, location, existing, trackingDelayData}) => {
-                            if (this.displayWarningWrongLocation && ((location && `${this.pickLocationId}` !== `${location}`) || !existing)) {
+                            if (this.displayWarningWrongLocation && ((location && `${this.pickLocation.id}` !== `${location}`) || !existing)) {
                                 this.alertService.show({
                                     header: `Confirmation`,
                                     message: `Êtes-vous sûr que cet élément est présent sur cet emplacement ?`,
@@ -398,7 +447,7 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
             ref_article: barCode,
             type: PickAndDropPage.PICK_AND_DROP_TRACKING_MOVEMENT,
             operateur: this.operator,
-            ref_emplacement: this.pickLocationId.toString(),
+            ref_emplacement: this.pickLocation.id.toString(),
             finished: 0,
             loading,
             fromStock: Number(false),
@@ -484,5 +533,26 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
 
         this.refreshListComponent();
         this.footerScannerComponent.fireZebraScan();
+    }
+
+    public get displayPacksOnLocationsList(): boolean {
+        return this.currentPacksOnLocation && this.toTakeOngoingPacks.length > 0;
+    }
+
+    private get toTakeOngoingPacks() {
+        return this.currentPacksOnLocation
+            ? this.currentPacksOnLocation
+                .filter(({hidden, ref_article: ongoingBarcode}) => (
+                    !hidden
+                    && !this.colisPrise.some(({ref_article: takeBarCode}) => takeBarCode === ongoingBarcode)
+                ))
+                .map(({subPacks, ...movements}) => movements)
+            : [];
+    }
+
+    private takeAll() {
+        this.toTakeOngoingPacks.forEach(({ref_article}) => {
+            this.testIfBarcodeEquals(ref_article, true);
+        });
     }
 }
