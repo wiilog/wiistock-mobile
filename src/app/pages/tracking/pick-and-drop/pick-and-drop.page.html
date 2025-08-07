@@ -9,6 +9,13 @@
                     [identifierName]="listIdentifierName"
                     [boldValues]="listBoldValues">
     </wii-list-panel>
+
+    <wii-list-panel *ngIf="displayPacksOnLocationsList && listPacksOnLocationHeader && listPacksOnLocationBody"
+                    [header]="listPacksOnLocationHeader"
+                    [body]="listPacksOnLocationBody"
+                    [identifierName]="listIdentifierName"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
 </div>
 
 <div class="page-footer">
