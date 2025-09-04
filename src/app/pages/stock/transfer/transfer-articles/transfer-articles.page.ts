@@ -75,7 +75,7 @@ export class TransferArticlesPage implements ViewWillEnter, ViewWillLeave {
                     this.loader = loader;
                     this.skipValidation = skipValidation;
 
-                    this.listBoldValues = ['barCode', 'label', 'reference', 'location', 'quantity'];
+                    this.listBoldValues = ['barcode', 'label', 'reference', 'location', 'quantity'];
                     this.headerConfig = {
                         leftIcon: {
                             name: 'transfer.svg',
@@ -218,7 +218,7 @@ export class TransferArticlesPage implements ViewWillEnter, ViewWillLeave {
 
     private createArticleInfo({barcode, label, reference, location, quantity}: TransferOrderArticle): {[name: string]: { label: string; value: string; }} {
         return {
-            barCode: {
+            barcode: {
                 label: 'Code barre',
                 value: barcode
             },

@@ -1,5 +1,5 @@
 export interface ReceptionReferenceArticle {
-    barCode: string;
+    barcode: string;
     comment: string;
     emergency: boolean;
     id: number;

@@ -18,7 +18,7 @@ import {Emplacement} from "@entities/emplacement";
 import {EmplacementScanModeEnum} from "@pages/prise-depose/emplacement-scan/emplacement-scan-mode.enum";
 
 type ArticleAssociation = {
-    barCode: string,
+    barcode: string,
     label: string,
     quantity: number,
     location?: string,
@@ -63,7 +63,7 @@ export class AssociationPage implements ViewWillEnter, ViewWillLeave {
 
     public ionViewWillEnter(): void {
         this.articlesList = this.navService.param('articlesList') || [];
-        this.listBoldValues = ['barCode', 'label', 'location', 'quantity'];
+        this.listBoldValues = ['barcode', 'label', 'location', 'quantity'];
         this.refreshHeader();
         this.refreshList();
     }
@@ -89,7 +89,7 @@ export class AssociationPage implements ViewWillEnter, ViewWillLeave {
         const needsLocationPicking = !logisticUnit.location;
         const articlesWithLogisticUnit = this.articlesList.filter((article) => article.currentLogisticUnitCode);
         const articlesWithLogisticUnitContent = articlesWithLogisticUnit
-            .map((articleWithLogisticUnit) => `<strong>${articleWithLogisticUnit.barCode}</strong> de ${articleWithLogisticUnit.currentLogisticUnitCode}`)
+            .map((articleWithLogisticUnit) => `<strong>${articleWithLogisticUnit.barcode}</strong> de ${articleWithLogisticUnit.currentLogisticUnitCode}`)
             .join(`<br>`)
         if (articlesWithLogisticUnit.length > 0 && needsCheck) {
             this.alertService.show({
@@ -142,8 +142,8 @@ export class AssociationPage implements ViewWillEnter, ViewWillLeave {
                     event: () => this.apiService
                         .requestApi(ApiService.DROP_IN_LU, {
                             params: {
-                                articles: articlesToDrop.map((article) => article.barCode),
-                                lu: logisticUnit.barCode,
+                                articles: articlesToDrop.map((article) => article.barcode),
+                                lu: logisticUnit.barcode,
                                 location: logisticUnit.location
                             }
                         }).pipe(
@@ -172,7 +172,7 @@ export class AssociationPage implements ViewWillEnter, ViewWillLeave {
         }
     }
 
-    public async scan(barCode: string) {
+    public async scan(barcode: string) {
         const hasNetwork = await this.networkService.hasNetwork();
         if (hasNetwork) {
             this.barcodeCheckLoading = true;
@@ -182,7 +182,7 @@ export class AssociationPage implements ViewWillEnter, ViewWillLeave {
                     event: () => this.apiService
                         .requestApi(ApiService.GET_ARTICLES, {
                             params: {
-                                barCode,
+                                barcode,
                                 createIfNotExist: true
                             }
                         })
@@ -194,7 +194,7 @@ export class AssociationPage implements ViewWillEnter, ViewWillLeave {
                             && res.success
                             && res.article
                         );
-                        const existing = this.articlesList.some((articleElement) => articleElement.barCode === article.barCode);
+                        const existing = this.articlesList.some((articleElement) => articleElement.barcode === article.barcode);
                         if (existing) {
                             this.toastService.presentToast('Vous avez déjà scanné cet article ou cette unité logistique.');
                         } else if (!article && !res.can_associate) {
@@ -250,7 +250,7 @@ export class AssociationPage implements ViewWillEnter, ViewWillLeave {
                     ? {
                         title: {
                             label: 'Unité logistique',
-                            value: article.barCode
+                            value: article.barcode
                         }
                     }
                     : {}),
@@ -289,7 +289,7 @@ export class AssociationPage implements ViewWillEnter, ViewWillLeave {
             ...!articleOrPack.is_lu
                 ? [{
                     label: 'Code barre',
-                    value: articleOrPack.barCode
+                    value: articleOrPack.barcode
                 }] : [{}],
             {
                 label: 'Emplacement',

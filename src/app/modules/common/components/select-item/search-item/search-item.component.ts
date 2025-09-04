@@ -133,8 +133,8 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             placeholder: 'Sélectionnez un utilisateur'
         },
         [SelectItemTypeEnum.DEMANDE_LIVRAISON_ARTICLES]: {
-            label: ['bar_code', 'label'],
-            valueField: 'bar_code',
+            label: ['barcode', 'label'],
+            valueField: 'barcode',
             templateIndex: 'article-demande',
             databaseTable: 'demande_livraison_article',
             placeholder: 'Sélectionnez un article'

@@ -37,7 +37,7 @@ type DemandeForApi = {
     type: number;
     destination: number;
     commentaire?: string;
-    references: Array<{barCode: string; 'quantity-to-pick': number}>;
+    references: Array<{barcode: string; 'quantity-to-pick': number}>;
     freeFields: string;
 };
 
@@ -660,8 +660,8 @@ export class LocalDataManagerService {
                                 type: demande.type_id,
                                 destination: demande.location_id,
                                 commentaire: demande.comment,
-                                references: articleForDemande.map(({article_bar_code: barCode, quantity_to_pick}) => ({
-                                    barCode,
+                                references: articleForDemande.map(({article_barcode: barcode, quantity_to_pick}) => ({
+                                    barcode,
                                     'quantity-to-pick': quantity_to_pick
                                 })),
                                 freeFields: demande.free_fields

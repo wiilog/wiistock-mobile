@@ -164,8 +164,8 @@ export class TransportPackDeliverPage implements ViewWillEnter, ViewWillLeave {
         };
     }
 
-    public deliverPack(barCode: string): void {
-        const selectedIndex = this.packs.findIndex(({code}) => (code === barCode));
+    public deliverPack(barcode: string): void {
+        const selectedIndex = this.packs.findIndex(({code}) => (code === barcode));
         if (selectedIndex > -1) {
             const selectedItem = this.packs[selectedIndex];
             if (selectedItem.delivered) {
@@ -198,8 +198,8 @@ export class TransportPackDeliverPage implements ViewWillEnter, ViewWillLeave {
             });
     }
 
-    private revertPack(barCode: string): void {
-        const selectedIndex = this.packs.findIndex(({code}) => code === barCode);
+    private revertPack(barcode: string): void {
+        const selectedIndex = this.packs.findIndex(({code}) => code === barcode);
         if (selectedIndex > -1 && this.packs[selectedIndex].delivered) {
             this.packs[selectedIndex].delivered = false;
             this.disabled = true;

@@ -87,7 +87,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
         }
         this.livraison = this.navService.param('livraison');
 
-        this.listBoldValues = ['label', 'barCode', 'location', 'quantity', 'targetLocationPicking', 'logisticUnit', 'articlesCount', 'nature'];
+        this.listBoldValues = ['label', 'barcode', 'location', 'quantity', 'targetLocationPicking', 'logisticUnit', 'articlesCount', 'nature'];
 
         if (this.footerScannerComponent) {
             this.footerScannerComponent.fireZebraScan();
@@ -500,7 +500,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                 label: 'Libellé',
                 value: label
             },
-            barCode: {
+            barcode: {
                 label: this.displayReferenceCodeAndScan ? 'Code reférence' : 'Code barre',
                 value: this.displayReferenceCodeAndScan ? reference : barcode
             },
@@ -769,7 +769,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
         this.navService.pop().subscribe(() => {
             this.navService.push(NavPathEnum.ASSOCIATION, {
                 articlesList: articles.map((article) => ({
-                    barCode: article.barcode,
+                    barcode: article.barcode,
                     label: article.label,
                     quantity: article.quantity,
                     location: article.location,

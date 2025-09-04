@@ -34,7 +34,7 @@ export class ManualCollectArticlesPage implements ViewWillLeave, ViewWillEnter {
 
     private selectedReferences: Array<{
         id: number;
-        refArticleBarCode: string;
+        refArticleBarcode: string;
         'article-to-pick': string;
         label: string;
         reference: string;
@@ -60,7 +60,7 @@ export class ManualCollectArticlesPage implements ViewWillLeave, ViewWillEnter {
             this.footerScannerComponent.fireZebraScan();
         }
 
-        this.listBoldValues = ['reference', 'label', 'barCode', 'location', 'quantity'];
+        this.listBoldValues = ['reference', 'label', 'barcode', 'location', 'quantity'];
 
         this.refreshConfig();
     }
@@ -123,7 +123,7 @@ export class ManualCollectArticlesPage implements ViewWillLeave, ViewWillEnter {
     }
 
     public addArticle(article: string) {
-        const alreadyScanned = this.selectedReferences.some((selectedReference) => selectedReference.refArticleBarCode === article || selectedReference["article-to-pick"] === article);
+        const alreadyScanned = this.selectedReferences.some((selectedReference) => selectedReference.refArticleBarcode === article || selectedReference["article-to-pick"] === article);
 
         if(alreadyScanned) {
             this.toastService.presentToast(`Ce code barre a déjà été scanné.`);
@@ -131,7 +131,7 @@ export class ManualCollectArticlesPage implements ViewWillLeave, ViewWillEnter {
             this.loadingService.presentLoadingWhile({
                 event: () => this.apiService.requestApi(ApiService.CHECK_MANUAL_COLLECT_SCAN, {
                     params: {
-                        barCode: article,
+                        barcode: article,
                     }
                 })
             }).subscribe((response) => {
@@ -231,9 +231,9 @@ export class ManualCollectArticlesPage implements ViewWillLeave, ViewWillEnter {
                     label: 'Libellé',
                     value: article.label
                 },
-                barCode: {
+                barcode: {
                     label: 'Code barre référence',
-                    value: article.refArticleBarCode
+                    value: article.refArticleBarcode
                 },
                 location: {
                     label: 'Emplacement de stockage',

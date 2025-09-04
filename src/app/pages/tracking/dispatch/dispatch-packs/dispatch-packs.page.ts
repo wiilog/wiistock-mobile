@@ -285,14 +285,14 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
         }
     }
 
-    public takePack(barCode: string): void {
+    public takePack(barcode: string): void {
         if(this.fromCreate) {
             this.navService.push(NavPathEnum.DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION, {
-                logisticUnit: barCode,
+                logisticUnit: barcode,
                 dispatch: this.dispatch,
             });
         } else {
-            const selectedIndex = this.dispatchPacks.findIndex(({code}) => (code === barCode));
+            const selectedIndex = this.dispatchPacks.findIndex(({code}) => (code === barcode));
             if (selectedIndex > -1) {
                 const selectedItem = this.dispatchPacks[selectedIndex];
                 if (selectedItem.treated) {
@@ -503,8 +503,8 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
         }
     }
 
-    private revertPack(barCode: string): void {
-        const selectedIndex = this.dispatchPacks.findIndex(({code}) => (code === barCode));
+    private revertPack(barcode: string): void {
+        const selectedIndex = this.dispatchPacks.findIndex(({code}) => (code === barcode));
         if (selectedIndex > -1
             && this.dispatchPacks[selectedIndex].treated) {
             const dispatchPack = this.dispatchPacks[selectedIndex];
@@ -529,8 +529,8 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
         }
     }
 
-    private deletePack(barCode: string): void {
-        const selectedIndex = this.dispatchPacks.findIndex(({code}) => (code === barCode));
+    private deletePack(barcode: string): void {
+        const selectedIndex = this.dispatchPacks.findIndex(({code}) => (code === barcode));
         if (selectedIndex > -1
             && this.dispatchPacks[selectedIndex].treated) {
             const dispatchPack = this.dispatchPacks[selectedIndex];

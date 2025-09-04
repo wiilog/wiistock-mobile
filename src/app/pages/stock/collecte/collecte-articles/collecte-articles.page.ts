@@ -93,7 +93,7 @@ export class CollecteArticlesPage implements CanLeave, ViewWillEnter, ViewWillLe
             info: this.collecte.forStock ? 'Mise en stock' : 'Destruction'
         };
 
-        this.listBoldValues = ['reference', 'label', 'barCode', 'location', 'quantity'];
+        this.listBoldValues = ['reference', 'label', 'barcode', 'location', 'quantity'];
 
         if (this.footerScannerComponent) {
             this.footerScannerComponent.fireZebraScan();
@@ -517,7 +517,7 @@ export class CollecteArticlesPage implements CanLeave, ViewWillEnter, ViewWillLe
                 label: 'Libellé',
                 value: reference_label || ''
             },
-            barCode: {
+            barcode: {
                 label: 'Code barre',
                 value: barcode || ''
             },

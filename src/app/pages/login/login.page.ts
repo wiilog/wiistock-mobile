@@ -225,18 +225,18 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
         this.unsubscribeZebra();
         this.zebraSubscription = this.barcodeScannerManager.datawedgeScan$
             .pipe(
-                filter((barCode: string) => Boolean(
-                    barCode
-                    && barCode.length > 1
+                filter((barcode: string) => Boolean(
+                    barcode
+                    && barcode.length > 1
                     && !this.loading
                 )),
-                map((barCode: string) => {
-                    const splitBarcode = barCode.split('\n');
+                map((barcode: string) => {
+                    const splitBarcode = barcode.split('\n');
                     return (splitBarcode && splitBarcode[0]) || '';
                 })
             )
-            .subscribe((barCode: string) => {
-                this.fillForm(barCode);
+            .subscribe((barcode: string) => {
+                this.fillForm(barcode);
             });
     }
 

@@ -126,7 +126,7 @@ export class TrackingListFactoryService {
                                 objectLabel: string;
                                 natureTranslation?: string;
                                 trackingDelayTranslation?: string;
-                                pressAction?: (barCode: string) => void
+                                pressAction?: (barcode: string) => void
                             }): ListConfig {
         const notDuplicateArticles = articles.reduce(
             (acc: Array<any>, movement) => {

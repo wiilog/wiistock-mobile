@@ -35,7 +35,7 @@ export class ReceptionReferenceTakePage implements ViewWillEnter {
             info: [
                 ...(this.refArticle ? [{label: 'Référence', value: this.refArticle.reference}] : []),
                 {label: 'Libellé', value: this.refArticle.label || ''},
-                {label: 'Code barre référence', value: `${this.refArticle.barCode}`},
+                {label: 'Code barre référence', value: `${this.refArticle.barcode}`},
                 {label: 'Quantité attendue restante', value: `${this.refArticle.remainingQuantity}`},
             ],
             fields: [

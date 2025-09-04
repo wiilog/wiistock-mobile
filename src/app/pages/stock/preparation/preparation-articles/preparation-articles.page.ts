@@ -96,7 +96,7 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
             info: `Flux : ${this.preparation.type}`
         };
 
-        this.listBoldValues = ['reference', 'referenceArticleReference', 'label', 'barCode', 'location', 'quantity', 'targetLocationPicking', 'logisticUnit', 'articlesCount', 'nature'];
+        this.listBoldValues = ['reference', 'label', 'barcode', 'location', 'quantity', 'targetLocationPicking', 'logisticUnit', 'articlesCount', 'nature'];
 
         zip(
             this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_PREPARATIONS),
@@ -431,6 +431,8 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
                 this.articlesNT = articlesPrepa.filter(({has_moved}) => has_moved === 0);
                 this.articlesT = articlesPrepa.filter(({has_moved}) => has_moved === 1);
 
+                console.log(this.articlesNT, this.articlesT)
+
                 this.displayTargetLocationPicking = displayTargetLocationPicking;
 
                 this.listToTreatConfig = this.createListToTreatConfig();
@@ -463,14 +465,13 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
             const selectedQuantityValid = selectedQuantity ? selectedQuantity : (selectedArticle as ArticlePrepaByRefArticle).quantity;
             let articleToInsert: ArticlePrepa = {
                 label: (selectedArticle as ArticlePrepaByRefArticle).label,
-                reference: (selectedArticle as ArticlePrepaByRefArticle).reference,
+                reference: (selectedArticle as ArticlePrepaByRefArticle).reference_article,
                 is_ref: 1,
                 has_moved: 1,
                 id_prepa: this.preparation.id,
                 isSelectableByUser: 1,
                 emplacement: (selectedArticle as ArticlePrepaByRefArticle).location,
                 quantite: selectedQuantityValid,
-                reference_article_reference: selectedArticle.reference_article_reference,
             };
             return ((selectedArticle as ArticlePrepaByRefArticle).isSelectableByUser)
                 ? of(undefined)
@@ -651,23 +652,12 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
         };
     }
 
-    private createArticleInfo({reference, is_ref, reference_article_reference, label, barcode, emplacement, quantite, targetLocationPicking}: ArticlePrepa): { [name: string]: { label: string; value: string; } } {
+    private createArticleInfo({reference, label, barcode, emplacement, quantite, targetLocationPicking}: ArticlePrepa): { [name: string]: { label: string; value: string; } } {
         return {
-            ...(
-                !is_ref && reference_article_reference
-                    ? {
-                        referenceArticleReference: {
-                            label: 'Référence article',
-                            value: reference_article_reference
-                        }
-                    }
-                    : {
-                        reference: {
-                            label: 'Référence',
-                            value: reference
-                        },
-                    }
-            ),
+            reference: {
+                label: 'Référence article',
+                value: reference
+            },
             label: {
                 label: 'Libellé',
                 value: label
@@ -675,7 +665,7 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
             ...(
                 barcode
                     ? {
-                        barCode: {
+                        barcode: {
                             label: 'Code barre',
                             value: barcode
                         }

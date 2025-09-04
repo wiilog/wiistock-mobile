@@ -58,16 +58,16 @@ export class PriseUlDetails implements ViewWillEnter {
     public ionViewWillEnter(): void {
         this.location = this.navService.param('location');
         this.validate = this.navService.param('validate');
-        const barCode = this.navService.param('barCode');
+        const barcode = this.navService.param('barcode');
         const {comment, signature, photo, natureId, projectId} = this.navService.param('values');
 
         this.loadingService.presentLoadingWhile({
-            event: () => this.apiService.requestApi(ApiService.LOGISTIC_UNIT_ARTICLES, {params: {code: barCode}}),
+            event: () => this.apiService.requestApi(ApiService.LOGISTIC_UNIT_ARTICLES, {params: {code: barcode}}),
             message: 'Chargement en cours...'
         }).subscribe((articles: Array<string>) => {
             this.articlesInLU = articles;
             this.headerConfig = {
-                title: `Prise de ${barCode}`,
+                title: `Prise de ${barcode}`,
                 subtitle: this.location ? `Emplacement : ${this.location.label}` : undefined,
                 leftIcon: {
                     name: 'upload.svg',

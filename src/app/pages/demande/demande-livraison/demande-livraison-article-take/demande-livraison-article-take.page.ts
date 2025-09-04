@@ -41,7 +41,7 @@ export class DemandeLivraisonArticleTakePage implements ViewWillEnter {
                         this.article.type_quantity
                     )
                 },
-                {label: 'Code barre', value: this.article.bar_code},
+                {label: 'Code barre', value: this.article.barcode},
                 {label: 'Quantité disponible', value: this.article.available_quantity ? String(this.article.available_quantity) : '-'}
             ],
             fields: [
