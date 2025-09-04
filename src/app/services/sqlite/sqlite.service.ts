@@ -27,7 +27,7 @@ import {InventoryLocationLine} from "@entities/inventory_location_line";
 export class SqliteService {
 
     private static readonly DB_PREFIX: string = 'wiistock_db';
-    private static readonly DB_VERSION: number = 20240530; // day of the last modification 2024-05-30
+    private static readonly DB_VERSION: number = 20250904; // day of the last modification 2025-09-04
 
     private static readonly DB_NAME: string = `${SqliteService.DB_PREFIX}_${SqliteService.DB_VERSION}`;
 
@@ -328,9 +328,8 @@ export class SqliteService {
                                         has_moved: 0,
                                         emplacement: toInsert.location,
                                         type_quantite: toInsert.type_quantite,
-                                        barcode: toInsert.barCode,
+                                        barcode: toInsert.barcode,
                                         original_quantity: toInsert.quantity,
-                                        reference_article_reference: toInsert.reference_article_reference,
                                         targetLocationPicking: toInsert.targetLocationPicking,
                                         lineLogisticUnitId: toInsert.lineLogisticUnitId,
                                         lineLogisticUnitCode: toInsert.lineLogisticUnitCode,
@@ -472,9 +471,9 @@ export class SqliteService {
                 //  --> on supprime les types qui sont dans la liste du getDataArray ET ceux qui ne sont pas dans des demandes en brouillon
                 // On garde les articles qui sont dans des demandes en brouillon
                 //  --> on supprime les articles qui sont dans la liste du getDataArray ET ceux qui ne sont pas dans des demandes en brouillon
-                mergeMap(([articleBarCodesInDemande, demandeLivraisonInDB]: [Array<{bar_code: string}>, Array<{type_id: number}>]) => {
-                    const demandeLivraisonArticlesBarCodesToImport = demandeLivraisonArticles.map(({bar_code}: any) => `'${bar_code}'`);
-                    const articleBarCodesInDemandeBarCodes = articleBarCodesInDemande.map(({bar_code}) => `'${bar_code}'`);
+                mergeMap(([articleBarcodesInDemande, demandeLivraisonInDB]: [Array<{barcode: string}>, Array<{type_id: number}>]) => {
+                    const demandeLivraisonArticlesBarcodesToImport = demandeLivraisonArticles.map(({barcode}: any) => `'${barcode}'`);
+                    const articleBarcodesInDemandeBarcodes = articleBarcodesInDemande.map(({barcode}) => `'${barcode}'`);
 
                     const demandeLivraisonTypesIdsToImport = demandeLivraisonTypes.map(({id}: any) => id); // les ids des types à importer
                     const typeIdsInDemandes = demandeLivraisonInDB.reduce((acc: Array<number>, {type_id}) => {
@@ -495,11 +494,11 @@ export class SqliteService {
                                     .join(' OR ')
                             ])
                             : of(undefined),
-                        (demandeLivraisonArticlesBarCodesToImport.length > 0 || articleBarCodesInDemandeBarCodes.length > 0)
+                        (demandeLivraisonArticlesBarcodesToImport.length > 0 || articleBarcodesInDemandeBarcodes.length > 0)
                             ? this.deleteBy('demande_livraison_article', [
                                 [
-                                    demandeLivraisonArticlesBarCodesToImport.length > 0 ? `(bar_code IN (${demandeLivraisonArticlesBarCodesToImport.join(',')}))` : '',
-                                    articleBarCodesInDemandeBarCodes.length > 0 ? `(bar_code NOT IN (${articleBarCodesInDemandeBarCodes.join(',')}))` : ''
+                                    demandeLivraisonArticlesBarcodesToImport.length > 0 ? `(barcode IN (${demandeLivraisonArticlesBarcodesToImport.join(',')}))` : '',
+                                    articleBarcodesInDemandeBarcodes.length > 0 ? `(barcode NOT IN (${articleBarcodesInDemandeBarcodes.join(',')}))` : ''
                                 ]
                                     .filter(Boolean)
                                     .join(' OR ')
@@ -712,14 +711,14 @@ export class SqliteService {
             )),
             mergeMap(() => (
                 (articlesCollecteAPI && articlesCollecteAPI.length > 0)
-                    ? this.insert('article_collecte', articlesCollecteAPI.map(({label, quantity_type, reference, quantity, is_ref, id_collecte, location, barCode, reference_label}: any) => ({
+                    ? this.insert('article_collecte', articlesCollecteAPI.map(({label, quantity_type, reference, quantity, is_ref, id_collecte, location, barcode, reference_label}: any) => ({
                         label,
                         reference,
                         is_ref,
                         id_collecte,
                         quantity_type,
                         emplacement: location,
-                        barcode: barCode,
+                        barcode,
                         reference_label,
                         quantite: quantity,
                         has_moved: 0,
@@ -743,7 +742,7 @@ export class SqliteService {
             articleCollecte.id_collecte + ", " +
             "0, " +
             "'" + this.escapeQuotes(articleCollecte.location) + "', " +
-            "'" + articleCollecte.barCode + "', " +
+            "'" + articleCollecte.barcode + "', " +
             "'" + articleCollecte.reference_label + "')"
         );
     }
@@ -780,7 +779,7 @@ export class SqliteService {
                                                                                 reference,
                                                                                 is_ref,
                                                                                 location,
-                                                                                barCode,
+                                                                                barcode,
                                                                                 type,
                                                                                 done,
                                                                                 mission_start,
@@ -799,7 +798,7 @@ export class SqliteService {
                             type,
                             done,
                             location: location ? location : 'N/A',
-                            barcode: barCode,
+                            barcode,
                             logistic_unit_code,
                             logistic_unit_id,
                             logistic_unit_nature,
@@ -858,7 +857,7 @@ export class SqliteService {
                         ? this.insert('anomalie_inventaire', anomaliesToInsert.map((anomaly: any) => ({
                             location: anomaly.location ? anomaly.location : 'N/A',
                             is_treatable: anomaly.isTreatable,
-                            barcode: anomaly.barCode,
+                            barcode: anomaly.barcode,
                             id: anomaly.id,
                             reference: anomaly.reference,
                             mission_id: anomaly.mission_id,
@@ -938,7 +937,7 @@ export class SqliteService {
         const query = (
             `SELECT demande_livraison_article.*, article_in_demande_livraison.quantity_to_pick AS quantity_to_pick ` +
             `FROM demande_livraison_article ` +
-            `INNER JOIN article_in_demande_livraison ON article_in_demande_livraison.article_bar_code = demande_livraison_article.bar_code ` +
+            `INNER JOIN article_in_demande_livraison ON article_in_demande_livraison.article_barcode = demande_livraison_article.barcode ` +
             `WHERE article_in_demande_livraison.demande_id = ${demandeId}`
         );
         return this.query(query);
@@ -948,7 +947,7 @@ export class SqliteService {
         const query = (
             `SELECT demande_livraison_article.*
             FROM demande_livraison_article
-            LEFT JOIN article_in_demande_livraison ON article_in_demande_livraison.article_bar_code = demande_livraison_article.bar_code
+            LEFT JOIN article_in_demande_livraison ON article_in_demande_livraison.article_barcode = demande_livraison_article.barcode
             WHERE article_in_demande_livraison.demande_id IS NULL`
         );
         return this.query(query);
@@ -957,7 +956,7 @@ export class SqliteService {
     public countArticlesByDemandeLivraison(demandeIds: Array<number>): Observable<{ [demande_id: number]: number }> {
         const demandeIdsJoined = demandeIds.join(',');
         const query = (
-            `SELECT COUNT(article_in_demande_livraison.article_bar_code) AS counter, article_in_demande_livraison.demande_id AS demande_id ` +
+            `SELECT COUNT(article_in_demande_livraison.article_barcode) AS counter, article_in_demande_livraison.demande_id AS demande_id ` +
             `FROM article_in_demande_livraison ` +
             `WHERE article_in_demande_livraison.demande_id IN (${demandeIdsJoined}) ` +
             `GROUP BY article_in_demande_livraison.demande_id`

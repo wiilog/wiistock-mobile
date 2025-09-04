@@ -185,7 +185,7 @@ export class ReceptionDetailsPage implements OnInit {
 
 
     public testIfBarcodeEquals(scanned: string): void {
-        const selectedLineTake = this.receptionReferenceArticles.findIndex((reference) => reference.barCode === scanned);
+        const selectedLineTake = this.receptionReferenceArticles.findIndex((reference) => reference.barcode === scanned);
 
         if (selectedLineTake > -1) {
             this.takeReferenceArticleQuantity(this.receptionReferenceArticles[selectedLineTake]);

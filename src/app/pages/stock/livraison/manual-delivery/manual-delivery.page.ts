@@ -48,7 +48,7 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
 
     private selectedArticles: Array<{
         id: number;
-        barCode: string;
+        barcode: string;
         label: string;
         reference: string;
         typeQuantity: string;
@@ -90,7 +90,7 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
     }
 
     public ngOnInit() {
-        this.listBoldValues = ['reference', 'label', 'barCode', 'location', 'quantity', 'lastActionDate', 'nature'];
+        this.listBoldValues = ['reference', 'label', 'barcode', 'location', 'quantity', 'lastActionDate', 'nature'];
 
         this.headerConfig = this.createHeaderConfig();
         this.listConfig = this.createBodyConfig();
@@ -217,7 +217,7 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
 
     public addArticle(article: string) {
         const params = {
-            barCode: article,
+            barcode: article,
         };
 
         this.loadingService.presentLoadingWhile({
@@ -231,7 +231,7 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
         }).subscribe(([response, project]) => {
             if (response.success) {
                 if (response.article && !response.article.is_ref) {
-                    const existing = this.selectedArticles.find(article => article.barCode == response.article.barCode)
+                    const existing = this.selectedArticles.find(article => article.barcode == response.article.barcode)
                     if (existing) {
                         this.toastService.presentToast(`Vous avez déjà scanné cet ${response.article.is_lu ? 'unité logistique' : 'article'}.`);
                     } else {
@@ -251,7 +251,7 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
                             this.toastService.presentToast(`Vous ne pouvez pas scanner une unité logistique avec un projet différent de celui sélectionné.`);
                         } else if (response.article.currentLogisticUnitId) {
                             this.alertService.show({
-                                message: `L'article ${response.article.barCode} sera enlevé de l'unité logistique ${response.article.currentLogisticUnitCode}`,
+                                message: `L'article ${response.article.barcode} sera enlevé de l'unité logistique ${response.article.currentLogisticUnitCode}`,
                                 buttons: [{
                                     text: 'Annuler',
                                     role: 'cancel',
@@ -337,9 +337,9 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
                         value: article.label
                     },
                 } : {}),
-                barCode: {
+                barcode: {
                     label: article.is_lu ? 'Objet' : 'Code barre',
-                    value: article.barCode
+                    value: article.barcode
                 },
                 ...(article.is_lu && article.lastActionDate ? ({
                     lastActionDate: {
@@ -374,7 +374,7 @@ export class ManualDeliveryPage implements ViewWillLeave, ViewWillEnter {
                 }
             },
             ...(article.is_lu ? {
-                pressAction: () => this.showLogisticUnitContent(article.articles as string, article.barCode),
+                pressAction: () => this.showLogisticUnitContent(article.articles as string, article.barcode),
             } : {}),
             ...(article.is_lu && article.natureColor ? ({
                 color: article.natureColor

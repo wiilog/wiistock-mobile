@@ -234,7 +234,7 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                     this.navService.push(NavPathEnum.MOVEMENT_CONFIRM, {
                         group: this.group,
                         fromStock: false,
-                        barCode: pack.code,
+                        barcode: pack.code,
                         values: {
                             quantity,
                             comment,
@@ -353,8 +353,8 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                             + (Number(packSplitNumber) || 0)
                             + 1
                         );
-                        const newBarCode = `${code}.${codeSuffix}`;
-                        this.addPackToBody(newBarCode, nature, trackingDelayData, null, pack);
+                        const newBarcode = `${code}.${codeSuffix}`;
+                        this.addPackToBody(newBarcode, nature, trackingDelayData, null, pack);
                         this.updateInProgressPack(code);
                     }
                 },
@@ -370,9 +370,9 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
         });
     }
 
-    private addPackToBody(barCode: string, nature: any, trackingDelayData?: any, pack?: any, splitFrom?: any){
+    private addPackToBody(barcode: string, nature: any, trackingDelayData?: any, pack?: any, splitFrom?: any){
         const newPack = pack || {
-            code: barCode,
+            code: barcode,
             nature_id: null,
             ...(splitFrom
                 ? {
@@ -395,6 +395,6 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
 
         this.refreshHeaderConfig();
         this.refreshBodyConfig();
-        this.updateInProgressPack(barCode);
+        this.updateInProgressPack(barcode);
     }
 }

@@ -72,7 +72,7 @@ export class DemandeLivraisonArticlesPage implements ViewWillEnter, ViewWillLeav
         this.listBoldValues = [
             'reference',
             'label',
-            'barCode',
+            'barcode',
             'quantity',
             'location',
             'management'
@@ -202,9 +202,9 @@ export class DemandeLivraisonArticlesPage implements ViewWillEnter, ViewWillLeav
                 mergeMap(([loading]: [HTMLIonLoadingElement, any]) => (
                     this.selectedArticles.length > 0
                         ? zip(
-                            ...(this.selectedArticles.map(({quantity_to_pick, bar_code}) => (
+                            ...(this.selectedArticles.map(({quantity_to_pick, barcode}) => (
                                 this.sqliteService.insert('article_in_demande_livraison', {
-                                    article_bar_code: bar_code,
+                                    article_barcode: barcode,
                                     demande_id: this.demandeId,
                                     quantity_to_pick
                                 })
@@ -287,9 +287,9 @@ export class DemandeLivraisonArticlesPage implements ViewWillEnter, ViewWillLeav
                     label: 'Libellé',
                     value: article.label
                 },
-                barCode: {
+                barcode: {
                     label: 'Code barre',
-                    value: article.bar_code
+                    value: article.barcode
                 },
                 quantity: {
                     label: 'Quantité',

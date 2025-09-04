@@ -168,8 +168,8 @@ export class TransportDepositPacksPage implements ViewWillEnter, ViewWillLeave {
         };
     }
 
-    public returnPack(barCode: string): void {
-        const selectedIndex = this.packs.findIndex(({code}) => (code === barCode));
+    public returnPack(barcode: string): void {
+        const selectedIndex = this.packs.findIndex(({code}) => (code === barcode));
         if (selectedIndex > -1) {
             const selectedItem = this.packs[selectedIndex];
             if (selectedItem.returned) {
@@ -220,8 +220,8 @@ export class TransportDepositPacksPage implements ViewWillEnter, ViewWillLeave {
             });
     }
 
-    private revertPack(barCode: string): void {
-        const selectedIndex = this.packs.findIndex(({code}) => code === barCode);
+    private revertPack(barcode: string): void {
+        const selectedIndex = this.packs.findIndex(({code}) => code === barcode);
         if (selectedIndex > -1 && this.packs[selectedIndex].returning) {
             this.packs[selectedIndex].returning = false;
 

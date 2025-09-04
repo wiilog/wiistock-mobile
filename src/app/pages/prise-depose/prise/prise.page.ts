@@ -252,10 +252,10 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             });
     }
 
-    public async testIfBarcodeEquals(barCode: string, isManualAdd: boolean = false) {
+    public async testIfBarcodeEquals(barcode: string, isManualAdd: boolean = false) {
         if (!this.barcodeCheckLoading) {
             if (!this.fromStock) {
-                this.processTackingBarCode(barCode, isManualAdd, 1);
+                this.processTackingBarcode(barcode, isManualAdd, 1);
             }
             else {
                 const hasNetwork = await this.networkService.hasNetwork();
@@ -268,7 +268,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                             tap((presentedLoader) => {
                                 loader = presentedLoader;
                             }),
-                            mergeMap(() => this.checkArticleOnLocation(barCode)),
+                            mergeMap(() => this.checkArticleOnLocation(barcode)),
                             mergeMap(({res, quantity}) => ((loader ? from(loader.dismiss()) : of(undefined)) as Observable<any>).pipe(
                                 tap(() => {
                                     loader = undefined;
@@ -285,7 +285,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                 );
                                 if (article && quantity > 0 && article.currentLogisticUnitId) {
                                     this.alertService.show({
-                                        message: `L'article ${article.barCode} sera enlevé de l'unité logistique ${article.currentLogisticUnitCode}`,
+                                        message: `L'article ${article.barcode} sera enlevé de l'unité logistique ${article.currentLogisticUnitCode}`,
                                         buttons: [{
                                             text: 'Annuler',
                                             role: 'cancel',
@@ -296,12 +296,12 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                             text: 'Confirmer',
                                             cssClass: 'alert-success',
                                             handler: () => {
-                                                this.processTackingBarCode(barCode, isManualAdd, quantity, article);
+                                                this.processTackingBarcode(barcode, isManualAdd, quantity, article);
                                             },
                                         }]
                                     });
                                 } else {
-                                    this.processTackingBarCode(barCode, isManualAdd, quantity, article);
+                                    this.processTackingBarcode(barcode, isManualAdd, quantity, article);
                                 }
                             },
                             error: () => {
@@ -332,7 +332,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             ? this.currentPacksOnLocation
                 .filter(({hidden, ref_article: ongoingBarcode}) => (
                     !hidden
-                    && !this.colisPrise.some(({ref_article: takeBarCode}) => takeBarCode === ongoingBarcode)
+                    && !this.colisPrise.some(({ref_article: takeBarcode}) => takeBarcode === ongoingBarcode)
                 ))
                 .map(({subPacks, ...movements}) => movements)
             : [];
@@ -342,9 +342,9 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         return this.currentPacksOnLocation && this.toTakeOngoingPacks.length > 0;
     }
 
-    private saveTrackingMovement(barCode: string, quantity: number, loading: boolean = false, articles: Array<string>, containsArticle?: boolean): void {
+    private saveTrackingMovement(barcode: string, quantity: number, loading: boolean = false, articles: Array<string>, containsArticle?: boolean): void {
         this.colisPrise.unshift({
-            ref_article: barCode,
+            ref_article: barcode,
             type: PrisePage.MOUVEMENT_TRACA_PRISE,
             operateur: this.operator,
             ref_emplacement: this.emplacement.label,
@@ -356,11 +356,11 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             articles,
             containsArticle
         });
-        this.setPackOnLocationHidden(barCode, true);
+        this.setPackOnLocationHidden(barcode, true);
     }
 
-    private updateTrackingMovementNature(barCode: string, natureId?: number, groupData?: any, trackingDelayData?: any): void {
-        const indexesToUpdate = this.findTakingIndexes(barCode);
+    private updateTrackingMovementNature(barcode: string, natureId?: number, groupData?: any, trackingDelayData?: any): void {
+        const indexesToUpdate = this.findTakingIndexes(barcode);
         for(const index of indexesToUpdate) {
             this.colisPrise[index].loading = false;
 
@@ -403,16 +403,16 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                 confirmItem: !this.fromStock
                     ? (element: { object?: { value?: string } }) => {
                         const {object} = element || {};
-                        const {value: barCode} = object || {};
+                        const {value: barcode} = object || {};
                         // we get first
-                        const [dropIndex] = this.findTakingIndexes(barCode);
+                        const [dropIndex] = this.findTakingIndexes(barcode);
                         if (dropIndex !== undefined) {
                             const {quantity, comment, signature, photo, nature_id: natureId, freeFields, isGroup, subPacks, manualDelayStart} = this.colisPrise[dropIndex];
                             this.trackingListFactory.disableActions();
                             this.navService.push(NavPathEnum.MOVEMENT_CONFIRM, {
                                 fromStock: this.fromStock,
                                 location: this.emplacement,
-                                barCode,
+                                barcode,
                                 isGroup,
                                 subPacks,
                                 values: {
@@ -425,7 +425,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                     manualDelayStart,
                                 },
                                 validate: (values: any) => {
-                                    this.updatePicking(barCode, values);
+                                    this.updatePicking(barcode, values);
                                 },
                                 movementType: MovementConfirmType.TAKE,
                             });
@@ -436,8 +436,8 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                     mode: 'remove',
                     action: this.cancelPickingAction()
                 },
-                pressAction: (barCode) => {
-                    const [dropIndex] = this.findTakingIndexes(barCode);
+                pressAction: (barcode) => {
+                    const [dropIndex] = this.findTakingIndexes(barcode);
                     if (dropIndex !== undefined) {
                         const {comment, signature, photo, nature_id: natureId, projectId} = this.colisPrise[dropIndex];
                         this.trackingListFactory.disableActions();
@@ -445,7 +445,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                             fromStock: this.fromStock,
                             location: this.emplacement,
                             headerConfig: listTakingHeader,
-                            barCode,
+                            barcode,
                             values: {
                                 comment,
                                 signature,
@@ -454,7 +454,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                 projectId
                             },
                             validate: (values: any) => {
-                                this.updatePicking(barCode, values);
+                                this.updatePicking(barcode, values);
                             },
                             movementType: MovementConfirmType.TAKE,
                         });
@@ -501,8 +501,8 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     }
 
     private cancelPickingAction(): (info: { [name: string]: { label?: string; value?: string; } }) => void {
-        return TrackingListFactoryService.CreateRemoveItemFromListHandler(this.colisPrise, undefined, (barCode) => {
-            this.setPackOnLocationHidden(barCode, false);
+        return TrackingListFactoryService.CreateRemoveItemFromListHandler(this.colisPrise, undefined, (barcode) => {
+            this.setPackOnLocationHidden(barcode, false);
             this.refreshListComponent();
         });
     }
@@ -518,9 +518,9 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         this.colisPriseAlreadySaved = [];
     }
 
-    private updatePicking(barCode: string|undefined,
+    private updatePicking(barcode: string|undefined,
                           {quantity, comment, signature, photo, projectId, natureId, freeFields, subPacks, manualDelayStart}: {quantity?: number; comment?: string; signature?: string; photo?: string; projectId?: number; natureId: number; freeFields: string; subPacks: any; manualDelayStart?: string;}): void {
-        const dropIndexes = this.findTakingIndexes(barCode);
+        const dropIndexes = this.findTakingIndexes(barcode);
         if (dropIndexes.length > 0) {
             for(const dropIndex of dropIndexes) {
                 if (quantity && quantity > 0) {
@@ -540,11 +540,11 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         this.footerScannerComponent.fireZebraScan();
     }
 
-    private checkArticleOnLocation(barCode: string): Observable<{res: any, quantity: number}> {
+    private checkArticleOnLocation(barcode: string): Observable<{res: any, quantity: number}> {
         return this.apiService
             .requestApi(ApiService.GET_ARTICLES, {
                 params: {
-                    barCode,
+                    barcode,
                     location: this.emplacement.label
                 }
             })
@@ -584,19 +584,19 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
             );
     }
 
-    private setPackOnLocationHidden(barCode: string|undefined, hidden: boolean): void {
-        if (barCode) {
-            const trackingIndex = this.currentPacksOnLocation.findIndex(({ref_article}) => (ref_article === barCode));
+    private setPackOnLocationHidden(barcode: string|undefined, hidden: boolean): void {
+        if (barcode) {
+            const trackingIndex = this.currentPacksOnLocation.findIndex(({ref_article}) => (ref_article === barcode));
             if (trackingIndex > -1) {
                 this.currentPacksOnLocation[trackingIndex].hidden = hidden;
             }
         }
     }
 
-    private findTakingIndexes(barCode?: string): Array<number> {
+    private findTakingIndexes(barcode?: string): Array<number> {
         return this.colisPrise.reduce(
             (acc: Array<number>, {ref_article}, currentIndex) => {
-                if (ref_article === barCode) {
+                if (ref_article === barcode) {
                     acc.push(currentIndex);
                 }
                 return acc;
@@ -605,22 +605,22 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         );
     }
 
-    private async processTackingBarCode(barCode: string, isManualAdd: boolean, quantity: number, article: any = null) {
+    private async processTackingBarcode(barcode: string, isManualAdd: boolean, quantity: number, article: any = null) {
         this.barcodeCheckLoading = false;
         if (quantity > 0) {
             if (this.colisPrise &&
                 (
-                    this.colisPrise.some((colis) => ((colis.ref_article || '').toLocaleLowerCase() === (barCode || '').toLocaleLowerCase())) ||
-                    this.colisPriseAlreadySaved.some((colis) => ((colis.ref_article || '').toLocaleLowerCase() === (barCode || '').toLocaleLowerCase()))
+                    this.colisPrise.some((colis) => ((colis.ref_article || '').toLocaleLowerCase() === (barcode || '').toLocaleLowerCase())) ||
+                    this.colisPriseAlreadySaved.some((colis) => ((colis.ref_article || '').toLocaleLowerCase() === (barcode || '').toLocaleLowerCase()))
                 )) {
                 this.toastService.presentToast('Cette prise a déjà été effectuée', {audio: true});
             }
             else {
-                this.saveTrackingMovement(barCode, quantity, false, article ? article.articles : null, article ? article.is_lu : false);
+                this.saveTrackingMovement(barcode, quantity, false, article ? article.articles : null, article ? article.is_lu : false);
 
                 const hasNetwork = await this.networkService.hasNetwork();
                 const needNatureChecks = hasNetwork && (!article || article.is_lu);
-                const [currentBarcodeIndex] = this.findTakingIndexes(barCode);
+                const [currentBarcodeIndex] = this.findTakingIndexes(barcode);
                 if (currentBarcodeIndex !== undefined && currentBarcodeIndex > -1) {
                     this.colisPrise[currentBarcodeIndex].loading = needNatureChecks;
                 }
@@ -630,7 +630,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                     this.apiService
                         .requestApi(ApiService.GET_PACK_DATA, {
                             params: {
-                                code: barCode,
+                                code: barcode,
                                 nature: 1,
                                 group: 1,
                                 trackingDelayData: 1,
@@ -671,7 +671,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                                 text: 'Confirmer',
                                                 cssClass: 'alert-success',
                                                 handler: () => {
-                                                    this.processLogisticUnitTaking(isGroup, isPack, barCode, group, nature, trackingDelayData);
+                                                    this.processLogisticUnitTaking(isGroup, isPack, barcode, group, nature, trackingDelayData);
                                                 },
                                             },
                                             {
@@ -685,11 +685,11 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                         ]
                                     });
                                 } else {
-                                    this.processLogisticUnitTaking(isGroup, isPack, barCode, group, nature, trackingDelayData);
+                                    this.processLogisticUnitTaking(isGroup, isPack, barcode, group, nature, trackingDelayData);
                                 }
                             },
                             error: () => {
-                                this.updateTrackingMovementNature(barCode);
+                                this.updateTrackingMovementNature(barcode);
                             },
                         });
                 }
@@ -722,19 +722,19 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
 
     private processLogisticUnitTaking(isGroup: boolean,
                                       isPack: boolean,
-                                      barCode: string,
+                                      barcode: string,
                                       group: any,
                                       nature: Nature,
                                       trackingDelayData: any): void {
         if(this.fromStock && isGroup) {
             const cancelPicking = this.cancelPickingAction();
-            cancelPicking({object: {value: barCode, label: barCode}});
+            cancelPicking({object: {value: barcode, label: barcode}});
 
             this.alertService.show({
                 header: 'Transfert impossible',
                 backdropDismiss: false,
                 cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
-                message: `Vous ne pouvez pas transférer l'unité logistique ${barCode} car c'est un groupe`,
+                message: `Vous ne pouvez pas transférer l'unité logistique ${barcode} car c'est un groupe`,
                 buttons: [
                     {
                         text: 'Annuler',
@@ -752,7 +752,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                     backdropDismiss: false,
                     cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
                     message: `
-                        Le colis ${barCode} est contenu dans le groupe ${group.code}.
+                        Le colis ${barcode} est contenu dans le groupe ${group.code}.
                         <br>Voulez-vous prendre le groupe entier, l'Ul seule ou annuler ?
                     `,
                     buttons: [
@@ -760,14 +760,14 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                             text: 'Prise du groupe',
                             cssClass: 'full-width margin-right',
                             handler: () => {
-                                this.updateTrackingMovementNature(barCode, nature && nature.id, group);
+                                this.updateTrackingMovementNature(barcode, nature && nature.id, group);
                             }
                         },
                         {
                             text: "Prise de l'UL",
                             cssClass: 'alert-button-role-cancel full-width margin-right',
                             handler: () => {
-                                this.updateTrackingMovementNature(barCode, nature && nature.id, null, trackingDelayData);
+                                this.updateTrackingMovementNature(barcode, nature && nature.id, null, trackingDelayData);
                             }
                         },
                         {
@@ -776,7 +776,7 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                             role: 'cancel',
                             handler: () => {
                                 const cancelPicking = this.cancelPickingAction();
-                                const value = isGroup && group ? group.code : barCode;
+                                const value = isGroup && group ? group.code : barcode;
                                 cancelPicking({object: {value: value, label: value}});
                             },
                         }
@@ -784,11 +784,11 @@ export class PrisePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                 });
             }
             else {
-                this.updateTrackingMovementNature(barCode, nature && nature.id, undefined, trackingDelayData);
+                this.updateTrackingMovementNature(barcode, nature && nature.id, undefined, trackingDelayData);
             }
         }
         else { // isGroup === true
-            this.updateTrackingMovementNature(barCode, nature && nature.id, group, trackingDelayData);
+            this.updateTrackingMovementNature(barcode, nature && nature.id, group, trackingDelayData);
         }
     }
 

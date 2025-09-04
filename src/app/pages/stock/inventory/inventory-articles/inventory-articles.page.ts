@@ -85,7 +85,7 @@ export class InventoryArticlesPage implements ViewWillEnter, ViewWillLeave, CanL
 
     public initRegularView() {
         this.subtitleConfig = this.selectedLocation;
-        this.listBoldValues = ['reference', 'barCode'];
+        this.listBoldValues = ['reference', 'barcode'];
         this.iconConfig = {name: 'inventory.svg'};
         this.titleConfig = 'Emplacement';
         this.logisticUnit = undefined;
@@ -269,7 +269,7 @@ export class InventoryArticlesPage implements ViewWillEnter, ViewWillLeave, CanL
                 id: null,
                 mission_id: selectedArticle.mission_id,
                 date: moment().format(),
-                bar_code: selectedArticle.barcode,
+                barcode: selectedArticle.barcode,
                 is_ref: selectedArticle.is_ref,
                 quantity,
                 location: selectedArticle.location,

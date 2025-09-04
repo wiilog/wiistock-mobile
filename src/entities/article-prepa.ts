@@ -9,7 +9,7 @@ export interface ArticlePrepa {
     has_moved: number;
     emplacement: string;
     barcode?: string;
-    reference_article_reference: string;
+
     // ArticlePrepaByRefArticle
     isSelectableByUser?: number;
     reference_article?: string;

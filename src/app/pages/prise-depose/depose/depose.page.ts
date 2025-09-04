@@ -232,8 +232,8 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         }
     }
 
-    public testColisDepose(barCode: string|undefined, isManualInput: boolean = false): void {
-        const pickingIndexes = this.findPickingIndexes(barCode);
+    public testColisDepose(barcode: string|undefined, isManualInput: boolean = false): void {
+        const pickingIndexes = this.findPickingIndexes(barcode);
         if (pickingIndexes.length > 0) {
             this.saveMouvementTraca(pickingIndexes);
         }
@@ -352,9 +352,9 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         return this.colisPrise.filter(({hidden, packGroup}) => (!hidden && !packGroup)).length === 0;
     }
 
-    private updatePicking(barCode: string|undefined,
+    private updatePicking(barcode: string|undefined,
                           {quantity, comment, signature, photo, natureId, freeFields, isGroup, subPacks}: {quantity: number; comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string; isGroup: number; subPacks: any;}): void {
-        const dropIndexes = this.findDropIndexes(barCode);
+        const dropIndexes = this.findDropIndexes(barcode);
 
         if (dropIndexes.length > 0) {
             for(const dropIndex of dropIndexes) {
@@ -432,16 +432,16 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                 confirmItem: !this.fromStock
                     ? (element: { object?: { value?: string } }) => {
                         const {object} = element || {};
-                        const {value: barCode} = object || {};
+                        const {value: barcode} = object || {};
                         // we get first
-                        const [dropIndex] = this.findDropIndexes(barCode);
+                        const [dropIndex] = this.findDropIndexes(barcode);
                         if (dropIndex !== undefined) {
                             const {quantity, comment, signature, photo, nature_id: natureId, freeFields, isGroup, subPacks} = this.colisDepose[dropIndex];
                             this.trackingListFactory.disableActions();
                             this.navService.push(NavPathEnum.MOVEMENT_CONFIRM, {
                                 fromStock: this.fromStock,
                                 location: this.emplacement,
-                                barCode,
+                                barcode,
                                 isGroup,
                                 subPacks,
                                 values: {
@@ -453,7 +453,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                     freeFields
                                 },
                                 validate: (values: any) => {
-                                    this.updatePicking(barCode, values);
+                                    this.updatePicking(barcode, values);
                                 },
                                 movementType: MovementConfirmType.DROP,
                             });
@@ -530,10 +530,10 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         this.colisPrise = [];
     }
 
-    private findPickingIndexes(barCode: string|undefined): Array<number> {
+    private findPickingIndexes(barcode: string|undefined): Array<number> {
         return this.colisPrise.reduce(
             (acc: Array<number>, {ref_article, hidden}, currentIndex) => {
-                if (ref_article === barCode
+                if (ref_article === barcode
                     && !hidden) {
                     acc.push(currentIndex);
                 }
@@ -543,10 +543,10 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         );
     }
 
-    private findDropIndexes(barCode: string|undefined): Array<number> {
+    private findDropIndexes(barcode: string|undefined): Array<number> {
         return this.colisDepose.reduce(
             (acc: Array<number>, {ref_article}, currentIndex) => {
-                if (ref_article === barCode) {
+                if (ref_article === barcode) {
                     acc.push(currentIndex);
                 }
                 return acc;

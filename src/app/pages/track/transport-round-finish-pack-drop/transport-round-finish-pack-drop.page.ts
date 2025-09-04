@@ -156,8 +156,8 @@ export class TransportRoundFinishPackDropPage implements ViewWillEnter, ViewWill
         };
     }
 
-    public loadPack(barCode: string): void {
-        const selectedIndex = this.packs.findIndex(({code}) => (code === barCode));
+    public loadPack(barcode: string): void {
+        const selectedIndex = this.packs.findIndex(({code}) => (code === barcode));
         if (selectedIndex > -1) {
             const selectedItem = this.packs[selectedIndex];
             if (selectedItem.dropped) {
@@ -190,8 +190,8 @@ export class TransportRoundFinishPackDropPage implements ViewWillEnter, ViewWill
             });
     }
 
-    private revertPack(barCode: string): void {
-        const selectedIndex = this.packs.findIndex(({code}) => code === barCode);
+    private revertPack(barcode: string): void {
+        const selectedIndex = this.packs.findIndex(({code}) => code === barcode);
         if (selectedIndex > -1 && this.packs[selectedIndex].dropped) {
             this.packs[selectedIndex].dropped = false;
 

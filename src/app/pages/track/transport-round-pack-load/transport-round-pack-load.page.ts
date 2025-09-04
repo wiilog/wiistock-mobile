@@ -202,8 +202,8 @@ export class TransportRoundPackLoadPage implements ViewWillEnter, ViewWillLeave 
         };
     }
 
-    public loadPack(barCode: string): void {
-        const selectedIndex = this.packs.findIndex(({code}) => (code === barCode));
+    public loadPack(barcode: string): void {
+        const selectedIndex = this.packs.findIndex(({code}) => (code === barcode));
         if (selectedIndex > -1) {
             const selectedItem = this.packs[selectedIndex];
             if(selectedItem.loaded) {
@@ -264,8 +264,8 @@ export class TransportRoundPackLoadPage implements ViewWillEnter, ViewWillLeave 
             });
     }
 
-    private revertPack(barCode: string): void {
-        const selectedIndex = this.packs.findIndex(({code}) => code === barCode);
+    private revertPack(barcode: string): void {
+        const selectedIndex = this.packs.findIndex(({code}) => code === barcode);
         if (selectedIndex > -1 && this.packs[selectedIndex].loading) {
             this.packs[selectedIndex].loading = false;
 

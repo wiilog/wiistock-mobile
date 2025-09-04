@@ -41,12 +41,12 @@ export class ReadingScanPage implements ViewWillEnter, ViewWillLeave {
         this.refreshHeaderConfig();
     }
 
-    public scan(barCode: string): void {
+    public scan(barcode: string): void {
         this.loadingService
             .presentLoadingWhile({
                 event: () => this.apiService.requestApi(ApiService.GET_PACK_DATA, {
                     params: {
-                        code: barCode,
+                        code: barcode,
                         existing: 1,
                         nature: 1,
                         pack: 1,

@@ -91,7 +91,7 @@ export class PreparationRefArticlesPage implements ViewWillEnter, ViewWillLeave,
             this.pageHasLoadedOnce = true;
             this.navParams = this.navService.params();
             this.refArticle = this.navParams.article;
-            this.listWhereClause = [`reference_barCode LIKE '${this.refArticle.barcode}'`];
+            this.listWhereClause = [`reference_barcode LIKE '${this.refArticle.barcode}'`];
 
             this.countSubscription = this.loadingService
                 .presentLoadingWhile({

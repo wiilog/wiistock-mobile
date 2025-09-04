@@ -111,7 +111,7 @@ export class MovementConfirmPage implements ViewWillEnter {
         this.subPacks = this.navService.param('subPacks');
         this.movementType = this.navService.param('movementType');
 
-        const barCode = this.navService.param('barCode');
+        const barcode = this.navService.param('barcode');
         const fromStock = this.navService.param('fromStock');
         const {
             quantity,
@@ -127,7 +127,7 @@ export class MovementConfirmPage implements ViewWillEnter {
         const chosenTitle = MovementConfirmPage.PageTitle[this.movementType];
 
         this.headerConfig = {
-            title: `${chosenTitle} de ${barCode}`,
+            title: `${chosenTitle} de ${barcode}`,
             subtitle: this.location ?
                 `Emplacement : ${this.location.label}`
                 : (this.group

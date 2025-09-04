@@ -96,7 +96,6 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'emplacement', value: 'TEXT'},
             {column: 'type_quantite', value: 'TEXT'},
             {column: 'barcode', value: 'TEXT'},
-            {column: 'reference_article_reference', value: 'TEXT'},
             {column: 'quantite', value: 'INTEGER'},
             {column: 'is_ref', value: 'INTEGER'},
             {column: 'id_prepa', value: 'INTEGER'},
@@ -119,8 +118,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'label', value: 'TEXT'},
             {column: 'location', value: 'TEXT'},
             {column: 'reference_article', value: 'TEXT'},
-            {column: 'reference_barCode', value: 'VARCHAR(255)'},
-            {column: 'barcode', value: 'TEXT'},
+            {column: 'reference_barcode', value: 'VARCHAR(255)'},
+            {column: 'barcode', value: 'VARCHAR(255)'},
             {column: 'quantity', value: 'INTEGER'},
             {column: 'isSelectableByUser', value: 'INTEGER'},
             {column: 'management', value: 'VARCHAR(255)'},
@@ -252,7 +251,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
         name: 'saisie_inventaire',
         schema: [
             {column: 'id', value: 'INTEGER PRIMARY KEY AUTOINCREMENT'},
-            {column: 'bar_code', value: 'VARCHAR(255)'},
+            {column: 'barcode', value: 'VARCHAR(255)'},
             {column: 'date', value: 'TEXT'},
             {column: 'location', value: 'TEXT'},
             {column: 'mission_id', value: 'INTEGER'},
@@ -326,7 +325,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
         name: 'article_in_demande_livraison',
         schema: [
             {column: 'demande_id', value: 'INTEGER'},
-            {column: 'article_bar_code', value: 'VARCHAR(255)'},
+            {column: 'article_barcode', value: 'VARCHAR(255)'},
             {column: 'quantity_to_pick', value: 'INTEGER'}
         ]
     },
@@ -345,7 +344,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             {column: 'id', value: 'INTEGER PRIMARY KEY'},
             {column: 'label', value: 'VARCHAR(255)'},
             {column: 'reference', value: 'VARCHAR(255)'},
-            {column: 'bar_code', value: 'VARCHAR(255)'},
+            {column: 'barcode', value: 'VARCHAR(255)'},
             {column: 'type_quantity', value: 'VARCHAR(255)'},
             {column: 'location_label', value: 'VARCHAR(255)'},
             {column: 'available_quantity', value: 'INTEGER'},

@@ -23,7 +23,7 @@ export class ManualCollectArticleTakePage implements ViewWillEnter{
 
     private selectedReference: {
         id: number;
-        refArticleBarCode: string;
+        refArticleBarcode: string;
         'article-to-pick'?: string;
         label: string;
         reference: string;
@@ -54,7 +54,7 @@ export class ManualCollectArticleTakePage implements ViewWillEnter{
                 {label: 'Libellé', value: this.selectedReference.label},
                 {
                     label: `Code barre ${this.selectedReference["article-to-pick"] ? 'article' : 'référence'}`,
-                    value: this.selectedReference["article-to-pick"] ? this.selectedReference["article-to-pick"] : this.selectedReference.refArticleBarCode
+                    value: this.selectedReference["article-to-pick"] ? this.selectedReference["article-to-pick"] : this.selectedReference.refArticleBarcode
                 },
                 {label: 'Emplacement de stockage', value: this.selectedReference.location}
             ],
