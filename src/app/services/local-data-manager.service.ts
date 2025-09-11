@@ -7,7 +7,7 @@ import {Collecte} from '@entities/collecte';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {FileService} from "@app/services/file.service";
 import {StorageService} from "@app/services/storage/storage.service";
-import {merge, Observable, of, ReplaySubject, Subject, tap, zip} from 'rxjs';
+import {Observable, of, ReplaySubject, Subject, tap, zip} from 'rxjs';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {catchError, mergeMap, map} from 'rxjs/operators';
 import {DemandeLivraison} from '@entities/demande-livraison';
@@ -18,6 +18,7 @@ import {TranslationService} from '@app/services/translations.service';
 import {DispatchPack} from '@entities/dispatch-pack';
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {Dispatch} from "@entities/dispatch";
+import {ToastService} from "@app/services/toast.service";
 
 
 type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies' | 'dispatch' | 'transfer' | 'empty_round';
@@ -52,6 +53,7 @@ export class LocalDataManagerService {
 
     public constructor(private sqliteService: SqliteService,
                        private apiService: ApiService,
+                       private toastService: ToastService,
                        private fileService: FileService,
                        private storageService: StorageService,
                        private alertService: AlertService,
@@ -546,6 +548,7 @@ export class LocalDataManagerService {
                                     map((apiResponse) => [apiResponse, mouvements]),
                                     mergeMap(([apiResponse, mouvements]) => {
                                         const refArticlesErrors = Object.keys((apiResponse && apiResponse.data && apiResponse.data.errors) || {});
+                                        const emptyGroups = ((apiResponse && apiResponse.data && apiResponse.data.emptyGroups) || [])
                                         return (
                                             (apiResponse && apiResponse.success)
                                                 ? zip(
@@ -553,7 +556,15 @@ export class LocalDataManagerService {
                                                         trackingTaking: apiResponse.data.persistedMovements || []
                                                     }),
                                                     this.updateSucceedTracking(refArticlesErrors, mouvements),
-                                                    this.sqliteService.resetMouvementsTraca(refArticlesErrors, 'prise', sendFromStock)
+                                                    this.sqliteService.resetMouvementsTraca(refArticlesErrors, 'prise', sendFromStock),
+                                                    emptyGroups.length > 0
+                                                        ? this.sqliteService
+                                                            .deleteBy('mouvement_traca', [
+                                                                emptyGroups
+                                                                    .map((code: any) => `ref_article LIKE '${code}'`)
+                                                                    .join(' OR ')
+                                                            ])
+                                                        : of(undefined)
                                                 ).pipe(map(() => apiResponse))
                                                 : of(undefined)
                                         );
@@ -895,6 +906,35 @@ export class LocalDataManagerService {
                 }),
                 mergeMap(() => this.sqliteService.deleteBy('mouvement_traca', [`id IN (${mouvementTracaToDelete.join(',')})`])),
 
+            );
+    }
+
+    public treatTrackingMovementApiResponse(apiResponse: any,
+                                            online: boolean = true,
+                                            multiDepose: boolean = false) {
+        const emptyGroups = ((apiResponse && apiResponse.data && apiResponse.data.emptyGroups) || [])
+        const errorsObject = ((apiResponse && apiResponse.data && apiResponse.data.errors) || {});
+        const errorsValues = Object.keys(errorsObject).map((key) => errorsObject[key]);
+        const errorsMessage = errorsValues.join('\n');
+        const message = online
+            ? (errorsMessage.length > 0 ? '' : apiResponse.data.status)
+            : (multiDepose
+                ? 'Déposes sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
+                : 'Dépose sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+        return this.toastService
+            .presentToast(`${errorsMessage}${(errorsMessage && message) ? '\n' : ''}${message}`, { duration: ToastService.LONG_DURATION })
+            .pipe(
+                mergeMap(() => {
+                    const groupPlural = (emptyGroups && emptyGroups.length > 0);
+                    return (emptyGroups && emptyGroups.length > 0)
+                        ? this.toastService.presentToast(
+                            groupPlural
+                                ? `${emptyGroups.join(', ')} vides. Ces groupes ne sont plus en prise.`
+                                : `${emptyGroups.join(', ')} vide. Ce groupe n'est plus en prise.`
+                        )
+                        : of(undefined)
+                }),
+                map(() => errorsValues.length)
             );
     }
 }

@@ -31,6 +31,8 @@ import {
     FormPanelSelectComponent
 } from "@common/components/panel/form-panel/form-panel-select/form-panel-select.component";
 import {SelectItemTypeEnum} from "@common/components/select-item/select-item-type.enum";
+import {PrisePage} from "@pages/prise-depose/prise/prise.page";
+import {DeposePage} from "@pages/prise-depose/depose/depose.page";
 
 @Component({
     selector: 'wii-pick-and-drop',
@@ -89,7 +91,7 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
                        public alertService: AlertService,
                        public translationService: TranslationService,
                        private trackingListFactory: TrackingListFactoryService,
-                       private localDataManagerService: LocalDataManagerService,
+                       private localDataManager: LocalDataManagerService,
                        public storageService: StorageService,
                        public toastService: ToastService) {
         this.listBoldValues = [
@@ -306,17 +308,20 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
             this.toastService.presentToast('Vous devez renseigner au moins une unité logistique.')
         } else {
             this.loadingService.presentLoadingWhile({
-                event: () => this.apiService.requestApi(ApiService.POST_PICK_AND_DROP_TRACKING_MOVEMENTS, {
-                    params: {
-                        pickLocation: this.pickLocation.id,
-                        dropLocation: this.dropLocation.id,
-                        ...(this.localDataManagerService.extractTrackingMovementFiles(this.localDataManagerService.mapTrackingMovements(this.colisPrise, true), true)),
-                    }
-                }),
-            }).subscribe((res) => {
-                if(res.success) {
+                event: () => this.postTrackingMovements(),
+            }).subscribe(({responseStandardTrackingMovements, responseGroupTrackingMovements}) => {
+                this.colisPrise = [];
+                this.refreshListComponent();
+
+                if(responseStandardTrackingMovements.success && responseGroupTrackingMovements.success) {
                     this.toastService.presentToast('Les prises et déposes ont bien été sauvegardées');
                     this.onValidate();
+                }
+                else if (!responseStandardTrackingMovements.success) {
+                    this.localDataManager.treatTrackingMovementApiResponse(responseStandardTrackingMovements);
+                }
+                else if (!responseGroupTrackingMovements.success) {
+                    this.toastService.presentToast(`Une erreur est survenue dans l'enregistrement des mouvements des groupes`);
                 }
             });
         }
@@ -554,5 +559,57 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
         this.toTakeOngoingPacks.forEach(({ref_article}) => {
             this.testIfBarcodeEquals(ref_article, true);
         });
+    }
+
+    private postTrackingMovements(): Observable<{ responseStandardTrackingMovements: any, responseGroupTrackingMovements: any }> {
+
+        const trackingMovements = this.localDataManager.mapTrackingMovements(
+            this.colisPrise
+                .flatMap((movement) => [
+                    {
+                        ...movement,
+                        ref_emplacement: this.pickLocation.label,
+                        type: PrisePage.MOUVEMENT_TRACA_PRISE,
+                    },
+                    {
+                        ...movement,
+                        ref_emplacement: this.dropLocation.label,
+                        type: DeposePage.MOUVEMENT_TRACA_DEPOSE,
+                    }
+                ])
+        );
+
+        const standardTrackingMovements = trackingMovements.filter(({isGroup}) => !isGroup);
+        const groupPickingMovements = trackingMovements.filter(({isGroup, type}) => isGroup && type === PrisePage.MOUVEMENT_TRACA_PRISE);
+        const groupDropMovements = trackingMovements.filter(({isGroup, type}) => isGroup && type === DeposePage.MOUVEMENT_TRACA_DEPOSE);
+
+        let responseStandardTrackingMovements: any;
+        return (standardTrackingMovements.length > 0
+            ? this.apiService.requestApi(ApiService.POST_TRACKING_MOVEMENTS, {
+                params: this.localDataManager.extractTrackingMovementFiles(standardTrackingMovements)
+            }).pipe(
+                tap((apiResponse) => {
+                    responseStandardTrackingMovements = apiResponse;
+                })
+            )
+            : of({success: true}))
+            .pipe(
+                mergeMap(() => (groupPickingMovements.length > 0
+                    ? this.apiService.requestApi(ApiService.POST_GROUP_TRACKINGS, {
+                        pathParams: {mode: 'picking'},
+                        params: this.localDataManager.extractTrackingMovementFiles(groupPickingMovements)
+                    })
+                    : of({success: true}))),
+                mergeMap(({success: successGroupPicking}) => (successGroupPicking && groupDropMovements.length > 0
+                    ? this.apiService.requestApi(ApiService.POST_GROUP_TRACKINGS, {
+                        pathParams: {mode: 'drop'},
+                        params: this.localDataManager.extractTrackingMovementFiles(groupDropMovements)
+                    })
+                    : of({success: successGroupPicking}))),
+                map((responseGroupTrackingMovements) => ({
+                    responseStandardTrackingMovements,
+                    responseGroupTrackingMovements
+                }))
+            )
     }
 }

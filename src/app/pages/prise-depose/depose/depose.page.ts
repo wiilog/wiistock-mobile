@@ -178,7 +178,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                                                     )
                                                 : of({hasNetwork})
                                         )),
-                                        mergeMap((a) => this.treatApiResponse(a.hasNetwork, a.apiResponse, multiDepose)),
+                                        mergeMap((a) => this.localDataManager.treatTrackingMovementApiResponse(a.apiResponse, a.hasNetwork, multiDepose)),
                                     )
                             }
                         })
@@ -555,42 +555,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
         );
     }
 
-    private treatApiResponse(online: any, apiResponse: any, multiDepose: any) {
-        const emptyGroups = ((apiResponse && apiResponse.data && apiResponse.data.emptyGroups) || null)
-        const errorsObject = ((apiResponse && apiResponse.data && apiResponse.data.errors) || {});
-        const errorsValues = Object.keys(errorsObject).map((key) => errorsObject[key]);
-        const errorsMessage = errorsValues.join('\n');
-        const message = online
-            ? (errorsMessage.length > 0 ? '' : apiResponse.data.status)
-            : (multiDepose
-                ? 'Déposes sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
-                : 'Dépose sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
-        return this.toastService
-            .presentToast(`${errorsMessage}${(errorsMessage && message) ? '\n' : ''}${message}`, { duration: ToastService.LONG_DURATION })
-            .pipe(
-                mergeMap(() => {
-                    const groupPlural = (emptyGroups && emptyGroups.length > 0);
-                    return (emptyGroups && emptyGroups.length > 0)
-                        ? zip(
-                            this.toastService.presentToast(
-                                groupPlural
-                                    ? `${emptyGroups.join(', ')} vides. Ces groupes ne sont plus en prise.`
-                                    : `${emptyGroups.join(', ')} vide. Ce groupe n'est plus en prise.`
-                            ),
-                            this.sqliteService
-                                .deleteBy('mouvement_traca', [
-                                    emptyGroups
-                                        .map((code: any) => `ref_article LIKE '${code}'`)
-                                        .join(' OR ')
-                                ])
-                        )
-                        : of(undefined)
-                }),
-                map(() => errorsValues.length)
-            );
-    }
-
-    private postGroupingMovements(groupingMovements: any, apiResponse: any) {
+        private postGroupingMovements(groupingMovements: any, apiResponse: any) {
         return this.apiService.requestApi(ApiService.POST_GROUP_TRACKINGS, {
             pathParams: {mode: 'drop'},
             params: this.localDataManager.extractTrackingMovementFiles(this.localDataManager.mapTrackingMovements(groupingMovements))
