@@ -130,15 +130,15 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
                     event: () => this.callApiLogin()
                 })
                     .subscribe({
-                        next: ({success, msg}) => {
+                        next: ({success, message}) => {
                             this.loading = false;
                             if (success) {
                                 this.notificationService.userIsLogged = true;
                                 this.navService.setRoot(NavPathEnum.MAIN_MENU, {
                                     notification: this.tappedNotification
                                 });
-                            } else if (!success && msg) {
-                                this.toastService.presentToast(msg);
+                            } else if (!success && message) {
+                                this.toastService.presentToast(message);
                             } else {
                                 this.toastService.presentToast('Identifiants incorrects.');
                             }
@@ -280,7 +280,7 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
             );
     }
 
-    private callApiLogin(): Observable<{ success: boolean, msg?: string }> {
+    private callApiLogin(): Observable<{ success: boolean, message?: string }> {
         return this.apiService
             .requestApi(ApiService.POST_API_KEY, {
                 params: {loginKey: this.loginKey},
@@ -288,7 +288,7 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
                 timeout: true
             })
             .pipe(
-                mergeMap(({data, success, msg}) => {
+                mergeMap(({data, success, message}) => {
                     if(success) {
                         const {apiKey, rights, userId, username, appContext, notificationChannels, parameters, fieldsParam, dispatchDefaultWaybill} = data;
 
@@ -303,11 +303,11 @@ export class LoginPage implements ViewWillEnter, ViewWillLeave {
                                     this.styleService.setStatusBarColor(true, color);
                                 }),
                                 mergeMap(() => this.notificationService.initialize()),
-                                map(() => ({success: true, msg}))
+                                map(() => ({success: true, message}))
                             )
                     }
                     else {
-                        return of({success: false, msg})
+                        return of({success: false, message})
                     }
                 })
             )

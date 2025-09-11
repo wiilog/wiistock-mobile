@@ -259,7 +259,7 @@ export class TruckArrivalReservesPage implements ViewWillEnter {
                         }, 3000);
                     });
                 } else {
-                    this.toastService.presentToast(response.msg);
+                    this.toastService.presentToast(response.message);
                 }
             });
         }

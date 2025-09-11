@@ -186,12 +186,12 @@ export class InventoryMissionZoneControlePage implements ViewWillEnter, ViewWill
     public refreshMissingsRefsListConfig() {
         const missingsRefsToDisplay = this.elementsToDisplay.filter(({missing}) => missing);
         const plural = missingsRefsToDisplay.length > 1 ? 's' : '';
-        const msgToDisplay = `référence${plural} manquante${plural}`;
+        const messageToDisplay = `référence${plural} manquante${plural}`;
 
         this.missingsRefsListConfig = {
             header: {
-                title: `Attention ${msgToDisplay}`,
-                subtitle: `${missingsRefsToDisplay.length} ${msgToDisplay}`,
+                title: `Attention ${messageToDisplay}`,
+                subtitle: `${missingsRefsToDisplay.length} ${messageToDisplay}`,
                 leftIcon: {
                     name: 'emergency.svg',
                     width: '25px'

@@ -219,7 +219,7 @@ export class DispatchGroupedSignatureFinishPage implements ViewWillEnter, ViewWi
                     if (!allDispatchCanBeSigned) {
                         return of({
                             success: false,
-                            msg: 'Erreur : tous les acheminements doivent contenir au moins une référence',
+                            message: 'Erreur : tous les acheminements doivent contenir au moins une référence',
                         })
                     } else if (signatory) {
                         let location;
@@ -255,22 +255,22 @@ export class DispatchGroupedSignatureFinishPage implements ViewWillEnter, ViewWi
                                                 comment
                                             }))).pipe(map(() => ({
                                                 success: true,
-                                                msg: 'Signature groupée effectuée',
+                                                message: 'Signature groupée effectuée',
                                             })));
                                         }
                                         return of({
                                             success: false,
-                                            msg: 'Informations invalides',
+                                            message: 'Informations invalides',
                                         });
                                     }))
                             : of({
                                 success: false,
-                                msg: 'Informations invalides',
+                                message: 'Informations invalides',
                             });
                     } else {
                         return of({
                             success: false,
-                            msg: 'Informations invalides',
+                            message: 'Informations invalides',
                         });
                     }
                 }));
@@ -315,7 +315,7 @@ export class DispatchGroupedSignatureFinishPage implements ViewWillEnter, ViewWi
                             )
                     }
                 }).subscribe((response) => {
-                    this.toastService.presentToast(response.msg).subscribe(() => {
+                    this.toastService.presentToast(response.message).subscribe(() => {
                         if (response.success) {
                             if (this.offlineMode) {
                                 this.navService.pop({

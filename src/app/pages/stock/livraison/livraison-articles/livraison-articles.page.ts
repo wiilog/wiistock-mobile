@@ -166,7 +166,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                                 } else {
                                     this.isValid = false;
                                     this.loadingStartLivraison = false;
-                                    return of(resp.msg);
+                                    return of(resp.message);
                                 }
                             })
                 ),
@@ -389,7 +389,7 @@ export class LivraisonArticlesPage implements ViewWillEnter, ViewWillLeave {
                 } else {
                     this.isValid = false;
                     this.loadingStartLivraison = false;
-                    this.toastService.presentToast(resp.msg);
+                    this.toastService.presentToast(resp.message);
                 }
             });
     }

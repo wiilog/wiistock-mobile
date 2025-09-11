@@ -324,7 +324,7 @@ export class CollecteArticlesPage implements CanLeave, ViewWillEnter, ViewWillLe
                     } else {
                         this.isValid = false;
                         this.loadingStartCollecte = false;
-                        this.toastService.presentToast(resp.msg);
+                        this.toastService.presentToast(resp.message);
                     }
                 });
         }
