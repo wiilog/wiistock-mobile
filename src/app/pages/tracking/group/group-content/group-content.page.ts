@@ -300,7 +300,7 @@ export class GroupContentPage implements ViewWillEnter, ViewWillLeave {
                 next: (response) => {
                     this.unsubscribeLoading();
                     if (response.success) {
-                        this.toastService.presentToast(response.msg);
+                        this.toastService.presentToast(response.message);
                         this.navService.pop().subscribe(() => this.navService.pop());
                     } else {
                         this.toastService.presentToast(`Erreur lors de la synchronisation du dégroupage`);

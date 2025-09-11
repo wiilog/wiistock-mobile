@@ -264,7 +264,7 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
                             this.apiService
                                 .requestApi(ApiService.BEGIN_PREPA, {params: {id: this.preparation.id}})
                                 .pipe(
-                                    mergeMap(({success, msg}) => {
+                                    mergeMap(({success, message}) => {
                                         if (success) {
                                             this.started = true;
                                             this.isValid = true;
@@ -280,7 +280,7 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
                                         } else {
                                             this.isValid = false;
                                             this.loadingStartPreparation = false;
-                                            return of(msg);
+                                            return of(message);
                                         }
                                     })
                                 )

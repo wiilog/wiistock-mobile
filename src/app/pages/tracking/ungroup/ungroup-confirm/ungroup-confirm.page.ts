@@ -163,7 +163,7 @@ export class UngroupConfirmPage implements ViewWillEnter, ViewWillLeave {
                 .subscribe(
                     (response) => {
                         if (response.success) {
-                            this.toastService.presentToast(response.msg);
+                            this.toastService.presentToast(response.message);
                             this.navService.pop()
                                 .pipe(mergeMap(() => this.navService.pop()))
                                 .subscribe(() => this.navService.pop());
