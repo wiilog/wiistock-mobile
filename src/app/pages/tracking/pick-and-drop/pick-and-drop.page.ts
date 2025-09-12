@@ -577,7 +577,13 @@ export class PickAndDropPage implements ViewWillEnter, ViewWillLeave {
                         type: DeposePage.MOUVEMENT_TRACA_DEPOSE,
                     }
                 ])
-        );
+        )
+            // sort picking movements before drop movements
+            .sort(({type: type1}, {type: type2}) => (
+                type1 === PrisePage.MOUVEMENT_TRACA_PRISE ? -1 :
+                type2 === PrisePage.MOUVEMENT_TRACA_PRISE ? 1 :
+                0
+            ));
 
         const standardTrackingMovements = trackingMovements.filter(({isGroup}) => !isGroup);
         const groupPickingMovements = trackingMovements.filter(({isGroup, type}) => isGroup && type === PrisePage.MOUVEMENT_TRACA_PRISE);
