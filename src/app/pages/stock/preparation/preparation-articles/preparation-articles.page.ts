@@ -431,8 +431,6 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
                 this.articlesNT = articlesPrepa.filter(({has_moved}) => has_moved === 0);
                 this.articlesT = articlesPrepa.filter(({has_moved}) => has_moved === 1);
 
-                console.log(this.articlesNT, this.articlesT)
-
                 this.displayTargetLocationPicking = displayTargetLocationPicking;
 
                 this.listToTreatConfig = this.createListToTreatConfig();
@@ -494,16 +492,9 @@ export class PreparationArticlesPage implements ViewWillEnter, ViewWillLeave {
                             }, 'AND')
                         )),
                         mergeMap((referenceArticle) => {
-
                             // we get all quantity picked for this refArticle plus the current quantity which is selected
-                            const quantityPicked = this.articlesT.reduce((acc: number, article: ArticlePrepa) => (
-                                acc +
-                                ((article.isSelectableByUser && ((selectedArticle as ArticlePrepaByRefArticle).reference_article === article.reference))
-                                    ? Number(article.quantite)
-                                    : 0)
-                            ), selectedQuantityValid);
 
-                            return (referenceArticle.quantite === quantityPicked)
+                            return (referenceArticle.quantite === selectedQuantityValid)
                                 ? this.sqliteService.update(`article_prepa`, [{
                                     values: {
                                         deleted: 1,
