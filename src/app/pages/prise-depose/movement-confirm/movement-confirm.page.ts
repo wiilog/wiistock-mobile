@@ -271,8 +271,7 @@ export class MovementConfirmPage implements ViewWillEnter {
         const formError = this.formPanelComponent.firstError;
         if (formError) {
             this.toastService.presentToast(formError);
-        }
-        else {
+        } else {
             let {quantity, comment, signature, photo, natureId, freeFields, manualDelayStart} = this.formPanelComponent.values;
             if (freeFields) {
                 Object.keys(freeFields).forEach((freeFieldId) => {
