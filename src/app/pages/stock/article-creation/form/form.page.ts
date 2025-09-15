@@ -449,7 +449,7 @@ export class FormPage implements ViewWillEnter, ViewWillLeave {
             event: () => this.apiService.requestApi(ApiService.CREATE_ARTICLE, {params})
         }).subscribe((response) => {
             this.loading = false;
-            this.toastService.presentToast(response.message || response.msg);
+            this.toastService.presentToast(response.message);
             if (response.success) {
                 this.navService.pop();
             }

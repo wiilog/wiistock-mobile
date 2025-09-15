@@ -565,15 +565,15 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
                         .pipe(
                             mergeMap(() => this.updateCurrentDispatchStatus()),
                             mergeMap(() => this.tryValidateDispatch()),
-                            mergeMap(({local, success, msg}) => (
+                            mergeMap(({local, success, message}) => (
                                 local || !success
-                                    ? of({local, success, msg})
-                                    : this.treatApiSuccess().pipe(map(() => ({local, success, msg})))
+                                    ? of({local, success, message})
+                                    : this.treatApiSuccess().pipe(map(() => ({local, success, message})))
                             )),
                         )
-                }).subscribe(({success, msg, local}) => {
+                }).subscribe(({success, message, local}) => {
                     if (!success) {
-                        this.toastService.presentToast(msg);
+                        this.toastService.presentToast(message);
                     } else if (local) {
                         this.navService.pop();
                     }
@@ -747,7 +747,7 @@ export class DispatchPacksPage implements OnInit, ViewWillEnter, ViewWillLeave {
 
     private tryValidateDispatch() {
         return this.dispatchOfflineMode
-            ? of({success: true, msg: `L'acheminement a bien été enregistré sur le nomade`, local: true})
+            ? of({success: true, message: `L'acheminement a bien été enregistré sur le nomade`, local: true})
             : this.makeApiReferencesParam().pipe(
                 mergeMap((references) => {
                     return this.apiService.requestApi(ApiService.DISPATCH_VALIDATE, {

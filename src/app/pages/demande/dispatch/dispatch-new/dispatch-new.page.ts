@@ -332,12 +332,12 @@ export class DispatchNewPage implements ViewWillEnter {
             this.loadingService.presentLoadingWhile({
                 event: () => of(undefined).pipe(
                     mergeMap(() => this.trySavingDispatch(values)),
-                    mergeMap(({success, msg, dispatch}) => (
+                    mergeMap(({success, message, dispatch}) => (
                         success && dispatch
                             ? (this.sqliteService.insert(`dispatch`, dispatch) as Observable<number>)
-                            : of({success, msg, dispatch})
+                            : of({success, message, dispatch})
                     )),
-                    mergeMap((result: number | {success: boolean; msg?: string, dispatch?: Dispatch}) => {
+                    mergeMap((result: number | {success: boolean; message?: string, dispatch?: Dispatch}) => {
                         // if number -> dispatch is inserted
                         if (typeof result === `number`) {
                             return this.navService.pop()
@@ -359,15 +359,15 @@ export class DispatchNewPage implements ViewWillEnter {
                     })
                 ),
                 message: `Création de l'acheminement en cours...`,
-            }).subscribe((result: {success?: boolean; msg?: string; redirect?: boolean}) => {
-                if (result.msg) {
-                    this.toastService.presentToast(result.msg);
+            }).subscribe((result: {success?: boolean; message?: string; redirect?: boolean}) => {
+                if (result.message) {
+                    this.toastService.presentToast(result.message);
                 }
             });
         }
     }
 
-    private trySavingDispatch(values: any): Observable<{success: boolean, msg?: string, dispatch: Dispatch}> {
+    private trySavingDispatch(values: any): Observable<{success: boolean, message?: string, dispatch: Dispatch}> {
         if (this.dispatchOfflineMode) {
             return this.formValuesToDispatch(values).pipe(
                 map((dispatch) => ({

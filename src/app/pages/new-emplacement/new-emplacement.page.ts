@@ -67,14 +67,14 @@ export class NewEmplacementPage implements ViewWillEnter {
                             .subscribe({
                                 next: (response) => {
                                     this.createNewEmp({
-                                        id: Number(response.msg),
+                                        id: Number(response.message),
                                         label: location
                                     });
                                 },
                                 error: (response) => {
                                     this.loading = false;
                                     loader.dismiss();
-                                    this.toastService.presentToast((response.error && response.error.msg) || 'Une erreur s\'est produite');
+                                    this.toastService.presentToast((response.error && response.error.message) || 'Une erreur s\'est produite');
                                 }
                             });
                     });

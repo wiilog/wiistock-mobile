@@ -203,13 +203,13 @@ export class TransportRoundListPage implements ViewWillEnter {
                             .presentLoadingWhile({
                                 event: () => this.apiService.requestApi(ApiService.START_DELIVERY_ROUND, options)
                             })
-                            .subscribe(({success, msg, round: apiRound}) => {
+                            .subscribe(({success, message, round: apiRound}) => {
                                 if (round) {
                                     Object.assign(round, apiRound);
                                 }
 
-                                if (msg) {
-                                    this.toastService.presentToast(msg);
+                                if (message) {
+                                    this.toastService.presentToast(message);
                                 }
 
                                 if (success) {

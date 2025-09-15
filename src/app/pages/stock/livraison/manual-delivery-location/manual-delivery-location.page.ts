@@ -106,11 +106,11 @@ export class ManualDeliveryLocationPage implements ViewWillEnter, ViewWillLeave 
                             }
                         }
                     ).subscribe({
-                        next: ({success, nomadMessage, msg}) => {
+                        next: ({success, nomadMessage, message}) => {
                             if (success) {
                                 this.handleLivraisonSuccess();
                             } else {
-                                this.handleLivraisonError(`${nomadMessage}. ${msg}`);
+                                this.handleLivraisonError(`${nomadMessage}. ${message}`);
                             }
                         },
                         error: (error) => {
