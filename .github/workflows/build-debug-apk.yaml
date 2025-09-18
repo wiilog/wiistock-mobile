@@ -1,0 +1,55 @@
+name: Build debug APK
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*-debug'
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-debug-apk:
+    runs-on: wiilog-ubuntu-4-core
+    container:
+      image: wiilog/wiistock-mobile-app
+      options: --user root
+    steps:
+
+      - name: Checkout sources
+        uses: actions/checkout@v5
+
+      - name: print
+        run: |
+          pwd
+          ls -la
+          tree ./.github
+
+      - name: Prepare build
+        uses: ./.github/workflow_call/prepare-build
+        with:
+          KEYSTORE_JKS_PASSPHRASE: ${{ secrets.KEYSTORE_JKS_PASSPHRASE }}
+          GOOGLE_SERVICES_JSON_PASSPHRASE: ${{ secrets.GOOGLE_SERVICES_JSON_PASSPHRASE }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+
+      - name: Build debug
+        run: yarn gradle:assemble:debug
+
+      - name: Debug apk copy
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk wiistock-debug.apk
+
+      - name: Upload debug artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wiistock-debug.apk
+          path: wiistock-debug.apk
+
+      - name: Upload debug on release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.ACCESS_TOKEN }}
+          file: wiistock-debug.apk
+          asset_name: wiistock-debug.apk
+          tag: ${{ github.ref }}
