@@ -1,0 +1,55 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-apk:
+    runs-on: wiilog-ubuntu-4-core
+    container:
+      image: wiilog/wiistock-mobile-app
+      options: --user root
+    steps:
+
+      - name: Checkout sources
+        uses: actions/checkout@v5
+
+      - name: print
+        run: |
+          pwd
+          ls -la
+          tree ./.github
+
+      - name: Prepare build
+        uses: ./.github/workflow_call/prepare-build
+        with:
+          KEYSTORE_JKS_PASSPHRASE: ${{ secrets.KEYSTORE_JKS_PASSPHRASE }}
+          GOOGLE_SERVICES_JSON_PASSPHRASE: ${{ secrets.GOOGLE_SERVICES_JSON_PASSPHRASE }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+
+      - name: Build
+        run: yarn gradle:assemble
+
+      - name: Apk copy
+        run: cp android/app/build/outputs/apk/release/app-release.apk wiistock.apk
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wiistock.apk
+          path: wiistock.apk
+
+      - name: Upload on release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.ACCESS_TOKEN }}
+          file: wiistock.apk
+          asset_name: wiistock.apk
+          tag: ${{ github.ref }}
