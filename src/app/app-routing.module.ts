@@ -499,6 +499,11 @@ const routes: Routes = [
         path: NavPathEnum.PICK_AND_DROP,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/tracking/pick-and-drop/pick-and-drop.module').then(m => m.PickAndDropPageModule)
+    },
+    {
+        path: NavPathEnum.TRACKING_ROUND_LIST,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/tracking-round/tracking-round-list/tracking-round-list.module').then(m => m.TrackingRoundListModule)
     }
 ];
 

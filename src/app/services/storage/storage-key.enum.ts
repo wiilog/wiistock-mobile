@@ -29,6 +29,7 @@ export enum StorageKeyEnum {
     RIGHT_DELIVERY_REQUEST = 'deliveryRequest',
     RIGHT_RECEPTION = 'reception',
     RIGHT_READING_MENU = 'readingMenu',
+    RIGHT_TRACKING_ROUND = 'trackingRound',
 
     FORCE_GROUPED_SIGNATURE = 'forceDispatchSignature',
     PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER = 'skipValidationsManualTransfer',
