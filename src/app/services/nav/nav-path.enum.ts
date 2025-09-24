@@ -99,4 +99,5 @@ export enum NavPathEnum {
     READING_DETAILS = 'reading-details',
     PICK_AND_DROP = 'pick-and-drop',
     TRACKING_ROUND_LIST = 'tracking-round-list',
+    TRACKING_ROUND_DETAILS = 'tracking-round-details',
 }

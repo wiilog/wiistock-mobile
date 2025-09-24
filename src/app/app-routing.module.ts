@@ -504,6 +504,11 @@ const routes: Routes = [
         path: NavPathEnum.TRACKING_ROUND_LIST,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/tracking/tracking-round/tracking-round-list/tracking-round-list.module').then(m => m.TrackingRoundListModule)
+    },
+    {
+        path: NavPathEnum.TRACKING_ROUND_DETAILS,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/tracking-round/tracking-round-details/tracking-round-details.module').then(m => m.TrackingRoundDetailsModule)
     }
 ];
 

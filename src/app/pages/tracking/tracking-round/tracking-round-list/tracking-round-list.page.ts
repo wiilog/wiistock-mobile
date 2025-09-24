@@ -104,9 +104,9 @@ export class TrackingRoundListPage implements ViewWillEnter, ViewWillLeave {
                         }
                         : {}),
                     action: () => {
-                        // this.navService.push(NavPathEnum., {
-                        //     trackingRoundId: trackingRound.id
-                        // });
+                        this.navService.push(NavPathEnum.TRACKING_ROUND_DETAILS, {
+                            trackingRoundId: trackingRound.id
+                        });
                     }
                 };
             });
