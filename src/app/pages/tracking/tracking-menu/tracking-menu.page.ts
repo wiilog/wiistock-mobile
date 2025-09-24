@@ -42,12 +42,13 @@ export class TrackingMenuPage implements ViewWillEnter {
             this.storageService.getRight(StorageKeyEnum.RIGHT_MOVEMENT),
             this.storageService.getRight(StorageKeyEnum.RIGHT_DISPATCH),
             this.storageService.getRight(StorageKeyEnum.RIGHT_READING_MENU),
+            this.storageService.getRight(StorageKeyEnum.RIGHT_TRACKING_ROUND),
             this.storageService.getCounter(StorageKeyEnum.COUNTERS_DISPATCHES_TREATED),
             this.sqliteService.count('dispatch', ['treatedStatusId IS NULL OR partial = 1']),
 
             this.translationService.get(`Demande`, `Acheminements`, `Général`)
         ).subscribe(
-            ([truckArrival, forceSignature, dispatchOfflineMode, movement, dispatch, readingMenu, treatedDispatches, toTreatDispatches, translations]) => {
+            ([truckArrival, forceSignature, dispatchOfflineMode, movement, dispatch, readingMenu, trackingRound, treatedDispatches, toTreatDispatches, translations]) => {
                 if (!dispatchOfflineMode && dispatch) {
                     this.menuConfig.push(
                         {
@@ -81,7 +82,7 @@ export class TrackingMenuPage implements ViewWillEnter {
                         action: () => {
                             this.navService.push(NavPathEnum.TRUCK_ARRIVAL_CARRIER);
                         }
-                    },)
+                    });
                 }
 
                 if(readingMenu) {
@@ -97,6 +98,17 @@ export class TrackingMenuPage implements ViewWillEnter {
                             }
                         }
                     });
+                }
+
+                if(trackingRound) {
+                    this.menuConfig.push({
+                        icon: 'tracking-round.svg',
+                        label: 'Tournée',
+                        iconColor: 'list-blue-light',
+                        action: () => {
+                            this.navService.push(NavPathEnum.TRACKING_ROUND_LIST);
+                        }
+                    })
                 }
 
                 this.statsSlidersData = this.createStatsSlidersData(treatedDispatches, toTreatDispatches);

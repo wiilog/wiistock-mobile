@@ -1,0 +1,8 @@
+<div scroll-y="true"
+     class="page-content">
+    <wii-card-list  *ngIf="!loading && trackingRoundsListConfig && trackingRoundsListConfig.length > 0"
+                   [listIconName]="trackingRoundsIconName"
+                   [color]="trackingRoundsListColor"
+                   [config]="trackingRoundsListConfig">
+    </wii-card-list>
+</div>

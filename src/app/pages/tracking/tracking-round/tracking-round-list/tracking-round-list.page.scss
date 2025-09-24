@@ -1,0 +1,22 @@
+@import "theme/variables";
+
+.page-content {
+    padding-top: 0;
+    padding-left: 0;
+    padding-right: 0;
+    flex: 1;
+}
+
+.filters {
+    margin-right: $spacer;
+    margin-left: $spacer;
+
+    .filter {
+        margin-bottom: 0.3rem;
+        margin-top: 0.3rem;
+    }
+}
+
+.custom-fill-button {
+    background-color: white;
+}

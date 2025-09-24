@@ -231,6 +231,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                 label: 'Prise et dépose',
                 filter: ({pageMode}) => pageMode === EmplacementScanModeEnum.TRACKING_PICK_AND_DROP,
             },
+            {pagePath: NavPathEnum.TRACKING_ROUND_LIST, label: 'Tournée'},
         ];
     }
 
