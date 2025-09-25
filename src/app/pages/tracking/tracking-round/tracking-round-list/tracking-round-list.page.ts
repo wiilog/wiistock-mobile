@@ -9,6 +9,7 @@ import {Translations} from '@entities/translation';
 import {TranslationService} from '@app/services/translations.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {ApiService} from "@app/services/api.service";
+import * as moment from "moment/moment";
 
 @Component({
     selector: 'wii-tracking-round-list',
@@ -85,6 +86,8 @@ export class TrackingRoundListPage implements ViewWillEnter, ViewWillLeave {
                         {
                             label: TranslationService.Translate(this.trackingRoundTranslations, 'Date attendue'),
                             value: trackingRound.expectedAt
+                                ? moment(trackingRound.expectedAt).format('DD/MM/YYYY HH:mm')
+                                : null,
                         },
                         {
                             label: TranslationService.Translate(this.trackingRoundTranslations, 'Emplacement de tournée'),
