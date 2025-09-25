@@ -1,19 +1,12 @@
-import {Component, EventEmitter, ViewChild} from '@angular/core';
+import {Component, EventEmitter} from '@angular/core';
 import {Subscription, zip} from 'rxjs';
-import {NavService} from '@app/services/nav/nav.service';
-import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {LoadingService} from '@app/services/loading.service';
 import {CardListConfig} from '@common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
 import {MainHeaderService} from '@app/services/main-header.service';
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
-import {SelectItemComponent} from "@common/components/select-item/select-item.component";
-import {ToastService} from '@app/services/toast.service';
-import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {Translations} from '@entities/translation';
 import {TranslationService} from '@app/services/translations.service';
-import * as moment from 'moment';
-import {StorageService} from "@app/services/storage/storage.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {ApiService} from "@app/services/api.service";
 
@@ -24,9 +17,6 @@ import {ApiService} from "@app/services/api.service";
 })
 export class TrackingRoundListPage implements ViewWillEnter, ViewWillLeave {
     public readonly barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SCAN;
-
-    @ViewChild('selectItemComponent', {static: false})
-    public selectItemComponent: SelectItemComponent;
 
     private loadingSubscription?: Subscription;
 
@@ -40,14 +30,10 @@ export class TrackingRoundListPage implements ViewWillEnter, ViewWillLeave {
 
     public trackingRoundTranslations: Translations;
 
-    public constructor(private sqliteService: SqliteService,
-                       private toastService: ToastService,
-                       private loadingService: LoadingService,
+    public constructor(private loadingService: LoadingService,
                        private mainHeaderService: MainHeaderService,
                        private translationService: TranslationService,
-                       private apiService: ApiService,
-                       private storageService: StorageService,
-                       private navService: NavService) {
+                       private apiService: ApiService) {
         this.resetEmitter$ = new EventEmitter<void>();
         this.loading = true;
     }
@@ -71,9 +57,6 @@ export class TrackingRoundListPage implements ViewWillEnter, ViewWillLeave {
 
     public ionViewWillLeave(): void {
         this.unsubscribeLoading();
-        if (this.selectItemComponent) {
-            this.selectItemComponent.unsubscribeZebraScan();
-        }
     }
 
     private unsubscribeLoading(): void {
