@@ -1,0 +1,62 @@
+<wii-main-loader [loading]="loading"
+                 [message]="messageLoading"></wii-main-loader>
+
+<div scroll-y="true"
+     class="page-content">
+    <wii-panel-header *ngIf="trackingRoundHeaderConfig"
+                      #formHeaderComponent
+                      class="page-header"
+                      [title]="trackingRoundHeaderConfig.title"
+                      [subtitle]="trackingRoundHeaderConfig.subtitle"
+                      [info]="trackingRoundHeaderConfig.info"
+                      (toggle)="trackingRoundHeaderConfig.onToggle && trackingRoundHeaderConfig.onToggle($event)"
+                      [collapsed]="trackingRoundHeaderConfig.collapsed || false"
+                      [transparent]="trackingRoundHeaderConfig.transparent"
+                      [leftIcon]="trackingRoundHeaderConfig.leftIcon"
+                      [rightIcons]="trackingRoundHeaderConfig.rightIcon">
+    </wii-panel-header>
+    <wii-card-list  *ngIf="!loading && trackingRoundsListConfig && trackingRoundsListConfig.length > 0"
+                   [listIconName]="trackingRoundsIconName"
+                   [color]="trackingRoundsListColor"
+                   [config]="trackingRoundsListConfig">
+    </wii-card-list>
+</div>
+
+
+<ion-fab *ngIf="!loading"
+         vertical="end"
+         horizontal="bottom"
+         slot="fixed">
+    <ion-fab-button (click)="onMenuClick()">
+        <ion-icon class="big-icon"  name="menu-outline"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="top" [activated]="fabListActivated">
+        <ion-fab-button color="light"
+                        (click)="onPauseClick()">
+            <wii-icon name="rfid_pause.svg" width="15px"></wii-icon>
+        </ion-fab-button>
+        <ion-fab-button color="light"
+                        (click)="onShowOngoinPacksClick()">
+            <wii-icon name="eye.svg" width="15px"></wii-icon>
+        </ion-fab-button>
+        <ion-fab-button color="light"
+                        (click)="onAddLocationClick()">
+            <ion-icon name="add-outline"></ion-icon>
+        </ion-fab-button>
+    </ion-fab-list>
+</ion-fab>
+<div class="page-footer">
+    <wii-barcode-scanner #footerScannerComponent
+                         [hidden]="!isStarted"
+                         (scanAdd)="testIfBarcodeEquals($event)"
+                         (cameraAdd)="testIfBarcodeEquals($event)"
+                         [mode]="barcodeScannerMode">
+    </wii-barcode-scanner>
+    <ion-button color="primary"
+                size="small"
+                expand="block"
+                [hidden]="isStarted"
+                (click)="startTrackingRound()">
+        Démarrer la tournée
+    </ion-button>
+</div>
