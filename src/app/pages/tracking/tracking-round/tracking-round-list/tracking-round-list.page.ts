@@ -10,6 +10,8 @@ import {TranslationService} from '@app/services/translations.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {ApiService} from "@app/services/api.service";
 import * as moment from "moment/moment";
+import {NavService} from "@app/services/nav/nav.service";
+import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 
 @Component({
     selector: 'wii-tracking-round-list',
@@ -34,6 +36,7 @@ export class TrackingRoundListPage implements ViewWillEnter, ViewWillLeave {
     public constructor(private loadingService: LoadingService,
                        private mainHeaderService: MainHeaderService,
                        private translationService: TranslationService,
+                       private navService: NavService,
                        private apiService: ApiService) {
         this.resetEmitter$ = new EventEmitter<void>();
         this.loading = true;
