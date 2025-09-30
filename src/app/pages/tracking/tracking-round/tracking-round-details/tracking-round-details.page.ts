@@ -103,7 +103,7 @@ export class TrackingRoundDetailsPage implements ViewWillEnter, ViewWillLeave {
                 TranslationService.Translate(this.trackingRoundTranslations, 'Statut') + ` : ${trackingRound.statusLabel || ''}`,
                 TranslationService.Translate(this.trackingRoundTranslations, 'Emplacement de tournée') + ` : ${trackingRound.locationLabel || ''}`,
                 TranslationService.Translate(this.trackingRoundTranslations, 'Urgence') + ` : ${trackingRound.emergency || 'Non'}`,
-            ].filter((item) => item) as Array<string>,
+            ].filter((item) => item),
             info: trackingRound.number,
             transparent: true,
             collapsed: true,
