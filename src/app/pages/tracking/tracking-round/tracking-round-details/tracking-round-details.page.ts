@@ -12,6 +12,8 @@ import {ApiService} from "@app/services/api.service";
 import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcode-scanner.component";
 import {HeaderConfig} from "@common/components/panel/model/header-config";
 import {PanelHeaderComponent} from "@common/components/panel/panel-header/panel-header.component";
+import {TrackingRound} from "@entities/tracking-round";
+import * as moment from 'moment';
 
 @Component({
     selector: 'wii-tracking-round-list',
@@ -59,6 +61,7 @@ export class TrackingRoundDetailsPage implements ViewWillEnter, ViewWillLeave {
 
 
     public ionViewWillEnter(): void {
+        this.loading = true;
         this.resetEmitter$.emit();
         this.trackingRoundId = this.navService.param('trackingRoundId');
         this.loadingService.presentLoadingWhile({
@@ -92,14 +95,14 @@ export class TrackingRoundDetailsPage implements ViewWillEnter, ViewWillLeave {
         }
     }
 
-    private refreshTrackingRoundHeaderConfig(trackingRound: any, translations: Translations, opened: boolean): void {
+    private refreshTrackingRoundHeaderConfig(trackingRound: TrackingRound, translations: Translations, opened: boolean): void {
         this.trackingRoundTranslations = translations;
         this.isStarted = trackingRound.isStarted;
 
         this.trackingRoundHeaderConfig = {
             title: `${trackingRound.typeLabel}`,
             subtitle: [
-                TranslationService.Translate(this.trackingRoundTranslations, 'Date attendue') + ` : ${trackingRound.expectedAt || ''}`,
+                TranslationService.Translate(this.trackingRoundTranslations, 'Date attendue') + ` : ${moment(trackingRound.expectedAt).format('DD/MM/YYYY HH:mm') || ''}`,
                 TranslationService.Translate(this.trackingRoundTranslations, 'Statut') + ` : ${trackingRound.statusLabel || ''}`,
                 TranslationService.Translate(this.trackingRoundTranslations, 'Emplacement de tournée') + ` : ${trackingRound.locationLabel || ''}`,
                 TranslationService.Translate(this.trackingRoundTranslations, 'Urgence') + ` : ${trackingRound.emergency || 'Non'}`,
