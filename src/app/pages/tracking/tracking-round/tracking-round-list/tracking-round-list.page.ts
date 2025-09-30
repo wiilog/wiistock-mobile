@@ -12,6 +12,7 @@ import {ApiService} from "@app/services/api.service";
 import * as moment from "moment/moment";
 import {NavService} from "@app/services/nav/nav.service";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
+import {TrackingRound} from "@entities/tracking-round";
 
 @Component({
     selector: 'wii-tracking-round-list',
@@ -75,10 +76,10 @@ export class TrackingRoundListPage implements ViewWillEnter, ViewWillLeave {
         this.mainHeaderService.emitSubTitle(`${trackingRoundsLength === 0 ? 'Aucune' : trackingRoundsLength} demande${trackingRoundsLength > 1 ? 's' : ''}`)
     }
 
-    private refreshTrackingRoundListConfig(trackingRounds: {success: boolean; data: Array<any>}, translations: Translations): void {
+    private refreshTrackingRoundListConfig(trackingRounds: {success: boolean; data: Array<TrackingRound>}, translations: Translations): void {
         this.trackingRoundTranslations = translations;
         this.trackingRoundsListConfig = trackingRounds.data
-            .map((trackingRound: any) => {
+            .map((trackingRound: TrackingRound) => {
                 return {
                     title: {label: '', value: trackingRound.typeLabel},
                     customColor: trackingRound.typeColor,
@@ -90,7 +91,7 @@ export class TrackingRoundListPage implements ViewWillEnter, ViewWillLeave {
                             label: TranslationService.Translate(this.trackingRoundTranslations, 'Date attendue'),
                             value: trackingRound.expectedAt
                                 ? moment(trackingRound.expectedAt).format('DD/MM/YYYY HH:mm')
-                                : null,
+                                : undefined,
                         },
                         {
                             label: TranslationService.Translate(this.trackingRoundTranslations, 'Emplacement de tournée'),
