@@ -2,7 +2,6 @@ import {Component, EventEmitter, ViewChild} from '@angular/core';
 import {Subscription, zip} from 'rxjs';
 import {NavService} from '@app/services/nav/nav.service';
 import {LoadingService} from '@app/services/loading.service';
-import {CardListConfig} from '@common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {Translations} from '@entities/translation';
@@ -14,6 +13,7 @@ import {HeaderConfig} from "@common/components/panel/model/header-config";
 import {PanelHeaderComponent} from "@common/components/panel/panel-header/panel-header.component";
 import {TrackingRound} from "@entities/tracking-round";
 import * as moment from 'moment';
+import {CustomListConfig} from "@common/components/custom-list/custom-list-config";
 
 @Component({
     selector: 'wii-tracking-round-list',
@@ -39,15 +39,16 @@ export class TrackingRoundDetailsPage implements ViewWillEnter, ViewWillLeave {
 
     public trackingRoundHeaderConfig: HeaderConfig;
 
-    public trackingRoundsListConfig: Array<CardListConfig>;
-    public readonly trackingRoundsListColor = CardListColorEnum.LIGHT_BLUE;
-    public trackingRoundsIconName?: string = 'tracking-round.svg';
+    public trackingRoundsListConfig: CustomListConfig;
 
     public trackingRoundTranslations: Translations;
 
     public messageLoading?: string;
 
     public trackingRoundId: number;
+
+    public trackingRoundToDoStatusCode: string = "A faire";
+    public trackingRoundPauseStatusCode: string = "Pause";
 
     public constructor(private loadingService: LoadingService,
                        private translationService: TranslationService,
@@ -98,6 +99,25 @@ export class TrackingRoundDetailsPage implements ViewWillEnter, ViewWillLeave {
     private refreshTrackingRoundHeaderConfig(trackingRound: TrackingRound, translations: Translations, opened: boolean): void {
         this.trackingRoundTranslations = translations;
         this.isStarted = trackingRound.isStarted;
+
+        this.trackingRoundsListConfig = {
+            disableList: [this.trackingRoundToDoStatusCode, this.trackingRoundPauseStatusCode].includes(trackingRound.statusLabel),
+            elements: trackingRound.lines.map((line: any) => ({
+                name: line.locationLabel,
+                checked: true,
+                action: () => {
+                    //rediriger vers le détails avec le line.locationId en paramètre
+                },
+                // rightBadge: {
+                //     label: '', //rajouter le nombre d'anomalies
+                //     icon: 'emergency.svg',
+                //     inline: true
+                // },
+            })),
+            commonIcon: {
+                name: 'location-black.svg'
+            },
+        };
 
         this.trackingRoundHeaderConfig = {
             title: `${trackingRound.typeLabel}`,

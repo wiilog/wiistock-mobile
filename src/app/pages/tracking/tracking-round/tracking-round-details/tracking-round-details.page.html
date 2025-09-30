@@ -15,11 +15,11 @@
                       [leftIcon]="trackingRoundHeaderConfig.leftIcon"
                       [rightIcons]="trackingRoundHeaderConfig.rightIcon">
     </wii-panel-header>
-    <wii-card-list  *ngIf="!loading && trackingRoundsListConfig && trackingRoundsListConfig.length > 0"
-                   [listIconName]="trackingRoundsIconName"
-                   [color]="trackingRoundsListColor"
-                   [config]="trackingRoundsListConfig">
-    </wii-card-list>
+    <wii-custom-list  *ngIf="!loading && trackingRoundsListConfig && trackingRoundsListConfig.elements.length > 0"
+                   [elements]="trackingRoundsListConfig.elements"
+                   [disableList]="trackingRoundsListConfig.disableList"
+                   [commonIcon]="trackingRoundsListConfig.commonIcon">
+    </wii-custom-list>
 </div>
 
 

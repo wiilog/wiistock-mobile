@@ -1,0 +1,94 @@
+@import "theme/variables";
+
+.custom-list-container {
+    padding: 5px 5px 50px;
+
+    &.empty-elements {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80%;
+        font-size: 18px;
+    }
+
+    .fields-container {
+        display: flex;
+        padding-right: 15px;
+        padding-left: 15px;
+        margin-bottom: 15px;
+        font-size: 14px;
+
+        div {
+            display: flex;
+        }
+
+        &:after {
+            content: '';
+            position: absolute;
+            width: 80%;
+            height: 1px;
+            background-color: $black;
+            margin: 15px 0;
+            z-index: -1;
+
+            &:last-child {
+                height: 0;
+            }
+        }
+
+        &:before {
+            content: '';
+            position: absolute;
+            height: 10%;
+            width: 1px;
+            background-color: $black;
+            margin: 15px;
+            z-index: -1;
+
+            &:first-child {
+                width: 0;
+            }
+
+            &:last-child {
+                height: 0;
+            }
+        }
+
+        .field-container {
+            box-shadow: 2px 2px 5px rgb(51 51 51 / 10%);
+            background-color: $white;
+            padding: 5px 10px 5px 5px;
+            display: flex;
+            width: 100%;
+            border-radius: 10px;
+
+            .field-value {
+                width: 100%;
+            }
+
+            .line-icon {
+                margin-right: 0.3rem !important;
+                width: 1.2rem !important;
+                height: 1.2rem !important;
+            }
+        }
+
+        .order-value {
+            box-shadow: 2px 2px 5px rgb(51 51 51 / 10%);
+            background-color: $white;
+            border-radius: 50%;
+            margin-right: 15px;
+            padding: 4px 10px;
+            font-weight: bold;
+        }
+
+
+        &:first-child {
+            padding-top: 15px !important;
+        }
+
+        .disabled-list {
+            background-color: $darkGray;
+        }
+    }
+}
