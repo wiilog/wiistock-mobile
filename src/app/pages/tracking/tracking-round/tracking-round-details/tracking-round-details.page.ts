@@ -101,12 +101,16 @@ export class TrackingRoundDetailsPage implements ViewWillEnter, ViewWillLeave {
         this.isStarted = trackingRound.isStarted;
 
         this.trackingRoundsListConfig = {
+            title: "emplacement",
             disableList: [this.trackingRoundToDoStatusCode, this.trackingRoundPauseStatusCode].includes(trackingRound.statusLabel),
             elements: trackingRound.lines.map((line: any) => ({
                 name: line.locationLabel,
-                checked: true,
+                checked: line.checked,
+                clickable: line.clickable,
                 action: () => {
-                    //rediriger vers le détails avec le line.locationId en paramètre
+                    if(line.clickable) {
+                        //rediriger vers le détails avec le line.locationId en paramètre
+                    }
                 },
                 // rightBadge: {
                 //     label: '', //rajouter le nombre d'anomalies
