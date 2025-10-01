@@ -1,8 +1,12 @@
+<div class="counter-container">{{ counter(title) }}</div>
 <div class="custom-list-container" *ngIf="elements && elements.length !== 0; else emptyElements">
     <div class="fields-container" *ngFor="let field of elements; index as i">
-        <span class="order-value {{ disableList ? 'disabled-list' : ''}}">{{ i+1 }}</span>
-        <span class="field-container {{ disableList ? 'disabled-list' : ''}}"
-              (click)="!disableList && field.action && field.action(field.name)">
+        <span *ngIf="!field.checked" class="order-value {{ disableList || !field.clickable ? 'disabled-list' : ''}}">{{ i+1 }}</span>
+        <span *ngIf="field.checked" class="checked-value background-checked {{ (disableList || !field.clickable) ? 'disabled-list' : ''}}">
+            <wii-icon class="line-icon" name="check.svg" color="success"></wii-icon>
+        </span>
+        <span class="field-container {{ disableList || !field.clickable ? 'disabled-list' : ''}} {{ field.checked ? 'background-checked' : '' }}"
+              (click)="!disableList && field.clickable && field.action && field.action(field.name)">
             <div>
                 <wii-icon *ngIf="field.icon || commonIcon" class="line-icon" name="{{ field.icon || commonIcon?.name }}"></wii-icon>
                 <span class="field-value">
@@ -15,11 +19,6 @@
         </span>
     </div>
 </div>
-<ion-infinite-scroll #infiniteScroll *ngIf="loadMore"
-                     threshold="100px"
-                     (ionInfinite)="loadMore(infiniteScroll)">
-    <ion-infinite-scroll-content loadingSpinner="circular"></ion-infinite-scroll-content>
-</ion-infinite-scroll>
 <ng-template #emptyElements>
     <div class="custom-list-container empty-elements">
         Aucun élément

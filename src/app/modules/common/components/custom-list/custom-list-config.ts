@@ -2,9 +2,11 @@ import {IconConfig} from '@common/components/panel/model/icon-config';
 import {BadgeConfig} from "@common/components/badge/badge-config";
 
 export interface CustomListConfig {
+    title: string;
     disableList: boolean;
     elements: Array<{
         checked: boolean;
+        clickable: boolean;
         rightBadge?: BadgeConfig;
         icon?: string;
         name: string;

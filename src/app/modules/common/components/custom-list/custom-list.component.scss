@@ -44,14 +44,19 @@
             background-color: $black;
             margin: 15px;
             z-index: -1;
+        }
 
-            &:first-child {
-                width: 0;
-            }
+        &:last-child::before {
+            height: 0 !important;
+        }
 
-            &:last-child {
-                height: 0;
-            }
+        .line-icon {
+            width: 1.2rem !important;
+            height: 1.2rem !important;
+        }
+
+        .background-checked {
+            background-color: $list-green-light !important;
         }
 
         .field-container {
@@ -63,23 +68,25 @@
             border-radius: 10px;
 
             .field-value {
+                margin-left: 0.5rem;
                 width: 100%;
-            }
-
-            .line-icon {
-                margin-right: 0.3rem !important;
-                width: 1.2rem !important;
-                height: 1.2rem !important;
             }
         }
 
-        .order-value {
+        .order-value, .checked-value {
             box-shadow: 2px 2px 5px rgb(51 51 51 / 10%);
             background-color: $white;
             border-radius: 50%;
             margin-right: 15px;
-            padding: 4px 10px;
             font-weight: bold;
+
+            &.order-value {
+                padding: 4px 10px;
+            }
+
+            &.checked-value {
+                padding: 6px;
+            }
         }
 
 
@@ -88,7 +95,13 @@
         }
 
         .disabled-list {
-            background-color: $darkGray;
+            background-color: $darkGray !important;
         }
     }
+}
+
+.counter-container {
+    margin-left: 20px;
+    color: $tertiary;
+    font-weight: bold;
 }

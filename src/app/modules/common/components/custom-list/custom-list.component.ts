@@ -1,5 +1,4 @@
-import {Component, Input, ViewChild} from '@angular/core';
-import {IonInfiniteScroll} from "@ionic/angular";
+import {Component, Input} from '@angular/core';
 import {IconConfig} from "@common/components/panel/model/icon-config";
 import {BadgeConfig} from "@common/components/badge/badge-config";
 
@@ -11,14 +10,12 @@ import {BadgeConfig} from "@common/components/badge/badge-config";
 })
 export class CustomListComponent {
 
-    @ViewChild('infiniteScroll', {static: false})
-    public infiniteScroll: IonInfiniteScroll;
-
     @Input()
     public elements: Array<{
         icon?: string;
         name: string;
         checked: boolean;
+        clickable: boolean;
         rightBadge?: BadgeConfig;
         action?: (label: string) => void;
     }>;
@@ -30,5 +27,11 @@ export class CustomListComponent {
     public disableList: boolean;
 
     @Input()
-    public loadMore: (infiniteScroll: IonInfiniteScroll) => void;
+    public title: string;
+
+    public counter(title: string): string {
+        const total = this.elements.length;
+        const checkedElements = this.elements.filter((element) => element.checked && !element.clickable).length;
+        return checkedElements + "/" + total + " " + title + (total > 1 ? 's' : '');
+    }
 }

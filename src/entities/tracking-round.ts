@@ -9,4 +9,5 @@ export interface TrackingRound {
     expectedAt: string;
     emergency?: string;
     isStarted: boolean;
+    lines: any;
 }
