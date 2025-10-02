@@ -15,12 +15,12 @@
                       [leftIcon]="trackingRoundHeaderConfig.leftIcon"
                       [rightIcons]="trackingRoundHeaderConfig.rightIcon">
     </wii-panel-header>
-    <wii-custom-list  *ngIf="!loading && trackingRoundsListConfig && trackingRoundsListConfig.elements.length > 0"
-                   [elements]="trackingRoundsListConfig.elements"
-                   [title]="trackingRoundsListConfig.title"
-                   [disableList]="trackingRoundsListConfig.disableList"
-                   [commonIcon]="trackingRoundsListConfig.commonIcon">
-    </wii-custom-list>
+    <wii-timeline  *ngIf="!loading && trackingRoundsListConfig && trackingRoundsListConfig.elements.length > 0"
+                      [elements]="trackingRoundsListConfig.elements"
+                      [title]="trackingRoundsListConfig.title"
+                      [disableList]="trackingRoundsListConfig.disableList"
+                      [commonIcon]="trackingRoundsListConfig.commonIcon">
+    </wii-timeline>
 </div>
 
 

@@ -1,0 +1,40 @@
+<div class="counter-container">{{ counter(title) }}</div>
+<div *ngIf="elements && elements.length !== 0; else emptyElements"
+     class="timeline-container">
+    <div *ngFor="let field of elements; index as order"
+         class="fields-container" >
+        <span *ngIf="!field.checked"
+              class="order-value"
+              [class.disabled-list]="disableList || !field.clickable">
+            {{ order+1 }}
+        </span>
+        <span *ngIf="field.checked"
+              class="checked-value background-checked"
+              [class.disabled-list]="disableList || !field.clickable">
+            <wii-icon class="line-icon" name="check.svg" color="success"></wii-icon>
+        </span>
+        <span class="field-container"
+              [class.disabled-list]="disableList || !field.clickable"
+              [class.background-checked]="field.checked"
+              (click)="!disableList && field.clickable && field.action && field.action(field.name)">
+            <div>
+                <wii-icon *ngIf="field.icon || commonIcon"
+                          class="line-icon"
+                          name="{{ field.icon || commonIcon?.name }}">
+                </wii-icon>
+                <span class="field-value">
+                    {{ field.name }}
+                </span>
+            </div>
+            <span *ngIf="field.rightBadge"
+                  class="badges-container">
+                <wii-badge [config]="field.rightBadge"></wii-badge>
+            </span>
+        </span>
+    </div>
+</div>
+<ng-template #emptyElements>
+    <div class="timeline-container empty-elements">
+        Aucun élément
+    </div>
+</ng-template>

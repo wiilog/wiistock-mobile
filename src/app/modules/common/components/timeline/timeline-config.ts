@@ -1,7 +1,7 @@
 import {IconConfig} from '@common/components/panel/model/icon-config';
 import {BadgeConfig} from "@common/components/badge/badge-config";
 
-export interface CustomListConfig {
+export interface TimelineConfig {
     title: string;
     disableList: boolean;
     elements: Array<{

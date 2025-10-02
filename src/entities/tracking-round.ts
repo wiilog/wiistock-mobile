@@ -1,3 +1,5 @@
+import {TrackingRoundLine} from "@entities/tracking-round-line";
+
 export interface TrackingRound {
     id: number;
     number: string;
@@ -9,5 +11,5 @@ export interface TrackingRound {
     expectedAt: string;
     emergency?: string;
     isStarted: boolean;
-    lines: any;
+    lines: Array<TrackingRoundLine>;
 }

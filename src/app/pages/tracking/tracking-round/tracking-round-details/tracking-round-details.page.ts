@@ -13,7 +13,8 @@ import {HeaderConfig} from "@common/components/panel/model/header-config";
 import {PanelHeaderComponent} from "@common/components/panel/panel-header/panel-header.component";
 import {TrackingRound} from "@entities/tracking-round";
 import * as moment from 'moment';
-import {CustomListConfig} from "@common/components/custom-list/custom-list-config";
+import {TimelineConfig} from "@common/components/timeline/timeline-config";
+import {TrackingRoundLine} from "@entities/tracking-round-line";
 
 @Component({
     selector: 'wii-tracking-round-list',
@@ -39,7 +40,7 @@ export class TrackingRoundDetailsPage implements ViewWillEnter, ViewWillLeave {
 
     public trackingRoundHeaderConfig: HeaderConfig;
 
-    public trackingRoundsListConfig: CustomListConfig;
+    public trackingRoundsListConfig: TimelineConfig;
 
     public trackingRoundTranslations: Translations;
 
@@ -103,17 +104,17 @@ export class TrackingRoundDetailsPage implements ViewWillEnter, ViewWillLeave {
         this.trackingRoundsListConfig = {
             title: "emplacement",
             disableList: [this.trackingRoundToDoStatusCode, this.trackingRoundPauseStatusCode].includes(trackingRound.statusLabel),
-            elements: trackingRound.lines.map((line: any) => ({
+            elements: trackingRound.lines.map((line: TrackingRoundLine) => ({
                 name: line.locationLabel,
                 checked: line.checked,
                 clickable: line.clickable,
                 action: () => {
                     if(line.clickable) {
-                        //rediriger vers le détails avec le line.locationId en paramètre
+                        //rediriger vers le détails avec le line.locationId en paramètre //TODO WIIS-13097
                     }
                 },
                 // rightBadge: {
-                //     label: '', //rajouter le nombre d'anomalies
+                //     label: '', //rajouter le nombre d'anomalies //TODO WIIS-13105
                 //     icon: 'emergency.svg',
                 //     inline: true
                 // },
