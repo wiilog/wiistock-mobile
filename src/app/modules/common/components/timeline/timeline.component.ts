@@ -2,13 +2,12 @@ import {Component, Input} from '@angular/core';
 import {IconConfig} from "@common/components/panel/model/icon-config";
 import {BadgeConfig} from "@common/components/badge/badge-config";
 
-
 @Component({
-    selector: 'wii-custom-list',
-    templateUrl: 'custom-list.component.html',
-    styleUrls: ['./custom-list.component.scss']
+    selector: 'wii-timeline',
+    templateUrl: 'timeline.component.html',
+    styleUrls: ['./timeline.component.scss']
 })
-export class CustomListComponent {
+export class TimelineComponent {
 
     @Input()
     public elements: Array<{

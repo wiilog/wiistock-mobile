@@ -52,7 +52,7 @@ import {
 import {FormViewerTextComponent} from "@common/components/panel/form-panel/form-viewer-text/form-viewer-text.component";
 import {FormPanelComponent} from "@common/components/panel/form-panel/form-panel.component";
 import {SuggestionListComponent} from "@common/components/suggestion-list/suggestion-list.component";
-import {CustomListComponent} from "@common/components/custom-list/custom-list.component";
+import {TimelineComponent} from "@common/components/timeline/timeline.component";
 import {TabComponent} from "@common/components/tab/tab.component";
 import {SimpleFormComponent} from "@common/components/simple-form/simple-form.component";
 import {CardListComponent} from "@common/components/card-list/card-list.component";
@@ -103,7 +103,7 @@ import {PanelContentComponent} from "@common/components/panel/panel-content/pane
         FormViewerTableComponent,
         FormViewerTextComponent,
         SuggestionListComponent,
-        CustomListComponent,
+        TimelineComponent,
         TabComponent,
         SimpleFormComponent,
         CardListComponent,
@@ -130,7 +130,7 @@ import {PanelContentComponent} from "@common/components/panel/panel-content/pane
         ListPanelItemComponent,
         FormPanelComponent,
         SuggestionListComponent,
-        CustomListComponent,
+        TimelineComponent,
         TabComponent,
         SimpleFormComponent,
         CardListComponent,
