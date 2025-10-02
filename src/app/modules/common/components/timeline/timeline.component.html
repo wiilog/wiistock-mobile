@@ -2,7 +2,7 @@
 <div *ngIf="elements && elements.length !== 0; else emptyElements"
      class="timeline-container">
     <div *ngFor="let field of elements; index as order"
-         class="fields-container" >
+         class="line-container" >
         <span *ngIf="!field.checked"
               class="order-value"
               [class.disabled-list]="disableList || !field.clickable">

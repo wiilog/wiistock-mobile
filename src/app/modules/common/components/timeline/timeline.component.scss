@@ -1,5 +1,8 @@
 @import "theme/variables";
 
+$spacer: 15px;
+$lineHeight: 40px;
+
 .timeline-container {
     padding: 5px 5px 50px;
 
@@ -11,43 +14,42 @@
         font-size: 18px;
     }
 
-    .fields-container {
+    .line-container {
         display: flex;
-        padding-right: 15px;
-        padding-left: 15px;
-        margin-bottom: 15px;
+        padding-right: $spacer;
+        padding-left: $spacer;
+        margin-bottom: $spacer;
         font-size: 14px;
+        min-height: $lineHeight;
 
-        div {
-            display: flex;
+        &:first-child {
+            padding-top: $spacer !important;
         }
 
+        // horizontal line
         &:after {
             content: '';
             position: absolute;
             width: 80%;
             height: 1px;
             background-color: $black;
-            margin: 15px 0;
+            margin: calc($lineHeight / 2) 0;
             z-index: -1;
-
-            &:last-child {
-                height: 0;
-            }
         }
 
-        &:before {
+        // vertical line
+        &:not(:last-child):before {
             content: '';
             position: absolute;
             height: 10%;
             width: 1px;
             background-color: $black;
-            margin: 15px;
+            margin: calc($lineHeight / 2);
             z-index: -1;
         }
 
-        &:last-child::before {
-            height: 0 !important;
+        div {
+            display: flex;
         }
 
         .line-icon {
@@ -55,16 +57,13 @@
             height: 1.2rem !important;
         }
 
-        .background-checked {
-            background-color: $list-green-light !important;
-        }
-
         .field-container {
-            box-shadow: 2px 2px 5px rgb(51 51 51 / 10%);
+            box-shadow: $card-box-shadow;
             background-color: $white;
             padding: 5px 10px 5px 5px;
             display: flex;
-            width: 100%;
+            align-items: center;
+            flex: 1;
             border-radius: 10px;
 
             .field-value {
@@ -73,29 +72,27 @@
             }
         }
 
-        .order-value, .checked-value {
-            box-shadow: 2px 2px 5px rgb(51 51 51 / 10%);
+        .order-value,
+        .checked-value {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: $card-box-shadow;
             background-color: $white;
             border-radius: 50%;
-            margin-right: 15px;
+            margin-right: $spacer;
             font-weight: bold;
 
-            &.order-value {
-                padding: 4px 10px;
-            }
-
-            &.checked-value {
-                padding: 6px;
-            }
-        }
-
-
-        &:first-child {
-            padding-top: 15px !important;
+            height: $lineHeight;
+            width: $lineHeight;
         }
 
         .disabled-list {
             background-color: $darkGray !important;
+        }
+
+        .background-checked {
+            background-color: $list-green-light !important;
         }
     }
 }
