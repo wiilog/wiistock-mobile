@@ -1,10 +1,10 @@
 import {Component} from '@angular/core';
 import {NavService} from '@app/services/nav/nav.service';
 import {ViewWillEnter} from '@ionic/angular';
-import {ArticleLivraison} from "@entities/article-livraison";
+import {ArticleLivraison} from "@database/article-livraison";
 import {IconConfig} from "@common/components/panel/model/icon-config";
 import {ListPanelItemConfig} from "@common/components/panel/model/list-panel/list-panel-item-config";
-import {ArticlePrepa} from "@entities/article-prepa";
+import {ArticlePrepa} from "@database/article-prepa";
 
 @Component({
     selector: 'wii-delivery-logistic-unit-content',

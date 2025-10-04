@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {ViewWillEnter} from '@ionic/angular';
 import {NavService} from '@app/services/nav/nav.service';
-import {TransportRound} from '@entities/transport-round';
+import {TransportRound} from '@database/transport-round';
 import {LoadingService} from '@app/services/loading.service';
 import {ApiService} from '@app/services/api.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
@@ -9,7 +9,7 @@ import * as moment from 'moment';
 import {ToastService} from '@app/services/toast.service';
 import {NetworkService} from '@app/services/network.service';
 import {TransportCardMode} from '@common/components/transport-card/transport-card.component';
-import {TransportRoundLine} from '@entities/transport-round-line';
+import {TransportRoundLine} from '@database/transport-round-line';
 import {AlertService} from '@app/services/alert.service';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 

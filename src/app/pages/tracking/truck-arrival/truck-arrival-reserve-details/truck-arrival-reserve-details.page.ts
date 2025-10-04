@@ -16,7 +16,7 @@ import {
 import {SelectItemTypeEnum} from "@common/components/select-item/select-item-type.enum";
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
 import {LoadingService} from "@app/services/loading.service";
-import {ReserveType} from "@entities/reserve-type";
+import {ReserveType} from "@database/reserve-type";
 
 
 enum QuantityType {

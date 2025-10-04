@@ -14,7 +14,7 @@ import {ServerImageKeyEnum} from '@app/services/server-image/server-image-key.en
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {AlertService} from '@app/services/alert.service';
-import {Translations} from '@entities/translation';
+import {Translations} from '@database/translation';
 import {TranslationService} from '@app/services/translations.service';
 import {ApiService} from "@app/services/api.service";
 import {LoadingService} from "@app/services/loading.service";

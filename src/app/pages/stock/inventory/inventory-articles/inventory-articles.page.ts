@@ -1,7 +1,7 @@
 import {Component, ViewChild} from '@angular/core';
 import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode-scanner-mode.enum';
-import {Anomalie} from '@entities/anomalie';
-import {ArticleInventaire} from '@entities/article-inventaire';
+import {Anomalie} from '@database/anomalie';
+import {ArticleInventaire} from '@database/article-inventaire';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {LoadingService} from '@app/services/loading.service';
@@ -10,7 +10,7 @@ import {MainHeaderService} from '@app/services/main-header.service';
 import {ToastService} from '@app/services/toast.service';
 import {from, Observable, of, ReplaySubject, Subscription, zip} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
-import {SaisieInventaire} from '@entities/saisie-inventaire';
+import {SaisieInventaire} from '@database/saisie-inventaire';
 import * as moment from 'moment';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {SelectItemTypeEnum} from '@common/components/select-item/select-item-type.enum';

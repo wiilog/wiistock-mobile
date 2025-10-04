@@ -4,17 +4,17 @@ import {NavService} from '@app/services/nav/nav.service';
 import {LoadingService} from '@app/services/loading.service';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
-import {Translations} from '@entities/translation';
+import {Translations} from '@database/translation';
 import {TranslationService} from '@app/services/translations.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {ApiService} from "@app/services/api.service";
 import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcode-scanner.component";
 import {HeaderConfig} from "@common/components/panel/model/header-config";
 import {PanelHeaderComponent} from "@common/components/panel/panel-header/panel-header.component";
-import {TrackingRound} from "@entities/tracking-round";
+import {TrackingRound} from "@api/tracking-round";
 import * as moment from 'moment';
 import {TimelineConfig} from "@common/components/timeline/timeline-config";
-import {TrackingRoundLine} from "@entities/tracking-round-line";
+import {TrackingRoundLine} from "@api/tracking-round-line";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 
 @Component({

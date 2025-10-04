@@ -4,29 +4,29 @@ import {NavService} from '@app/services/nav/nav.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {LoadingService} from '@app/services/loading.service';
 import {map, mergeMap} from 'rxjs/operators';
-import {Dispatch} from '@entities/dispatch';
+import {Dispatch} from '@database/dispatch';
 import {CardListConfig} from '@common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
 import {MainHeaderService} from '@app/services/main-header.service';
 import {SelectItemComponent} from "@common/components/select-item/select-item.component";
 import {ToastService} from '@app/services/toast.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
-import {Translations} from '@entities/translation';
+import {Translations} from '@database/translation';
 import {TranslationService} from '@app/services/translations.service';
 import {StorageService} from "@app/services/storage/storage.service";
 import {FormPanelParam} from "@common/directives/form-panel/form-panel-param";
 import {FormPanelComponent} from "@common/components/panel/form-panel/form-panel.component";
-import {Status} from "@entities/status";
+import {Status} from "@database/status";
 import {FormPanelInputComponent} from "@common/components/panel/form-panel/form-panel-input/form-panel-input.component";
 import {ApiService} from "@app/services/api.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import * as bcrypt from 'bcryptjs';
 import * as moment from "moment";
-import {User} from "@entities/user";
-import {Emplacement} from "@entities/emplacement";
-import {DispatchPack} from "@entities/dispatch-pack";
-import {DispatchReference} from "@entities/dispatch-reference";
+import {User} from "@database/user";
+import {Emplacement} from "@database/emplacement";
+import {DispatchPack} from "@database/dispatch-pack";
+import {DispatchReference} from "@database/dispatch-reference";
 
 @Component({
     selector: 'wii-dispatch-grouped-signature-finish',

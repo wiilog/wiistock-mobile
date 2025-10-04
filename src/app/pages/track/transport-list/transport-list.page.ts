@@ -1,13 +1,13 @@
 import {Component, ViewChild} from '@angular/core';
 import {ViewWillEnter} from '@ionic/angular';
 import {NavService} from '@app/services/nav/nav.service';
-import {TransportRound} from '@entities/transport-round';
+import {TransportRound} from '@database/transport-round';
 import {FormPanelComponent} from '@common/components/panel/form-panel/form-panel.component';
 import {HeaderConfig} from '@common/components/panel/model/header-config';
 import {FormatService} from '@app/services/format.service';
 import {MapLocation} from '@common/components/leaflet-map/leaflet-map.component';
 import {TransportCardMode} from '@common/components/transport-card/transport-card.component';
-import {TransportRoundLine} from '@entities/transport-round-line';
+import {TransportRoundLine} from '@database/transport-round-line';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {AlertService} from '@app/services/alert.service';
 import {TransportService} from '@app/services/transport.service';

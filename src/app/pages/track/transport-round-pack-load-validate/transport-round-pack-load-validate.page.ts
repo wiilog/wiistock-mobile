@@ -1,19 +1,19 @@
 import {Component, EventEmitter, ViewChild} from '@angular/core';
-import {Emplacement} from "@entities/emplacement";
+import {Emplacement} from "@database/emplacement";
 import {SelectItemComponent} from "@common/components/select-item/select-item.component";
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {SelectItemTypeEnum} from "@common/components/select-item/select-item-type.enum";
 import {NavService} from "@app/services/nav/nav.service";
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
 import {AlertService} from "@app/services/alert.service";
-import {Nature} from "@entities/nature";
-import {AllowedNatureLocation} from "@entities/allowed-nature-location";
+import {Nature} from "@database/nature";
+import {AllowedNatureLocation} from "@database/allowed-nature-location";
 import {ToastService} from "@app/services/toast.service";
 import {ApiService} from "@app/services/api.service";
 import {LoadingService} from "@app/services/loading.service";
 import {zip} from 'rxjs';
 import {NetworkService} from "@app/services/network.service";
-import {TransportRound} from "@entities/transport-round";
+import {TransportRound} from "@database/transport-round";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 

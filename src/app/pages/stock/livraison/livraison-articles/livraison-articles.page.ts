@@ -1,7 +1,7 @@
 import {Component, ViewChild} from '@angular/core';
-import {Livraison} from '@entities/livraison';
+import {Livraison} from '@database/livraison';
 import {BarcodeScannerComponent} from '@common/components/barcode-scanner/barcode-scanner.component';
-import {ArticleLivraison} from '@entities/article-livraison';
+import {ArticleLivraison} from '@database/article-livraison';
 import {HeaderConfig} from '@common/components/panel/model/header-config';
 import {ListPanelItemConfig} from '@common/components/panel/model/list-panel/list-panel-item-config';
 import {IconConfig} from '@common/components/panel/model/icon-config';
@@ -11,7 +11,7 @@ import {ApiService} from '@app/services/api.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {map, mergeMap, tap} from 'rxjs/operators';
 import * as moment from 'moment';
-import {Mouvement} from '@entities/mouvement';
+import {Mouvement} from '@database/mouvement';
 import {IconColor} from '@common/components/icon/icon-color';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {NetworkService} from '@app/services/network.service';
@@ -20,12 +20,12 @@ import {StorageService} from "@app/services/storage/storage.service";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {Observable, of, zip} from "rxjs";
 import {AlertService} from "@app/services/alert.service";
-import {Nature} from "@entities/nature";
+import {Nature} from "@database/nature";
 import {LoadingService} from "@app/services/loading.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {TranslationService} from "@app/services/translations.service";
-import {Translations} from "@entities/translation";
-import {Emplacement} from "@entities/emplacement";
+import {Translations} from "@database/translation";
+import {Emplacement} from "@database/emplacement";
 import {EmplacementScanModeEnum} from "@pages/prise-depose/emplacement-scan/emplacement-scan-mode.enum";
 
 

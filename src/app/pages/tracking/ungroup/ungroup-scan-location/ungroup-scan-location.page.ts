@@ -1,6 +1,6 @@
 import {Component, ViewChild} from '@angular/core';
 import {SelectItemTypeEnum} from "@common/components/select-item/select-item-type.enum";
-import {Emplacement} from "@entities/emplacement";
+import {Emplacement} from "@database/emplacement";
 import {ToastService} from "@app/services/toast.service";
 import {StorageService} from "@app/services/storage/storage.service";
 import {NavService} from "@app/services/nav/nav.service";

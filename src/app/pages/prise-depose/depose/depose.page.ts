@@ -1,7 +1,7 @@
 import {Component, ViewChild} from '@angular/core';
 import {BarcodeScannerComponent} from '@common/components/barcode-scanner/barcode-scanner.component';
-import {Emplacement} from '@entities/emplacement';
-import {MouvementTraca} from '@entities/mouvement-traca';
+import {Emplacement} from '@database/emplacement';
+import {MouvementTraca} from '@database/mouvement-traca';
 import {HeaderConfig} from '@common/components/panel/model/header-config';
 import {ListPanelItemConfig} from '@common/components/panel/model/list-panel/list-panel-item-config';
 import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode-scanner-mode.enum';
@@ -20,15 +20,15 @@ import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {ApiService} from '@app/services/api.service';
 import {TranslationService} from '@app/services/translations.service';
-import {Nature} from '@entities/nature';
-import {Translations} from '@entities/translation';
+import {Nature} from '@database/nature';
+import {Translations} from '@database/translation';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {AlertService} from '@app/services/alert.service';
 import {NetworkService} from '@app/services/network.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {HttpErrorResponse} from "@angular/common/http";
 import {RfidManagerService} from "@app/services/rfid-manager.service";
-import {Livraison} from "@entities/livraison";
+import {Livraison} from "@database/livraison";
 
 @Component({
     selector: 'wii-depose',

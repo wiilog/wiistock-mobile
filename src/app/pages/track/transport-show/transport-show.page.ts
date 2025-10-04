@@ -1,10 +1,10 @@
 import {Component} from '@angular/core';
 import {ViewWillEnter} from '@ionic/angular';
 import {NavService} from '@app/services/nav/nav.service';
-import {TransportRoundLine} from '@entities/transport-round-line';
+import {TransportRoundLine} from '@database/transport-round-line';
 import {TransportCardMode} from '@common/components/transport-card/transport-card.component';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
-import {TransportRound} from "@entities/transport-round";
+import {TransportRound} from "@database/transport-round";
 
 @Component({
     selector: 'wii-transport-show',

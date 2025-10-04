@@ -1,5 +1,5 @@
 import {Injectable} from "@angular/core";
-import {TransportRound} from '@entities/transport-round';
+import {TransportRound} from '@database/transport-round';
 
 @Injectable({
     providedIn: 'root'

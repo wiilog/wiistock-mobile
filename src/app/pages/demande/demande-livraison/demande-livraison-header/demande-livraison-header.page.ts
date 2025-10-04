@@ -1,7 +1,7 @@
 import {Component, ViewChild} from '@angular/core';
 import {of, Subscription, zip} from 'rxjs';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
-import {DemandeLivraison} from '@entities/demande-livraison';
+import {DemandeLivraison} from '@database/demande-livraison';
 import {StorageService} from '@app/services/storage/storage.service';
 import {MainHeaderService} from '@app/services/main-header.service';
 import {NavService} from '@app/services/nav/nav.service';
@@ -13,7 +13,7 @@ import {FormPanelParam} from '@common/directives/form-panel/form-panel-param';
 import {FormPanelInputComponent} from '@common/components/panel/form-panel/form-panel-input/form-panel-input.component';
 import {FormPanelSelectComponent} from '@common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 import {FormPanelService} from "@app/services/form-panel.service";
-import {FreeField, FreeFieldType} from "@entities/free-field";
+import {FreeField, FreeFieldType} from "@database/free-field";
 import {LoadingService} from '@app/services/loading.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';

@@ -28,7 +28,8 @@
             "@plugins/*": ["app/plugins/*"],
             "@pages/*": ["app/pages/*"],
             "@app/*": ["app/*"],
-            "@entities/*": ["entities/*"],
+            "@database/*": ["model/database/*"],
+            "@api/*": ["model/api/*"],
             "@environments/*": ["environments/*"],
             "crypto": ["../node_modules/crypto-browserify"],
             "stream": ["../node_modules/stream-browserify"]

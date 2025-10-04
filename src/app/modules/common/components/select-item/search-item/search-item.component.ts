@@ -3,7 +3,7 @@ import {IonicSelectableComponent} from 'ionic-selectable';
 import {SelectItemTypeEnum} from '../select-item-type.enum';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {map, take, tap} from 'rxjs/operators';
-import {ArticleInventaire} from '@entities/article-inventaire';
+import {ArticleInventaire} from '@database/article-inventaire';
 import {Observable, of, ReplaySubject, Subscription} from 'rxjs';
 import {TableName} from '@app/services/sqlite/table-definition';
 import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";

@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {Collecte} from '@entities/collecte';
+import {Collecte} from '@database/collecte';
 import {CardListConfig} from '@common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
 import {MainHeaderService} from '@app/services/main-header.service';

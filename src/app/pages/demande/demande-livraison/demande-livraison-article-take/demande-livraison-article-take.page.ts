@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {NavService} from '@app/services/nav/nav.service';
-import {DemandeLivraisonArticle} from '@entities/demande-livraison-article';
+import {DemandeLivraisonArticle} from '@database/demande-livraison-article';
 import {ToastService} from '@app/services/toast.service';
 import {ViewWillEnter} from "@ionic/angular";
 

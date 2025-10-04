@@ -6,9 +6,12 @@ import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {ApiService} from "@app/services/api.service";
 import {NavService} from "@app/services/nav/nav.service";
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
-import {Nature} from "@entities/nature";
+import {Nature} from "@database/nature";
 import {ToastService} from "@app/services/toast.service";
-import {Translations} from "@entities/translation";
+import {Translations} from "@database/translation";
+import {Pack} from "@api/pack";
+import {HeaderConfig} from "@common/components/panel/model/header-config";
+import {ListPanelItemConfig} from "@common/components/panel/model/list-panel/list-panel-item-config";
 
 @Component({
     selector: 'wii-tracking-round-ongoing-packs',
@@ -19,10 +22,10 @@ export class TrackingRoundOngoingPacksPage implements ViewWillEnter, ViewWillLea
 
     private loadingSubscription?: Subscription;
 
-    public ongoingPacks: Array<any>;
+    public ongoingPacks: Array<Pack>;
 
-    public headerConfig: any;
-    public bodyConfig: any;
+    public headerConfig: HeaderConfig;
+    public bodyConfig: Array<ListPanelItemConfig>;
 
     public translations: {
         trackingRoundGeneral: Translations,
@@ -36,7 +39,7 @@ export class TrackingRoundOngoingPacksPage implements ViewWillEnter, ViewWillLea
         },
     } = {};
 
-    public readonly listBoldValues = [
+    public readonly listBoldValues: Array<string> = [
         'logisticUnits',
         'quantity',
         'nature',
@@ -125,14 +128,14 @@ export class TrackingRoundOngoingPacksPage implements ViewWillEnter, ViewWillLea
     }
 
     private refreshBodyConfig(): void {
-        this.bodyConfig = this.ongoingPacks.map(({code, quantity, natureId}: any) => {
-            const natureConfig = natureId && this.natureIdsToConfig[natureId];
+        this.bodyConfig = this.ongoingPacks.map(({code, quantity, natureId}): ListPanelItemConfig => {
+
+            const natureConfig = natureId
+                ? this.natureIdsToConfig[natureId]
+                : undefined;
+
             return {
-                ...(natureConfig?.color
-                    ? {
-                        color: natureConfig.color
-                    }
-                    : {}),
+                color: natureConfig?.color,
                 infos: {
                     logisticUnit: {
                         label: TranslationService.Translate(this.translations.trackingRoundGeneral, 'Unité logistique'),
@@ -140,7 +143,7 @@ export class TrackingRoundOngoingPacksPage implements ViewWillEnter, ViewWillLea
                     },
                     quantity: {
                         label: TranslationService.Translate(this.translations.trackingRoundFixedFields, 'Quantité'),
-                        value: quantity,
+                        value: `${quantity}`,
                     },
                     ...(natureConfig?.label
                         ? {

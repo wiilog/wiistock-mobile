@@ -1,13 +1,13 @@
 import {Component, EventEmitter, ViewChild} from '@angular/core';
 import {NavService} from "@app/services/nav/nav.service";
-import {TransportRound} from "@entities/transport-round";
+import {TransportRound} from "@database/transport-round";
 import {ToastService} from "@app/services/toast.service";
 import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcode-scanner.component";
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
-import {Emplacement} from "@entities/emplacement";
-import {AllowedNatureLocation} from "@entities/allowed-nature-location";
-import {Nature} from "@entities/nature";
+import {Emplacement} from "@database/emplacement";
+import {AllowedNatureLocation} from "@database/allowed-nature-location";
+import {Nature} from "@database/nature";
 import {AlertService} from "@app/services/alert.service";
 import {SelectItemTypeEnum} from "@common/components/select-item/select-item-type.enum";
 import {SelectItemComponent} from "@common/components/select-item/select-item.component";

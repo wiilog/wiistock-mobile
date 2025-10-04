@@ -4,11 +4,11 @@ import {CardListColorEnum} from '@common/components/card-list/card-list-color.en
 import {MainHeaderService} from '@app/services/main-header.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {NavService} from '@app/services/nav/nav.service';
-import {TransferOrder} from '@entities/transfer-order';
+import {TransferOrder} from '@database/transfer-order';
 import {Subscription, zip} from 'rxjs';
 import {LoadingService} from '@app/services/loading.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
-import {TransferOrderArticle} from '@entities/transfer-order-article';
+import {TransferOrderArticle} from '@database/transfer-order-article';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {StorageService} from '@app/services/storage/storage.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";

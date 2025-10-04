@@ -16,17 +16,17 @@ import {HeaderConfig} from "@common/components/panel/model/header-config";
 import {ListPanelItemConfig} from "@common/components/panel/model/list-panel/list-panel-item-config";
 import {TranslationService} from "@app/services/translations.service";
 import {MovementConfirmType} from "@pages/prise-depose/movement-confirm/movement-confirm-type";
-import {MouvementTraca} from "@entities/mouvement-traca";
+import {MouvementTraca} from "@database/mouvement-traca";
 import {Observable, of, zip} from "rxjs";
-import {Nature} from "@entities/nature";
-import {Translations} from "@entities/translation";
+import {Nature} from "@database/nature";
+import {Translations} from "@database/translation";
 import {map, mergeMap, tap} from "rxjs/operators";
 import {NetworkService} from "@app/services/network.service";
 import {AlertService} from "@app/services/alert.service";
 import * as moment from "moment/moment";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {LocalDataManagerService} from "@app/services/local-data-manager.service";
-import {Emplacement} from "@entities/emplacement";
+import {Emplacement} from "@database/emplacement";
 import {
     FormPanelSelectComponent
 } from "@common/components/panel/form-panel/form-panel-select/form-panel-select.component";

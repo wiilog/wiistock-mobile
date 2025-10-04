@@ -15,7 +15,7 @@ import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {LoadingService} from "@app/services/loading.service";
 import {NavService} from "@app/services/nav/nav.service";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
-import {Emplacement} from "@entities/emplacement";
+import {Emplacement} from "@database/emplacement";
 
 @Component({
     selector: 'wii-manual-collect-articles',

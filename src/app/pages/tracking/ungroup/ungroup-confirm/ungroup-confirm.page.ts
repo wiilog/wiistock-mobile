@@ -10,7 +10,7 @@ import {Subscription, zip} from 'rxjs';
 import {ViewWillEnter, ViewWillLeave} from '@ionic/angular';
 import {LoadingService} from '@app/services/loading.service';
 import {mergeMap, map} from 'rxjs/operators';
-import {Translations} from "@entities/translation";
+import {Translations} from "@database/translation";
 import {TranslationService} from "@app/services/translations.service";
 
 @Component({

@@ -14,11 +14,11 @@ import {StorageService} from '@app/services/storage/storage.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
 import {TabConfig} from '@common/components/tab/tab-config';
-import {ArticleInventaire} from '@entities/article-inventaire';
+import {ArticleInventaire} from '@database/article-inventaire';
 import {ListPanelItemConfig} from '@common/components/panel/model/list-panel/list-panel-item-config';
 import * as moment from 'moment';
-import {Anomalie} from '@entities/anomalie';
-import {InventoryMission} from "@entities/inventory_mission";
+import {Anomalie} from '@database/anomalie';
+import {InventoryMission} from "@database/inventory_mission";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 
 enum PageMode {

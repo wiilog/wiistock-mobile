@@ -7,12 +7,12 @@ import {IconColor} from "@common/components/icon/icon-color";
 import {FormPanelComponent} from "@common/components/panel/form-panel/form-panel.component";
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
-import {ReceptionReferenceArticle} from "@entities/reception-reference-article";
+import {ReceptionReferenceArticle} from "@database/reception-reference-article";
 import {ToastService} from "@app/services/toast.service";
 import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcode-scanner.component";
 import {LoadingService} from "@app/services/loading.service";
 import {ReceptionService} from "@app/services/reception.service";
-import {Reception} from "@entities/reception";
+import {Reception} from "@database/reception";
 import {AlertService} from "@app/services/alert.service";
 
 

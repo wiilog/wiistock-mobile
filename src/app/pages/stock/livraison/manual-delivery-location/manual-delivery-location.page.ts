@@ -1,6 +1,6 @@
 import {Component, EventEmitter, ViewChild} from '@angular/core';
 import {SelectItemComponent} from '@common/components/select-item/select-item.component';
-import {Emplacement} from '@entities/emplacement';
+import {Emplacement} from '@database/emplacement';
 import {SelectItemTypeEnum} from '@common/components/select-item/select-item-type.enum';
 import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {IconConfig} from '@common/components/panel/model/icon-config';

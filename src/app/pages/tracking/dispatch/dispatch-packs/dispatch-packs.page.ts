@@ -4,16 +4,16 @@ import {NavService} from '@app/services/nav/nav.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {LoadingService} from '@app/services/loading.service';
 import {filter, map, mergeMap, tap} from 'rxjs/operators';
-import {Dispatch} from '@entities/dispatch';
+import {Dispatch} from '@database/dispatch';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
 import {IconConfig} from '@common/components/panel/model/icon-config';
-import {DispatchPack} from '@entities/dispatch-pack';
+import {DispatchPack} from '@database/dispatch-pack';
 import {HeaderConfig} from '@common/components/panel/model/header-config';
 import {ListPanelItemConfig} from '@common/components/panel/model/list-panel/list-panel-item-config';
-import {Nature} from '@entities/nature';
+import {Nature} from '@database/nature';
 import {IconColor} from '@common/components/icon/icon-color';
 import {BarcodeScannerComponent} from '@common/components/barcode-scanner/barcode-scanner.component';
-import {Translations} from '@entities/translation';
+import {Translations} from '@database/translation';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
@@ -23,9 +23,9 @@ import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {StorageService} from "@app/services/storage/storage.service";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {Browser} from '@capacitor/browser';
-import {Status} from "@entities/status";
+import {Status} from "@database/status";
 import * as moment from "moment";
-import {DispatchReference} from "@entities/dispatch-reference";
+import {DispatchReference} from "@database/dispatch-reference";
 
 @Component({
     selector: 'wii-dispatch-packs',

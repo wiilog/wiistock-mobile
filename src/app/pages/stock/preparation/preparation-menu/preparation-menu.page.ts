@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {CardListConfig} from '@common/components/card-list/card-list-config';
-import {Preparation} from '@entities/preparation';
+import {Preparation} from '@database/preparation';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
 import {NavService} from '@app/services/nav/nav.service';
 import {MainHeaderService} from '@app/services/main-header.service';

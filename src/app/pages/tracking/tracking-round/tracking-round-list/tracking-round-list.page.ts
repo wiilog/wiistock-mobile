@@ -5,14 +5,14 @@ import {CardListConfig} from '@common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
 import {MainHeaderService} from '@app/services/main-header.service';
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
-import {Translations} from '@entities/translation';
+import {Translations} from '@database/translation';
 import {TranslationService} from '@app/services/translations.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {ApiService} from "@app/services/api.service";
 import * as moment from "moment/moment";
 import {NavService} from "@app/services/nav/nav.service";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
-import {TrackingRound} from "@entities/tracking-round";
+import {TrackingRound} from "@api/tracking-round";
 
 @Component({
     selector: 'wii-tracking-round-list',

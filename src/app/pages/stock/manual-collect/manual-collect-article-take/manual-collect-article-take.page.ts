@@ -3,7 +3,7 @@ import {NavService} from '@app/services/nav/nav.service';
 import {ToastService} from '@app/services/toast.service';
 import {ViewWillEnter} from "@ionic/angular";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
-import {Emplacement} from "@entities/emplacement";
+import {Emplacement} from "@database/emplacement";
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
 import {EmplacementScanModeEnum} from "@pages/prise-depose/emplacement-scan/emplacement-scan-mode.enum";

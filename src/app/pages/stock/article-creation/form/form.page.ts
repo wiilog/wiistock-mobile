@@ -27,7 +27,7 @@ import {mergeMap, Observable, of, map} from "rxjs";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
-import {Emplacement} from "@entities/emplacement";
+import {Emplacement} from "@database/emplacement";
 import {EmplacementScanModeEnum} from "@pages/prise-depose/emplacement-scan/emplacement-scan-mode.enum";
 
 

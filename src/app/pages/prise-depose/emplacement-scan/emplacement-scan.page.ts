@@ -4,7 +4,7 @@ import {SelectItemTypeEnum} from '@common/components/select-item/select-item-typ
 import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {ToastService} from '@app/services/toast.service';
 import {NavService} from '@app/services/nav/nav.service';
-import {Emplacement} from '@entities/emplacement';
+import {Emplacement} from '@database/emplacement';
 import {StorageService} from '@app/services/storage/storage.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';

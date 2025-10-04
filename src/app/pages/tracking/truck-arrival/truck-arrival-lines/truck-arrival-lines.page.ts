@@ -4,7 +4,7 @@ import {FormPanelComponent} from "@common/components/panel/form-panel/form-panel
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
 import {ToastService} from "@app/services/toast.service";
 import {StorageService} from "@app/services/storage/storage.service";
-import {Emplacement} from "@entities/emplacement";
+import {Emplacement} from "@database/emplacement";
 import {ApiService} from "@app/services/api.service";
 import {LoadingService} from "@app/services/loading.service";
 import {MainHeaderService} from "@app/services/main-header.service";
@@ -13,7 +13,7 @@ import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode
 import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcode-scanner.component";
 import {AlertService} from "@app/services/alert.service";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
-import {Carrier} from "@entities/carrier";
+import {Carrier} from "@database/carrier";
 import {ViewWillEnter} from "@ionic/angular";
 import {zip} from "rxjs";
 

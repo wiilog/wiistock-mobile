@@ -1,5 +1,5 @@
 import {Component, EventEmitter, ViewChild} from '@angular/core';
-import {Livraison} from '@entities/livraison';
+import {Livraison} from '@database/livraison';
 import {CardListConfig} from '@common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
 import {NavService} from '@app/services/nav/nav.service';
@@ -8,14 +8,14 @@ import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {SelectItemComponent} from '@common/components/select-item/select-item.component';
 import {SelectItemTypeEnum} from '@common/components/select-item/select-item-type.enum';
 import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode-scanner-mode.enum';
-import {Emplacement} from '@entities/emplacement';
+import {Emplacement} from '@database/emplacement';
 import {Subscription, zip} from 'rxjs';
 import {LoadingService} from '@app/services/loading.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import * as moment from "moment";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {TranslationService} from "@app/services/translations.service";
-import {Translations} from "@entities/translation";
+import {Translations} from "@database/translation";
 
 
 @Component({

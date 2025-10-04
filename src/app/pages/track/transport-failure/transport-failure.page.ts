@@ -2,7 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 import {NavService} from '@app/services/nav/nav.service';
 import {ApiService} from '@app/services/api.service';
 import {LoadingService} from '@app/services/loading.service';
-import {TransportRoundLine} from '@entities/transport-round-line';
+import {TransportRoundLine} from '@database/transport-round-line';
 import {
     FormPanelSelectComponent
 } from '@common/components/panel/form-panel/form-panel-select/form-panel-select.component';
@@ -20,7 +20,7 @@ import {HeaderConfig} from '@common/components/panel/model/header-config';
 import {FileService} from '@app/services/file.service';
 import {mergeMap, map} from 'rxjs/operators';
 import {TransportService} from '@app/services/transport.service';
-import {TransportRound} from "@entities/transport-round";
+import {TransportRound} from "@database/transport-round";
 import {ViewWillEnter} from "@ionic/angular";
 import {TranslationService} from "@app/services/translations.service";
 
