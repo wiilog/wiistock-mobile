@@ -15,6 +15,7 @@ import {TrackingRound} from "@entities/tracking-round";
 import * as moment from 'moment';
 import {TimelineConfig} from "@common/components/timeline/timeline-config";
 import {TrackingRoundLine} from "@entities/tracking-round-line";
+import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 
 @Component({
     selector: 'wii-tracking-round-list',
@@ -129,7 +130,7 @@ export class TrackingRoundDetailsPage implements ViewWillEnter, ViewWillLeave {
             subtitle: [
                 TranslationService.Translate(this.trackingRoundTranslations, 'Date attendue') + ` : ${moment(trackingRound.expectedAt).format('DD/MM/YYYY HH:mm') || ''}`,
                 TranslationService.Translate(this.trackingRoundTranslations, 'Statut') + ` : ${trackingRound.statusLabel || ''}`,
-                TranslationService.Translate(this.trackingRoundTranslations, 'Emplacement de tournée') + ` : ${trackingRound.locationLabel || ''}`,
+                TranslationService.Translate(this.trackingRoundTranslations, 'Emplacement de la tournée') + ` : ${trackingRound.locationLabel || ''}`,
                 TranslationService.Translate(this.trackingRoundTranslations, 'Urgence') + ` : ${trackingRound.emergency || 'Non'}`,
             ].filter((item) => item),
             info: trackingRound.number,
@@ -171,8 +172,15 @@ export class TrackingRoundDetailsPage implements ViewWillEnter, ViewWillLeave {
         })
     }
     public onPauseClick(): void {}
-    public onShowOngoinPacksClick(): void {}
+
+    public onShowOngoingPacksClick(): void {
+        this.navService.push(NavPathEnum.TRACKING_ROUND_ONGOING_PACKS, {
+            trackingRoundId: this.trackingRoundId,
+        });
+    }
+
     public onAddLocationClick(): void {}
+
     public testIfBarcodeEquals(locationScanned: string): void {
 
     }

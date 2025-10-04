@@ -1,8 +1,4 @@
 import {Injectable} from '@angular/core';
-import {ApiService} from '@app/services/api.service';
-import {from, mergeMap, zip, Observable, of} from 'rxjs';
-import {map} from 'rxjs/operators';
-import {App} from "@capacitor/app";
 import {Reception} from "@entities/reception";
 import * as moment from "moment/moment";
 

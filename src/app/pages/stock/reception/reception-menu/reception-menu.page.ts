@@ -10,7 +10,6 @@ import {NavService} from "@app/services/nav/nav.service";
 import {LoadingService} from "@app/services/loading.service";
 import {Reception} from "@entities/reception";
 import {ReceptionService} from "@app/services/reception.service";
-import {Livraison} from "@entities/livraison";
 
 @Component({
     selector: 'wii-reception-menu',

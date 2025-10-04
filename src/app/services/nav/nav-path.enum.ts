@@ -100,4 +100,5 @@ export enum NavPathEnum {
     PICK_AND_DROP = 'pick-and-drop',
     TRACKING_ROUND_LIST = 'tracking-round-list',
     TRACKING_ROUND_DETAILS = 'tracking-round-details',
+    TRACKING_ROUND_ONGOING_PACKS = 'tracking-round-ongoing-packs',
 }

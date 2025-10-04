@@ -1,4 +1,4 @@
-import {TrackingRoundLine} from "@entities/tracking-round-line";
+import {TrackingRoundLine} from "./tracking-round-line";
 
 export interface TrackingRound {
     id: number;
