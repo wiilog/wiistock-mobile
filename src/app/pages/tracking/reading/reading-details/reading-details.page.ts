@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {NavService} from '@app/services/nav/nav.service';
 import {ViewWillEnter} from '@ionic/angular';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
-import {Translations} from '@entities/translation';
+import {Translations} from '@database/translation';
 import {TranslationService} from '@app/services/translations.service';
 import {zip} from 'rxjs';
 import {IconConfig} from "@common/components/panel/model/icon-config";

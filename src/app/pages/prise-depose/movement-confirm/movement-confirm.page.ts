@@ -1,11 +1,11 @@
 import {Component, ViewChild} from '@angular/core';
 import {FormPanelComponent} from '@common/components/panel/form-panel/form-panel.component';
 import {HeaderConfig} from '@common/components/panel/model/header-config';
-import {Emplacement} from '@entities/emplacement';
+import {Emplacement} from '@database/emplacement';
 import {ToastService} from '@app/services/toast.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {SelectItemTypeEnum} from '@common/components/select-item/select-item-type.enum';
-import {FreeField, FreeFieldType} from '@entities/free-field';
+import {FreeField, FreeFieldType} from '@database/free-field';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {FormPanelService} from '@app/services/form-panel.service';
 import {FormPanelParam} from '@common/directives/form-panel/form-panel-param';
@@ -19,14 +19,14 @@ import {
 import {
     FormPanelCameraComponent
 } from '@common/components/panel/form-panel/form-panel-camera/form-panel-camera.component';
-import {Nature} from '@entities/nature';
+import {Nature} from '@database/nature';
 import {zip} from 'rxjs';
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
 import {IconColor} from '@common/components/icon/icon-color';
 import {ListPanelItemConfig} from '@common/components/panel/model/list-panel/list-panel-item-config';
-import {MouvementTraca} from '@entities/mouvement-traca';
+import {MouvementTraca} from '@database/mouvement-traca';
 import {ViewWillEnter} from "@ionic/angular";
-import {Translations} from "@entities/translation";
+import {Translations} from "@database/translation";
 import {TranslationService} from "@app/services/translations.service";
 import {LoadingService} from "@app/services/loading.service";
 import {

@@ -5,7 +5,7 @@ import {FormViewerParam} from '@common/directives/form-viewer/form-viewer-param'
 import {FormPanelComponent} from '@common/components/panel/form-panel/form-panel.component';
 import {NatureWithQuantity} from '@common/components/panel/model/form-viewer/form-viewer-table-config';
 import {FormViewerTableComponent} from '@common/components/panel/form-panel/form-viewer-table/form-viewer-table.component';
-import {TransportRoundLine} from '@entities/transport-round-line';
+import {TransportRoundLine} from '@database/transport-round-line';
 
 @Component({
     selector: 'wii-pack-count',

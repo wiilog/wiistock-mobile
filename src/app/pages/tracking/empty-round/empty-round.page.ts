@@ -2,7 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 import {IconConfig} from '@common/components/panel/model/icon-config';
 import {ViewWillEnter, ViewWillLeave} from '@ionic/angular';
 import {NavService} from '@app/services/nav/nav.service';
-import {Emplacement} from '@entities/emplacement';
+import {Emplacement} from '@database/emplacement';
 import {FormPanelParam} from '@common/directives/form-panel/form-panel-param';
 import {FormPanelInputComponent} from '@common/components/panel/form-panel/form-panel-input/form-panel-input.component';
 import {ApiService} from '@app/services/api.service';

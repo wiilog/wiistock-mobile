@@ -2,12 +2,12 @@ import {Component, ViewChild} from '@angular/core';
 import {NavService} from "@app/services/nav/nav.service";
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcode-scanner.component";
-import {Emplacement} from "@entities/emplacement";
+import {Emplacement} from "@database/emplacement";
 import {ToastService} from "@app/services/toast.service";
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
 import {LoadingService} from "@app/services/loading.service";
 import {ApiService} from "@app/services/api.service";
-import {TransportRound} from "@entities/transport-round";
+import {TransportRound} from "@database/transport-round";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 

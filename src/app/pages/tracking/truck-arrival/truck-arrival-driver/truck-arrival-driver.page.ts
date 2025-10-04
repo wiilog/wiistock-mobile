@@ -12,12 +12,12 @@ import {
     FormPanelInputComponent
 } from "@common/components/panel/form-panel/form-panel-input/form-panel-input.component";
 import {StorageService} from "@app/services/storage/storage.service";
-import {Emplacement} from "@entities/emplacement";
+import {Emplacement} from "@database/emplacement";
 import {ApiService} from "@app/services/api.service";
 import {LoadingService} from "@app/services/loading.service";
-import {Driver} from "@entities/driver";
+import {Driver} from "@database/driver";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
-import {Carrier} from "@entities/carrier";
+import {Carrier} from "@database/carrier";
 import {zip} from "rxjs";
 import {ViewWillEnter} from "@ionic/angular";
 

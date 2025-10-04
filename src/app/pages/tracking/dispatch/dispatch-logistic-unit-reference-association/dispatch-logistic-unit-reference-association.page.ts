@@ -24,17 +24,17 @@ import {ApiService} from "@app/services/api.service";
 import {
     FormPanelButtonsComponent
 } from "@common/components/panel/form-panel/form-panel-buttons/form-panel-buttons.component";
-import {DispatchReference} from "@entities/dispatch-reference";
-import {Dispatch} from "@entities/dispatch";
+import {DispatchReference} from "@database/dispatch-reference";
+import {Dispatch} from "@database/dispatch";
 import {Observable, of, zip} from "rxjs";
 import {ViewWillEnter} from "@ionic/angular";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
 import {map, mergeMap, tap} from "rxjs/operators";
 import {StorageService} from "@app/services/storage/storage.service";
-import {AssociatedDocumentType} from "@entities/associated-document-type";
-import {DispatchPack} from "@entities/dispatch-pack";
+import {AssociatedDocumentType} from "@database/associated-document-type";
+import {DispatchPack} from "@database/dispatch-pack";
 import {SelectItemTypeEnum} from "@common/components/select-item/select-item-type.enum";
-import {Nature} from "@entities/nature";
+import {Nature} from "@database/nature";
 
 @Component({
     selector: 'wii-dispatch-logistic-unit-reference-association',

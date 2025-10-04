@@ -2,7 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 import {ViewWillEnter} from '@ionic/angular';
 import {NavService} from '@app/services/nav/nav.service';
 import {FormPanelParam} from '@common/directives/form-panel/form-panel-param';
-import {TransportRoundLine} from '@entities/transport-round-line';
+import {TransportRoundLine} from '@database/transport-round-line';
 import {
     FormPanelSigningComponent
 } from '@common/components/panel/form-panel/form-panel-signing/form-panel-signing.component';
@@ -20,7 +20,7 @@ import {PackCountComponent} from '@common/components/pack-count/pack-count.compo
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {TransportCardMode} from '@common/components/transport-card/transport-card.component';
 import {TransportService} from '@app/services/transport.service';
-import {TransportRound} from "@entities/transport-round";
+import {TransportRound} from "@database/transport-round";
 import {
     FormPanelTextareaComponent
 } from '@common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component';

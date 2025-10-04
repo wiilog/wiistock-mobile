@@ -8,7 +8,7 @@ import {MainHeaderService} from "@app/services/main-header.service";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {NavService} from "@app/services/nav/nav.service";
 import {LoadingService} from "@app/services/loading.service";
-import {Reception} from "@entities/reception";
+import {Reception} from "@database/reception";
 import {ReceptionService} from "@app/services/reception.service";
 
 @Component({

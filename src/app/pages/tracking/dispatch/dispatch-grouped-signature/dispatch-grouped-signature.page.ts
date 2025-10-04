@@ -4,7 +4,7 @@ import {NavService} from '@app/services/nav/nav.service';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {LoadingService} from '@app/services/loading.service';
 import {mergeMap, tap} from 'rxjs/operators';
-import {Dispatch} from '@entities/dispatch';
+import {Dispatch} from '@database/dispatch';
 import {CardListConfig} from '@common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
 import {MainHeaderService} from '@app/services/main-header.service';
@@ -13,7 +13,7 @@ import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode
 import {SelectItemComponent} from "@common/components/select-item/select-item.component";
 import {ToastService} from '@app/services/toast.service';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
-import {Translations} from '@entities/translation';
+import {Translations} from '@database/translation';
 import {TranslationService} from '@app/services/translations.service';
 import * as moment from 'moment';
 import {StorageService} from "@app/services/storage/storage.service";

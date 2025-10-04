@@ -1,7 +1,7 @@
 import {Component, ViewChild} from '@angular/core';
 import {BarcodeScannerComponent} from '@common/components/barcode-scanner/barcode-scanner.component';
-import {Collecte} from '@entities/collecte';
-import {ArticleCollecte} from '@entities/article-collecte';
+import {Collecte} from '@database/collecte';
+import {ArticleCollecte} from '@database/article-collecte';
 import {HeaderConfig} from '@common/components/panel/model/header-config';
 import {ListPanelItemConfig} from '@common/components/panel/model/list-panel/list-panel-item-config';
 import {IconConfig} from '@common/components/panel/model/icon-config';
@@ -11,7 +11,7 @@ import {LocalDataManagerService} from '@app/services/local-data-manager.service'
 import {ApiService} from '@app/services/api.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {filter, mergeMap, map} from 'rxjs/operators';
-import {Mouvement} from '@entities/mouvement';
+import {Mouvement} from '@database/mouvement';
 import * as moment from 'moment';
 import {from, Observable, of, zip} from 'rxjs';
 import {IconColor} from '@common/components/icon/icon-color';

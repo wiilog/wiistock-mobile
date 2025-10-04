@@ -16,7 +16,7 @@ import {Subscription, zip} from 'rxjs';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {AlertService} from "@app/services/alert.service";
 import {TranslationService} from "@app/services/translations.service";
-import {Translations} from "@entities/translation";
+import {Translations} from "@database/translation";
 
 @Component({
     selector: 'wii-group-content',

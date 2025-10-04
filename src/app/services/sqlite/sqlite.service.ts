@@ -1,25 +1,25 @@
 import {Injectable} from '@angular/core';
 import {StorageService} from '@app/services/storage/storage.service';
-import {Livraison} from '@entities/livraison';
+import {Livraison} from '@database/livraison';
 import {from, Observable, of, zip} from 'rxjs';
 import {mergeMap, map, take, tap, catchError} from 'rxjs/operators';
-import {Handling} from '@entities/handling';
-import {MouvementTraca} from '@entities/mouvement-traca';
-import {Anomalie} from "@entities/anomalie";
-import {ArticlePrepaByRefArticle} from "@entities/article-prepa-by-ref-article";
-import {ArticleCollecte} from "@entities/article-collecte";
-import {ArticleLivraison} from "@entities/article-livraison";
+import {Handling} from '@database/handling';
+import {MouvementTraca} from '@database/mouvement-traca';
+import {Anomalie} from "@database/anomalie";
+import {ArticlePrepaByRefArticle} from "@database/article-prepa-by-ref-article";
+import {ArticleCollecte} from "@database/article-collecte";
+import {ArticleLivraison} from "@database/article-livraison";
 import * as moment from 'moment';
 import {keptTablesOnConnection, TablesDefinitions} from '@app/services/sqlite/tables-definitions';
 import {TableName} from '@app/services/sqlite/table-definition';
 import {StorageKeyEnum} from '@app/services/storage/storage-key.enum';
-import {DemandeLivraisonArticle} from '@entities/demande-livraison-article';
+import {DemandeLivraisonArticle} from '@database/demande-livraison-article';
 import {CapacitorSQLite, CapacitorSQLitePlugin} from '@capacitor-community/sqlite';
-import {Carrier} from '@entities/carrier';
-import {Driver} from "@entities/driver";
-import {Dispatch} from "@entities/dispatch";
-import {DispatchPack} from "@entities/dispatch-pack";
-import {InventoryLocationLine} from "@entities/inventory_location_line";
+import {Carrier} from '@database/carrier';
+import {Driver} from "@database/driver";
+import {Dispatch} from "@database/dispatch";
+import {DispatchPack} from "@database/dispatch-pack";
+import {InventoryLocationLine} from "@database/inventory_location_line";
 
 @Injectable({
     providedIn: 'root'

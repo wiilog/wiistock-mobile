@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Reception} from "@entities/reception";
+import {Reception} from "@database/reception";
 import * as moment from "moment/moment";
 
 

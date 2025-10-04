@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {Handling} from '@entities/handling';
+import {Handling} from '@database/handling';
 import {CardListConfig} from '@common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
 import {MainHeaderService} from '@app/services/main-header.service';
@@ -7,7 +7,7 @@ import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {NavService} from '@app/services/nav/nav.service';
 import * as moment from 'moment';
 import {Subject, zip} from 'rxjs';
-import {Translations} from '@entities/translation';
+import {Translations} from '@database/translation';
 import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {TranslationService} from "@app/services/translations.service";

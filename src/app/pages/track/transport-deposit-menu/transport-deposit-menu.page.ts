@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {ViewWillEnter} from '@ionic/angular';
 import {NavService} from '@app/services/nav/nav.service';
-import {TransportRound} from '@entities/transport-round';
+import {TransportRound} from '@database/transport-round';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 
 @Component({

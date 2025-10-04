@@ -23,12 +23,12 @@ import {ApiService} from "@app/services/api.service";
 import {Observable, of, zip} from "rxjs";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {map, mergeMap, tap} from "rxjs/operators";
-import {Translations} from "@entities/translation";
+import {Translations} from "@database/translation";
 import {ViewWillEnter} from "@ionic/angular";
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
-import {Dispatch} from "@entities/dispatch";
+import {Dispatch} from "@database/dispatch";
 import * as moment from "moment";
-import {DispatchEmergency} from "@entities/dispatch-emergency";
+import {DispatchEmergency} from "@database/dispatch-emergency";
 
 
 @Component({

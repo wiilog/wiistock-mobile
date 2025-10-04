@@ -1,7 +1,7 @@
 import {Component, ViewChild} from '@angular/core';
 import {NavService} from '@app/services/nav/nav.service';
 import {ViewWillEnter, ViewWillLeave} from '@ionic/angular';
-import {ArticleCollecte} from '@entities/article-collecte';
+import {ArticleCollecte} from '@database/article-collecte';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
 import {LoadingService} from '@app/services/loading.service';
 import {ApiService} from '@app/services/api.service';

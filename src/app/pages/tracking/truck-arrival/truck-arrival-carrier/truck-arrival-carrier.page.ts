@@ -8,7 +8,7 @@ import {SelectItemTypeEnum} from '@common/components/select-item/select-item-typ
 import {FormPanelComponent} from '@common/components/panel/form-panel/form-panel.component';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {ToastService} from '@app/services/toast.service';
-import {Carrier} from '@entities/carrier';
+import {Carrier} from '@database/carrier';
 import {ApiService} from '@app/services/api.service';
 import {NetworkService} from '@app/services/network.service';
 import {LoadingService} from '@app/services/loading.service';

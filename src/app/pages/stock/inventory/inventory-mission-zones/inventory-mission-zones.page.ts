@@ -5,12 +5,12 @@ import {LoadingService} from '@app/services/loading.service';
 import {SelectItemComponent} from '@common/components/select-item/select-item.component';
 import {ListPanelItemConfig} from "@common/components/panel/model/list-panel/list-panel-item-config";
 import {IconColor} from "@common/components/icon/icon-color";
-import {InventoryLocationLine} from "@entities/inventory_location_line";
+import {InventoryLocationLine} from "@database/inventory_location_line";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {ViewWillEnter} from "@ionic/angular";
 import {ApiService} from "@app/services/api.service";
 import {map, mergeMap} from "rxjs/operators";
-import {InventoryLocationTag} from "@entities/inventory_location_tag";
+import {InventoryLocationTag} from "@database/inventory_location_tag";
 import {zip} from "rxjs";
 import {AlertService} from "@app/services/alert.service";
 

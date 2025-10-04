@@ -1,16 +1,16 @@
 import {Component, ViewChild} from '@angular/core';
 import {NavService} from '@app/services/nav/nav.service';
-import {Dispatch} from '@entities/dispatch';
+import {Dispatch} from '@database/dispatch';
 import {CardListColorEnum} from '@common/components/card-list/card-list-color.enum';
 import {ToastService} from '@app/services/toast.service';
 import {SelectItemTypeEnum} from '@common/components/select-item/select-item-type.enum';
-import {DispatchPack} from '@entities/dispatch-pack';
+import {DispatchPack} from '@database/dispatch-pack';
 import {FormPanelSelectComponent} from '@common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 import {HeaderConfig} from '@common/components/panel/model/header-config';
 import {FormPanelParam} from '@common/directives/form-panel/form-panel-param';
 import {FormPanelInputComponent} from '@common/components/panel/form-panel/form-panel-input/form-panel-input.component';
 import {FormPanelComponent} from '@common/components/panel/form-panel/form-panel.component';
-import {Nature} from '@entities/nature';
+import {Nature} from '@database/nature';
 import {FormViewerParam} from '@common/directives/form-viewer/form-viewer-param';
 import {FormViewerTextComponent} from '@common/components/panel/form-panel/form-viewer-text/form-viewer-text.component';
 import {

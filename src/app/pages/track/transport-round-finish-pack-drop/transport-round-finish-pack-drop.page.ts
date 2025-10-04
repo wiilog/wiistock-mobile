@@ -1,6 +1,6 @@
 import {Component, ViewChild} from '@angular/core';
 import {NavService} from "@app/services/nav/nav.service";
-import {TransportRound} from "@entities/transport-round";
+import {TransportRound} from "@database/transport-round";
 import {TranslationService} from "@app/services/translations.service";
 import {IconColor} from "@common/components/icon/icon-color";
 import {CardListColorEnum} from "@common/components/card-list/card-list-color.enum";
@@ -8,7 +8,7 @@ import {HeaderConfig} from "@common/components/panel/model/header-config";
 import {ListPanelItemConfig} from "@common/components/panel/model/list-panel/list-panel-item-config";
 import {ToastService} from "@app/services/toast.service";
 import {BarcodeScannerComponent} from "@common/components/barcode-scanner/barcode-scanner.component";
-import {Translations} from "@entities/translation";
+import {Translations} from "@database/translation";
 import {SqliteService} from "@app/services/sqlite/sqlite.service";
 import {BarcodeScannerModeEnum} from "@common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";

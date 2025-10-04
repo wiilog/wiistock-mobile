@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {TransportRoundLine} from '@entities/transport-round-line';
+import {TransportRoundLine} from '@database/transport-round-line';
 import {SimpleCardTitle} from '@common/components/simple-card/simple-card.component';
 import {Platform} from '@ionic/angular';
 import {TranslationService} from "@app/services/translations.service";

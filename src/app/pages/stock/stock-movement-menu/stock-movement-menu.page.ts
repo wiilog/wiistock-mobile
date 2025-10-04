@@ -4,7 +4,7 @@ import {ToastService} from '@app/services/toast.service';
 import {zip} from 'rxjs';
 import {MenuConfig} from '@common/components/menu/menu-config';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
-import {MouvementTraca} from '@entities/mouvement-traca';
+import {MouvementTraca} from '@database/mouvement-traca';
 import {StatsSlidersData} from '@common/components/stats-sliders/stats-sliders-data';
 import {NavService} from '@app/services/nav/nav.service';
 import {ActivatedRoute} from '@angular/router';
@@ -14,7 +14,7 @@ import {StorageService} from '@app/services/storage/storage.service';
 import {NetworkService} from '@app/services/network.service';
 import {ViewWillEnter} from "@ionic/angular";
 import {EmplacementScanModeEnum} from "@pages/prise-depose/emplacement-scan/emplacement-scan-mode.enum";
-import {Emplacement} from "@entities/emplacement";
+import {Emplacement} from "@database/emplacement";
 
 
 @Component({

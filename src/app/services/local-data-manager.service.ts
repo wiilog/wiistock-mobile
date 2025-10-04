@@ -1,23 +1,23 @@
 import {Injectable} from '@angular/core';
 import {ApiService} from '@app/services/api.service';
-import {Preparation} from '@entities/preparation';
-import {Mouvement} from '@entities/mouvement';
-import {Livraison} from '@entities/livraison';
-import {Collecte} from '@entities/collecte';
-import {MouvementTraca} from '@entities/mouvement-traca';
+import {Preparation} from '@database/preparation';
+import {Mouvement} from '@database/mouvement';
+import {Livraison} from '@database/livraison';
+import {Collecte} from '@database/collecte';
+import {MouvementTraca} from '@database/mouvement-traca';
 import {FileService} from "@app/services/file.service";
 import {StorageService} from "@app/services/storage/storage.service";
 import {Observable, of, ReplaySubject, Subject, tap, zip} from 'rxjs';
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
 import {catchError, mergeMap, map} from 'rxjs/operators';
-import {DemandeLivraison} from '@entities/demande-livraison';
-import {DemandeLivraisonArticleSelected} from '@entities/demande-livraison-article-selected';
-import {TransferOrder} from '@entities/transfer-order';
+import {DemandeLivraison} from '@database/demande-livraison';
+import {DemandeLivraisonArticleSelected} from '@database/demande-livraison-article-selected';
+import {TransferOrder} from '@database/transfer-order';
 import {AlertService} from '@app/services/alert.service';
 import {TranslationService} from '@app/services/translations.service';
-import {DispatchPack} from '@entities/dispatch-pack';
+import {DispatchPack} from '@database/dispatch-pack';
 import {StorageKeyEnum} from "@app/services/storage/storage-key.enum";
-import {Dispatch} from "@entities/dispatch";
+import {Dispatch} from "@database/dispatch";
 import {ToastService} from "@app/services/toast.service";
 
 

@@ -1,4 +1,4 @@
-import {TransportRoundLine} from '@entities/transport-round-line';
+import {TransportRoundLine} from '@database/transport-round-line';
 
 export interface TransportRound {
     id: number;

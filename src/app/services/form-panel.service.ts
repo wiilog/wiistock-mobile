@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {FreeField, FreeFieldTyping} from '@entities/free-field';
+import {FreeField, FreeFieldTyping} from '@database/free-field';
 import {FormPanelToggleComponent} from '@common/components/panel/form-panel/form-panel-toggle/form-panel-toggle.component';
 import {FormPanelParam} from '@common/directives/form-panel/form-panel-param';
 import {FormPanelCalendarMode} from '@common/components/panel/form-panel/form-panel-calendar/form-panel-calendar-mode';

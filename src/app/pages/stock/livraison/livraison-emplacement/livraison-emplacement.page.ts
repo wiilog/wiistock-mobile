@@ -1,7 +1,7 @@
 import {Component, EventEmitter, ViewChild} from '@angular/core';
 import {SelectItemComponent} from '@common/components/select-item/select-item.component';
-import {Emplacement} from '@entities/emplacement';
-import {Livraison} from '@entities/livraison';
+import {Emplacement} from '@database/emplacement';
+import {Livraison} from '@database/livraison';
 import {SelectItemTypeEnum} from '@common/components/select-item/select-item-type.enum';
 import {BarcodeScannerModeEnum} from '@common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {IconConfig} from '@common/components/panel/model/icon-config';
@@ -18,7 +18,7 @@ import {LoadingService} from "@app/services/loading.service";
 import {NetworkService} from '@app/services/network.service';
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 import {TranslationService} from "@app/services/translations.service";
-import {Translations} from "@entities/translation";
+import {Translations} from "@database/translation";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 
 @Component({

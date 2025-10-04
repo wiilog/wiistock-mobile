@@ -3,7 +3,7 @@ import {NavService} from '@app/services/nav/nav.service';
 import {ToastService} from '@app/services/toast.service';
 import {ViewWillEnter} from "@ionic/angular";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
-import {ReceptionReferenceArticle} from "@entities/reception-reference-article";
+import {ReceptionReferenceArticle} from "@database/reception-reference-article";
 
 @Component({
     selector: 'wii-reception-article-take',

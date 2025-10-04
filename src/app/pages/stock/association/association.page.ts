@@ -14,7 +14,7 @@ import {mergeMap} from "rxjs/operators";
 import {NavPathEnum} from "@app/services/nav/nav-path.enum";
 import {CardListConfig} from "@common/components/card-list/card-list-config";
 import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
-import {Emplacement} from "@entities/emplacement";
+import {Emplacement} from "@database/emplacement";
 import {EmplacementScanModeEnum} from "@pages/prise-depose/emplacement-scan/emplacement-scan-mode.enum";
 
 type ArticleAssociation = {

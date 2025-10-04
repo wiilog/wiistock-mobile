@@ -4,9 +4,9 @@ import {NavService} from '@app/services/nav/nav.service';
 import {FormPanelComponent} from '@common/components/panel/form-panel/form-panel.component';
 import {HeaderConfig} from '@common/components/panel/model/header-config';
 import {TransportCardMode} from '@common/components/transport-card/transport-card.component';
-import {TransportRoundLine} from '@entities/transport-round-line';
+import {TransportRoundLine} from '@database/transport-round-line';
 import {NavPathEnum} from '@app/services/nav/nav-path.enum';
-import {TransportRound} from '@entities/transport-round';
+import {TransportRound} from '@database/transport-round';
 
 @Component({
     selector: 'wii-transport-collect-natures',

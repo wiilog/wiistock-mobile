@@ -1,5 +1,5 @@
 import {SqliteService} from '@app/services/sqlite/sqlite.service';
-import {Translation, Translations} from "@entities/translation";
+import {Translation, Translations} from "@database/translation";
 import {Injectable} from "@angular/core";
 import {map} from 'rxjs/operators';
 import {Observable, Subject} from 'rxjs';

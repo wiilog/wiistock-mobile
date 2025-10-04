@@ -1,7 +1,7 @@
 import {Component, ViewChild} from '@angular/core';
 import {FormPanelComponent} from '@common/components/panel/form-panel/form-panel.component';
 import {HeaderConfig} from '@common/components/panel/model/header-config';
-import {Emplacement} from '@entities/emplacement';
+import {Emplacement} from '@database/emplacement';
 import {ToastService} from '@app/services/toast.service';
 import {NavService} from '@app/services/nav/nav.service';
 import {SelectItemTypeEnum} from '@common/components/select-item/select-item-type.enum';
@@ -11,7 +11,7 @@ import {FormPanelInputComponent} from '@common/components/panel/form-panel/form-
 import {FormPanelSelectComponent} from '@common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 import {FormPanelSigningComponent} from '@common/components/panel/form-panel/form-panel-signing/form-panel-signing.component';
 import {FormPanelCameraComponent} from '@common/components/panel/form-panel/form-panel-camera/form-panel-camera.component';
-import {Nature} from '@entities/nature';
+import {Nature} from '@database/nature';
 import {zip} from 'rxjs';
 import {ListPanelItemConfig} from '@common/components/panel/model/list-panel/list-panel-item-config';
 import {ApiService} from "@app/services/api.service";
