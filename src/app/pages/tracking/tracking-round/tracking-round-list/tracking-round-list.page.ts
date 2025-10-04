@@ -94,7 +94,7 @@ export class TrackingRoundListPage implements ViewWillEnter, ViewWillLeave {
                                 : undefined,
                         },
                         {
-                            label: TranslationService.Translate(this.trackingRoundTranslations, 'Emplacement de tournée'),
+                            label: TranslationService.Translate(this.trackingRoundTranslations, 'Emplacement de la tournée'),
                             value: trackingRound.locationLabel || ''
                         },
                         {label: TranslationService.Translate(this.trackingRoundTranslations, 'Urgence'), value: trackingRound.emergency || 'Non'}

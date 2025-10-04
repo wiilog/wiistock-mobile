@@ -509,7 +509,12 @@ const routes: Routes = [
         path: NavPathEnum.TRACKING_ROUND_DETAILS,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/tracking/tracking-round/tracking-round-details/tracking-round-details.module').then(m => m.TrackingRoundDetailsModule)
-    }
+    },
+    {
+        path: NavPathEnum.TRACKING_ROUND_ONGOING_PACKS,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/tracking-round/tracking-round-ongoing-packs/tracking-round-ongoing-packs.module').then(m => m.TrackingRoundOngoingPacksModule)
+    },
 ];
 
 @NgModule({

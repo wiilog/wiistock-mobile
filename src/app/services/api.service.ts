@@ -100,9 +100,10 @@ export class ApiService {
     public static readonly GET_RECEPTIONS = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/receptions`};
     public static readonly GET_RECEPTION_LINES = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/receptions/{reception}/lines`};
     public static readonly PATCH_RECEPTIONS = {method: PATCH, service: `${ApiService.MOBILE_API_URL_BASE}/receptions/{reception}`};
-    public static readonly GET_TRACKING_ROUNDS = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/tracking-rounds/`};
+    public static readonly GET_TRACKING_ROUNDS = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/tracking-rounds`};
     public static readonly GET_TRACKING_ROUND_DETAILS = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/tracking-rounds/{trackingRound}`};
     public static readonly START_TRACKING_ROUND = {method: POST, service: `${ApiService.MOBILE_API_URL_BASE}/tracking-rounds/{trackingRound}/start`};
+    public static readonly GET_TRACKING_ROUND_ONGOING_PACKS = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/tracking-rounds/{trackingRound}/packs`};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'
