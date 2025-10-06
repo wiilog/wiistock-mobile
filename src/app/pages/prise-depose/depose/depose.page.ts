@@ -353,7 +353,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
     }
 
     private updatePicking(barcode: string|undefined,
-                          {quantity, comment, signature, photo, natureId, freeFields, isGroup, subPacks}: {quantity: number; comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string; isGroup: number; subPacks: any;}): void {
+                          {quantity, comment, signature, photo, natureId, freeFields}: {quantity: number; comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string;}): void {
         const dropIndexes = this.findDropIndexes(barcode);
 
         if (dropIndexes.length > 0) {
@@ -366,8 +366,6 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
                 this.colisDepose[dropIndex].photo = photo;
                 this.colisDepose[dropIndex].nature_id = natureId;
                 this.colisDepose[dropIndex].freeFields = freeFields;
-                this.colisDepose[dropIndex].isGroup = isGroup;
-                this.colisDepose[dropIndex].subPacks = subPacks;
             }
 
             this.refreshPriseListComponent();
