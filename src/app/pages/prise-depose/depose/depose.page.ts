@@ -603,7 +603,7 @@ export class DeposePage implements ViewWillEnter, ViewWillLeave, CanLeave {
 
     private ensureRfidScannerConnection(): Observable<void> {
         return !this.fromStock
-            ? this.storageService.getRight(StorageKeyEnum.RFID_ON_MOBILE_TRACKING_MOVEMENTS)
+            ? this.storageService.getRight(StorageKeyEnum.RIGHT_RFID_TRACKING_MOVEMENTS)
                 .pipe(
                     mergeMap((rfidOnMobileTrackingMovements) => rfidOnMobileTrackingMovements ? this.rfidManager.ensureScannerConnection() : of(undefined)),
                     map(() => undefined)
