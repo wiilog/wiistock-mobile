@@ -12,6 +12,7 @@ export enum StorageKeyEnum {
     RIGHT_GROUPED_SIGNATURE = 'groupedSignature',
     RIGHT_CREATE_ARTICLE_FROM_NOMADE = 'createArticleFromNomade',
     RIGHT_PICK_AND_DROP_MENU = 'pickAndDrop',
+    RIGHT_RFID_TRACKING_MOVEMENTS = 'rfidTrackingMovements',
     DEMO_MODE = 'demoMode',
     RIGHT_MOVEMENT = 'movement',
     RIGHT_DISPATCH = 'dispatch',
@@ -50,7 +51,6 @@ export enum StorageKeyEnum {
     PARAMETER_RFID_PREFIX = 'rfidPrefix',
     DISPATCH_OFFLINE_MODE = 'dispatchOfflineMode',
     ARRIVAL_NUMBER_FORMAT = 'arrivalNumberFormat',
-    RFID_ON_MOBILE_TRACKING_MOVEMENTS = 'rfidOnMobileTrackingMovements',
 
     API_KEY = 'api-key',
     OPERATOR = 'operator',
