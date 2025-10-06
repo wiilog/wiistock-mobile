@@ -80,7 +80,6 @@ export class MovementConfirmPage implements ViewWillEnter {
         photo: string;
         natureId: number,
         freeFields: string,
-        subPacks?: any,
         manualDelayStart?: string,
     }) => void;
 
@@ -294,7 +293,6 @@ export class MovementConfirmPage implements ViewWillEnter {
                 photo,
                 natureId,
                 freeFields: JSON.stringify(freeFields),
-                subPacks: this.subPacks,
                 manualDelayStart,
             });
             this.navService.pop();
@@ -308,7 +306,7 @@ export class MovementConfirmPage implements ViewWillEnter {
     }
 
     private calculateSubPacksListConfig() {
-        return this.subPacks.map(({nature_id, ref_article, quantity, comment, signature, photo, freeFields}): ListPanelItemConfig => ({
+        return this.subPacks.map(({nature_id, ref_article, quantity}): ListPanelItemConfig => ({
             color: nature_id && this.natureIdToNature[nature_id] ? this.natureIdToNature[nature_id].color : undefined,
             infos: {
                 code: {
