@@ -103,6 +103,8 @@ export class ApiService {
     public static readonly GET_TRACKING_ROUNDS = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/tracking-rounds`};
     public static readonly GET_TRACKING_ROUND_DETAILS = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/tracking-rounds/{trackingRound}`};
     public static readonly START_TRACKING_ROUND = {method: POST, service: `${ApiService.MOBILE_API_URL_BASE}/tracking-rounds/{trackingRound}/start`};
+    public static readonly GET_ONGOING_PACKS = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/tracking-rounds/{trackingRound}/ongoing-packs`};
+    public static readonly SAVE_TRACKING_ROUND_MOVEMENTS = {method: POST, service: `${ApiService.MOBILE_API_URL_BASE}/tracking-rounds/{trackingRound}/save-tracking-round-movements`};
     public static readonly GET_TRACKING_ROUND_ONGOING_PACKS = {method: GET, service: `${ApiService.MOBILE_API_URL_BASE}/tracking-rounds/{trackingRound}/packs`};
 
     private static readonly DEFAULT_HEADERS = {
