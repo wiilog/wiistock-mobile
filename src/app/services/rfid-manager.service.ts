@@ -1,6 +1,6 @@
 import {Injectable} from "@angular/core";
 import {RfidManagerService as PluginRfidManagerService} from "@plugins/rfid-manager/rfid-manager.service";
-import {catchError, from, mergeMap, Observable, of, Subject, tap} from "rxjs";
+import {catchError, mergeMap, Observable, of, tap} from "rxjs";
 import {
     DeviceInfoResult,
     ErrorCodeEnum,
@@ -49,14 +49,8 @@ export class RfidManagerService {
     }
 
     public ensureScannerConnection(presentErrorToast: boolean = true): Observable<ManagerResult & {deviceInfo?: DeviceInfoResult}> {
-        const subject$ = new Subject<ManagerResult & {deviceInfo?: DeviceInfoResult}>();
-        this.plugin.deviceInfo()
+        return this.launchNewConnection()
             .pipe(
-                mergeMap((deviceInfo: DeviceInfoResult) => (
-                    deviceInfo.connected
-                        ? of({success: true, deviceInfo})
-                        : this.launchNewConnection()
-                )),
                 tap((result: ManagerResult & {alreadyConnected?: boolean, deviceInfo?: DeviceInfoResult}) => {
                     if (result.success) {
                         if (result.deviceInfo) {
@@ -67,48 +61,37 @@ export class RfidManagerService {
                         this.presentErrorToast(presentErrorToast, result);
                     }
                 }),
-            )
-            .subscribe(subject$);
-        return subject$;
+            );
     }
 
     public startScan(presentErrorToast: boolean = true): Observable<ManagerResult & {deviceInfo?: DeviceInfoResult}> {
-        const subject$ = new Subject<ManagerResult & {deviceInfo?: DeviceInfoResult}>();
-        this.plugin.startScan()
+        return this.plugin.startScan()
             .pipe(
                 catchError((error: Error) => this.handleRunError(error)),
                 tap((result: ManagerResult) => {
                     this.presentErrorToast(presentErrorToast, result);
                 }),
-            )
-            .subscribe(subject$);
-        return subject$;
+            );
     }
 
     public stopScan(presentErrorToast: boolean = true): Observable<ManagerResult> {
-        const subject$ = new Subject<ManagerResult & {deviceInfo?: DeviceInfoResult}>();
-        this.plugin.stopScan()
+        return this.plugin.stopScan()
             .pipe(
                 catchError((error: Error) => this.handleRunError(error)),
                 tap((result: ManagerResult) => {
                     this.presentErrorToast(presentErrorToast, result);
                 }),
-            )
-            .subscribe(subject$);
-        return subject$;
+            );
     }
 
     public disconnect(presentErrorToast: boolean = true): Observable<ManagerResult> {
-        const subject$ = new Subject<ManagerResult & {deviceInfo?: DeviceInfoResult}>();
-        this.plugin.disconnect()
+        return this.plugin.disconnect()
             .pipe(
                 catchError((error: Error) => this.handleRunError(error)),
                 tap((result: ManagerResult) => {
                     this.presentErrorToast(presentErrorToast, result);
                 }),
-            )
-            .subscribe(subject$);
-        return subject$;
+            );
     }
 
     private handleRunError(error: Error): Observable<ManagerResult> {
