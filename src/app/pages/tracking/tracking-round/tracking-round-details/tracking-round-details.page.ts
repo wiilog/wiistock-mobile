@@ -111,7 +111,10 @@ export class TrackingRoundDetailsPage implements ViewWillEnter, ViewWillLeave {
                 clickable: line.clickable,
                 action: () => {
                     if(line.clickable) {
-                        //rediriger vers le détails avec le line.locationId en paramètre //TODO WIIS-13097
+                        this.navService.push(NavPathEnum.TRACKING_ROUND_MOVEMENT, {
+                            trackingRound: trackingRound,
+                            trackingRoundLine: line,
+                        });
                     }
                 },
                 // rightBadge: {

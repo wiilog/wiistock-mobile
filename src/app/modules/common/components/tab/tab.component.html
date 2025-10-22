@@ -2,7 +2,8 @@
     <div class="tab"
          *ngFor="let tab of config"
          [class.active]="activeKey === tab.key"
-         (click)="onTabClicked(tab.key)">
+         [class.disabled]="tab.disabled"
+         (click)="!tab.disabled && onTabClicked(tab.key)">
         {{ tab.label }}
     </div>
 </div>

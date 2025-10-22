@@ -9,13 +9,14 @@
             {{ order+1 }}
         </span>
         <span *ngIf="field.checked"
-              class="checked-value background-checked"
-              [class.disabled-list]="disableList || !field.clickable">
+              class="checked-value"
+              [class.disabled-list]="disableList || !field.clickable"
+              [class.background-checked]="field.checked && field.clickable">
             <wii-icon class="line-icon" name="check.svg" color="success"></wii-icon>
         </span>
         <span class="field-container"
               [class.disabled-list]="disableList || !field.clickable"
-              [class.background-checked]="field.checked"
+              [class.background-checked]="field.checked && field.clickable"
               (click)="!disableList && field.clickable && field.action && field.action(field.name)">
             <div>
                 <wii-icon *ngIf="field.icon || commonIcon"

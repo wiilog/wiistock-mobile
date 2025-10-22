@@ -1,0 +1,48 @@
+<div scroll-y="true"
+     class="page-content">
+    <wii-panel-header *ngIf="trackingRoundHeaderConfig"
+                      #formHeaderComponent
+                      class="page-header"
+                      [title]="trackingRoundHeaderConfig.title"
+                      [subtitle]="trackingRoundHeaderConfig.subtitle"
+                      [transparent]="trackingRoundHeaderConfig.transparent"
+                      [info]="trackingRoundHeaderConfig.info"
+                      [leftIcon]="trackingRoundHeaderConfig.leftIcon">
+    </wii-panel-header>
+    <wii-tab [(activeKey)]="currentPageMode"
+             (activeKeyChange)="reloadPage()"
+             [config]="tabConfig">
+    </wii-tab>
+
+    <wii-list-panel *ngIf="currentPageMode === PageMode.DROP && dropListConfig"
+                    [body]="dropListConfig.body"
+                    [identifierName]="listIdentifierName"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+
+    <wii-list-panel *ngIf="displayPickList"
+                    [header]="pickListHeaderConfig"
+                    [body]="pickListConfig.body"
+                    [identifierName]="listIdentifierName"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+
+    <wii-form-panel *ngIf="currentPageMode === PageMode.EMPTY_ROUND && emptyRoundBodyConfig"
+                    #formPanelComponent
+                    [body]="emptyRoundBodyConfig">
+    </wii-form-panel>
+</div>
+<div class="page-footer">
+    <wii-barcode-scanner #footerScannerComponent
+                         (scanAdd)="testIfBarcodeEquals($event)"
+                         (cameraAdd)="testIfBarcodeEquals($event)"
+                         (manualAdd)="testIfBarcodeEquals($event)"
+                         [mode]="barcodeScannerMode">
+    </wii-barcode-scanner>
+    <ion-button color="primary"
+                size="small"
+                expand="block"
+                (click)="validate()">
+        Valider
+    </ion-button>
+</div>

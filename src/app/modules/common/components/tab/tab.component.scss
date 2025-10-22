@@ -7,21 +7,25 @@
 .tabs-wrapper {
     display: flex;
     flex: 1;
-    border: $primary solid 3px;
-    padding: 3px;
     background-color: $white;
 
     .tab {
         flex: 1;
         font-size: 14px;
-        padding: 1rem;
+        padding: 0.5rem;
         text-align: center;
         font-weight: bold;
         color: $primary;
+        align-content: center;
 
         &.active {
             background-color: $primary;
             color: $white;
+        }
+
+        &.disabled {
+            background-color: $disabled;
+            color: $medium;
         }
     }
 }
